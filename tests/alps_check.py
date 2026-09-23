@@ -463,7 +463,7 @@ def t24(b, f):
         p = D + f'res/s24_{k}_' + f; d.value.save_as(p); sizes.append(os.path.getsize(p)); c.pg.wait_for_timeout(300)
         if k == 0:   # 두 번째 저장 전에 화면 상태를 흔든다: 편집 · 꾸미기 탭 · 인쇄 경고 · 도움말
             c.js("()=>{document.querySelector('#b-edit').click(); panelTab='page'; panelPage=1; syncPageTabs(); syncPage(); document.querySelector('#b-edit').click();}")
-            c.js("()=>{SETTINGS.bilingual=true; render(); applyScale(); document.querySelector('#b-print').click(); document.querySelector('#ow-go').click(); const d=document.querySelector('#printhint details'); if(d) d.open=true; document.querySelector('#ph-cancel').click(); document.querySelector('#b-help').click(); document.querySelector('#help-close').click(); SETTINGS.bilingual=false; render(); applyScale(); document.querySelector('#b-edit').click(); document.querySelector('#b-preview').click(); document.querySelector('#b-preview').click();}")
+            c.js("()=>{SETTINGS.bilingual=true; render(); applyScale(); document.querySelector('#b-print').click(); document.querySelector('#ow-go').click(); const d=document.querySelector('#printhint details'); if(d) d.open=true; document.querySelector('#printhint .dlg-x').click(); document.querySelector('#b-help').click(); document.querySelector('#help .dlg-x').click(); SETTINGS.bilingual=false; render(); applyScale(); document.querySelector('#b-edit').click(); document.querySelector('#b-preview').click(); document.querySelector('#b-preview').click();}")
     src = open(D + f, encoding='utf-8').read(); s0 = open(D + 'res/s24_0_' + f, encoding='utf-8').read()
     md = lambda s: re.search(r'\n<script id="menu-data">(.*?)</script>', s, re.S).group(1)
     other0 = len(s0.encode()) - len(md(s0).encode()); othersrc = len(src.encode()) - len(md(src).encode())
@@ -830,7 +830,7 @@ def t11(b, f):
     if has:
         c.js("()=>document.querySelector('#b-help').click()"); pg.wait_for_timeout(100)
         st.append(['도움말 체크 꺼짐', c.js("()=>document.querySelector('#help-ph').checked") is False])
-        c.js("()=>{const e=document.querySelector('#help-ph'); e.checked=true; e.dispatchEvent(new Event('change')); document.querySelector('#help-close').click();}")
+        c.js("()=>{const e=document.querySelector('#help-ph'); e.checked=true; e.dispatchEvent(new Event('change')); document.querySelector('#help .dlg-x').click();}")
         st.append(['되살림', c.js("()=>'printHint' in SETTINGS") is False])
         c.js("()=>document.querySelector('#b-print').click()"); pg.wait_for_timeout(100)
         st.append(['체크 빈 채 열림', c.js("()=>[document.querySelector('#printhint').open, document.querySelector('#ph-skip').checked]") == [True, False]])
@@ -1128,7 +1128,7 @@ def t52(b, f):
     c = Ctx(b, f); pg = c.pg; pg.click('#b-edit'); pg.wait_for_timeout(300)
     snap = "()=>JSON.stringify({sz:P(0).scale, top:MENU.brand.top||'', tm:SETTINGS.topMode||'', items:MENU.sheets.map(s=>s.map(col=>col.map(x=>(x.items||[]).length)))})"
     before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
-    keys = c.js("()=>Object.keys(PRESETS)")
+    keys = c.js("()=>Object.keys(PRESETS).filter(k=>!PRESETS[k].hidden)")   # 285번. 숨긴 조합(basic = 내 조합의 시작 모양)은 타일이 없다
     for k in keys:
         c.js("()=>document.querySelector('#f-presets').scrollIntoView()"); pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
         out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)

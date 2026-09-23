@@ -1971,7 +1971,7 @@ dialog .st-msg{color:#9c3a20;min-height:1em}
    단추로 안 보인다 · 뭘 어떻게 하라는 건지 모르겠다 · 확인 화면은 실제 메뉴판처럼 · 모달이 너무 작다")
    · 뒤 메뉴판이 휠에 움직이지 않게 — 첫 화면이 열린 동안 문서 스크롤을 잠근다. 스크롤 막대 자리는 남겨(gutter) 종이가 옆으로 안 튄다(규칙 I · 224번)
    · 덜 중요한 단추는 글자 단추(bt-text) 대신 테두리 단추(bt-out) — 글자 단추는 설명 글과 구분되지 않았다. 되돌아가는 단추는 바닥 줄 왼쪽 */
-html:has(dialog#start[open]){overflow:hidden;scrollbar-gutter:stable}
+html:has(dialog[open]){overflow:hidden;scrollbar-gutter:stable}   /* 285번. 모든 창 — 첫 화면에만 걸려 있어 창 위치가 7px 달랐다 */
 dialog#start{width:min(640px, calc(100vw - 32px))}
 dialog#start h3:focus{outline:none}
 dialog#start.wide{width:min(1080px, calc(100vw - 32px))}
@@ -2094,6 +2094,23 @@ body.unsaved #b-file{background:#efe3c9;border-color:#efe3c9;color:#1a140c}
 body.unsaved #b-file:hover{background:#fff6e2;border-color:#fff6e2}
 body.web.unsaved #b-file{background:rgba(22,17,10,.94);border-color:rgba(240,230,205,.18);color:#efe3c9}
 .tb-menu #b-save{background:transparent;border:0;color:#efe3c9}
+/* ── 285번. 짜임 통일(사용자: "버튼 위치 · 텍스트 위치 왜 이래 · 모달이 갑자기 위치랑 크기가 바뀐다 · 일관성이 없다")
+   · 위쪽 막대 두 줄 모두 가운데 — 일하는 자리(종이)가 가운데다. 둘째 줄(편집 도구)은 자리를 늘 비워 둔다(visibility) — 편집을 켜고 꺼도 종이가 안 움직인다
+   · 모든 창 폭 560 하나 · 위 끝은 고정(가운데 정렬이면 단계마다 위 끝이 오르내렸다) · 읽은 메뉴 확인만 화면 가득 찬 창 */
+dialog{width:min(560px, calc(100vw - 32px));margin:72px auto 16px;max-height:calc(100vh - 88px)}
+dialog#start{width:min(560px, calc(100vw - 32px))}
+dialog#start.wide{width:calc(100vw - 32px);max-width:1440px;margin:16px auto;max-height:calc(100vh - 32px)}
+dialog h4{margin:18px 0 6px;font-size:15px;font-weight:700}
+dialog h3 + h4{margin-top:4px}
+dialog ul{margin:0 0 4px 18px;padding:0}
+dialog ul li{margin-bottom:4px;line-height:1.6}
+.st-picrow.has{flex-direction:column;align-items:flex-start;gap:8px}
+dialog button.st-swb{width:76px}
+.st-sw{gap:6px;flex-wrap:nowrap}   /* 내 조합 + 추천 다섯 = 여섯이 한 줄에 */
+.st-picrow.has .st-picimg{height:180px}
+.pl-presets{grid-template-columns:repeat(3,1fr)}
+.panel button.pl-tile{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel label small{font-size:11px;color:rgba(240,230,205,.46);margin-left:4px}
 /* ── 283번. 위쪽 고정 막대 — 280번대까지 아래에 떠 있던 막대 둘(조작 · 편집)을 한 줄로. 종이는 그 아래에서 시작한다.
    높이 56 고정 — 좁으면 줄을 바꾸지 않고 막대 안에서 옆으로 민다(줄을 바꾸면 높이가 변해 종이를 가린다) */
 .barwrap.topbar{position:fixed;left:0;right:0;top:0;bottom:auto;transform:none;max-width:none;display:block;z-index:30}
@@ -2118,13 +2135,29 @@ body.editing .topbar .editbar{display:flex}
   background:transparent;color:#efe3c9;font:inherit;font-size:14px;text-align:left;cursor:pointer}
 .tb-menu button:hover,.tb-menu button:focus-visible{background:rgba(240,230,205,.1);outline:none}
 .tb-menu small{font-size:12px;color:rgba(240,230,205,.6)}
-body{padding-top:86px;padding-bottom:48px}   /* 아래 막대가 없어져 아래 여백(150 · 190px)도 줄였다 */
+@media screen{ body{padding-top:86px;padding-bottom:48px} }   /* 아래 막대가 없어져 아래 여백(150 · 190px)도 줄였다. 285번. 화면에만 — 인쇄에 걸려 빈 쪽이 생겼다(t30) */
 html{scroll-padding-top:72px}   /* 가린 줄로 스크롤할 때 막대 아래로 */
 .panel{top:72px}
 .undo{bottom:24px}
 @media screen and (max-width:900px){ body{padding-top:68px;padding-bottom:48px} }
 @media screen and (max-width:1119px){ .panel{top:auto;bottom:16px} }
 @media print{ .tb-menu{display:none !important} }
+/* 285번. 막대 두 줄 · 가운데 */
+.barwrap.topbar{display:flex;flex-direction:column;align-items:stretch;pointer-events:none}
+.barwrap.topbar > *{pointer-events:auto}
+.topbar .bar{justify-content:center}
+.topbar .tb-right{margin-left:0}
+.topbar .bar.tb-edit{align-self:center;height:44px;margin-top:6px;padding:4px 8px;gap:6px;border-radius:22px;border:1px solid rgba(240,230,205,.18);
+  background:rgba(40,32,22,.97);box-shadow:0 4px 14px rgba(0,0,0,.35);max-width:calc(100vw - 16px);visibility:hidden}
+body.editing .topbar .bar.tb-edit{visibility:visible}
+.topbar .tb-edit button{height:34px;border-radius:17px;padding:0 14px;font-size:13px}
+.topbar .tb-edit button.ib{width:34px;padding:0;font-size:17px;line-height:1}
+.topbar .tb-edit .sep{width:1px;height:20px;background:rgba(240,230,205,.16)}
+@media screen{ body{padding-top:136px} }   /* 285번. 화면에만(인쇄에 걸리면 종이가 밀려 빈 쪽이 생긴다) */
+html{scroll-padding-top:122px}
+.panel{top:122px}
+@media screen and (max-width:900px){ body{padding-top:118px} }
+@media screen and (max-width:1119px){ .panel{top:auto;bottom:16px} }
 /* 277번. 자동 저장 상태 — 막대 안의 작은 글자. 버셀 주소가 아니면 [파일로 저장] 불이 그대로, 버셀 주소면 불을 끈다(자동 저장이 대신한다) */
 .bar .autost{font-size:12px;color:rgba(240,230,205,.72);white-space:nowrap;padding:0 2px 0 6px;cursor:default}
 .bar .autost.off{color:rgba(240,230,205,.5)}
@@ -2161,7 +2194,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <div class="st-plogo" id="f-logorow"><button type="button" class="st-drop" id="f-logo-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으면 로고가 바뀝니다</small></button>
   <div class="st-tiles" id="f-tiles"></div></div>
   <!-- 273번. 추천 조합 — 누르면 글꼴 · 색 · 종이 · 분류 제목 · 점선 · 상단 · 그림 · 도장 · 추천 표시를 한 번에 맞춘다(글자 크기 · 내용은 그대로) -->
-  <span class="lbl" id="f-presets-l">추천 조합</span>
+  <label id="f-presets-l">조합 <small>내 조합 · 추천</small></label>
   <div class="pl-presets" id="f-presets" role="group" aria-label="추천 조합"></div>   <!-- 284번. 목록 → 타일(한 번 눌러 바로 입혀 본다) · 맨 앞 「내 조합」 -->
   <div class="pblock" data-kind="all">
   <div class="pbhead"><span class="pbadge">모든 장</span> 파일 전체에 하나씩</div>
@@ -2463,7 +2496,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <p id="ow-msg"></p>
   <p class="sub" id="ow-sub"></p>
   <div class="row2 end">
-    <button id="ow-cancel" type="button" class="bt-fill">취소하고 고치기</button>
+    <button id="ow-cancel" type="button" class="bt-fill">고치러 가기</button>
     <button id="ow-go" type="button" class="bt-out">그냥 인쇄</button>
   </div>
 </div></dialog>
@@ -2528,7 +2561,6 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <!-- 229번. 단추 줄은 창 바닥에 붙인다. 체크 상자도 같은 줄로 — 스크롤에 밀리면 못 본다 -->
   <div class="row2 end foot2">
     <label class="chk"><input type="checkbox" id="ph-skip"> 다시 보지 않기</label>
-    <button id="ph-cancel" type="button" class="bt-out">취소</button>
     <button id="ph-go" type="button" class="bt-fill">인쇄 창 열기</button>
   </div>
 </div></dialog>
@@ -2539,7 +2571,6 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <p>숫자로 된 가격만 바뀝니다. "가격문의" 같은 글자는 그대로 둡니다.</p>
   <div class="row2"><input type="number" id="bulk-amt" value="500" step="100" min="0"> 원씩</div>
   <div class="row2 end">
-    <button id="bulk-cancel" type="button" class="bt-out">취소</button>
     <button id="bulk-down" type="button" class="bt-tonal">내리기</button>
     <button id="bulk-up" type="button" class="bt-tonal">올리기</button>
   </div>
@@ -2607,7 +2638,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
       <div class="st-tiles" id="st-tiles"></div></div>
     <input type="file" id="st-file" accept="image/*" hidden>
     <input type="file" id="st-hfile" accept=".html,text/html" hidden>   <!-- 277번. 불러올 메뉴판 파일 -->
-    <span class="st-lbl">추천 조합 <small>글꼴 · 색 · 모양을 한 번에 — 나중에 [꾸미기]에서 하나씩 바꿀 수 있습니다</small></span>   <!-- 273번. 색 → 추천 조합 -->
+    <span class="st-lbl">조합 <small>「내 조합」은 수수한 기본 모양입니다 · 추천 조합은 [꾸미기]에서 언제든 눌러 볼 수 있습니다</small></span>   <!-- 273번. 색 → 추천 조합 -->
     <div class="st-sw" id="st-sw"></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-go">이대로 시작</button></div>
   </div>
@@ -2627,19 +2658,20 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <span class="autost" id="autost" aria-live="polite"></span>   <!-- 277번. 자동 저장 상태 — 늘 보인다(단추가 아니다). 283번. 이름 옆으로 -->
   <span class="sep"></span>
   <button id="b-file" type="button" aria-haspopup="menu" aria-expanded="false">파일 ▾</button>   <!-- 283번. 새로 만들기 · 불러오기 · 파일로 저장 -->
-  <span class="editbar" id="editbar" aria-label="편집 도구">
+  <span class="sep"></span>
+  <span class="tb-right">
+    <button id="b-edit" type="button">편집</button>
+    <button id="b-print" type="button">인쇄</button>
+    <button id="b-help" type="button" title="도움말">?</button>
+  </span>
+</nav>
+<nav class="bar tb-edit" id="editbar" aria-label="편집 도구">   <!-- 285번. 편집 도구는 둘째 줄 가운데 — 편집 중에만 보이고, 자리는 늘 비워 둔다(보였다 안 보였다 해도 종이가 안 움직인다) -->
     <button id="b-undo" type="button" class="ib" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)" disabled>↶</button><button id="b-redo" type="button" class="ib" aria-label="다시 하기" title="다시 하기 (Ctrl+Y)" disabled>↷</button>   <!-- 271번. ◀ ▶ 는 분류 옮기기 모양이라 쓰지 않는다(규칙 H) -->
     <span class="sep"></span>
     <button id="b-style" type="button">꾸미기</button>
     <button id="b-preview" type="button">미리보기</button>
     <span class="sep"></span>
     <button id="b-bulk" type="button">가격 일괄</button>
-  </span>
-  <span class="tb-right">
-    <button id="b-edit" type="button">편집</button>
-    <button id="b-print" type="button">인쇄</button>
-    <button id="b-help" type="button" title="도움말">?</button>
-  </span>
 </nav>
 <div class="tb-menu" id="filemenu" role="menu" hidden>
   <button id="b-start" type="button" role="menuitem">새로 만들기…<small>빈 메뉴판 · 사진 · 예시 중에서 고릅니다</small></button>
@@ -2653,54 +2685,28 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <!-- 88번. 고칠 때마다 항목을 덧붙였더니 19줄이 됐고 낡은 문장이 섞였다(36번을 어겼다).
        **목록이 길면 안 읽힌다**(49번). 열 줄로 다시 썼다 — 기능을 바꿀 때는 덧붙이지 말고
        해당 줄을 고칠 것 -->
-  <ol>
-    <li>고칠 일이 있으면 <b>편집</b>을 누르세요. 글자 고치기도 모양 바꾸기도 전부 편집 안에 있습니다.
-        편집을 켜면 오른쪽 <b>꾸미기</b> 창이 함께 열립니다(창 오른쪽 위 <b>✕</b>로 닫고 <b>꾸미기</b>로 다시 엽니다).</li>
-    <li>화면은 완성본과 거의 같습니다. <b>글자를 눌러</b> 고치고, 흐린 빈 칸("용량" · "분류 메모")은 쓰면 생기고 지우면 없어집니다.
-        Enter는 칸에서 빠져나오는 단추인데, <b>분류 이름 · 와인 이름 · 와인 라벨</b> 세 자리에서는 <b>줄을 나눕니다</b>.</li>
-    <li><b>메뉴 줄</b>에 마우스를 올리면 그 줄이 옅게 칠해지고 <b>메뉴 이름 바로 뒤</b>에 <b>★ · 품 · 설 · ✕</b> 상자가,
-        <b>이름 앞</b>에 <b>▲ ▼</b>가 뜹니다. ★은 추천, 품은 품절, <b>설은 메뉴 설명</b>(이름 아래 작은 글씨로 한 줄 —
-        재료나 맛 같은 것을 적습니다. 다시 누르면 없어집니다), ✕는 그 줄 지우기,
-        ▲▼는 같은 분류 안에서 <b>위아래로 옮기기</b>입니다. 더 갈 데가 없는 쪽은 흐리게 나옵니다.</li>
-    <li><b>넣고 빼는 단추는 한자리에 모여 있습니다.</b> 아무 분류에나 마우스를 올리면
-        <b>메뉴 → 분류 → 단</b> 순으로 한 줄씩 나옵니다. 위가 작은 것, 아래가 큰 것이고,
-        모두 <b>마우스를 올린 자리 바로 다음</b>에 들어갑니다.
-        ✕에 마우스를 올리면 <b>지워질 만큼이 통째로 칠해집니다</b>.</li>
-    <li><b>장(종이)만 자리가 다릅니다</b> — 종이 <b>위쪽 탭</b>에 <b>1쪽 ＋ 메뉴 장 추가 ＋ 와인 장 추가 ✕ 장 삭제</b>가 늘 나와 있습니다.
-        장은 종이 하나 전체의 일이라 층이 다릅니다. 와인 장은 레드 · 화이트 · 스파클링 · 로제 분류가 갖춰진 채 생깁니다.</li>
-    <li>분류는 <b>제목 옆 ◀ ▶</b>로 옆 단으로 옮깁니다. 그 옆 <b>[분류 형식]</b>을 와인으로 바꾸면 그 분류의 메뉴가
-        <b>와인 카드</b>(병 그림 · 라벨 · 원산지 · 품종 · 향 · 맛)로 나옵니다 — 2쪽 와인판이 그렇게 되어 있습니다.
-        카드에 어떤 줄(병 그림 · 원산지 · 품종 · 향 · 맛 · 특징)을 어떤 차례로 보일지는 [꾸미기] <b>전체 탭 → 와인 카드</b>에서 정하고(와인 한 병이 카드 한 장입니다), 병은 종류마다 정하며 카드 하나만 다르게 하려면 편집 중 병 아래 칸에서 다른 종류의 병을 고르고,
-        <b>특징</b>(당도 · 바디 · 산미 · 탄닌)은 편집 중에 <b>점을 눌러</b> 매깁니다. 카드에 마우스를 올리면
-        <b>★ 품 ✕</b>는 메뉴 줄과 같이 <b>이름 바로 오른쪽</b>에, <b>▲▼</b>는 카드 왼쪽 위에 뜹니다.
-        [꾸미기]는 <b>전체</b> · <b>장별</b> 두 탭입니다 — 장별에서 쪽을 고르면 상단 · 글자 크기 · 바닥 · 그림 · 도장을 그 장만 바꾸고,
-        <b>[다른 장에도 똑같이]</b>로 한 번에 맞춥니다.
-        한쪽 단만 꽉 차서 글자가 안 커질 때
-        [꾸미기]의 <b>고르게 나누기</b>를 누르면 분류를 단에 고르게 다시 나눕니다
-        (순서를 지키며 나누므로, 눌러도 안 변하면 <b>분류 제목의 ◀ ▶</b>로 직접 옮기세요).</li>
-    <li><b>[한 장에 맞춤]은 켜고 끄는 단추입니다</b>(처음에는 꺼져 있습니다). 켜 두면 내용이 바뀔 때마다
-        한 장에 들어가는 최대 크기로 저절로 맞춰지고, <b>＋ · ㅡ</b>를 누르면 꺼지면서 그 크기로 고정됩니다.
-        꺼져 있으면 <b>내용을 고쳐도 크기가 저절로 바뀌지 않습니다</b> — 한 장에 안 들어가면
-        줄이는 대신 그 장에 <b>붉은 띠</b>가 서고 <b>몇 %로 낮추면 들어가는지</b> 알려 줍니다.
-        크기는 <b>세로 · 가로 각각 따로</b> 기억합니다.</li>
-    <li><b>[상단 크기]</b>는 맨 위 영역을 <b>통째로</b> 키우고 줄입니다 — 여백만이 아니라 로고 · 업종 · 한 줄 소개 · 맨 위 모양까지 함께 바뀝니다. 본문 글자 크기와는 별개입니다.</li>
-    <li><b>영업시간</b>은 늘 <b>첫 장</b>에 나옵니다. <b>바닥 글 · 식재료 원산지 · 도장</b>은 <b>장마다 따로</b>
-        켜고 내용도 따로 씁니다 — [꾸미기] <b>장별</b> 탭에서 쪽을 고른 뒤 <b>바닥</b>의 스위치를 끄면 통째로 사라집니다.
-        맨 위 <b>업종 · 한 줄 소개</b>도 같은 탭 <b>상단</b>의 스위치입니다 — 끄면 그 줄만큼 상단이 낮아집니다.</li>   <!-- 263번. 체크 → 스위치 -->
-    <li><b>새로 만들기</b>(빈 메뉴판 · 사진 · 예시)와 <b>파일에서 불러오기</b>, <b>파일로 저장</b>은 위쪽 막대의 <b>[파일 ▾]</b>에 있습니다. 새로 만들면 지금 메뉴판이 통째로 바뀌지만 되돌리기가 됩니다. <b>상호명</b>은 [꾸미기] 전체 탭 맨 위에서 고치고, 저장할 파일 이름이 됩니다.</li>   <!-- 284번. 꾸미기 창 맨 아래에서 [파일 ▾]로 옮겼다(283번) -->   <!-- 264번 -->
-    <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>를, 놓쳤으면 <b>Ctrl+Z</b>를 누르세요.
-        인쇄될 모습이 궁금하면 <b>미리보기</b>입니다.</li>
-    <li>인터넷 주소로 연 메뉴판은 고칠 때마다 이 브라우저에 <b>자동 저장</b>되고(위쪽 막대의 「✓ 자동 저장됨」), 다음에 같은 주소를 열면 이어집니다.
-        <b>파일로 저장</b>은 메뉴판을 파일로 받아 두는 것 — 백업하거나 다른 컴퓨터로 옮길 때 쓰고, 옮긴 곳에서는 위쪽 막대 <b>[파일 ▾] → [파일에서 불러오기]</b>로 올립니다.
-        컴퓨터 파일로 연 메뉴판은 자동 저장이 안 되니, 고친 뒤 <b>[파일 ▾] → [파일로 저장]</b>을 눌러 두세요(고친 곳이 있으면 [파일 ▾]에 불이 들어옵니다).   <!-- 277번 -->
-        <b>인쇄</b>는 인쇄 창의 <b>「설정 더보기」</b>에서 용지 A4 · <b>배율 기본값(100%)</b> · 여백 "없음" · 배경 그래픽 켜기입니다.
-        가장자리의 흰 테두리는 프린터가 못 찍는 자리라 메뉴판이 일부러 비워 둔 것이고, 화면에도 같은 폭(4mm)으로 보입니다. 이보다 넓게 나오는 것은 그 프린터가 더 못 찍는 것입니다.</li>   <!-- 241번 -->
-  </ol>
+  <!-- 285번. 열두 항목 줄글 → 다섯 묶음(사용자: "그냥 줄글"). 자세한 것은 사용법에 -->
+  <h4>시작하기</h4>
+  <ul><li><b>[편집]</b>을 누르면 고칠 수 있고, 오른쪽에 <b>꾸미기</b> 창이 함께 열립니다. 편집 도구는 위쪽 막대 둘째 줄에 나옵니다.</li>
+    <li>새로 만들기 · 파일에서 불러오기 · 파일로 저장은 위쪽 <b>[파일 ▾]</b>에 있습니다.</li></ul>
+  <h4>글자와 메뉴 고치기</h4>
+  <ul><li><b>글자를 눌러</b> 고칩니다. Enter 는 칸에서 빠져나옵니다(분류 이름 · 와인 이름 · 와인 라벨에서는 줄을 나눕니다).</li>
+    <li>메뉴 줄에 마우스를 올리면 이름 뒤에 <b>★</b> 추천 · <b>품</b> 품절 · <b>설</b> 메뉴 설명 · <b>✕</b> 지우기, 이름 앞에 <b>▲ ▼</b> 옮기기가 뜹니다.</li>
+    <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
+    <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>나 <b>↶</b> · Ctrl+Z.</li></ul>
+  <h4>모양 바꾸기</h4>
+  <ul><li>[꾸미기] <b>전체</b> 탭 — 조합(내 조합 · 추천 조합) · 글꼴 · 색 · 종이 · 와인 카드와 병. <b>장별</b> 탭 — 쪽마다 상단 · 글자 크기 · 바닥 · 그림 · 도장.</li>
+    <li>한 장에 안 들어가면 <b>붉은 띠</b>와 함께 몇 %로 낮추면 들어가는지 알려 줍니다. <b>[한 장에 맞춤]</b>을 켜면 저절로 맞춥니다.</li></ul>
+  <h4>저장</h4>
+  <ul><li>인터넷 주소로 열면 고칠 때마다 <b>자동 저장</b>됩니다(위쪽 「✓ 자동 저장됨」).</li>
+    <li>백업 · 다른 컴퓨터로 옮기기는 <b>[파일 ▾] → [파일로 저장]</b>, 옮긴 곳에서는 <b>[파일에서 불러오기]</b>. 컴퓨터 파일로 열었을 때는 자동 저장이 안 됩니다(고친 곳이 있으면 [파일 ▾]에 불이 들어옵니다).</li></ul>
+  <h4>인쇄</h4>
+  <ul><li>인쇄 창의 「설정 더보기」에서 용지 A4 · <b>배율 기본값(100%)</b> · 여백 없음 · <b>배경 그래픽 켜기</b>.</li>
+    <li>가장자리 흰 테두리(4mm)는 프린터가 못 찍는 자리라 일부러 비워 둔 것입니다.</li></ul>
   <!-- 234번. [다시 보지 않기]로 끈 인쇄 안내를 되살릴 곳이 없었다. 늘 보이는 체크로 둔다(24번) -->
   <div class="row2 end foot2">
     <label class="chk"><input type="checkbox" class="m3sw" id="help-ph"> [인쇄]를 누르면 인쇄 안내 먼저 보기</label>
     <button id="help-guide" type="button" class="bt-out">둘러보기 다시 보기</button>   <!-- 269번. 가이드를 다시 보는 곳(234번과 같은 자리) -->
-    <button id="help-close" type="button" class="bt-out">닫기</button>
   </div>
 </div></dialog>
 
@@ -6132,7 +6138,7 @@ $("#b-print").onclick   = () => {
 };
 $("#ow-cancel").onclick = () => $("#overwarn").close();
 $("#ow-go").onclick     = () => { $("#overwarn").close(); nextPrint(); };
-$("#ph-cancel").onclick = () => $("#printhint").close();
+/* 285번. #ph-cancel 는 걷었다 — ✕ 가 닫는다 */
 $("#ph-go").onclick     = () => {
   const skip = $("#ph-skip").checked;
   if (skip){ SETTINGS.printHint = false; touch(); }
@@ -6150,13 +6156,13 @@ $("#b-preview").onclick   = () => {
 };
 $("#prev-back").onclick  = () => $("#b-preview").click();
 $("#b-bulk").onclick     = () => openDlg($("#bulk"));
-$("#bulk-cancel").onclick= () => $("#bulk").close();
+/* 285번. #bulk-cancel 는 걷었다 — ✕ 가 닫는다 */
 $("#bulk-up").onclick    = () => { $("#bulk").close(); bulkPrice(+Math.abs(+$("#bulk-amt").value || 0)); };
 $("#bulk-down").onclick  = () => { $("#bulk").close(); bulkPrice(-Math.abs(+$("#bulk-amt").value || 0)); };
 $("#b-help").onclick    = () => { $("#help-ph").checked = SETTINGS.printHint !== false; openDlg($("#help")); };
 /* 234번. 인쇄 안내 다시 켜기. 켜져 있으면 키가 없다(15번 · printHint 는 원래 그렇다) */
 $("#help-ph").onchange  = e => { if (e.target.checked) delete SETTINGS.printHint; else SETTINGS.printHint = false; touch(); };
-$("#help-close").onclick= () => $("#help").close();
+/* 285번. #help-close 는 걷었다 — ✕ 가 닫는다 */
 /* 284번. 바깥 누르기로 닫지 않는다 — 모든 안내창. 닫기는 ✕ · 창의 단추 · Esc(사용자: "닫기 버튼 눌렀을 때 꺼지게"). 266번의 "바깥 누르면 닫힘" 줄을 걷었다 */
 document.querySelectorAll(".dlg-x").forEach(b => { if (b.id !== "st-close") b.onclick = () => b.closest("dialog").close(); });
 
@@ -6642,8 +6648,8 @@ $("#st-check-go").onclick = () => {
 
 /* ── 273번. 추천 조합(프리셋) — 이미 있는 손잡이 값의 묶음. 누르면 한 번 맞추고 끝난다(저장되는 설정이 아니다 — 규칙 H · 89번).
    글자 크기 · 내용 · 맨 위(글자 / 로고)는 건드리지 않는다 — 채운 메뉴가 바로 넘치지 않게(크기는 사장님 몫). 값을 늘리면 t52 가 이름 · 값을 본다 */
-const PRESETS = {
-  basic:  { name:"일반 식당",   font:"gothic",   bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴)
+const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타일에서는 「내 조합」으로 보인다(hidden: 추천 조합 목록에는 안 나온다)
+  basic:  { name:"내 조합",     hidden:true, font:"gothic",   bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴)
   hansik: { name:"한식 식당",   font:"serif",    bold:false, theme:"pat",   paper:"hanji",   sec:"band", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"추천" },
   cafe:   { name:"카페",        font:"gothica1", bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"none", seal:"none", mark:"✿" },
   bunsik: { name:"분식",        font:"round",    bold:true,  theme:"chili", paper:"gingham", sec:"pill", align:"left",   leader:"none", noren:"arch",  art:"none", seal:"none", mark:"best" },
@@ -6674,7 +6680,7 @@ function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)
   const pa = JSON.stringify((a.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper"])), pb = JSON.stringify((b.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper"]));
   const x = Object.assign({}, a), y = Object.assign({}, b); delete x.pages; delete y.pages; return n(x) === n(y) && pa === pb; }
 function presetLook(k){ const S = JSON.parse(JSON.stringify(SETTINGS)), M = JSON.parse(JSON.stringify(MENU)); applyPresetTo(S, M, k); return lookOf(S); }
-function curPreset(){ const now = lookOf(SETTINGS); return Object.keys(PRESETS).find(k => sameLook(now, presetLook(k))) || "mine"; }
+function curPreset(){ const now = lookOf(SETTINGS); return Object.keys(PRESETS).filter(k => !PRESETS[k].hidden).find(k => sameLook(now, presetLook(k))) || "mine"; }   // 285번. 숨긴 조합(basic)은 내 조합으로 친다
 function applyLookTo(S, L){ LOOK_KEYS.forEach(k => { if (L[k] === undefined) delete S[k]; else S[k] = JSON.parse(JSON.stringify(L[k])); });
   (S.pages || []).forEach((p, i) => { const q = L.pages[i] || L.pages[0] || {}; PAGE_LOOK.forEach(k => { if (q[k] === undefined) delete p[k]; else p[k] = q[k]; }); }); }
 function setMyLook(L){   // 내 조합을 적는다 — 빈 병 목록(bottleMore)보다 앞에. 저장이 빈 목록을 지우고 열 때 맨 뒤에 다시 붙여(239번) 열쇠 순서가 저장 왕복마다 바뀌었다(t14)
@@ -6685,14 +6691,14 @@ function presetTiles(){
   const box = $("#f-presets"); if (!box) return;
   const cur = curPreset();
   if (cur === "mine") setMyLook(lookOf(SETTINGS));   // 지금 모양이 곧 내 조합
-  const want = ["mine", ...Object.keys(PRESETS)].filter(k => k !== "mine" || SETTINGS.myLook);
+  const want = ["mine", ...Object.keys(PRESETS).filter(k => !PRESETS[k].hidden)];   // 285번. 내 조합은 늘 맨 앞
   if (box.dataset.keys !== want.join(",")){
     box.innerHTML = ""; box.dataset.keys = want.join(",");
     want.forEach(k => { const b = el("button", "pl-tile"); b.type = "button"; b.dataset.p = k;
       const c = el("span", "c"), band = el("i"), dot = el("em"); c.append(band, dot);
-      b.append(c, document.createTextNode(k === "mine" ? "내 조합" : PRESETS[k].name)); b.onclick = () => pickLook(k); box.append(b); });
+      b.append(c, document.createTextNode(k === "mine" ? "내 조합" : PRESETS[k].name)); b.title = b.textContent; b.onclick = () => pickLook(k); box.append(b); });
   }
-  box.querySelectorAll(".pl-tile").forEach(b => { const k = b.dataset.p, t = THEMES[k === "mine" ? (SETTINGS.myLook.theme || "night") : PRESETS[k].theme] || THEMES.night;
+  box.querySelectorAll(".pl-tile").forEach(b => { const k = b.dataset.p, t = THEMES[k === "mine" ? ((SETTINGS.myLook || {}).theme || SETTINGS.theme || "night") : PRESETS[k].theme] || THEMES.night;
     const c = b.querySelector(".c"); c.style.background = t.paper; c.querySelector("i").style.background = t.band; c.querySelector("em").style.background = t.accent;
     b.classList.toggle("on", k === cur); b.setAttribute("aria-pressed", k === cur ? "true" : "false"); });
 }
