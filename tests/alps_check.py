@@ -1093,7 +1093,7 @@ def t49(b, f):
         out['steps'].append(c.js("""()=>{const h=document.querySelector('.gd-hole'),t=document.querySelector('.gd-tip'); if(!h||!t) return null;
           const a=h.getBoundingClientRect(),q=t.getBoundingClientRect(); const see=[...document.querySelectorAll('.tohere .rowtools, .addhere > .addrow')].some(e=>getComputedStyle(e).visibility==='visible');
           return {h:t.querySelector('h4').textContent, hole:[Math.round(a.width),Math.round(a.height)], cover:!(q.right<a.left||q.left>a.right||q.bottom<a.top||q.top>a.bottom), inview:q.left>=0&&q.right<=innerWidth&&q.top>=0&&q.bottom<=innerHeight, tools:see}}"""))
-        pg.click('.gd-tip button.tonal' if i < 4 else '.gd-tip button.fill'); pg.wait_for_timeout(300)
+        pg.click('.gd-tip button.fill'); pg.wait_for_timeout(300)   # 291번 — [다음]도 채운 단추
     out['done'] = c.js("()=>[SETTINGS.guideDone === true, document.querySelectorAll('.gd-tip,.gd-hole,.gd-block').length]")
     pg.click('#b-help'); pg.wait_for_timeout(200); pg.click('#help-guide'); pg.wait_for_timeout(500)
     out['again'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
