@@ -1161,7 +1161,9 @@ def t54(b, f):
     buf = io.BytesIO(); im.save(buf, 'PNG'); png = {'name': 'menu.png', 'mimeType': 'image/png', 'buffer': buf.getvalue()}
     out = {}
     c = Ctx(b, 'p_' + f); pg = c.pg
-    pg.click('#st-photo'); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', ANS54); pg.click('#st-appgo'); pg.wait_for_timeout(250)
+    # 288번 — 다른 앱 길은 바로 읽기가 안 될 때만 나온다. 서버가 꺼 둔 경우로 연다
+    pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
+    pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', ANS54); pg.click('#st-appgo'); pg.wait_for_timeout(250)
     out['check'] = c.js("()=>[!document.querySelector('#st-check').hidden, document.querySelectorAll('#st-ctab input').length, document.querySelectorAll('#st-ctab input.un').length]")
     pg.click('#st-check-go'); pg.wait_for_timeout(150); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
     out['menu'] = c.js("()=>MENU.sheets[0].map(col=>col.map(s=>[s.name, s.items.map(i=>i.name+'='+i.price)]))")
@@ -1172,7 +1174,8 @@ def t54(b, f):
         reqs.append({'url': r.request.url, 'body': r.request.post_data or '', 'hdr': dict(r.request.headers)})
         r.fulfill(status=200, content_type='application/json', body=json.dumps({'text': ANS54, 'model': 'test'}))
     pg.route('**/api/read', ok_route)
-    pg.click('#st-photo'); pg.click('#st-way button[data-w="gem"]')
+    pg.click('#st-photo'); pg.wait_for_timeout(300)
+    out['other'] = [c.js("()=>document.querySelector('#st-other').hidden")]   # 288번 — 바로 읽기가 되면 한 길만
     with pg.expect_file_chooser() as fc: pg.click('#st-pic')
     fc.value.set_files(png); pg.wait_for_timeout(500)
     out['no_key_box'] = c.js("()=>!document.querySelector('#st-key')")
@@ -1184,6 +1187,7 @@ def t54(b, f):
     pg.route('**/api/read', lambda r: r.fulfill(status=429, content_type='application/json', body='{"error":"limit","code":"limit"}'))
     pg.click('#st-check-back'); pg.click('#st-gemgo'); pg.wait_for_timeout(500)
     out['limit_msg'] = '한도' in c.js("()=>document.querySelector('#st-gemmsg').textContent")
+    out['other'].append(not c.js("()=>document.querySelector('#st-other').hidden"))   # 288번 — 한 번 실패하면 다른 앱 길이 나온다
     out['err'] += c.errs; c.close()
     c = Ctx(b, 'p_' + f); pg = c.pg   # 278번 — 서버에서 꺼 두면(READ_ENABLED=off) 사진 창을 열 때 알아채 흐리게
     pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
@@ -1307,8 +1311,8 @@ def judge(t, r):
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
-            ok = r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and not r['err']
-            return ok, f"붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            ok = r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
+            return ok, f"다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"

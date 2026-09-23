@@ -1253,16 +1253,11 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .noren [contenteditable="true"]:focus{outline-color:var(--paper);background:rgba(255,255,255,.14)}
 
 /* ── 미리보기 ─────────────────────────────────────────────────────── */
-/* 버튼 색만 바뀌면 미리보기 중인지 알기 어렵다. 화면 위에 띠를 하나 띄운다 */
-.prevbar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:41;
-  display:flex;align-items:center;gap:14px;padding:10px 12px 10px 17px;border-radius:13px;
-  background:var(--ui-accent);color:#fff;font-family:var(--ui-font);font-size:13.5px;
-  flex-wrap:wrap;justify-content:center;text-align:center;max-width:calc(100vw - 24px);
-  box-shadow:0 12px 34px rgba(0,0,0,.5)}
-.prevbar[hidden]{display:none}
-.prevbar button{font:inherit;color:#fff;background:rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.55);border-radius:9px;padding:6px 12px;cursor:pointer}
-.prevbar button:hover{background:rgba(255,255,255,.3)}
+/* 289번. 화면 위에 띄우던 띠(.prevbar)를 걷었다 — 283번에 막대가 위로 온 뒤 띠가 [파일] · [편집 끝]을 덮어 눌리지 않았다(사용자 · 재 봤다).
+   미리보기 중인지는 단추가 말한다 — [미리보기] ↔ [미리보기 끝](편집 ↔ 편집 끝과 같은 짜임) · 켜진 색. 두 글자를 한 칸에 겹쳐 폭은 늘 긴 쪽(8번) */
+#b-preview{display:inline-grid;align-items:center;justify-items:center}
+#b-preview > span{grid-area:1/1}
+#b-preview:not(.on) .pv-on,#b-preview.on .pv-off{visibility:hidden}
 /* 편집 상태와 커서는 그대로 두고 편집용 장식만 걷는다 */
 .editing.preview .rowtools,.editing.preview .addbtn{display:none !important}
 .editing.preview [contenteditable="true"]{outline:none !important;background:none !important}
@@ -1701,7 +1696,7 @@ body.editing .editbar{display:flex}
   .sheet{box-shadow:none;break-after:page;page-break-after:always;height:296.6mm}
   .sheet.land{height:209.6mm}
   .sheet:last-child{break-after:auto;page-break-after:auto}
-  .barwrap,.bar,.panel,.hint,dialog,.rowtools,.addbtn,.addrow,.pagebar,.undo,.prevbar{display:none !important}
+  .barwrap,.bar,.panel,.hint,dialog,.rowtools,.addbtn,.addrow,.pagebar,.undo{display:none !important}
   /* 235번. **편집 중 Ctrl+P 에 병 고르기(`.bsel`)가 찍혔다.** 156 · 157번이 병 아래에 붙인 편집 전용 칸인데
      위 목록은 그보다 먼저 만들어져 안 따라왔다(이름을 바꾸거나 더할 때 이 목록도 볼 것) */
   .bsel{display:none !important}
@@ -1783,8 +1778,6 @@ dialog input.m3sw:focus-visible{outline-color:#241c12}
 .undo{border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .undo button{border:0;color:#f0a898;font-weight:700;height:36px;border-radius:18px;padding:0 12px}
 .undo button:hover{background:rgba(240,168,152,.12)}
-.prevbar{border-radius:24px}
-.prevbar button{height:36px;border-radius:18px;padding:0 16px}
 /* ── 264번. 첫 화면 · 빈 메뉴판 · 맨 위 글자 ───────────────────────────────
    첫 화면은 M3 안내창(폭 최대 560 · 263번 모양). 맨 위 글자(.logo.txt)는 종이의 일이라 로고 색 · 본문 글꼴을 쓴다 */
 .noren .logo.txt{width:auto;max-width:100%;aspect-ratio:auto;background:none;-webkit-mask:none;mask:none;filter:none;
@@ -2000,6 +1993,17 @@ dialog#start #st-gem p.st-help{margin:10px 0 0}
 dialog#start #st-gem p.st-msg:empty{display:none}
 .st-how{margin:10px 0 0 20px;padding:0;font-size:13px;line-height:1.6;color:#3b3022}
 .st-how li{margin-bottom:2px}
+/* 288번. 첫 사용 흐름 — 단계 표시 · 다른 앱 길은 바로 읽기가 안 될 때만 */
+.st-pg{flex:0 0 auto;font-size:12.5px;color:#6b5d48;white-space:nowrap}
+.st-pg[hidden],#st-other[hidden]{display:none}
+#st-other{margin-top:14px}
+dialog#start #st-other p.st-help{margin:0 0 8px}
+dialog#start #st-app .st-how{margin:12px 0 10px 20px}
+dialog#start #st-app .st-how .row2{margin:6px 0 4px}
+dialog#start #st-pichint{margin:8px 0 0}
+dialog#start #st-gem p.st-note{margin:4px 0 0}
+dialog#start p.st-msg.err{color:#a3321f}
+@media screen and (max-width:560px){ dialog#start .st-head{flex-wrap:wrap} dialog#start .st-head h3{flex:1 1 0;min-width:0} dialog#start .st-pg{flex-basis:100%;margin:-6px 0 0} }   /* 288번. 좁으면 단계 표시는 제목 아래 줄로 — 제목이 두 줄로 접혔다 */   /* 288번. 멈췄다는 말은 설명 글과 구분되게 */
 .st-legend{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:13px;color:#3b3022}
 .st-legend i{flex:0 0 auto;width:28px;height:16px;border-radius:3px;background:#fff1b8;border:1px solid #d9b43a}
 .st-cphoto{position:sticky;top:0}
@@ -2101,17 +2105,18 @@ body.web.unsaved #b-file{background:rgba(22,17,10,.94);border-color:rgba(240,230
    · 사진을 올리면 사진이 점선 상자 안으로, [사진 바꾸기]는 상자 안 오른쪽
    · 창을 열면 초점은 제목에 · 종이 위 탭의 장 단추를 테두리 단추로 */
 header.topbar input.tb-name{height:34px;box-sizing:border-box;padding:0 8px;border:1px solid transparent;border-radius:6px;background:transparent;
-  color:#efe3c9;font:600 15px var(--ui-font);text-align:right;cursor:text}   /* 287번. 글자처럼 보이다가 마우스를 올리면 테, 누르면 입력 칸 */
+  color:#efe3c9;font:600 15px var(--ui-font);text-align:left;cursor:text}   /* 287번. 글자처럼 보이다가 마우스를 올리면 테, 누르면 입력 칸 */
 header.topbar input.tb-name:hover{border-color:rgba(240,230,205,.3)}
 header.topbar input.tb-name:focus{outline:none;border-color:rgba(240,230,205,.6);background:rgba(240,230,205,.08);text-align:left}
 header.topbar input.tb-name::placeholder{color:rgba(240,230,205,.45)}
 header.topbar .bar.tb-edit{height:38px;margin-top:4px;padding:2px 6px}   /* 뒤의 285번 규칙보다 구체적으로 */
 header.topbar .tb-edit button{height:32px;border-radius:16px}
 header.topbar .tb-edit button.ib{width:32px}
-.topbar .tb-name{flex:0 0 10em;width:10em;max-width:10em;text-align:right}
+.topbar .tb-name{flex:0 0 10em;width:10em;max-width:10em;text-align:left}   /* 288번. 늘 왼쪽 — 오른쪽에 붙였다가 누르면 왼쪽으로 튀었다(사용자) */
 .topbar .autost{transition:color .5s, opacity .3s}
 .topbar .autost.saving{opacity:.5}
-.topbar .autost.just{color:#a8d8a0}
+.topbar .autost.just{color:#c4f2b8;background:rgba(120,200,110,.22)}   /* 288번. 저장된 순간을 더 또렷하게(사용자) — 색에 옅은 바탕까지. 자리는 안 바뀐다(padding 은 늘 같다) */
+.topbar .autost{border-radius:12px;transition:color .4s, background-color .4s, opacity .3s}
 .st-seg,.st-pseg{display:inline-grid !important;grid-auto-flow:column;grid-auto-columns:1fr}
 .st-seg button::before,.st-pseg button::before{content:"✓ ";visibility:hidden}
 .st-seg button.on::before,.st-pseg button.on::before{visibility:visible}
@@ -2124,8 +2129,6 @@ dialog h3:focus{outline:none}
 dialog:focus-visible{outline:none}
 .pl-mine{margin-bottom:4px}
 .panel button.pl-tile{position:relative}
-.pl-tile .x{position:absolute;top:0;right:2px;font-size:10px;line-height:1;padding:3px;color:rgba(240,230,205,.55);border-radius:50%}
-.pl-tile .x:hover{color:#efe3c9;background:rgba(240,230,205,.14)}
 .editing .sheet .pagebar .addbtn{border:1px solid rgba(60,45,28,.45);border-radius:13px;padding:2px 10px;background:rgba(255,253,246,.7);color:#3b2f22;opacity:1}
 /* ── 285번. 짜임 통일(사용자: "버튼 위치 · 텍스트 위치 왜 이래 · 모달이 갑자기 위치랑 크기가 바뀐다 · 일관성이 없다")
    · 위쪽 막대 두 줄 모두 가운데 — 일하는 자리(종이)가 가운데다. 둘째 줄(편집 도구)은 자리를 늘 비워 둔다(visibility) — 편집을 켜고 꺼도 종이가 안 움직인다
@@ -2150,7 +2153,7 @@ dialog button.st-swb{width:76px}
 .topbar .bar{flex-wrap:nowrap;justify-content:flex-start;height:56px;box-sizing:border-box;padding:8px 16px;gap:8px;border-radius:0;border-width:0 0 1px;
   overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
 .topbar .tb-name{flex:0 1 auto;min-width:3em;max-width:14em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;color:#efe3c9}
-.topbar .autost{flex:0 0 auto;padding:0 4px 0 0}
+.topbar .autost{flex:0 0 auto;padding:3px 9px}
 .topbar .editbar{display:none;align-items:center;gap:6px;flex:0 0 auto}
 body.editing .topbar .editbar{display:flex}
 .topbar .editbar button{height:36px;border-radius:18px;padding:0 14px;font-size:13px}
@@ -2160,7 +2163,7 @@ body.editing .topbar .editbar{display:flex}
 .topbar .bar > button,.topbar .tb-right button{flex:0 0 auto}
 .topbar #b-edit{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}   /* 오른쪽 묶음의 주된 동작 하나 */
 .topbar #b-edit:hover{background:#8f2c21}
-.topbar #b-style.on{background:rgba(240,230,205,.16);border-color:rgba(240,230,205,.34);color:#efe3c9}   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
+.topbar #b-style.on,.topbar #b-preview.on{background:rgba(240,230,205,.16);border-color:rgba(240,230,205,.34);color:#efe3c9}   /* 289번. [미리보기 끝]도 — [편집 끝]과 빨간 단추 둘이 됐다(규칙 I) */   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
 .tb-menu{position:fixed;z-index:31;min-width:240px;padding:6px;display:flex;flex-direction:column;gap:2px;
   background:#2a2218;border:1px solid rgba(240,230,205,.22);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:var(--ui-font)}
 .tb-menu[hidden]{display:none}
@@ -2226,7 +2229,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   <div class="st-plogo" id="f-logorow"><button type="button" class="st-drop" id="f-logo-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으면 로고가 바뀝니다</small></button>
   <div class="st-tiles" id="f-tiles"></div></div>
   <!-- 273번. 추천 조합 — 누르면 글꼴 · 색 · 종이 · 분류 제목 · 점선 · 상단 · 그림 · 도장 · 추천 표시를 한 번에 맞춘다(글자 크기 · 내용은 그대로) -->
-  <label id="f-mine-l">내 조합 <small>모양을 고치면 저절로 남습니다(넷까지)</small></label>
+  <label id="f-mine-l">내 조합 <small>추천 조합을 입힌 뒤 모양을 바꾸면 여기에 남습니다</small></label>   <!-- 289번. 한 칸 -->
     <div class="pl-presets pl-mine" id="f-mine" role="group" aria-label="내 조합"></div>   <!-- 286번. 내 조합 줄과 추천 조합 줄을 나눴다 -->
     <label id="f-presets-l">추천 조합</label>
     <div class="pl-presets" id="f-presets" role="group" aria-label="추천 조합"></div>
@@ -2618,7 +2621,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
     <p class="st-grp">새로 만들기</p>
     <div class="st-big">
     <button type="button" class="st-opt" id="st-blank"><span class="st-th"><i></i></span><span class="st-tx"><b>빈 메뉴판으로 시작</b><span>가게 이름과 모양을 정하고, 메뉴는 직접 적습니다</span></span></button>
-    <button type="button" class="st-opt" id="st-photo"><span class="st-th cam"></span><span class="st-tx"><b>사진으로 시작</b><span>지금 쓰는 메뉴판을 찍어 올리면 AI 가 메뉴 이름과 가격을 채웁니다</span></span></button>   <!-- 275번. 준비 중 → 만듦 -->
+    <button type="button" class="st-opt" id="st-photo"><span class="st-th cam"></span><span class="st-tx"><b>사진으로 시작</b><span>지금 쓰는 메뉴판을 찍어 올리면 AI가 메뉴 이름과 가격을 채웁니다</span></span></button>   <!-- 275번. 준비 중 → 만듦 -->
     </div>
     <p class="st-grp">이미 있는 메뉴판으로</p>
     <div class="st-list">   <!-- 281번. 큰 카드 둘보다 한 급 낮게 — 목록 두 줄(› 표시) -->
@@ -2628,29 +2631,32 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   </div>
   <!-- 275번. 사진으로 시작 — 제미나이 키로 바로 읽기 · 또는 쓰는 AI 앱에서 읽은 답을 붙여 넣기. 둘 다 같은 "읽은 값 확인"으로 간다 -->
   <div id="st-read" hidden>   <!-- 280번. 할 일을 순서대로 두 단계로 · 읽기 단추는 바닥 줄 -->
-    <div class="st-head"><button type="button" class="st-icon" id="st-read-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">사진으로 시작</h3></div>   <!-- 281번. 뒤로는 머리 왼쪽 ← -->
-    <p class="sub">지금 쓰는 메뉴판 사진을 올리면 AI 가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
-    <p class="st-step"><em>1</em>메뉴판 사진 올리기</p>
+    <div class="st-head"><button type="button" class="st-icon" id="st-read-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">사진으로 시작</h3><span class="st-pg">3단계 중 1단계</span></div>   <!-- 288번. 몇 단계 남았는지 -->   <!-- 281번. 뒤로는 머리 왼쪽 ← -->
+    <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
+    <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
     <div class="st-picrow"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button></div>
-    <p class="st-step"><em>2</em>읽는 방법 고르기</p>
-    <span class="st-seg" id="st-way"><button type="button" data-w="gem">여기서 바로 읽기</button><button type="button" data-w="app">다른 AI 앱에서</button></span>
+    <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
     <div id="st-gem">   <!-- 276번. 사장님 키 칸을 없앴다 — 버셀 서버 함수(api/read.js)가 읽는다 -->
-      <p class="sub st-help">사진을 올리고 아래 [읽기]를 누르면 이 화면에서 바로 읽습니다.</p>
-      <p class="sub st-note">무료라 붐비면 잠시 멈출 수 있습니다. 그때는 [다른 AI 앱에서]를 쓰세요. 보낸 사진은 구글이 서비스 개선에 쓸 수 있으니 메뉴판만 찍어 주세요.</p>   <!-- 286번 -->
+      <p class="sub st-note">보낸 사진은 구글이 서비스 개선에 쓸 수 있으니 메뉴판만 찍어 주세요.</p>   <!-- 288번. 붐빌 때의 말은 실제로 멈췄을 때 안내 칸에 -->
       <p class="sub st-help st-msg" id="st-gemmsg"></p>
     </div>
+    <div id="st-other" hidden>   <!-- 288번. 바로 읽기가 꺼져 있거나 · 인터넷이 없거나 · 한 번 실패했을 때만 -->
+      <p class="sub st-help">여기서 바로 읽기가 안 되면, 쓰시는 AI 앱(챗GPT · 제미나이 등)으로 읽어 올 수도 있습니다.</p>
+      <span class="st-seg" id="st-way"><button type="button" data-w="gem">여기서 바로 읽기</button><button type="button" data-w="app">다른 AI 앱에서</button></span>
+    </div>
     <div id="st-app" hidden>
-      <p class="sub st-help">쓰시는 AI 앱(챗GPT · 제미나이 등)에 메뉴판 사진과 요청 글을 함께 보내고, 받은 답을 아래 칸에 붙여 넣은 뒤 [읽기]를 누릅니다.</p>
-      <p class="sub st-note">요청 글은 [요청 글 복사]로 한 번에 복사됩니다.</p>   <!-- 286번. 번호 목록 → 제미나이 쪽과 같은 짜임 -->
-      <div class="row2"><button type="button" class="bt-tonal" id="st-copy">요청 글 복사</button></div>
-      <textarea id="st-ans" class="st-in st-ans" rows="6" placeholder="AI 의 답을 여기에 붙여 넣으세요"></textarea>
+      <ol class="st-how">   <!-- 288번. 할 일이 넷이라 다시 번호 목록으로(286번이 줄글로 바꿔 순서가 거꾸로 읽혔다 — 사용자) -->
+        <li>아래 [요청 글 복사]를 누릅니다<div class="row2"><button type="button" class="bt-tonal" id="st-copy">요청 글 복사</button></div></li>
+        <li>쓰시는 AI 앱에 메뉴판 사진을 올리고, 복사한 요청 글을 붙여 넣어 보냅니다</li>
+        <li>AI가 준 답을 통째로 복사해 아래 칸에 붙여 넣고 [읽기]를 누릅니다</li></ol>
+      <textarea id="st-ans" class="st-in st-ans" rows="6" placeholder="AI의 답을 여기에 붙여 넣으세요"></textarea>
       <p class="sub st-help st-msg" id="st-appmsg"></p>
     </div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-gemgo">읽기</button><button type="button" class="bt-fill" id="st-appgo" hidden>읽기</button></div>
   </div>
   <div id="st-check" hidden>   <!-- 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단으로 · 창을 넓게 -->
-    <div class="st-head"><button type="button" class="st-icon" id="st-check-back" aria-label="사진 다시 읽기" title="사진 다시 읽기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">읽은 메뉴 확인</h3></div>
+    <div class="st-head"><button type="button" class="st-icon" id="st-check-back" aria-label="사진 다시 읽기" title="사진 다시 읽기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">읽은 메뉴 확인</h3><span class="st-pg">3단계 중 2단계</span></div>
     <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요.</p>
     <p class="st-legend"><i></i>노랗게 칠한 칸은 사진이 흐려서 잘못 읽었을 수 있는 곳입니다. 먼저 확인해 주세요.</p>
     <p class="st-cnote">종이는 A4 세로 비율 그대로입니다. 메뉴 이름을 지우면 그 줄은 넣지 않습니다. 가게 이름 · 색 · 모양은 다음 화면에서 정합니다.</p>
@@ -2659,7 +2665,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
   </div>
   <div id="st-setup" hidden>
-    <div class="st-head"><button type="button" class="st-icon" id="st-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">빈 메뉴판 만들기</h3></div>
+    <div class="st-head"><button type="button" class="st-icon" id="st-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1" id="st-setup-h">빈 메뉴판 만들기</h3><span class="st-pg" id="st-pg3" hidden>3단계 중 3단계</span></div>
     <p class="sub">나중에 [편집] · [꾸미기]에서 전부 다시 바꿀 수 있습니다.</p>
     <p class="sub st-cap">메뉴판 맨 위가 이렇게 보입니다</p>
     <div class="st-prev" id="st-prev"></div>
@@ -2678,11 +2684,6 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-go">이대로 시작</button></div>
   </div>
 </div></dialog>
-
-<div class="prevbar" id="prevbar" hidden>
-  <span>미리보기 · 인쇄되는 모습입니다</span>
-  <button type="button" id="prev-back">편집으로 돌아가기</button>
-</div>
 
 <div class="undo" id="undo" hidden><span class="t"></span><button type="button" id="undo-btn">되돌리기</button></div>
 
@@ -2704,7 +2705,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
     <button id="b-undo" type="button" class="ib" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)" disabled>↶</button><button id="b-redo" type="button" class="ib" aria-label="다시 하기" title="다시 하기 (Ctrl+Y)" disabled>↷</button>   <!-- 271번. ◀ ▶ 는 분류 옮기기 모양이라 쓰지 않는다(규칙 H) -->
     <span class="sep"></span>
     <button id="b-style" type="button">꾸미기</button>
-    <button id="b-preview" type="button">미리보기</button>
+    <button id="b-preview" type="button" aria-pressed="false" title="인쇄되는 모습 보기 — 이때는 글자가 고쳐지지 않습니다"><span class="pv-off">미리보기</span><span class="pv-on">미리보기 끝</span></button>   <!-- 289번 -->
     <span class="sep"></span>
     <button id="b-bulk" type="button">가격 일괄</button>
 </nav>
@@ -4658,7 +4659,7 @@ function render(){
   buildPages().forEach(p => box.appendChild(drawSheet(p)));
   document.body.classList.toggle("editing", editing);
   wineFit(); priceWidths();
-  if (editing) document.querySelectorAll("[data-path]").forEach(n => { n.contentEditable="true"; n.spellcheck=false; });
+  if (editing && !preview) document.querySelectorAll("[data-path]").forEach(n => { n.contentEditable="true"; n.spellcheck=false; });   // 289번. 미리보기에서는 못 고친다
   $("#page-rule").textContent = "@page{size:A4 " + (SETTINGS.orient==="landscape"?"landscape":"portrait") + ";margin:0}";
   // 구성이 실제로 몇 칸 · 몇 장이 되는지 값으로 보여 준다(78번). 라벨에 숫자를 박으면
   // 묶음 수가 바뀔 때마다 거짓말이 되고, applyLook 에 두면 ＋ 로 늘렸을 때 안 따라온다.
@@ -4690,7 +4691,7 @@ function fillHints(){
     /* 208번. 세 줄은 많다 — **두 줄**로. ① 하는 일 + 끝내는 법 ② ※ 주의 */
     edit: "글자를 눌러 고치고, 모양은 [꾸미기] 창에서 바꿉니다. 다 되면 [편집 끝]. 파일로 받아 두려면 위쪽 [파일 ▾] → [파일로 저장].\n"
         + "※ 넣고 빼는 단추는 마우스를 올린 분류에만 나옵니다. 장은 위쪽 탭입니다.",
-    prev: "인쇄되는 모습입니다. [미리보기]를 다시 누르면 편집으로 돌아갑니다."
+    prev: "인쇄되는 모습입니다. 이때는 글자가 고쳐지지 않습니다 — [미리보기 끝]을 누르면 편집으로 돌아갑니다."
   };
   $("#hint").querySelectorAll("[data-hint]").forEach(n => { n.textContent = t[n.dataset.hint] || ""; });
 }
@@ -4886,7 +4887,7 @@ function autoStatus(k){
   if (!ON_WEB){ n.textContent = "자동 저장 안 됨"; n.title = "컴퓨터 파일로 연 메뉴판은 자동 저장되지 않습니다. [파일로 저장]을 눌러야 남습니다"; n.className = "autost off"; return; }
   n.className = "autost" + (k === "fail" ? " fail" : k === "saving" ? " saving" : "");   // 286번. 글자는 그대로, 색으로만 — 저장 중에는 흐리게, 저장되면 잠깐 밝게(글자가 바뀌면 막대가 옆으로 움직였다)
   n.textContent = k === "fail" ? "자동 저장 실패" : "✓ 자동 저장됨";
-  if (k !== "saving" && k !== "fail"){ n.classList.add("just"); clearTimeout(autoStatus.t); autoStatus.t = setTimeout(() => n.classList.remove("just"), 1200); }
+  if (k !== "saving" && k !== "fail"){ n.classList.add("just"); clearTimeout(autoStatus.t); autoStatus.t = setTimeout(() => n.classList.remove("just"), 2000); }   // 288번. 1.2 → 2초
   n.title = k === "fail" ? "이 브라우저에 저장하지 못했습니다(공간이 모자랄 수 있습니다). [파일로 저장]으로 받아 두세요"
     : "이 컴퓨터의 이 브라우저에 자동으로 저장됩니다" + (autoAt ? " — 마지막 " + autoAt.toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" }) : "") + ". 다른 컴퓨터로 옮기거나 백업하려면 [파일로 저장]";
 }
@@ -5583,13 +5584,12 @@ function bulkPrice(delta){
 }
 
 let preview = false;
-/* 편집 상태와 커서는 그대로 두고 편집용 장식만 걷는다.
-   글자를 바꾸지 않는다 — 바꾸면 편집 막대 안에서 옆 버튼이 밀린다(10번) */
+/* 편집용 장식을 걷고, 289번부터는 글자도 못 고친다(인쇄되는 모습을 보는 자리 — 전에는 표시 없이 글자가 고쳐졌다). 꾸미기 창은 그대로 쓴다.
+   단추 글자는 [미리보기 끝]으로 바뀌지만 두 글자를 한 칸에 겹쳐 폭이 늘 같다(10 · 289번) */
 function setPreview(on){
   preview = on;
   document.body.classList.toggle("preview", on);
-  $("#b-preview").classList.toggle("on", on);
-  $("#prevbar").hidden = !on;
+  $("#b-preview").classList.toggle("on", on); $("#b-preview").setAttribute("aria-pressed", on ? "true" : "false");   // 289번. 띠 대신 단추 글자
   document.body.style.paddingTop = "";
   /* 96번. 띠는 `position:fixed` 인데 **띠 높이 + 28px 만큼 종이를 통째로 밀어** 내렸다.
      미리보기를 껐다 켤 때마다 종이가 뛰어 "왔다갔다 하는 것처럼" 보인다.
@@ -6191,7 +6191,6 @@ $("#b-preview").onclick   = () => {
   if (preview) requestAnimationFrame(() => applyScale());
   placePanel();
 };
-$("#prev-back").onclick  = () => $("#b-preview").click();
 $("#b-bulk").onclick     = () => openDlg($("#bulk"));
 /* 285번. #bulk-cancel 는 걷었다 — ✕ 가 닫는다 */
 $("#bulk-up").onclick    = () => { $("#bulk").close(); bulkPrice(+Math.abs(+$("#bulk-amt").value || 0)); };
@@ -6329,6 +6328,7 @@ function readLogo(file){
 let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt = null;   // 273번. stPreset — 정하기 창의 추천 조합   // 268번. stAlt — 반대 모양(고르기용)
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
+  $("#st-other").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; $("#st-setup-h").textContent = "빈 메뉴판 만들기"; stOther = false; stFromPhoto = false;   // 288번
   $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = "";
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
@@ -6377,9 +6377,13 @@ $("#st-blank").onclick = () => {
   $("#st-shop").value = ""; $("#st-top").value = "";
   $("#start").classList.remove("wide");   // 280번. 확인 화면에서 넘어오면 창 폭을 되돌린다
   $("#st-choose").hidden = true; $("#st-setup").hidden = false;
+  stFromPhoto = false; $("#st-setup-h").textContent = "빈 메뉴판 만들기"; $("#st-pg3").hidden = true;   // 288번. 사진 길이면 아래 [다음]이 바꾼다
   stSwatches(); stSync(); $("#start").scrollTop = 0; footShade($("#start")); $("#st-shop").focus({ preventScroll:true });
 };
-$("#st-back").onclick = () => { $("#st-setup").hidden = true; $("#st-choose").hidden = false; $("#start").scrollTop = 0; };
+$("#st-back").onclick = () => { $("#st-setup").hidden = true;
+  if (stFromPhoto){ $("#st-check").hidden = false; $("#start").classList.add("wide"); }   // 288번. 사진 길에서는 ← 가 읽은 메뉴 확인으로(메뉴를 잃지 않는다)
+  else $("#st-choose").hidden = false;
+  $("#start").scrollTop = 0; };
 $("#st-close").onclick = () => $("#start").close();
 $("#st-shop").addEventListener("input", stSync);
 $("#st-top").addEventListener("input", stSync);   // 267번. 상호명을 따라 쓰지 않는다 — 두 칸이 같은 칸처럼 보였다
@@ -6548,7 +6552,7 @@ function parseMenuText(txt){
   return secs.filter(s => s.items.length);
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
-let stPic = null, stParsed = null, stWay = "app";
+let stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false;   // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img){
   const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
   c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
@@ -6561,16 +6565,20 @@ function takePic(file){
   fr.readAsDataURL(file);
 }
 function stReadSync(){
+  const showOther = stOther || !readOn || !navigator.onLine;   // 288번. 바로 읽기가 되는 동안은 한 길만
+  $("#st-other").hidden = !showOther; if (!showOther) stWay = "gem";
   $("#st-way").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.w === stWay));
   $("#st-gem").hidden = stWay !== "gem"; $("#st-app").hidden = stWay !== "app";
   $("#st-gemgo").hidden = stWay !== "gem"; $("#st-appgo").hidden = stWay !== "app";   // 280번. 읽기 단추를 바닥 줄로 옮겼다
   $("#st-appgo").disabled = !$("#st-ans").value.trim();   // 284번. 붙여 넣은 답이 없으면 막는다(막힌 모양은 흐리게)
+  $("#st-pic small").textContent = stWay === "app" ? "다음 화면에서 사진과 나란히 비교할 때 씁니다 · 안 올려도 됩니다" : "메뉴판 사진을 누르거나 끌어다 놓으세요";   // 288번. 다른 앱 길에서는 사진이 비교용이다
   $("#st-pic .st-dtx").textContent = stPic ? "사진 바꾸기" : "이미지 선택";   // 281번. 올린 뒤에는 작은 단추로(.has)
   $(".st-picrow").classList.toggle("has", !!stPic);
   if (stPic && document.activeElement === $("#st-pic")) $("#st-pic").blur();   // 286번. 파일 창을 닫고 돌아온 초점이 [바꾸기]에 테를 세웠다
   const off = !navigator.onLine;
   $("#st-gemgo").disabled = off || !stPic || !readOn;   // 278번. 꺼져 있으면 흐리게
   $("#st-way").querySelector('[data-w="gem"]').disabled = !readOn;
+  if (!readOn || off) $("#st-gemmsg").classList.add("err");   // 288번. 끄는 것은 [읽기]를 다시 누를 때 — 여기서 끄면 방금 난 오류의 색이 지워진다
   if (!readOn) $("#st-gemmsg").textContent = READ_OFF_MSG;
   else if (off) $("#st-gemmsg").textContent = "인터넷에 연결돼 있지 않아 여기서 바로 읽을 수 없습니다. [다른 AI 앱에서]를 쓰거나 연결한 뒤 다시 누르세요.";
   else if (!stPic) $("#st-gemmsg").textContent = "";   // 286번. 흐린 [읽기]와 같은 말을 두 번 했다
@@ -6581,7 +6589,7 @@ function stReadSync(){
 const READ_API = "https://menupan-jin.vercel.app/api/read";   // 279번. 배포 주소(버셀에서 정한 이름)   // 배포 주소가 바뀌면 여기와 api/read.js 의 ALLOWED_ORIGINS 를 같이
 /* 278번. 사진 읽기 스위치 — 버셀 환경 변수 READ_ENABLED. 사진 창을 열 때 한 번 묻고(3초까지), 꺼져 있으면 [제미나이로 바로]를 흐리게.
    못 물으면(인터넷 · 서버 문제) 켜진 것으로 두고 누를 때 오류로 안내한다 */
-const READ_OFF_MSG = "지금은 사진 바로 읽기를 쉬고 있습니다. [다른 AI 앱에서]를 써 주세요.";
+const READ_OFF_MSG = "지금은 여기서 바로 읽기를 쉬고 있습니다. 아래 [다른 AI 앱에서]를 써 주세요.";   // 288번. 그 단추가 바로 아래에 나온다
 let readOn = true;
 async function readStatus(){
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 3000);
@@ -6651,7 +6659,7 @@ function splitCols(secs){   // 분류를 두 단에 나눈다 — 줄 수가 고
   return [L.length ? L : [{ name:"", items:[{ name:"", price:"" }] }], R.length ? R : [{ name:"", items:[{ name:"", price:"" }] }]];
 }
 $("#st-photo").onclick = () => {
-  stPic = null; stParsed = null; stWay = "gem";   // 276번. 키가 필요 없어 제미나이가 기본
+  stPic = null; stParsed = null; stWay = "gem"; stOther = false;   // 288번   // 276번. 키가 필요 없어 제미나이가 기본
   $("#st-ans").value = ""; $("#st-appmsg").textContent = "";
   const im = $("#st-picimg"); im.removeAttribute("src"); im.hidden = true;
   $("#st-choose").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; footShade($("#start"));
@@ -6664,9 +6672,9 @@ addEventListener("online", () => { if (!$("#st-read").hidden) stReadSync(); }); 
 $("#st-gemgo").onclick = async () => {
   const msg = $("#st-gemmsg");
   if (!stPic){ msg.textContent = "먼저 메뉴판 사진을 올려 주세요."; return; }
-  const b = $("#st-gemgo"); b.disabled = true; msg.textContent = "읽는 중입니다… (10초쯤 걸릴 수 있습니다)";
+  const b = $("#st-gemgo"); b.disabled = true; msg.classList.remove("err"); msg.textContent = "읽는 중입니다… (10초쯤 걸릴 수 있습니다)";
   try { const t = await geminiRead(stPic); msg.textContent = ""; toCheck(t, msg); }
-  catch(e){ msg.textContent = e.message; }
+  catch(e){ msg.textContent = e.message; stOther = true; msg.classList.add("err"); }   // 288번. 한 번 실패하면 다른 앱 길을 꺼내 준다
   finally { b.disabled = false; stReadSync(); }
 };
 $("#st-copy").onclick = async () => {
@@ -6682,13 +6690,14 @@ $("#st-check-back").onclick = () => { $("#start").classList.remove("wide"); $("#
 $("#st-check-go").onclick = () => {
   const secs = readCheck(); if (!secs.length){ toast("메뉴 이름이 한 줄도 없습니다", null); return; }
   stParsed = secs; const keep = stParsed;
-  $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
+  $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;
+  stFromPhoto = true; $("#st-setup-h").textContent = "이름과 모양 정하기"; $("#st-pg3").hidden = false;   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
 };
 
 /* ── 273번. 추천 조합(프리셋) — 이미 있는 손잡이 값의 묶음. 누르면 한 번 맞추고 끝난다(저장되는 설정이 아니다 — 규칙 H · 89번).
    글자 크기 · 내용 · 맨 위(글자 / 로고)는 건드리지 않는다 — 채운 메뉴가 바로 넘치지 않게(크기는 사장님 몫). 값을 늘리면 t52 가 이름 · 값을 본다 */
 const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타일에서는 「내 조합」으로 보인다(hidden: 추천 조합 목록에는 안 나온다)
-  basic:  { name:"내 조합",     hidden:true, font:"gothic",   bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴)
+  basic:  { name:"내 조합",     hidden:true, font:"gothic",   bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"left",   leader:"dots", noren:"plain", art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴). 289번. 정말 기본 모양 — 흰 종이 · 검은 글자 · 민무늬 · 상단 띠 없음(사용자)
   hansik: { name:"한식 식당",   font:"serif",    bold:false, theme:"pat",   paper:"hanji",   sec:"band", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"추천" },
   cafe:   { name:"카페",        font:"gothica1", bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"none", seal:"none", mark:"✿" },
   bunsik: { name:"분식",        font:"round",    bold:true,  theme:"chili", paper:"gingham", sec:"pill", align:"left",   leader:"none", noren:"arch",  art:"none", seal:"none", mark:"best" },
@@ -6721,20 +6730,23 @@ function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)
 function presetLook(k){ const S = JSON.parse(JSON.stringify(SETTINGS)), M = JSON.parse(JSON.stringify(MENU)); applyPresetTo(S, M, k); return lookOf(S); }
 function applyLookTo(S, L){ LOOK_KEYS.forEach(k => { if (L[k] === undefined) delete S[k]; else S[k] = JSON.parse(JSON.stringify(L[k])); });
   (S.pages || []).forEach((p, i) => { const q = L.pages[i] || L.pages[0] || {}; PAGE_LOOK.forEach(k => { if (q[k] === undefined) delete p[k]; else p[k] = q[k]; }); }); }
-/* 286번. 내 조합을 여러 칸으로(사용자: "추천 조합을 고르고 살짝 고친 뒤 다시 내 조합 선택이 안 된다" — 285번은 고친 추천 조합이 내 조합을 덮어썼다).
-   · 추천 조합을 입고 모양을 고치면 → 새 칸이 생긴다(넷까지 — 넘으면 가장 오래된 칸부터). 내 조합 칸을 입고 고치면 → 그 칸이 고쳐진다
-   · **모양 값만 본다** — 메뉴 이름 · 가격 같은 글자는 고쳐도 칸이 안 생긴다(lookOf 는 모양 값만 담는다. 사용자: "텍스트만 입력했을 때는 고쳐 썼다고 판단하면 안 된다")
+/* 289번. 내 조합은 한 칸(사용자: "내 조합 1 · 2 는 갑자기 뭐야?" — 286번의 여러 칸은 차이가 안 보였다). 규칙(사용자):
+   · 추천 조합을 입힌 뒤 **꾸미기의 모양 값**을 바꾸면 그 모양이 「내 조합」이 된다 — 앞의 내 조합을 덮는다(되돌리기로 돌아간다)
+   · 종이 안의 글자만 고치면 추천 조합이 그대로 켜져 있다(lookOf 는 모양 값만 담는다 — 286번 그대로)
+   · 빈 메뉴판은 「내 조합」(= 기본 모양 PRESETS.basic)으로 시작한다
    · 지금 입은 것은 SETTINGS.lookBase("p:카페" · "m:0"). 열쇠는 빈 병 목록보다 앞에 적는다(저장 왕복 열쇠 순서 — t14, 284번) */
 function setKey(k, v){ const had = "bottleMore" in SETTINGS, bm = SETTINGS.bottleMore; if (had) delete SETTINGS.bottleMore; SETTINGS[k] = v; if (had) SETTINGS.bottleMore = bm; }
-function lookSlots(){ if (!Array.isArray(SETTINGS.myLooks)){ const a = SETTINGS.myLook ? [SETTINGS.myLook] : []; delete SETTINGS.myLook; setKey("myLooks", a); } return SETTINGS.myLooks; }
+function lookSlots(){
+  if (!Array.isArray(SETTINGS.myLooks)){ const a = SETTINGS.myLook ? [SETTINGS.myLook] : []; delete SETTINGS.myLook; setKey("myLooks", a); }
+  const S = SETTINGS.myLooks;
+  if (S.length > 1){ const b = SETTINGS.lookBase || "", i = b.startsWith("m:") && S[+b.slice(2)] ? +b.slice(2) : S.length - 1; S.splice(0, S.length, S[i]); if (b.startsWith("m:")) setKey("lookBase", "m:0"); }   // 286번 파일(여러 칸)은 입고 있던 칸 · 없으면 마지막 칸 하나만
+  return S;
+}
 function visPresets(){ return Object.keys(PRESETS).filter(k => !PRESETS[k].hidden); }
 function trackLook(){
   const now = lookOf(SETTINGS), S = lookSlots();
   const p = visPresets().find(k => sameLook(now, presetLook(k))); if (p){ if (SETTINGS.lookBase !== "p:" + p) setKey("lookBase", "p:" + p); return; }
-  const i = S.findIndex(L => sameLook(now, L)); if (i >= 0){ if (SETTINGS.lookBase !== "m:" + i) setKey("lookBase", "m:" + i); return; }
-  const b = SETTINGS.lookBase || "";
-  if (b.startsWith("m:") && S[+b.slice(2)]){ S[+b.slice(2)] = now; return; }   // 내 조합 칸을 고치는 중
-  S.push(now); if (S.length > 4) S.shift(); setKey("lookBase", "m:" + (S.length - 1));   // 추천 조합(또는 처음 모양)을 고쳐 씀 → 새 칸
+  S[0] = now; if (SETTINGS.lookBase !== "m:0") setKey("lookBase", "m:0");   // 289번. 어느 추천 조합과도 다르면 그것이 내 조합 — 한 칸을 덮는다
 }
 function lookTile(key, name, theme, on, del){
   const b = el("button", "pl-tile" + (on ? " on" : "")); b.type = "button"; b.dataset.p = key; b.title = name; b.setAttribute("aria-pressed", on ? "true" : "false");
@@ -6749,8 +6761,7 @@ function presetTiles(){
   trackLook();
   const S = lookSlots(), base = SETTINGS.lookBase || "";
   mm.innerHTML = ""; pm.innerHTML = "";
-  S.forEach((L, i) => mm.append(lookTile("m" + i, S.length > 1 ? "내 조합 " + (i + 1) : "내 조합", L.theme, base === "m:" + i,
-    base === "m:" + i ? null : () => { S.splice(i, 1); const j = base.startsWith("m:") ? +base.slice(2) : -1; if (j > i) setKey("lookBase", "m:" + (j - 1)); presetTiles(); touch(); })));
+  S.forEach((L, i) => mm.append(lookTile("m" + i, "내 조합", L.theme, base === "m:" + i)));   // 289번. 한 칸 — 지우기(✕) 없음
   visPresets().forEach(k => pm.append(lookTile(k, PRESETS[k].name, PRESETS[k].theme, base === "p:" + k)));
   mm.querySelectorAll(".pl-tile").forEach(b => b.onclick = () => pickLook("m:" + b.dataset.p.slice(1)));
   pm.querySelectorAll(".pl-tile").forEach(b => b.onclick = () => pickLook("p:" + b.dataset.p));
@@ -6761,7 +6772,7 @@ function pickLook(key){
   else applyPresetTo(SETTINGS, MENU, key.slice(2));
   setKey("lookBase", key);
   syncControls(); applyLook(); render(); applyScale(); touch();
-  const nm = key.startsWith("m:") ? (lookSlots().length > 1 ? "내 조합 " + (+key.slice(2) + 1) : "내 조합") : PRESETS[key.slice(2)].name;
+  const nm = key.startsWith("m:") ? "내 조합" : PRESETS[key.slice(2)].name;
   toast("‘" + nm + "’으로 바꿨습니다", () => stepBack());
 }
 
@@ -6795,9 +6806,9 @@ const GUIDE = [
   { h:"꾸미기 창", p:"글꼴 · 색 · 상단 모양 · 그림 · 도장을 고릅니다.",
     dl:[[BTN("전체"), "파일 전체에"], [BTN("장별"), "고른 장에만"]],
     prep:() => { if ($("#panel").hidden) $("#b-style").click(); }, at:() => $("#panel") },
-  { h: ON_WEB ? "저장은 알아서 됩니다" : "다 고쳤으면 파일로 저장",   // 283번. [파일로 저장]은 [파일 ▾] 안 — 가이드는 [파일 ▾]를 짚는다   // 277번. 인터넷 주소는 자동 저장 — 컴퓨터 파일은 전처럼
-    p: ON_WEB ? "고칠 때마다 이 브라우저에 자동 저장됩니다(위쪽 막대의 ✓ 자동 저장됨). " + BTN("파일 ▾") + " → [파일로 저장]은 파일로 받아 두는 것입니다.<small>백업하거나 다른 컴퓨터로 옮길 때 씁니다</small>"
-              : BTN("파일 ▾") + " → [파일로 저장]을 누르면 지금 모습 그대로 새 파일이 내려받아집니다.<small>다음부터는 그 파일을 여세요</small>", at:() => $("#b-file") }
+  { h:"다 되면 인쇄",   // 288번. 가이드의 끝은 목표(뽑아 쓰기)로 — 실제로 막힌 곳이 인쇄 창이었다(사용자 가게 · 9/7 좌우 잘림 · 9/18 위 잘림). 저장은 한 줄로
+    p: BTN("인쇄") + "를 누르면 인쇄 창에서 맞출 셋(용지 A4 · 여백 없음 · 배경 그래픽)을 그림과 함께 먼저 알려 줍니다."
+       + (ON_WEB ? "<small>저장은 고칠 때마다 알아서 됩니다(위쪽의 ✓ 자동 저장됨)</small>" : "<small>고친 것은 [파일 ▾] → [파일로 저장]으로 남겨 두세요</small>"), at:() => $("#b-print") }
 ];
 let gi = -1, gdPrev = null;
 function guideStart(){ gdPrev = document.activeElement; if (!editing) toggleEdit(); gi = 0; guideShow(); }   // 270번. 시작 전 커서 자리를 기억한다
