@@ -2249,6 +2249,28 @@ dialog button:not(:disabled):active,.gd-tip button:active,.rowtools button:not(:
 /* ══ 293번. 올린 뒤의 사진 상자 — 상자 전체가 누르기 · 끌어다 놓기 자리(손 모양 · 올리면 테가 짙어진다) */
 dialog .st-picrow.has{cursor:pointer}
 dialog .st-picrow.has:hover,dialog .st-picrow.has.over{border-color:#6b5438;background:#fffaf0}
+
+/* ══ 294번. 조합 × 정렬마다 편집 화면을 재서 고친 것(사용자: "각 조합별로 점선이나 안내 · 버튼 위치 · 정렬 안 맞는 곳이 많다")
+   ① 분류 도구(◀▶ · 분류 형식)는 제목 바로 뒤(98번)인데, 가운데 · 오른쪽 정렬에서는 뒤에 자리가 없어 칸 밖으로 27 ~ 37 · 165px 나갔다(모든 조합 — 재 봤다).
+      가운데 · 오른쪽 정렬에서는 **제목 바로 위, 제목과 같은 쪽 정렬로**. 왼쪽 정렬은 그대로(뒤에 자리가 있다 — 0px). 제목에 딱 붙어 있어 마우스가 옮겨 가도 끊기지 않는다(68번)
+   ② ＋ 묶음이 다음 분류 제목을 덮을 때 뒤 글자가 비쳤다 — 층을 가르려고 둔 반투명(.grp .85 · .pg .72)과 단추 사이 틈. 떠 있는 도구는 불투명(161번) — 묶음 전체에 바탕 · 그림자
+   ③ 편집 점선(마우스를 올린 칸 · 빈 칸 · 빈 용량 상자)이 검은색 고정이라 어두운 종이(호프 · 치킨)에서 안 보였다 — 글자색에서 섞는다 */
+.editing .sheet.sa-center .sec-head .rowtools,.editing .sheet.sa-right .sec-head .rowtools{top:auto;bottom:100%;padding:0 0 3px 0}
+.editing .sheet.sa-center .sec-head .rowtools{left:50%;transform:translateX(-50%)}
+.editing .sheet.sa-right .sec-head .rowtools{left:auto;right:0;transform:none}
+.editing .addrow{background:var(--ed-bg);padding:3px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.editing .addrow .addbtn.grp,.editing .addrow .addbtn.pg{opacity:1}
+[contenteditable="true"]:hover{outline-color:color-mix(in srgb, var(--ink) 38%, transparent)}
+.editing [contenteditable="true"]:empty{outline-color:color-mix(in srgb, var(--ink) 48%, transparent)}
+.editing:not(.preview) .row:not(.wine) .vol:empty::before{outline-color:color-mix(in srgb, var(--ink) 48%, transparent)}
+/* ④ 사진을 올린 뒤 — 사진을 크게 가운데, [사진 바꾸기]는 바로 아래 가운데(사진과 한 세로선). 293번은 단추가 어느 선에도 안 맞고 사진이 가장 작았다 */
+dialog .st-picrow.has{flex-direction:column;align-items:center;gap:10px;padding:14px}
+dialog .st-picrow.has .st-picimg{height:220px;max-width:100%}
+dialog .st-picrow.has button.st-drop{margin:0}
+/* ⑤ 알약 제목은 그림자로 양옆 .72em 을 더 칠한다 — 도구의 틈(.45em)보다 넓어 ◀ 가 알약에 겹쳤다(재 봤다) */
+.editing .sheet.sh-pill:not(.sa-center):not(.sa-right) .sec-head .rowtools{padding-left:.95em}
+/* ⑥ 오른쪽 정렬에서는 제목도 분류 메모(오른쪽 아래, 179번)도 오른쪽이라 겹쳤다 — 메모를 왼쪽으로 */
+.sheet.sa-right .sec-head .ml{right:auto;left:0}
 </style>
 </head>
 <body>
