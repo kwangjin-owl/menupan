@@ -15,7 +15,10 @@ def pixels(img):
 D = os.path.join(os.getcwd(), '_check') + '/'
 os.makedirs(D + 'res', exist_ok=True)
 NOREN = ["full","flat","wave","scallop","ridge","saw","arch","ribbon","twin","fade","frame","line","plain"]
-FONTS = ['gungseo','myeongjo','gothic','round','hand','batang','serif','plex']
+FONTS = ['gungseo','myeongjo','gothic','round','hand','batang','serif','plex']   # 272번. 파일의 FONTS 를 못 읽을 때만 쓴다 — 도는 목록은 파일에서 읽는다(font_list)
+def font_list(c):
+    try: return c.js("()=>Object.keys(FONTS)")   # 글꼴을 늘려도 검사 파일을 안 고쳐도 되게(272번 — 고정 목록이라 새 글꼴 셋을 안 돌렸다)
+    except Exception: return FONTS
 SEALS = ['none','tri','mtn','word','star','rtri','rword','rmtn','sstar','ring']
 SHAPES = ['bordeaux','burgundy','champagne','stout','flute','port','dessert','madeira','provence']
 KINDS = ['red','white','sparkling','rose','orange']
@@ -53,7 +56,7 @@ def t02(b, f):
     c = Ctx(b, f)
     for o in ('portrait', 'landscape'):
         fs = []
-        for fo in FONTS:
+        for fo in font_list(c):
             for se in SEALS:
                 c.pg.goto(url(f))
                 fs.append([fo, se, c.js("([o,fo,se])=>{SETTINGS.orient=o; SETTINGS.font=fo; MENU.sheets.forEach((_,i)=>{P(i).seal=se; P(i).autofit=true;}); syncControls(); applyLook(); render(); fitNow(); applyScale(); return [...MENU.sheets.keys()].map(i=>overA4(i))}", [o, fo, se])])
@@ -641,7 +644,7 @@ def t36(b, f):
 def t37(b, f):
     c = Ctx(b, f, 1600, 1300); res = []; worst = 0
     for o in ('portrait', 'landscape'):
-        for fo in FONTS:
+        for fo in font_list(c):
             for sh in SHAPES:
                 c.js("""([o,fo,sh,K])=>{SETTINGS.orient=o; SETTINGS.font=fo; SETTINGS.bottles={}; K.forEach(k=>SETTINGS.bottles[k]={shape:sh,color:'ink'});
                    MENU.sheets.forEach((_,i)=>{P(i).art='none'; P(i).autofit=true;}); syncControls(); applyLook(); render(); fitNow(); applyScale();}""", [o, fo, sh, KINDS])
@@ -683,7 +686,7 @@ def t39(b, f):
     src = open(D + f, encoding='utf-8').read()
     m = re.search(r'(\nconst SETTINGS = )(\{.*?\})(;\n)', src, re.S)
     S = json.loads(m.group(2))
-    S.update({'font': 'nope', 'theme': 42, 'mark': 'X', 'pageno': 'zzz', 'secAlign': 'diag', 'wineAlign': 5})
+    S.update({'font': 'nope', 'theme': 42, 'mark': 'toolongmark', 'pageno': 'zzz', 'secAlign': 'diag', 'wineAlign': 5})   # 274번. 'X' 는 이제 올바른 글자 표시(영문 1자) — 7자 넘는 글자로 시험
     for k, pg in enumerate(S.get('pages', [])):
         pg.update({'noren': 'bogus', 'art': 'dragon', 'seal': 7,
                    'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4]})
@@ -977,6 +980,259 @@ def t45(b, f):
         out['err_' + o] = c.errs; c.close()
     return out
 
+# ───────────────────────── 46. 넘침 판정 · 바닥 고정 · 위 여백(244 ~ 256번). 265번에서 넣었다 — 그전에는 흉내 스크립트로만 봤다(7장)
+#   흉내 조건은 부록 A 각 항목의 "흉내" 줄 그대로. 벌린 틈 · 빈 자리를 키운 뒤에는 applyScale() 을 부르지 않고 overWhy() 만 부른다 —
+#   다시 벌리면(spread) 키운 것이 흡수돼 흉내가 사라진다. 구성마다 새로 연다(126번)
+T46_SEC = "(n)=>{const s=document.querySelectorAll('.sheet')[0]; const col=s.querySelectorAll('.body .col')[1]; const sec=[...col.children].pop(); sec.style.paddingBottom=n+'px'; return overWhy(0)}"
+def t46(b, f):
+    out = {}
+    c = Ctx(b, f)
+    gap0 = c.js("()=>{const s=document.querySelector('.sheet'),o=s.getBoundingClientRect(); return +(o.bottom-s.querySelector('.foot').getBoundingClientRect().bottom).toFixed(1)}")
+    c.js("()=>{for(let i=0;i<8;i++) MENU.sheets[0][0][0].items.push({name:'넘침 시험 '+i, price:9000}); render(); applyScale();}")
+    gap1 = c.js("()=>{const s=document.querySelector('.sheet'),o=s.getBoundingClientRect(); return +(o.bottom-s.querySelector('.foot').getBoundingClientRect().bottom).toFixed(1)}")
+    out['244_foot_fixed'] = [gap0, gap1, c.js("()=>overWhy(0)")]            # 바닥은 그대로 · 진짜 넘침은 tall
+    out['err'] = list(c.errs); c.close()
+    c = Ctx(b, f)                                                             # 245 — 와인 칸 아래 3px 안 보이는 요소는 넘침이 아니다
+    out['245_invisible'] = c.js("()=>{const s=document.querySelectorAll('.sheet')[1]; const sec=[...s.querySelectorAll('.body .col')].map(x=>[...x.children].pop()).pop(); const d=document.createElement('div'); d.style.cssText='height:3px;visibility:hidden'; sec.append(d); return overWhy(1)}")
+    out['err'] += c.errs; c.close()
+    for n in (10, 30, 45, 60):                                                # 248 · 251 · 252 — 빈 자리로 키운 것은 넘침이 아니다
+        c = Ctx(b, f); out[f'sec_pad_{n}'] = c.js(T46_SEC, n); out['err'] += c.errs; c.close()
+    for seal in ('on', 'off'):                                                # 254 · 255 — 빈 분류의 밑줄이 도장 윗변을 20px 지나면: 도장 켬 = 넘침, 끔 = 아님
+        c = Ctx(b, f)
+        out['254_line_' + seal] = c.js("""(off)=>{ if(off){ P(0).seal='none'; }
+          MENU.sheets[0][1].push({name:'', items:[]}); render();
+          const s=document.querySelectorAll('.sheet')[0]; const seal=s.querySelector('.seal'); const col=s.querySelectorAll('.body .col')[1]; const sec=[...col.children].pop();
+          const sealTop = off ? (s.getBoundingClientRect().bottom - 40 - 52) : seal.getBoundingClientRect().top;
+          const line = sec.getBoundingClientRect().bottom; sec.style.marginTop = (parseFloat(getComputedStyle(sec).marginTop) + (sealTop + 20 - line)) + 'px';
+          return [overWhy(0), Math.round(sec.getBoundingClientRect().bottom - sealTop)] }""", seal == 'off')
+        out['err'] += c.errs; c.close()
+    top = {}
+    for o in ('portrait', 'landscape'):                                       # 256 — 로고 윗변 = 위 11mm
+        c = Ctx(b, f); c.js("(o)=>{SETTINGS.orient=o; syncControls(); applyLook(); render(); applyScale();}", o)
+        top[o] = c.js("()=>{const s=document.querySelector('.sheet'),l=s.querySelector('.noren .logo'); return +((l.getBoundingClientRect().top-s.getBoundingClientRect().top)/96*25.4).toFixed(2)}")
+        out['err'] += c.errs; c.close()
+    out['256_logo_top_mm'] = top
+    c = Ctx(b, f)                                                             # 246 — 글꼴이 도착할 때마다(loadingdone) 다시 잰다
+    out['246_loadingdone'] = c.js("async()=>{let n=0; const o=applyScale; applyScale=function(){n++; return o.apply(this, arguments)}; document.fonts.dispatchEvent(new Event('loadingdone')); await new Promise(r=>setTimeout(r,300)); applyScale=o; return n}")
+    out['err'] += c.errs; c.close()
+    return out
+
+# ───────────────────────── 47. 첫 화면 · 빈 메뉴판(264 · 265번). 검사 파일에 설정 한 줄("startScreen": true)을 넣은 사본을 연다
+def t47(b, f):
+    from PIL import Image, ImageDraw
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'start_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    def mk(im): buf = io.BytesIO(); im.save(buf, 'PNG'); return {'name': 'logo.png', 'mimeType': 'image/png', 'buffer': buf.getvalue()}
+    im = Image.new('RGB', (400, 300), 'white'); ImageDraw.Draw(im).ellipse((120, 60, 280, 240), fill='black'); png = mk(im)          # 바탕이 분명한 로고
+    am = Image.new('RGB', (400, 300), 'white'); dd = ImageDraw.Draw(am); dd.rectangle((200, 0, 400, 300), fill='black'); dd.ellipse((140, 70, 260, 230), fill=(128, 128, 128)); png_amb = mk(am)   # 가장자리가 반반 — 애매
+    out = {}
+    c = Ctx(b, 'start_' + f, dl=True); pg = c.pg
+    out['open_first'] = c.js("()=>[document.querySelector('#start').open, getComputedStyle(document.querySelector('#st-closerow')).display, document.querySelector('#st-photo').disabled]")
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(150); out['esc_stays'] = c.js("()=>document.querySelector('#start').open")
+    pg.mouse.click(8, 8); pg.wait_for_timeout(150); out['backdrop_stays'] = c.js("()=>document.querySelector('#start').open")   # 266번 — 바깥 누르기
+    pg.click('#st-blank'); pg.fill('#st-shop', '시험 가게'); pg.wait_for_timeout(100)
+    out['top_follows'] = [pg.input_value('#st-top'), pg.inner_text('#st-prev'), '시험 가게-메뉴-' in pg.inner_text('#st-fname')]
+    pg.click('#st-seg button[data-m="img"]')
+    def up(f):   # 268번 — 점선 상자를 실제로 눌러 파일 창에 넣는다(앱의 받는 곳을 그대로 거친다. 흉내 낸 받는 곳이 낡아 헛실패가 났다)
+        with pg.expect_file_chooser() as fc: pg.click('#st-up')
+        fc.value.set_files(f); pg.wait_for_timeout(600)
+    up(png)
+    m1 = c.js("()=>document.querySelector('#st-prev .st-mask')?.style.getPropertyValue('--src').length || 0")
+    t_clear = c.js("()=>document.querySelectorAll('#st-tiles .st-exb').length")   # 268번 — 분명한 로고에는 두 모양을 안 띄운다
+    up(png_amb)
+    t_amb = c.js("()=>document.querySelectorAll('#st-tiles .st-exb').length"); m1 = c.js("()=>document.querySelector('#st-prev .st-mask')?.style.getPropertyValue('--src').length || 0")
+    pg.click('#st-tiles .st-exb.no'); pg.wait_for_timeout(400)   # 애매할 때만 묻는다 — 알프스 예시 ✗ 를 누른다
+    m2 = c.js("()=>document.querySelector('#st-prev .st-mask')?.style.getPropertyValue('--src').length || 0")
+    out['logo_mask_invert'] = [m1 > 0, m1 != m2, t_clear == 0, t_amb == 2]
+    pg.click('#st-go'); pg.wait_for_timeout(700)
+    out['guide_up'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)   # 269번부터 시작하면 가이드가 뜬다 — 닫고 간다
+    out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:P(0).seal, art:P(0).art, logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
+    with pg.expect_download() as d: pg.click('#b-save')
+    out['save_name'] = d.value.suggested_filename; d.value.save_as(D + 'res/start_saved_' + f)
+    out['err'] = list(c.errs); c.close()
+    c = Ctx(b, 'res/start_saved_' + f); pg = c.pg
+    out['saved_opens_direct'] = not c.js("()=>document.querySelector('#start').open")
+    pg.click('#b-edit'); pg.wait_for_timeout(200); c.js("()=>document.querySelector('#b-start').scrollIntoView()"); pg.click('#b-start'); pg.wait_for_timeout(200)
+    out['reopen_close'] = c.js("()=>!document.querySelector('#st-closerow').hidden")
+    pg.click('#st-blank'); pg.wait_for_timeout(150); pg.mouse.click(8, 8); pg.wait_for_timeout(150)
+    out['setup_backdrop_stays'] = c.js("()=>document.querySelector('#start').open && !document.querySelector('#st-setup').hidden")   # 266번 — 다시 연 정하기 창도
+    pg.click('#st-back'); pg.wait_for_timeout(100)
+    pg.click('#st-alps'); pg.wait_for_timeout(500)
+    out['alps_no_guide'] = c.js("()=>!document.querySelector('.gd-tip')")   # 270번 — 가이드를 본 사람은 길을 다시 골라도 안 뜬다
+    out['alps'] = c.js("()=>[document.querySelectorAll('.sheet').length, MENU.brand.shop, !document.querySelector('#undo-btn').hidden]")
+    pg.click('#undo-btn'); pg.wait_for_timeout(400)
+    out['undo_back'] = c.js("()=>[MENU.brand.shop, document.querySelectorAll('.sheet').length]")
+    out['err'] += c.errs; c.close()
+    c = Ctx(b, 'start_' + f, dl=True); pg = c.pg                               # 265 — 상호명을 비우면 "메뉴판"
+    pg.click('#st-blank'); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    with pg.expect_download() as d: pg.click('#b-save')
+    out['noname'] = [c.js("()=>document.title"), d.value.suggested_filename]
+    out['err'] += c.errs; c.close()
+    return out
+
+# ───────────────────────── 48. 글자가 바뀌는 막대 단추의 폭(규칙 I · 267번). 263번이 "편집"↔"편집 끝" 폭을 망가뜨렸는데 t25(종이 튐)는 못 잡았다
+def t48(b, f):
+    c = Ctx(b, f); w = lambda: c.js("()=>[...document.querySelectorAll('.bar button')].map(e=>[e.id, +e.getBoundingClientRect().width.toFixed(1)])")
+    a = w(); c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); e = w()
+    h = c.js("()=>[[...document.querySelectorAll('#btpick button')].map(b=>Math.round(b.getBoundingClientRect().height)), [...document.querySelectorAll('.wfrow button')].map(b=>Math.round(b.getBoundingClientRect().height))]")   # 268번 — 병 단추 · ▲▼ 높이
+    c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); z = w()
+    out = {'idle': a, 'edit': e, 'back': z, 'heights': h, 'err': c.errs}; c.close(); return out
+
+# ───────────────────────── 49. 가이드(269번) — 첫 화면에서 길을 고른 직후에만 뜨고, 단계마다 짚는 것이 화면에 있고 보이는지
+def t49(b, f):
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'g_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    out = {'steps': []}
+    c = Ctx(b, f); c.pg.wait_for_timeout(600); out['plain_open'] = c.js("()=>document.querySelectorAll('.gd-tip').length"); c.close()
+    c = Ctx(b, 'g_' + f); pg = c.pg
+    pg.click('#st-blank'); pg.click('#st-go'); pg.wait_for_timeout(900)
+    for i in range(5):
+        out['steps'].append(c.js("""()=>{const h=document.querySelector('.gd-hole'),t=document.querySelector('.gd-tip'); if(!h||!t) return null;
+          const a=h.getBoundingClientRect(),q=t.getBoundingClientRect(); const see=[...document.querySelectorAll('.tohere .rowtools, .addhere > .addrow')].some(e=>getComputedStyle(e).visibility==='visible');
+          return {h:t.querySelector('h4').textContent, hole:[Math.round(a.width),Math.round(a.height)], cover:!(q.right<a.left||q.left>a.right||q.bottom<a.top||q.top>a.bottom), inview:q.left>=0&&q.right<=innerWidth&&q.top>=0&&q.bottom<=innerHeight, tools:see}}"""))
+        pg.click('.gd-tip button.tonal' if i < 4 else '.gd-tip button.fill'); pg.wait_for_timeout(300)
+    out['done'] = c.js("()=>[SETTINGS.guideDone === true, document.querySelectorAll('.gd-tip,.gd-hole,.gd-block').length]")
+    pg.click('#b-help'); pg.wait_for_timeout(200); pg.click('#help-guide'); pg.wait_for_timeout(500)
+    out['again'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    out['esc'] = c.js("()=>document.querySelectorAll('.gd-tip').length"); out['err'] = c.errs; c.close()
+    return out
+
+# ───────────────────────── 50. 되돌리기 · 다시 하기(271번) — 막대 단추의 흐림과 Ctrl+Z · Ctrl+Y
+def t50(b, f):
+    c = Ctx(b, f); pg = c.pg; pg.click('#b-edit'); pg.wait_for_timeout(300)
+    st = lambda: c.js("()=>[document.querySelector('#b-undo').disabled, document.querySelector('#b-redo').disabled, MENU.sheets[0][0][0].items.length]")
+    out = {'start': st()}
+    c.js("()=>{MENU.sheets[0][0][0].items.pop(); render(); touch();}"); out['edited'] = st()
+    pg.click('#b-undo'); pg.wait_for_timeout(250); out['undo'] = st()
+    pg.click('#b-redo'); pg.wait_for_timeout(250); out['redo'] = st()
+    pg.keyboard.press('Control+z'); pg.wait_for_timeout(250); out['ctrlz'] = st()
+    pg.keyboard.press('Control+y'); pg.wait_for_timeout(250); out['ctrly'] = st()
+    pg.keyboard.press('Control+z'); pg.wait_for_timeout(250); c.js("()=>{MENU.sheets[0][0][0].name='시험'; render(); touch();}"); out['newedit'] = st()
+    out['err'] = c.errs; c.close(); return out
+
+# ───────────────────────── 51. 모양만 바꾸는 손잡이(273번) — 값마다 종이 위 칸의 자리 · 크기가 기본과 0px. 이것이 통과하면 넘침 · 인쇄 검사를 조합마다 돌리지 않아도 된다
+RECT51 = """()=>[...document.querySelectorAll('.sheet section, .sheet .row, .sheet .sec-head, .sheet .foot, .sheet .noren')].map(e=>{const r=e.getBoundingClientRect(); return [Math.round(r.left*10)/10,Math.round(r.top*10)/10,Math.round(r.width*10)/10,Math.round(r.height*10)/10]})"""
+def t51(b, f):
+    c = Ctx(b, f); base = c.js(RECT51); out = {'n': len(base), 'diff': {}}
+    knobs = c.js("()=>({paper:[...document.querySelectorAll('#f-paper option')].map(o=>o.value), sec:[...document.querySelectorAll('#f-secstyle option')].map(o=>o.value), leader:[...document.querySelectorAll('#f-leader option')].map(o=>o.value), theme:Object.keys(THEMES)})")
+    for k, vals in knobs.items():
+        for v in vals:
+            c.js("([k,v])=>{ if(k==='paper') SETTINGS.paper=v; if(k==='sec') SETTINGS.secStyle=v; if(k==='leader'){ if(v==='none') SETTINGS.showDots=false; else { delete SETTINGS.showDots; SETTINGS.leader=v; } } if(k==='theme') SETTINGS.theme=v; applyLook(); render(); }", [k, v])
+            now = c.js(RECT51); d = max((abs(a - q) for x, y in zip(base, now) for a, q in zip(x, y)), default=0) if len(now) == len(base) else 999
+            out['diff'][k + '=' + v] = d
+            c.js("()=>{ delete SETTINGS.paper; delete SETTINGS.secStyle; delete SETTINGS.leader; delete SETTINGS.showDots; SETTINGS.theme='night'; applyLook(); render(); }")
+    out['err'] = c.errs; c.close(); return out
+
+# ───────────────────────── 52. 추천 조합(273번) — 꾸미기 창에서 맞추면 PRESETS 값이 걸리고, 글자 크기 · 내용 · 맨 위는 그대로, 되돌리기로 돌아온다
+def t52(b, f):
+    c = Ctx(b, f); pg = c.pg; pg.click('#b-edit'); pg.wait_for_timeout(300)
+    snap = "()=>JSON.stringify({sz:P(0).scale, top:MENU.brand.top||'', tm:SETTINGS.topMode||'', items:MENU.sheets.map(s=>s.map(col=>col.map(x=>(x.items||[]).length)))})"
+    before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
+    keys = c.js("()=>Object.keys(PRESETS)")
+    for k in keys:
+        pg.select_option('#f-preset', k); pg.wait_for_timeout(200)
+        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', document.querySelector('#f-preset').value==='']}", k)
+    out['same_size_content'] = c.js(snap) == before
+    for _ in keys: pg.keyboard.press('Control+z'); pg.wait_for_timeout(120)
+    out['undo_back'] = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})") == st
+    out['err'] = c.errs; c.close(); return out
+
+# ───────────────────────── 53. 글자 추천 표시(274번) — 가장 긴 표시를 모든 줄에 붙여도 줄 높이가 그대로, 각주의 보통 낱말은 안 바뀐다, 길이 제한
+def t53(b, f):
+    c = Ctx(b, f)
+    h0 = c.js("()=>[...document.querySelectorAll('.sheet .row')].map(r=>Math.round(r.getBoundingClientRect().height*10)/10)")
+    c.js("()=>{ MENU.feet[0].notes=['추천 메뉴는 매일 바뀝니다']; applyMark('추천'); applyMark('great'); MENU.sheets.forEach(sh=>sh.forEach(col=>col.forEach(sec=>(sec.items||[]).forEach(it=>{ if(it.name) it.pick=true; })))); render(); applyScale(); }")
+    h1 = c.js("()=>[...document.querySelectorAll('.sheet .row')].map(r=>Math.round(r.getBoundingClientRect().height*10)/10)")
+    out = {'rows': len(h0), 'grew': sum(1 for a, q in zip(h0, h1) if q > a + 0.5), 'pills': c.js("()=>document.querySelectorAll('.pick.tx').length"),
+           'note': c.js("()=>MENU.feet[0].notes[0]"), 'over': c.js("()=>[...Array(MENU.sheets.length).keys()].map(i=>overWhy(i))"),
+           'limit': c.js("()=>[markOk('강력추천'), markOk('강력추천요'), markOk('great!'), markOk('greatest')]"), 'err': c.errs}
+    out['over_match'] = c.js("""()=>[...document.querySelectorAll('.sheet')].every((sh,i)=>{ const lim=sh.getBoundingClientRect().bottom - parseFloat(getComputedStyle(sh).paddingBottom);
+        const real=[...sh.querySelectorAll('.row')].some(r=>r.getBoundingClientRect().bottom > lim + 1); return real === !!overWhy(i); })""")
+    c.close(); return out
+
+# ───────────────────────── 54. 사진으로 시작(275번) — 붙여 넣기 길과 제미나이 길(인터넷 대신 가짜 답). 요청 모양 · 키는 브라우저에만 · 확인 화면 · 노란 칸 · 시작 뒤 메뉴
+ANS54 = "[식사]\n단호박 크림 파스타 | 14000\n고사리 들깨 크림 파스타? | 14000\n오징어 페코리노 파스타 | 14,000원\n[안주]\n生 연어구이 | 10000\n국물바지락 | 11000?\n피망 | 시가\n[음료]\n콜라 · 사이다 | 3000"
+def t54(b, f):
+    from PIL import Image, ImageDraw
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    im = Image.new('RGB', (600, 800), 'white'); ImageDraw.Draw(im).rectangle((30, 30, 570, 770), outline='black', width=4)
+    buf = io.BytesIO(); im.save(buf, 'PNG'); png = {'name': 'menu.png', 'mimeType': 'image/png', 'buffer': buf.getvalue()}
+    out = {}
+    c = Ctx(b, 'p_' + f); pg = c.pg
+    pg.click('#st-photo'); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', ANS54); pg.click('#st-appgo'); pg.wait_for_timeout(250)
+    out['check'] = c.js("()=>[!document.querySelector('#st-check').hidden, document.querySelectorAll('#st-ctab input').length, document.querySelectorAll('#st-ctab input.un').length]")
+    pg.click('#st-check-go'); pg.wait_for_timeout(150); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
+    out['menu'] = c.js("()=>MENU.sheets[0].map(col=>col.map(s=>[s.name, s.items.map(i=>i.name+'='+i.price)]))")
+    out['err'] = list(c.errs); c.close()
+    c = Ctx(b, 'p_' + f); pg = c.pg; reqs = []
+    def ok_route(r):   # 276번 — 버셀 서버 함수(파일로 열었으니 배포 주소)를 가로챈다. 278번 — 켜져 있나 묻는 GET 은 켜짐으로
+        if r.request.method == 'GET': r.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
+        reqs.append({'url': r.request.url, 'body': r.request.post_data or '', 'hdr': dict(r.request.headers)})
+        r.fulfill(status=200, content_type='application/json', body=json.dumps({'text': ANS54, 'model': 'test'}))
+    pg.route('**/api/read', ok_route)
+    pg.click('#st-photo'); pg.click('#st-way button[data-w="gem"]')
+    with pg.expect_file_chooser() as fc: pg.click('#st-pic')
+    fc.value.set_files(png); pg.wait_for_timeout(500)
+    out['no_key_box'] = c.js("()=>!document.querySelector('#st-key')")
+    pg.click('#st-gemgo'); pg.wait_for_timeout(700)
+    q = reqs[0] if reqs else {'url': '', 'body': '', 'hdr': {}}
+    bd = json.loads(q['body'] or '{}')
+    out['gem'] = [q['url'].endswith('/api/read'), (bd.get('image') or '').startswith('data:image/jpeg;base64,'), set(bd) == {'image'}, not any(k.lower() == 'x-goog-api-key' for k in q['hdr']), c.js("()=>!document.querySelector('#st-check').hidden")]
+    pg.unroute('**/api/read')
+    pg.route('**/api/read', lambda r: r.fulfill(status=429, content_type='application/json', body='{"error":"limit","code":"limit"}'))
+    pg.click('#st-check-back'); pg.click('#st-gemgo'); pg.wait_for_timeout(500)
+    out['limit_msg'] = '한도' in c.js("()=>document.querySelector('#st-gemmsg').textContent")
+    out['err'] += c.errs; c.close()
+    c = Ctx(b, 'p_' + f); pg = c.pg   # 278번 — 서버에서 꺼 두면(READ_ENABLED=off) 사진 창을 열 때 알아채 흐리게
+    pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
+    pg.click('#st-photo'); pg.wait_for_timeout(500)
+    out['off'] = [c.js("()=>document.querySelector('#st-way [data-w=\"gem\"]').disabled"), c.js("()=>document.querySelector('#st-gemgo').disabled"), c.js("()=>stWay") == 'app', '쉬고' in c.js("()=>document.querySelector('#st-gemmsg').textContent")]
+    out['err'] += c.errs; c.close()
+    # 276번 — 메뉴판의 요청 글(READ_PROMPT)과 서버 함수의 요청 글(PROMPT)이 같은가. 서버 함수 파일을 찾으면 본다
+    here = os.path.dirname(os.path.abspath(__file__)); cand = [os.path.join(here, 'api', 'read.js'), os.path.join(here, '..', 'api', 'read.js')]
+    fn = next((p for p in cand if os.path.exists(p)), None); out['prompt_same'] = None
+    if fn:
+        def arr(t, head):
+            i = t.find(head); j = t.find('].join', i); return json.loads(t[i + len(head):j + 1]) if i >= 0 else None
+        out['prompt_same'] = arr(src, 'const READ_PROMPT = ') == arr(open(fn, encoding='utf-8').read(), 'const PROMPT = ')
+    return out
+
+# ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t55(b, f):
+    import threading, http.server, socketserver, functools
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'w_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    class Q(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *a): pass
+    srv = socketserver.TCPServer(('127.0.0.1', 0), functools.partial(Q, directory=D)); port = srv.server_address[1]
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    out = {}
+    try:
+        ctx = b.new_context(viewport={'width': 1400, 'height': 900}, accept_downloads=True); pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(f'http://127.0.0.1:{port}/w_{f}'); pg.wait_for_timeout(400)
+        out['first'] = [pg.evaluate("document.querySelector('#start').open"), pg.evaluate("localStorage.getItem('menupan-auto')") is None]
+        pg.click('#st-blank'); pg.click('#st-go'); pg.wait_for_timeout(800); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
+        pg.evaluate("()=>{MENU.sheets[0][0][0].name='자동 저장 시험'; render(); touch();}"); pg.wait_for_timeout(900)
+        out['saved'] = ['자동 저장됨' in pg.inner_text('#autost'), '자동 저장 시험' in (pg.evaluate("localStorage.getItem('menupan-auto')") or ''), not pg.evaluate("getComputedStyle(document.querySelector('#b-save')).backgroundColor").startswith('rgb(239')]
+        pg.reload(); pg.wait_for_timeout(600)
+        out['reopen'] = [not pg.evaluate("document.querySelector('#start').open"), pg.evaluate("MENU.sheets[0][0][0].name") == '자동 저장 시험', '지난번' in pg.evaluate("document.querySelector('#undo')?.innerText||''")]
+        with pg.expect_download() as d: pg.click('#b-save')
+        sv = open(d.value.path(), encoding='utf-8').read(); mm = re.search(r'id="autost"[^>]*>([^<]*)</span>', sv)
+        out['file_clean'] = [' web' not in sv.split('<body')[1][:80], bool(mm) and mm.group(1).strip() == '']   # 칸 안의 글자만 — 옆 주석을 세지 않는다
+        pg.set_input_files('#st-hfile', D + f); pg.wait_for_timeout(1200)
+        imp = [pg.evaluate("MENU.sheets.length"), not pg.evaluate("document.querySelector('#start').open"), '불러왔습니다' in pg.evaluate("document.querySelector('#undo')?.innerText||''")]
+        pg.click('#undo-btn'); pg.wait_for_timeout(1200)
+        out['import'] = imp + [pg.evaluate("MENU.sheets[0][0][0].name") == '자동 저장 시험']
+        out['err'] = errs; ctx.close()
+        c = Ctx(b, 'w_' + f); c.pg.click('#st-blank'); c.pg.click('#st-go'); c.pg.wait_for_timeout(700); c.pg.keyboard.press('Escape')
+        c.js("()=>{MENU.sheets[0][0][0].name='파일 쪽'; render(); touch();}"); c.pg.wait_for_timeout(800)
+        out['file'] = [c.pg.inner_text('#autost') == '자동 저장 안 됨', c.js("()=>localStorage.getItem('menupan-auto')") is None, c.js("()=>document.body.classList.contains('unsaved')")]
+        out['err'] += c.errs; c.close()
+    finally:
+        srv.shutdown()
+    return out
+
 def near(x, y, t): return abs(x - y) <= t
 def judge(t, r):
     """(통과?, 한 줄 요약). None 이면 사람이 볼 것"""
@@ -1045,13 +1301,58 @@ def judge(t, r):
                 and all(all(x[2] == H for x in o['edit']) and all(x[2] == W for x in o['idle'] + o['preview'] + o['editPrint']) for o in sh.values())
             mins = {k: v[0] for k, v in w.items()}
             return not bad and okv and not (r['err_portrait'] or r['err_landscape']), f"가장자리 최소 {mins} {bad or ''} · 흰 테두리 4mm · 편집만 반투명 {okv}"
+        if t == 't55':
+            ok = all(r['first']) and all(r['saved']) and all(r['reopen']) and all(r['file_clean']) and r['import'][:1] == [2] and all(r['import'][1:]) and all(r['file']) and not r['err']
+            return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
+        if t == 't54':
+            want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
+            ok = r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and not r['err']
+            return ok, f"붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+        if t == 't51':
+            bad = {k: v for k, v in r['diff'].items() if v > 0}
+            return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"
+        if t == 't52':
+            bad = {k: v for k, v in r['apply'].items() if not all(v)}
+            return not bad and r['same_size_content'] and r['undo_back'] and not r['err'], f"조합 {list(r['apply'])} · 값이 안 맞은 조합 {bad or '없음'} · 크기 · 내용 그대로 {r['same_size_content']} · 되돌리기 {r['undo_back']}"
+        if t == 't53':
+            # 글자 표시는 자리를 먹어 긴 이름이 두 줄이 될 수 있다(9장 6번 — 넘침은 붉은 띠가 받는다). 그래서 높아진 줄 수는 참고로만 보고, 넘침 판정이 실제 넘침과 맞는지를 본다
+            ok = r['pills'] > 0 and r['note'] == '추천 메뉴는 매일 바뀝니다' and r['limit'] == [True, False, True, False] and r['over_match'] and not r['err']
+            return ok, f"줄 {r['rows']} 중 두 줄로 넘어간 줄 {r['grew']}(참고) · 글자 표시 {r['pills']} · 각주 {r['note']} · 넘침 판정 {r['over']} · 실제 넘침과 맞음 {r['over_match']} · 길이 제한 {r['limit']}"
+        if t == 't50':
+            n = r['start'][2]
+            ok = (r['start'] == [True, True, n] and r['edited'] == [False, True, n - 1] and r['undo'] == [True, False, n] and r['redo'] == [False, True, n - 1]
+                  and r['ctrlz'] == [True, False, n] and r['ctrly'] == [False, True, n - 1] and r['newedit'][1] is True and not r['err'])
+            return ok, f"[↶흐림, ↷흐림, 줄 수] 처음 {r['start']} · 고침 {r['edited']} · ↶ {r['undo']} · ↷ {r['redo']} · Ctrl+Z {r['ctrlz']} · Ctrl+Y {r['ctrly']} · 되돌린 뒤 새로 고침 {r['newedit']} · 오류 {r['err'][:2]}"
+        if t == 't49':
+            st = r['steps']; ok = (r['plain_open'] == 0 and len(st) == 5 and all(x and x['hole'][0] > 10 and x['hole'][1] > 10 and not x['cover'] and x['inview'] for x in st)
+                  and st[1]['tools'] and st[2]['tools'] and r['done'] == [True, 0] and r['again'] and r['esc'] == 0 and not r['err'])
+            return ok, f"그냥 열면 {r['plain_open']} · 단계 {[ (x or {}).get('h','없음')[:6] for x in st]} · 짚은 칸 {[ (x or {}).get('hole') for x in st]} · 말풍선이 가림 {[ (x or {}).get('cover') for x in st]} · 도구 보임 2/3단계 {st[1].get('tools') if len(st)>1 and st[1] else None}/{st[2].get('tools') if len(st)>2 and st[2] else None} · 끝 {r['done']} · 다시 {r['again']} · Esc {r['esc']} · 오류 {r['err'][:2]}"
+        if t == 't48':
+            d = {k: v for k, v in r['idle']}; e = {k: v for k, v in r['edit']}; z = {k: v for k, v in r['back']}
+            bad = {k: (d[k], e.get(k)) for k in d if k and k in e and d[k] and e[k] and abs(d[k] - e[k]) > 0.5}   # 폭 0 = 그 모드에서 숨은 단추(편집 도구 막대) — 뺀다
+            hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 24   # 병은 병 모양이 보이는 높이 · ▲▼는 줄보다 작게(268번)
+            return not bad and d == z and hok and not r['err'], f"편집 켜고 끌 때 폭이 바뀐 막대 단추 {bad or '없음'} · 편집 단추 {d.get('b-edit')}/{e.get('b-edit')} · 병 단추 높이 {sorted(set(hb))} · ▲▼ {sorted(set(hw))}"
+        if t == 't46':
+            g = r['244_foot_fixed']; top = r['256_logo_top_mm']
+            ok = (near(g[0], g[1], 1) and g[2] == 'tall' and r['245_invisible'] is None and all(r[f'sec_pad_{n}'] is None for n in (10, 30, 45, 60))
+                  and r['254_line_on'][0] == 'tall' and r['254_line_off'][0] is None and all(near(v, 11, 0.4) for v in top.values()) and r['246_loadingdone'] >= 1 and not r['err'])
+            return ok, f"바닥 고정 {g} · 안 보이는 3px {r['245_invisible']} · 빈 자리 10·30·45·60px {[r[f'sec_pad_{n}'] for n in (10, 30, 45, 60)]} · 밑줄이 도장 +20px 켬/끔 {r['254_line_on'][0]}/{r['254_line_off'][0]} · 로고 윗변 mm {top} · 글꼴 도착 뒤 다시 재기 {r['246_loadingdone']}회"
+        if t == 't47':
+            s = r['started']; import re as _re
+            ok = (r['open_first'] == [True, 'none', False] and   # 275번 — 사진으로 시작이 준비 중(흐림)에서 눌림으로
+                  r['esc_stays'] and r.get('backdrop_stays') and r.get('setup_backdrop_stays') and r['top_follows'] == ['', '가게 이름', True] and all(r['logo_mask_invert'])
+                  and not s['open'] and s['editing'] and s['sheets'] == 1 and s['title'] == '시험 가게 — 메뉴' and s['flag'] and s['undo'] == 0 and s['font'] == 'gothic'
+                  and s['seal'] == 'none' and s['art'] == 'none' and s['logo'] and s['focus'] == 'sheets.0.0.0.name'
+                  and _re.match(r'시험 가게-메뉴-\d{4}-\d\d-\d\d\.html$', r['save_name']) and r['saved_opens_direct'] and r['reopen_close']
+                  and r['alps'] == [2, '알프스', True] and r.get('guide_up') and r.get('alps_no_guide') and r['undo_back'] == ['시험 가게', 1] and r['noname'][0] == '메뉴판' and r['noname'][1].startswith('메뉴판-') and not r['err'])
+            return ok, f"첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

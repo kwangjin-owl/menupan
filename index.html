@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>alps 알프스 — 메뉴</title>
+<title>메뉴판</title>   <!-- 265번. 상호명이 없을 때의 이름 — 알프스 이름을 범용 파일에 붙이지 않는다. 상호명이 있으면 syncTitle() 이 바꾼다 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link id="font-link" rel="stylesheet"
@@ -201,7 +201,7 @@ body{transition:padding-right .18s ease}
     var(--band) calc(57.1429% + 2px) calc(71.4286% - 2px), transparent calc(71.4286% - 2px) calc(71.4286% + 2px),
     var(--band) calc(71.4286% + 2px) calc(85.7143% - 2px), transparent calc(85.7143% - 2px) calc(85.7143% + 2px),
     var(--band) calc(85.7143% + 2px) 100%)}
-.noren .logo{width:var(--nr-logo);aspect-ratio:1864/1506;margin:0 auto .7em;
+.noren .logo{width:var(--nr-logo);aspect-ratio:var(--logo-ar, 1864/1506);margin:0 auto .7em;   /* 264번. 올린 그림은 제 비율(--logo-ar) */
   background-color:var(--logo);
   -webkit-mask:var(--logo-src) center/contain no-repeat;
   mask:var(--logo-src) center/contain no-repeat;
@@ -1417,7 +1417,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:5px}
 .panel .grp.typo3 button{padding:5px 4px;white-space:nowrap}
 /* 191 · 200번. 크기 막대 — 끌어서 1% 단위. 컴맹 기준이라 손잡이를 크게 잡는다(83번: 만질 것은 크게) */
-.panel #sz-range,.panel #nsz-range{width:100%;margin:2px 0 6px;accent-color:var(--accent);height:22px;cursor:pointer}
+.panel #sz-range,.panel #nsz-range{width:100%;margin:2px 0 6px;accent-color:var(--ui-accent);height:22px;cursor:pointer}   /* 263번. 종이의 포인트색(--accent)을 쓰고 있었다 — 규칙 I(26번) 위반. 도구 화면 색으로 */
 /* 200번. **창 안의 단추 · 고르기 칸은 높이가 하나여야 한다.** 줄마다 padding 이 달라
    같은 일을 하는 단추가 제각각 커 보였다("크기도 제각각이고 엉망") */
 .panel button,.panel select{min-height:34px;box-sizing:border-box}
@@ -1727,6 +1727,253 @@ body.editing .editbar{display:flex}
   .sheet.over::before{display:none !important}   /* 190번. 넘침 표시는 화면에만 */
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* ── 263번. 도구 화면을 M3 규칙으로 ────────────────────────────────────
+   대상은 막대 · 꾸미기 창 · 안내창 · 알림뿐이다. 종이(.sheet)와 종이 위에 뜨는 줄 도구(★ 품 설 ✕ ▲▼ ＋)는
+   건드리지 않는다 — 줄 도구를 M3 최소 누름 크기(48)로 키우면 메뉴 글자를 가린다(규칙 D 예외).
+   색은 파일 색 그대로, 모양 · 크기 · 위계만 M3 에서 가져온다.
+   · 단추: 완전히 둥근 모양 · 높이 40(편집 막대 32)
+   · 안내창: 모서리 28 · 제목 24 · 확인은 채운 단추(bt-fill), 덜 중요한 것은 글자 단추(bt-text), 같은 무게 둘은 연한 색(bt-tonal)
+   · 꾸미기 창 칸 높이는 M3 기본 56 이 아니라 40 — 폭 292px 의 촘촘한 창에서 56 이면 길이가 크게 는다(M3 에서 벗어난 자리)
+   · 되돌리기 알림은 모양만 스낵바(모서리 4 · 글자 단추). 바탕은 어두운 채 — 밝은 종이 위에 뜨므로 "뒤와 반대 밝기"가 이쪽이다 */
+.bar{padding:8px 10px;border-radius:28px;gap:8px}
+.bar button{height:40px;border-radius:20px;padding:0 18px;font-size:14px}
+.bar #b-help{width:40px;padding:0}
+.bar #b-edit{min-width:calc(3.8em + 36px)}   /* 267번. 263번이 안쪽 여백을 키우고 이 폭을 다시 안 쟀다 — "편집 끝"이 더 넓어 단추가 왔다갔다 했다(규칙 I) */
+.bar.editbar{padding:6px 8px;border-radius:24px}
+.bar.editbar button{height:32px;border-radius:16px;padding:0 14px;font-size:13px}
+dialog{border-radius:28px}
+dialog .in{padding:24px 24px 20px;font-size:14px;line-height:1.6}
+dialog h3{font-size:24px;line-height:32px;font-weight:400;margin-bottom:16px}
+dialog .row2.foot2{margin:16px -24px -20px;padding:12px 24px 20px}
+dialog button{height:40px;border-radius:20px;padding:0 20px;border-color:#9c8a68;font-weight:500}
+dialog button.bt-text{border-color:transparent;color:var(--ui-accent);padding:0 12px}
+dialog button.bt-text:hover{background:rgba(165,53,40,.08)}
+dialog button.bt-fill{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
+dialog button.bt-fill:hover{background:#8f2c21;border-color:#8f2c21}
+dialog button.bt-tonal{background:#e7dac0;border-color:#e7dac0;color:#241c12}
+dialog button.bt-tonal:hover{background:#dccca9;border-color:#dccca9}
+dialog input[type=number]{height:40px;box-sizing:border-box;border-radius:4px;border-color:#9c8a68}
+.panel{border-radius:16px}
+.panel .ptabs{gap:0}
+.panel .ptab-btn{height:44px;font:500 14px/1 var(--ui-font);letter-spacing:0;border-bottom-width:3px}
+.panel .ptab-btn.on{background:none;color:#efe3c9}
+.panel label{font-size:12px;color:rgba(240,230,205,.66)}
+.panel select,.panel button{min-height:40px;font-size:13px}
+.panel select{border-radius:4px;border-color:rgba(240,230,205,.34);padding-left:12px}
+.panel button{border-radius:20px;padding:0 14px;border-color:rgba(240,230,205,.34)}
+.panel .grp.typo3{gap:2px}
+.panel .grp.typo3 button{border-radius:4px;min-height:40px}
+.panel .grp.typo3 button:first-child{border-radius:20px 4px 4px 20px}
+.panel .grp.typo3 button:last-child{border-radius:4px 20px 20px 4px}
+.panel .pgpick .pill{border-radius:8px;height:32px;min-height:32px;padding:0 12px;font-size:13px}
+input.m3sw{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:44px;height:26px;margin:0;border-radius:13px;
+  border:2px solid rgba(240,230,205,.34);background:transparent;position:relative;cursor:pointer;transition:background .15s}
+input.m3sw::after{content:"";position:absolute;left:4px;top:50%;width:14px;height:14px;border-radius:50%;
+  background:rgba(240,230,205,.66);transform:translateY(-50%);transition:left .15s,width .15s,height .15s}
+input.m3sw:checked{background:var(--ui-accent);border-color:var(--ui-accent)}
+input.m3sw:checked::after{left:20px;width:18px;height:18px;background:#fff}
+input.m3sw:focus-visible{outline:2px solid #efe3c9;outline-offset:2px}
+.panel label.chk input.m3sw{width:44px;height:26px}
+dialog input.m3sw{border-color:#9c8a68}
+dialog input.m3sw::after{background:#5c4f3c}
+dialog input.m3sw:checked::after{background:#fff}
+dialog input.m3sw:focus-visible{outline-color:#241c12}
+.panel label.chk{min-height:40px;margin-top:0;font-size:13px;gap:10px;color:#efe3c9}
+.panel .chkrow{flex-direction:column;gap:0}
+.panel .chkrow label.chk{margin-top:0}
+.undo{border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.undo button{border:0;color:#f0a898;font-weight:700;height:36px;border-radius:18px;padding:0 12px}
+.undo button:hover{background:rgba(240,168,152,.12)}
+.prevbar{border-radius:24px}
+.prevbar button{height:36px;border-radius:18px;padding:0 16px}
+/* ── 264번. 첫 화면 · 빈 메뉴판 · 맨 위 글자 ───────────────────────────────
+   첫 화면은 M3 안내창(폭 최대 560 · 263번 모양). 맨 위 글자(.logo.txt)는 종이의 일이라 로고 색 · 본문 글꼴을 쓴다 */
+.noren .logo.txt{width:auto;max-width:100%;aspect-ratio:auto;background:none;-webkit-mask:none;mask:none;filter:none;
+  color:var(--logo);font-family:var(--kr);font-size:4em;font-weight:500;line-height:1.2;letter-spacing:.06em;text-align:center;
+  margin:0 auto .3em;overflow-wrap:anywhere}
+.editing .noren .logo.txt .bv:empty::before{content:"가게 이름";opacity:.5}
+dialog#start{width:min(560px, calc(100vw - 32px))}
+dialog#start .sub{margin:0 0 16px}
+#st-closerow[hidden]{display:none}
+dialog button.st-opt{display:flex;align-items:center;gap:16px;width:100%;height:auto;min-height:88px;padding:12px 16px;margin:0 0 8px;
+  text-align:left;background:#fffdf6;border:1px solid #9c8a68;border-radius:12px;font-weight:400}
+dialog button.st-opt:hover{background:#fff}
+dialog button.st-opt:disabled{opacity:.38;cursor:default}
+.st-opt b{display:block;font-size:16px;font-weight:500;margin-bottom:2px}
+.st-tx > span{font-size:13px;color:#5c4f3c;line-height:1.5}
+.st-th{flex:0 0 auto;width:48px;height:64px;border:1px solid #c9bda6;background:#efe3c9;box-sizing:border-box;display:flex;flex-direction:column}
+.st-th i{display:block;height:16px;background:#1c3145}
+.st-th.ph{background:transparent;border-style:dashed}
+.st-th.lines::after{content:"";margin:8px 6px 0;height:22px;background:repeating-linear-gradient(#c9b795 0 2px,transparent 2px 7px)}
+.st-lbl{display:block;font-size:14px;font-weight:500;margin:16px 0 6px}
+.st-lbl small{font-weight:400;color:#5c4f3c;margin-left:4px;font-size:12px}
+.st-in{width:100%;height:40px;box-sizing:border-box;border:1px solid #9c8a68;border-radius:4px;padding:0 12px;font:inherit;font-size:15px;background:#fffdf6;color:inherit}
+dialog p.st-help{margin:4px 0 0;font-size:12px}
+dialog p.st-cap{margin:0 0 4px;font-size:12px}
+.st-prev{height:76px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:500 28px/1.2 var(--kr);letter-spacing:.06em;
+  overflow:hidden;padding:0 12px;text-align:center;background:#1c3145;color:#efe3c9}
+.st-prev .st-mask{display:block;height:52px;width:100%;-webkit-mask:var(--src) center/contain no-repeat;mask:var(--src) center/contain no-repeat}
+.st-prev .ph{opacity:.55;font:400 14px/1.4 var(--ui-font);letter-spacing:0}
+.st-seg{display:inline-flex;border:1px solid #9c8a68;border-radius:20px;overflow:hidden;margin-bottom:8px}
+dialog .st-seg button{height:40px;border:0;border-radius:0;padding:0 20px;font-weight:400}
+dialog .st-seg button + button{border-left:1px solid #9c8a68}
+dialog .st-seg button.on{background:#e7dac0;font-weight:500}
+.st-seg button.on::before,.st-pseg button.on::before{content:"✓ "}
+.st-imgbtns{display:flex;gap:8px;flex-wrap:wrap}
+.st-sw{display:flex;gap:8px;flex-wrap:wrap}
+dialog button.st-swb{display:flex;flex-direction:column;align-items:center;gap:4px;width:76px;height:auto;padding:6px 0;border:1px solid transparent;
+  border-radius:12px;font-size:12px;font-weight:400}
+dialog button.st-swb.on{border-color:#241c12;background:#fffdf6}
+.st-swb .c{width:44px;height:44px;border-radius:8px;border:1px solid #c9bda6;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+.st-swb .c i{display:block;height:18px}
+.panel input#f-shop{height:40px;border-radius:4px;font-size:13px;padding:0 12px;box-sizing:border-box}
+.panel .st-pseg{display:inline-flex;gap:0;border:1px solid rgba(240,230,205,.34);border-radius:20px;overflow:hidden;align-self:flex-start}
+.panel .st-pseg button{border:0;border-radius:0}
+.panel .st-pseg button + button{border-left:1px solid rgba(240,230,205,.34)}
+.panel .st-pseg button.on{background:rgba(240,230,205,.16)}
+.panel .st-plogo{margin-top:6px}
+.panel .st-plogo[hidden]{display:none}
+.panel .st-again{margin-top:18px;padding-top:12px;border-top:1px solid rgba(240,230,205,.16)}
+.panel .st-again label{line-height:1.5}
+/* ── 267번. 꾸미기 창은 M3 밀도 −2 — 긴 설정 목록(form)이라 밀도를 올려도 되는 자리다(M3 density: 한 단계에 4px).
+   안내창 · 막대는 기본 밀도 그대로(M3 — 과업 · 알림에는 올리지 않는다). 263번이 기본 크기를 그대로 씌워 창이 길고 지저분해졌다 */
+.panel select,.panel input#f-shop{min-height:32px;height:32px}
+/* 268번. 267번은 "꾸미기 창의 모든 단추 = 32px" 로 걸어 병 고르기 단추(103 → 32 — 병이 찌그러졌다)와 [카드에 보일 줄] ▲▼(14 → 32)까지 바꿨다.
+   촘촘하게 할 단추만 고른다 — 한 줄 묶음(.grp) · 병 칸의 지우기 */
+.panel .grp button,.panel .btview button{min-height:32px;height:32px;border-radius:16px;padding:0 12px}
+.panel .ptab-btn{height:40px}
+.panel .grp.typo3 button{min-height:32px}
+.panel .grp.typo3 button:first-child{border-radius:16px 4px 4px 16px}
+.panel .grp.typo3 button:last-child{border-radius:4px 16px 16px 4px}
+.panel .pgpick .pill{height:28px;min-height:28px}
+.panel label.chk{min-height:32px}
+.panel .chkrow{flex-direction:row;flex-wrap:wrap;column-gap:20px}
+.panel input.m3sw,.panel label.chk input.m3sw{width:36px;height:20px;border-radius:10px}
+.panel input.m3sw::after{left:3px;width:10px;height:10px}
+.panel input.m3sw:checked::after{left:17px;width:14px;height:14px}
+.panel .st-toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.panel .st-toprow label{margin:0}
+.panel .st-pseg button{height:28px;min-height:28px;padding:0 14px}
+.panel .st-plogo{margin-top:8px}
+.panel .st-plogo[hidden]{display:none}
+.panel .st-again{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.panel .st-again label{margin:0;font-size:11.5px}
+dialog .st-imgbtns{align-items:center}
+dialog .st-toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 8px}
+dialog .st-toprow .st-lbl{margin:0}
+dialog .st-toprow .st-seg{margin:0}
+/* ── 268번. 이미지 올리기 상자 · 모양 고르기 · [처음 화면으로] ─────────────────────
+   올리는 동작은 어디서나 점선 상자 "이미지 선택"(누르거나 끌어다 놓기) — 나중에 메뉴 사진 · 와인 라벨도 같은 상자(규칙 H).
+   로고는 올린 뒤 두 모양(자동 · 반대)을 나란히 보여 맞는 쪽을 누르게 한다 — "모양 뒤집기"라는 말이 뜻을 전하지 못했다 */
+.st-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;box-sizing:border-box;cursor:pointer;
+  border:1.5px dashed #9c8a68;border-radius:12px;background:#fffdf6;color:#241c12;font:inherit;padding:12px}
+dialog button.st-drop{height:auto;min-height:64px;border-radius:12px;border:1.5px dashed #9c8a68;font-weight:500}
+.st-drop small{font-size:12px;font-weight:400;color:#5c4f3c}
+.st-drop.over{border-color:var(--ui-accent);background:#fff}
+.st-drop .st-dtx::before{content:"＋ "}
+.panel button.st-drop{height:auto;min-height:0;border-radius:10px;border:1.5px dashed rgba(240,230,205,.34);background:transparent;color:#efe3c9;padding:8px 10px}   /* 지금 로고는 아래 모양 고르기에 보이므로 상자에는 글자만 */
+.panel .st-drop small{color:rgba(240,230,205,.6)}
+.panel .st-drop.over{border-color:#f0a898}
+.st-tiles{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-top:8px}
+.st-tiles:empty{display:none}
+.st-tcap{flex:1 0 100%;margin:0;font-size:12px}
+dialog .st-tcap{color:#5c4f3c}
+.panel .st-tcap{color:rgba(240,230,205,.66)}
+.panel .st-again{display:block;margin-top:18px;padding-top:12px;border-top:1px solid rgba(240,230,205,.16)}
+.panel .st-again button{display:block;width:100%;height:36px;min-height:0;border-radius:18px;border:1px solid rgba(240,230,205,.34);background:none;color:#efe3c9}
+.panel .st-again label{display:block;margin:6px 0 0;font-size:11.5px;line-height:1.5}
+.st-exb{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 1 0;min-width:120px;padding:10px 8px;box-sizing:border-box;cursor:pointer;
+  border:1px solid #9c8a68;border-radius:12px;background:#fffdf6;font:inherit;color:#241c12}
+dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius:12px;padding:10px 8px;font-weight:400}
+.panel button.st-exb{background:transparent;border-color:rgba(240,230,205,.34);color:#efe3c9}
+.st-exb b{display:block;width:100%;max-width:140px;padding:8px 0;border-radius:8px;text-align:center;font:500 20px/1.2 var(--kr);letter-spacing:.1em}
+.st-exb.ok b{background:#1c3145;color:#efe3c9}
+.st-exb.no b{background:#1c3145;color:#1c3145;box-shadow:inset 0 0 0 5px #1c3145, inset 0 0 0 60px #efe3c9}
+.st-exb span{font-size:12px;line-height:1.4;text-align:center}
+.st-exb:hover{border-color:var(--ui-accent)}
+/* ── 269번. 가이드 — 짚는 곳만 밝히고 나머지는 어둡게(0.6 — 안내창과 같게). 말풍선은 M3 설명 풍선 모양, 안내창 색 ── */
+.gd-block{position:fixed;inset:0;z-index:300}
+.gd-hole{position:fixed;z-index:301;border-radius:10px;box-shadow:0 0 0 3px var(--ui-accent),0 0 0 9999px rgba(10,8,5,.6);pointer-events:none;transition:all .2s}
+.gd-tip{position:fixed;z-index:302;width:min(328px, calc(100vw - 24px));box-sizing:border-box;padding:16px 20px 10px;border-radius:12px;background:#f4ecdb;color:#241c12;
+  font-family:var(--ui-font);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.gd-tip .n{font-size:12px;color:#5c4f3c}
+.gd-tip h4{margin:4px 0 6px;font-size:16px;font-weight:500}
+.gd-tip p{margin:0;font-size:14px;line-height:1.6}
+.gd-tip .r{display:flex;gap:4px;align-items:center;justify-content:flex-end;margin-top:12px}
+.gd-tip button{height:40px;border-radius:20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;padding:0 12px;border:0;background:transparent;color:var(--ui-accent)}
+.gd-tip button:hover{background:rgba(165,53,40,.08)}
+.gd-tip button.skip{margin-right:auto}
+.gd-tip button.tonal{background:#e7dac0;color:#241c12;padding:0 20px}
+.gd-tip button.fill{background:var(--ui-accent);color:#fff;padding:0 20px}
+@media print{.gd-block,.gd-hole,.gd-tip{display:none !important}}
+/* 270번. 말풍선의 위계 — 단계(점) · 제목(굵고 진하게) · 설명(옅게) · 화면의 이름(표지) · 동작(단추)을 모양으로 가른다 */
+.gd-tip{padding:16px 20px 12px}
+.gd-tip .n{display:flex;gap:6px;margin-bottom:10px}
+.gd-tip .n i{width:6px;height:6px;border-radius:50%;background:#d4c6a8}
+.gd-tip .n i.past{background:#b09a74}
+.gd-tip .n i.on{width:18px;border-radius:3px;background:var(--ui-accent)}
+.gd-tip h4{margin:0 0 6px;font-size:17px;font-weight:700;color:#241c12;line-height:1.35}
+.gd-tip p{margin:0;font-size:14px;line-height:1.6;color:#4a3f30}
+.gd-tip p small{display:block;margin-top:2px;font-size:12.5px;color:#7a6a50}
+.gd-tip kbd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 4px;margin-right:2px;box-sizing:border-box;
+  border:1px solid #9c8a68;border-radius:4px;background:#fffdf6;font:600 11px/1 var(--ui-font);color:#241c12;vertical-align:1px}
+.gd-tip .gd-b{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:11px;background:#2a221a;color:#efe3c9;font-size:12px;font-weight:500;white-space:nowrap;vertical-align:1px}
+.gd-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;margin:10px 0 0;padding:10px 12px;border-radius:8px;background:rgba(90,76,54,.07)}
+.gd-dl dt{margin:0;white-space:nowrap}
+.gd-dl dd{margin:0;font-size:13px;color:#4a3f30}
+.gd-tip .r{margin-top:14px}
+.gd-tip button:focus{outline:none}
+.gd-tip button:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px}
+/* 271번. 되돌리기 · 다시 하기 — 아이콘 단추(정사각). 할 것이 없으면 흐리게. 말풍선은 한국어 낱말 가운데서 끊지 않는다 */
+.bar.editbar button.ib{width:32px;padding:0;font-size:16px;line-height:1}
+.bar.editbar button.ib:disabled{opacity:.35;cursor:default}
+.gd-tip{word-break:keep-all;overflow-wrap:anywhere}
+/* 273번. 종이 결 · 분류 제목 모양 — 칸의 자리 · 크기는 그대로 두고 칠만 바꾼다(그림자 · 글자 줄 안 바탕은 자리를 차지하지 않는다) */
+.sheet.pp-plain{background-image:none}
+.sheet.pp-plain::after{display:none}
+.sheet.sh-band section > .sec-head{background:var(--band);box-shadow:0 0 0 .3em var(--band);border-radius:2px}
+.sheet.sh-band section > .sec-head h2,.sheet.sh-band section > .sec-head .hv{color:var(--paper)}
+.sheet.sh-band section > .sec-head .ko,.sheet.sh-band section > .sec-head .ml,.sheet.sh-band section > .sec-head .en{color:var(--paper);opacity:.8}
+.sheet.sh-band section > .sec-rule,.sheet.sh-pill section > .sec-rule{visibility:hidden}
+.sheet.sh-pill section > .sec-head h2 .hv{background:var(--accent);color:var(--paper);border-radius:999px;box-shadow:0 0 0 .22em var(--accent),.5em 0 0 .22em var(--accent),-.5em 0 0 .22em var(--accent)}
+.panel .pair2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.panel .pair2 > span{display:flex;flex-direction:column;min-width:0}
+/* 273번. 종이 무늬 넷 · 점선 모양 — 바탕 · 선 모양만(자리 · 크기는 그대로). 무늬는 아주 옅게(잉크) */
+.sheet[class*=" pp-"]::after{display:none}
+.sheet.pp-hanji{background-image:radial-gradient(ellipse 14px 1.2px at 30% 40%,rgba(120,95,55,.10),transparent 70%),radial-gradient(ellipse 1.2px 11px at 70% 60%,rgba(120,95,55,.08),transparent 70%),radial-gradient(ellipse 22px 1px at 55% 25%,rgba(120,95,55,.07),transparent 70%),radial-gradient(ellipse 9px 1px at 15% 80%,rgba(255,255,255,.5),transparent 70%);
+  background-size:37px 29px,43px 53px,61px 41px,31px 23px}   /* 273번. 한지 — 흩어진 짧은 섬유(처음 판은 규칙적인 빗금이라 그물 · 천처럼 보였다) */
+.sheet.pp-kraft{background-image:radial-gradient(rgba(70,45,15,.16) .7px,transparent 1px),radial-gradient(rgba(70,45,15,.10) .6px,transparent .9px);background-size:7px 7px,11px 11px;background-position:0 0,3px 5px}
+.sheet.pp-gingham{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 7%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--accent) 7%,transparent) 50%,transparent 50%);background-size:18px 18px}
+.sheet.pp-wood{background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 1px,transparent 1px 23px),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 9px,transparent 9px 41px)}
+.sheet.ld-dash .dots{background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 26%,transparent) 55%,transparent 55%) 0 50% / 7px 1px repeat-x}
+.sheet.ld-line .dots{background:linear-gradient(color-mix(in srgb,var(--ink) 20%,transparent),color-mix(in srgb,var(--ink) 20%,transparent)) 0 50% / 100% 1px no-repeat}
+/* 274번. 글자 추천 표시 — 작은 알약. 줄 높이는 그대로(line-height 0, 가로 여백만) */
+.pick.tx{margin-left:.7em;font-size:.5em;font-weight:700;letter-spacing:.02em;padding:0 .5em;border-radius:999px;background:var(--accent);color:var(--paper);vertical-align:.5em;white-space:nowrap;line-height:0;box-shadow:0 0 0 .18em var(--accent)}
+.row.out .pick.tx{background:var(--ink-soft);box-shadow:0 0 0 .18em var(--ink-soft)}
+.panel #f-markc{height:32px;border-radius:4px;font-size:13px;padding:0 10px;box-sizing:border-box;margin-top:6px;width:100%}
+.panel #f-markc[hidden]{display:none}
+/* 273번. 정하기 창 추천 조합 타일 — 포인트 색 점 하나 */
+.st-swb .c em{display:block;width:10px;height:10px;border-radius:50%;margin:6px auto 0}
+dialog button.st-swb{width:84px}
+/* 275번. 사진으로 시작 · 읽은 값 확인 */
+.st-picimg{display:block;max-width:100%;max-height:220px;margin:10px auto 0;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.st-picimg[hidden]{display:none}
+dialog .st-ans{height:auto;min-height:120px;padding:10px 12px;font:13px/1.5 var(--ui-font);resize:vertical}
+dialog .st-msg{color:#9c3a20;min-height:1em}
+.st-ctab{display:flex;flex-direction:column;gap:4px;margin-top:12px;max-height:46vh;overflow:auto;padding-right:4px}
+.st-crow{display:grid;grid-template-columns:1fr 96px;gap:6px}
+.st-cin{height:32px;box-sizing:border-box;border:1px solid #c9bda6;border-radius:4px;padding:0 8px;font:14px var(--ui-font);background:#fffdf6;color:#241c12;min-width:0}
+.st-cin.st-csec{margin-top:10px;font-weight:700;border-color:#9c8a68}
+.st-cin.st-cp{text-align:right}
+.st-cin.un{background:#fff1b8;border-color:#d9b43a}   /* 자신 없는 값 — 노랗게(9장 3번에 맡겨 둔 색) */
+#st-read .row2,#st-check .row2{margin-top:10px}
+#st-gem[hidden],#st-app[hidden]{display:none}
+/* 277번. 자동 저장 상태 — 막대 안의 작은 글자. 버셀 주소가 아니면 [파일로 저장] 불이 그대로, 버셀 주소면 불을 끈다(자동 저장이 대신한다) */
+.bar .autost{font-size:12px;color:rgba(240,230,205,.72);white-space:nowrap;padding:0 2px 0 6px;cursor:default}
+.bar .autost.off{color:rgba(240,230,205,.5)}
+.bar .autost.fail{color:#f0a898}
+body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,230,205,.34);color:#efe3c9}
+@media print{.autost{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
 </head>
@@ -1739,6 +1986,7 @@ body.editing .editbar{display:flex}
 </div>
 
 <div class="panel" id="panel" hidden>
+  <!-- 263번. 설정 하나를 켜고 끄는 체크 여섯은 스위치(m3sw). 여러 줄 중에서 고르는 [카드에 보일 줄]은 체크 상자로 남는다 -->
   <!-- 12개가 평평한 목록이면 훑을 수가 없다. 성격별로 묶고 구분선을 둔다.
        "꾸밈"은 한 번 정하면 안 건드리는 것들이라 접어 두어 창 높이를 줄인다 —
        접지 않으면 맨 아래 원산지가 어떤 화면 높이에서도 스크롤 밖으로 밀린다 -->
@@ -1747,6 +1995,17 @@ body.editing .editbar{display:flex}
   <!-- 152번. 탭은 [공통] 하나와 장마다 하나. 장 탭의 손잡이는 한 벌이고 panelPage 가 어느 장인지 정한다 -->
   <div class="ptabs" id="ptabs" role="tablist"></div>
   <div class="ptab on" data-tab="common">
+  <!-- 264번. 상호명(저장 파일 이름 · 창 제목) · 메뉴판 맨 위(글자 / 그림) -->
+  <label for="f-shop">상호명 <small>(저장할 파일 이름)</small></label>
+  <input type="text" id="f-shop" autocomplete="off">
+  <!-- 267번. 고르기(글자 | 그림)와 동작(그림 올리기 · 모양 뒤집기)의 위계를 나눈다 — 고르기는 이름표와 한 줄, 동작은 그림을 골랐을 때만 작은 글자 단추로 한 줄 -->
+  <div class="st-toprow"><label>메뉴판 맨 위</label><span class="grp st-pseg" id="f-topmode"><button type="button" data-m="text">글자</button><button type="button" data-m="img">로고</button></span></div>
+  <!-- 268번. "그림"은 파일에 든 장식(꾸밈)의 이름이라 쓰지 않는다 — 맨 위는 [글자 | 로고], 올리기는 점선 상자 "이미지 선택", 모양은 두 미리보기 중 고른다 -->
+  <div class="st-plogo" id="f-logorow"><button type="button" class="st-drop" id="f-logo-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으면 로고가 바뀝니다</small></button>
+  <div class="st-tiles" id="f-tiles"></div></div>
+  <!-- 273번. 추천 조합 — 누르면 글꼴 · 색 · 종이 · 분류 제목 · 점선 · 상단 · 그림 · 도장 · 추천 표시를 한 번에 맞춘다(글자 크기 · 내용은 그대로) -->
+  <label for="f-preset">추천 조합</label>
+  <select id="f-preset"><option value="">조합을 고르면 한 번에 맞춥니다…</option><option value="basic">기본</option><option value="hansik">한식 식당</option><option value="cafe">카페</option><option value="bunsik">분식</option><option value="hof">호프 · 치킨</option><option value="alps">알프스 모양</option></select>
   <div class="pblock" data-kind="all">
   <div class="pbhead"><span class="pbadge">모든 장</span> 파일 전체에 하나씩</div>
   <div class="pgrp">종이</div>
@@ -1780,11 +2039,14 @@ body.editing .editbar{display:flex}
   <!-- 159번. 글꼴과 [굵게]를 한 줄에. 따로 두면 창이 두 줄 길어진다 -->
   <span class="grp fontrow">
     <select id="f-font">
-      <option value="gungseo">궁서체 (기본)</option>
+      <option value="gungseo">궁서체</option>   <!-- 272번. "(기본)"을 뗐다 — 빈 메뉴판의 기본은 본고딕이고 궁서는 알프스 예시의 것(규칙 A) -->
       <option value="myeongjo">명조</option>
       <option value="gothic">고딕</option>
+      <option value="nanum">나눔고딕</option>
+      <option value="gothica1">고딕 A1</option>
       <option value="batang">고운바탕</option>
       <option value="serif">본명조</option>
+      <option value="hahmlet">함렛</option>
       <option value="round">둥근고딕</option>
       <option value="plex">플렉스 고딕</option>
       <option value="hand">손글씨</option>
@@ -1798,6 +2060,10 @@ body.editing .editbar{display:flex}
       <option value="sumi">먹 흑백</option>
       <option value="pat">팥 자주</option>
       <option value="forest">숲 초록</option>
+      <option value="board">나무 판 (어두움)</option>
+      <option value="chili">고추 빨강</option>
+      <option value="cafe">커피 크림</option>
+      <option value="milk">우유 흰색</option>
       <option value="custom">직접 고르기</option>
     </select>
     <!-- 색 상자만 있으면 뭐가 뭔지 알 수 없다. 이름을 붙여 둔다 -->
@@ -1816,7 +2082,7 @@ body.editing .editbar{display:flex}
   <!-- 159번. 짧은 손잡이 둘은 한 줄에. 한 줄씩 쌓으면 창만 길어진다 -->
   <!-- 160 → 161번. **영문 병기는 공통이 맞다.** 메뉴 줄만의 일인 줄 알고 [메뉴 장]으로 옮겼는데,
        **분류 제목의 영문**은 와인 장에도 붙는다. 걸리는 곳이 두 장이면 공통이다 -->
-  <label class="chk"><input type="checkbox" id="f-bi"> 영문 병기 <small>(분류 · 메뉴 이름 아래)</small></label>
+  <label class="chk"><input type="checkbox" class="m3sw" id="f-bi"> 영문 병기 <small>(분류 · 메뉴 이름 아래)</small></label>
 
   <span class="grp two">
     <span class="fld"><label for="f-mark">추천 표시</label>
@@ -1825,7 +2091,11 @@ body.editing .editbar{display:flex}
         <option value="●">● 점</option>
         <option value="◆">◆ 마름모</option>
         <option value="✿">✿ 꽃</option>
-      </select></span>
+        <option value="best">best</option><option value="great">great</option><option value="hot">hot</option>
+        <option value="추천">추천</option><option value="베스트">베스트</option><option value="인기">인기</option><option value="강추">강추</option>
+        <option value="__own">직접 쓰기…</option>   <!-- 274번. 글자 표시 — 9장 6번 -->
+      </select>
+      <input type="text" id="f-markc" maxlength="6" placeholder="한글 4자 · 영문 6자까지" hidden></span>
     <span class="fld"><label for="f-pageno">쪽 번호</label>
       <select id="f-pageno">
         <option value="of">1 / 2</option>
@@ -1841,6 +2111,11 @@ body.editing .editbar{display:flex}
     <option value="center">가운데</option>
     <option value="right">오른쪽</option>
   </select>
+  <!-- 273번. 모양만 바꾸는 손잡이 둘 — 칸의 자리 · 크기는 그대로(검사가 조합마다 늘지 않게. t51 이 0px 를 본다) -->
+  <span class="grp pair2"><span><label for="f-paper">종이 결</label>
+    <select id="f-paper"><option value="grain">결 무늬</option><option value="plain">민무늬</option><option value="hanji">한지</option><option value="kraft">크라프트지</option><option value="gingham">깅엄 체크</option><option value="wood">나무결</option></select></span>
+  <span><label for="f-secstyle">분류 제목</label>
+    <select id="f-secstyle"><option value="line">밑줄</option><option value="band">색 띠</option><option value="pill">알약</option></select></span></span>
   </div>
 
   <!-- 157번. 갈래 머리에 작은 이름표를 다는 것만으로는 "아직도 구분이 잘 안 된다"는 지적을 받았다.
@@ -1850,7 +2125,9 @@ body.editing .editbar{display:flex}
   <div class="pbhead"><span class="pbadge">메뉴 장</span> 메뉴가 한 줄씩 놓이는 장만</div>
   <div class="pgrp">메뉴 줄</div>
   <!-- 124번. 점선은 "점선"이라고만 부른다. 인쇄 용어(리더·안내선)는 UI 에 쓰지 않는다(38번) -->
-  <label class="chk"><input type="checkbox" id="f-dots"> 메뉴명과 가격 사이 점선</label>
+  <!-- 273번. 점선 스위치를 모양 고르기로 — 점선 · 줄표 · 가는 실선 · 없음(모양만. 없음은 전의 스위치 끔과 같다) -->
+  <label for="f-leader">메뉴명과 가격 사이</label>
+  <select id="f-leader"><option value="dots">점선</option><option value="dash">줄표</option><option value="line">가는 실선</option><option value="none">없음</option></select>
   </div>
 
   <!-- 155번. 와인 카드 · 병은 모든 와인 카드에 함께 걸리는 설정이라 장 탭이 아니고, 메뉴 장에는 해당이 없어 [공통]도 아니다 -->
@@ -1885,6 +2162,10 @@ body.editing .editbar{display:flex}
   <!-- 접어 뒀다가 "있는지도 모르겠다"고 지적받았다. 24번(고르는 수단을 조건부로
        숨기지 말 것)을 만들어 놓고 내가 어겼다. 창이 길어져 스크롤이 생기는 것은
        감수한다 — 스크롤 막대는 보이지만 접힌 것은 있는지조차 안 보인다 -->
+    <!-- 264번. 첫 화면 다시 열기 — 메뉴판이 통째로 바뀌는 단추라 자주 누르는 편집 막대에서 멀리 둔다 -->
+  <div class="st-again"><button type="button" id="b-import">파일에서 불러오기</button>   <!-- 277번 -->
+  <button type="button" id="b-start">처음 화면으로</button>   <!-- 268번. 창 폭을 채우는 테두리 단추 — 267번의 글자 단추는 설명 글과 구분되지 않았다 -->
+  <label>빈 메뉴판 · 알프스 예시 중에서 다시 고릅니다. 고른 뒤에도 되돌릴 수 있습니다</label></div>
   </div>
   <div class="ptab" data-tab="page">
   <div class="pgpick" id="pgpick"></div>
@@ -1935,8 +2216,8 @@ body.editing .editbar{display:flex}
   <!-- 111번. 업종 · 한 줄 소개는 바닥 구역처럼 통째로 껐다 켠다. 끄면 그 줄만큼 상단이 줄어든다.
        켜고 끄는 것은 드롭다운이 아니라 체크 — 두 값뿐인데 열어서 고를 이유가 없다 -->
   <span class="chkrow">
-    <label class="chk"><input type="checkbox" id="f-title"> 업종</label>
-    <label class="chk"><input type="checkbox" id="f-sub"> 한 줄 소개</label>
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-title"> 업종</label>
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-sub"> 한 줄 소개</label>
   </span>
 
   <label for="f-logo">로고 색</label>
@@ -1967,10 +2248,10 @@ body.editing .editbar{display:flex}
   <!-- 94번. 바닥의 두 구역은 **통째로 껐다 켤 수 있어야 한다.** 줄마다 ✕ 로 다 지우는 것과
        "이 구역은 안 쓴다"는 다른 일이고, 다 지워도 편집 화면에는 빈 자리와 ＋ 가 남는다.
        15번의 "켜고 끄는 버튼은 별도 형태가 있는 것에만" 에 맞다 — 라벨과 틀이 있는 구역이다 -->
-  <!-- 111번. 켜고 끄는 것은 전부 체크다(드롭다운이었다). 체크 = 표시 -->
+  <!-- 111번. 켜고 끄는 것은 전부 체크다(드롭다운이었다). 체크 = 표시. 263번에서 설정 하나를 켜고 끄는 것은 스위치(m3sw)로 바뀌었다 -->
   <span class="chkrow">
-    <label class="chk"><input type="checkbox" id="f-notes"> 바닥 글</label>
-    <label class="chk"><input type="checkbox" id="f-origin"> 식재료 원산지</label>
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-notes"> 바닥 글</label>
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-origin"> 식재료 원산지</label>
   </span>
   <!-- 주소·전화는 토글을 뺐다. 라벨도 구분선도 없는 그냥 한 줄이라 각주처럼 쓰고 지우면
        되는데 토글을 두면 "켰는데 화면이 그대로"인 상태가 생긴다. 원산지만 라벨·구분선·
@@ -2022,17 +2303,19 @@ body.editing .editbar{display:flex}
 <!-- 195번. `confirm()` 은 브라우저가 **창 맨 위**에 붙여 띄우고 자리를 바꿀 수 없다.
      다른 안내창과 같은 `<dialog>` 로 바꾼다 — `::backdrop` 과 함께 **화면 한가운데**에 선다 -->
 <dialog id="overwarn"><div class="in">
+  <!-- 263번. 단추 위계는 M3 — 권하는 동작은 채운 단추(bt-fill), 덜 중요한 것은 글자 단추(bt-text) -->
   <!-- 234번. 가로만 좁은 장에도 "아래가 잘립니다"라고 했다 — 제목 · 본문 · 보충을 넘친 이유에 따라 JS 가 채운다 -->
   <h3 id="ow-title">한 장에 안 들어갑니다</h3>
   <p id="ow-msg"></p>
   <p class="sub" id="ow-sub"></p>
   <div class="row2 end">
-    <button id="ow-cancel" type="button">취소하고 고치기</button>
-    <button id="ow-go" type="button">그냥 인쇄</button>
+    <button id="ow-cancel" type="button" class="bt-fill">취소하고 고치기</button>
+    <button id="ow-go" type="button" class="bt-text">그냥 인쇄</button>
   </div>
 </div></dialog>
 
 <dialog id="printhint"><div class="in">
+  <!-- 263번. [인쇄 창 열기] 채운 단추 · [취소] 글자 단추 · 도움말의 되살리기 체크는 스위치(m3sw) -->
   <h3>인쇄 전에</h3>
   <!-- 234번. 「먼저 — 화면 확대를 100%로」를 걷었다. 크롬은 인쇄할 때 화면 확대를 쓰지 않으므로 준비 단계가 아니라
        참고다 — 맨 아래 한 줄로 내렸다. 짝을 잃은 「그다음」 딱지도 같이 걷었다(번호는 인쇄 창의 셋에만, 231번).
@@ -2091,19 +2374,82 @@ body.editing .editbar{display:flex}
   <!-- 229번. 단추 줄은 창 바닥에 붙인다. 체크 상자도 같은 줄로 — 스크롤에 밀리면 못 본다 -->
   <div class="row2 end foot2">
     <label class="chk"><input type="checkbox" id="ph-skip"> 다시 보지 않기</label>
-    <button id="ph-cancel" type="button">취소</button>
-    <button id="ph-go" type="button">인쇄 창 열기</button>
+    <button id="ph-cancel" type="button" class="bt-text">취소</button>
+    <button id="ph-go" type="button" class="bt-fill">인쇄 창 열기</button>
   </div>
 </div></dialog>
 
 <dialog id="bulk"><div class="in">
+  <!-- 263번. [내리기] · [올리기]는 무게가 같아 둘 다 연한 색 단추(bt-tonal) -->
   <h3>가격 일괄 조정</h3>
   <p>숫자로 된 가격만 바뀝니다. "가격문의" 같은 글자는 그대로 둡니다.</p>
   <div class="row2"><input type="number" id="bulk-amt" value="500" step="100" min="0"> 원씩</div>
   <div class="row2 end">
-    <button id="bulk-cancel" type="button">취소</button>
-    <button id="bulk-down" type="button">내리기</button>
-    <button id="bulk-up" type="button">올리기</button>
+    <button id="bulk-cancel" type="button" class="bt-text">취소</button>
+    <button id="bulk-down" type="button" class="bt-tonal">내리기</button>
+    <button id="bulk-up" type="button" class="bt-tonal">올리기</button>
+  </div>
+</div></dialog>
+
+<dialog id="start"><div class="in">
+  <!-- 264번. 첫 화면 — 처음 여는 파일(SETTINGS.startScreen)이면 열자마자, 아니면 꾸미기 [처음 화면으로]로 연다 -->
+  <div id="st-choose">
+    <h3>메뉴판을 어떻게 시작할까요?</h3>
+    <p class="sub">저장한 파일을 다시 열면 바로 메뉴판이 뜹니다. 이 화면은 나중에 [꾸미기] 맨 아래에서 다시 열 수 있습니다.</p>
+    <button type="button" class="st-opt" id="st-blank"><span class="st-th"><i></i></span><span class="st-tx"><b>빈 메뉴판으로 시작</b><span>상호명 · 맨 위 · 색만 정하고, 메뉴는 직접 채웁니다</span></span></button>
+    <button type="button" class="st-opt" id="st-photo"><span class="st-th ph"></span><span class="st-tx"><b>사진으로 시작</b><span>지금 쓰는 메뉴판을 찍어 올리면 AI 가 메뉴 이름 · 가격을 읽어 옵니다</span></span></button>   <!-- 275번. 준비 중 → 만듦 -->
+    <button type="button" class="st-opt" id="st-import"><span class="st-th ph"></span><span class="st-tx"><b>저장한 파일 불러오기</b><span>[파일로 저장]으로 받아 둔 메뉴판 파일을 올려 이어서 씁니다</span></span></button>   <!-- 277번 -->
+    <button type="button" class="st-opt" id="st-alps"><span class="st-th lines"><i></i></span><span class="st-tx"><b>알프스 예시로 시작</b><span>알프스 가게의 메뉴판을 그대로 열어 고쳐 씁니다</span></span></button>
+    <div class="row2 end" id="st-closerow" hidden><button type="button" class="bt-text" id="st-close">닫기</button></div>
+  </div>
+  <!-- 275번. 사진으로 시작 — 제미나이 키로 바로 읽기 · 또는 쓰는 AI 앱에서 읽은 답을 붙여 넣기. 둘 다 같은 "읽은 값 확인"으로 간다 -->
+  <div id="st-read" hidden>
+    <h3>사진으로 시작</h3>
+    <p class="sub">메뉴판 사진을 올리면 AI 가 메뉴 이름 · 가격을 읽어 옵니다. 읽은 값은 다음 화면에서 확인하고 고칩니다.</p>
+    <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
+    <img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
+    <div class="st-toprow"><span class="st-lbl">읽는 방법</span>
+    <span class="st-seg" id="st-way"><button type="button" data-w="gem">제미나이로 바로</button><button type="button" data-w="app">다른 AI 앱에서</button></span></div>
+    <div id="st-gem">   <!-- 276번. 사장님 키 칸을 없앴다 — 버셀 서버 함수(api/read.js)가 광진 님의 무료 키로 읽는다 -->
+      <p class="sub st-help">무료로 읽어 주는 기능이라 많이 붐비면 잠시 멈출 수 있습니다. 그때는 [다른 AI 앱에서]를 써 주세요.
+        보낸 사진은 구글이 서비스 개선에 쓸 수 있으니, 메뉴판 말고 다른 것이 찍히지 않게 해 주세요.</p>
+      <p class="sub st-help st-msg" id="st-gemmsg"></p>
+      <div class="row2 end"><button type="button" class="bt-fill" id="st-gemgo">읽기</button></div>
+    </div>
+    <div id="st-app" hidden>
+      <p class="sub st-help">① [요청 글 복사] → ② 쓰는 AI 앱(챗GPT · 제미나이 등)에 사진을 올리고 요청 글을 붙여 넣어 보내기 → ③ AI 의 답을 복사해 아래 칸에 붙여 넣기</p>
+      <div class="row2"><button type="button" class="bt-tonal" id="st-copy">요청 글 복사</button></div>
+      <textarea id="st-ans" class="st-in st-ans" rows="6" placeholder="AI 의 답을 여기에 붙여 넣으세요"></textarea>
+      <p class="sub st-help st-msg" id="st-appmsg"></p>
+      <div class="row2 end"><button type="button" class="bt-fill" id="st-appgo">읽기</button></div>
+    </div>
+    <div class="row2 end foot2"><button type="button" class="bt-text" id="st-read-back">처음 화면으로</button><button type="button" class="bt-text" id="st-manual">직접 입력할게요</button></div>
+  </div>
+  <div id="st-check" hidden>
+    <h3>읽은 값 확인</h3>
+    <p class="sub">노란 칸은 AI 가 자신 없어 한 값입니다. 틀린 곳만 고치고 [다음]을 누르세요. 빈 이름 줄은 빠집니다.</p>
+    <img id="st-cimg" class="st-picimg" alt="올린 메뉴판 사진">
+    <div id="st-ctab" class="st-ctab"></div>
+    <div class="row2 end foot2"><button type="button" class="bt-text" id="st-check-back">다시 읽기</button><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
+  </div>
+  <div id="st-setup" hidden>
+    <h3>빈 메뉴판 만들기</h3>
+    <p class="sub">나중에 [편집] · [꾸미기]에서 전부 다시 바꿀 수 있습니다.</p>
+    <p class="sub st-cap">메뉴판 맨 위가 이렇게 보입니다</p>
+    <div class="st-prev" id="st-prev"></div>
+    <label class="st-lbl" for="st-shop">상호명 <small>저장할 파일 이름에 씁니다</small></label>
+    <input type="text" id="st-shop" class="st-in" autocomplete="off">
+    <p class="sub st-help" id="st-fname"></p>
+    <div class="st-toprow"><span class="st-lbl">메뉴판 맨 위</span>
+    <span class="st-seg" id="st-seg"><button type="button" data-m="text">글자</button><button type="button" data-m="img">로고</button></span></div>   <!-- 268번 [글자 | 로고] · 267번. 꾸미기 창과 같은 이름(규칙 H) · 이름표와 한 줄 -->
+    <div id="st-textrow"><input type="text" id="st-top" class="st-in" aria-label="메뉴판 맨 위 글자" autocomplete="off"><p class="sub st-help">메뉴판 맨 위에 크게 찍히는 글자입니다. 상호명과 따로 적습니다</p></div>   <!-- 267번. 상호명을 따라 쓰지 않는다 -->
+    <div id="st-imgrow" hidden><button type="button" class="st-drop" id="st-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으세요 · 로고는 모양만 따서 한 가지 색으로 칠합니다</small></button>   <!-- 268번 -->
+      <div class="st-tiles" id="st-tiles"></div></div>
+    <input type="file" id="st-file" accept="image/*" hidden>
+    <input type="file" id="st-hfile" accept=".html,text/html" hidden>   <!-- 277번. 불러올 메뉴판 파일 -->
+    <span class="st-lbl">추천 조합 <small>글꼴 · 색 · 모양을 한 번에 — 나중에 [꾸미기]에서 하나씩 바꿀 수 있습니다</small></span>   <!-- 273번. 색 → 추천 조합 -->
+    <div class="st-sw" id="st-sw"></div>
+    <div class="row2 end foot2"><button type="button" class="bt-text" id="st-back">처음 화면으로</button><button type="button" class="bt-fill" id="st-go">이대로 시작</button></div>
   </div>
 </div></dialog>
 
@@ -2122,6 +2468,8 @@ body.editing .editbar{display:flex}
 <!-- 고치는 일은 전부 편집 안에 둔다. 구성·꾸미기가 밖에 나와 있으면 "고치는 곳"이
      두 군데가 되고, 원산지처럼 어느 쪽에 속하는지 애매한 것이 생긴다 -->
 <nav class="bar editbar" id="editbar" aria-label="편집 도구">
+  <button id="b-undo" type="button" class="ib" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)" disabled>↶</button><button id="b-redo" type="button" class="ib" aria-label="다시 하기" title="다시 하기 (Ctrl+Y)" disabled>↷</button>   <!-- 271번. ◀ ▶ 는 분류 옮기기 모양이라 쓰지 않는다(규칙 H) -->
+  <span class="sep"></span>
   <button id="b-style" type="button">꾸미기</button>
   <button id="b-preview" type="button">미리보기</button>
   <span class="sep"></span>
@@ -2129,7 +2477,8 @@ body.editing .editbar{display:flex}
 </nav>
 <nav class="bar">
   <button id="b-edit" type="button">편집</button>
-  <button id="b-save" type="button" class="primary">저장</button>
+  <span class="autost" id="autost" aria-live="polite"></span>   <!-- 277번. 자동 저장 상태 — 늘 보인다(단추가 아니다) -->
+  <button id="b-save" type="button" class="primary">파일로 저장</button>   <!-- 277번. "저장" → "파일로 저장" — 자동 저장과 가른다 -->
   <button id="b-print" type="button" class="primary">인쇄</button>
   <button id="b-help" type="button" title="도움말">?</button>
 </nav>
@@ -2172,18 +2521,23 @@ body.editing .editbar{display:flex}
         크기는 <b>세로 · 가로 각각 따로</b> 기억합니다.</li>
     <li><b>[상단 크기]</b>는 맨 위 영역을 <b>통째로</b> 키우고 줄입니다 — 여백만이 아니라 로고 · 업종 · 한 줄 소개 · 맨 위 모양까지 함께 바뀝니다. 본문 글자 크기와는 별개입니다.</li>
     <li><b>영업시간</b>은 늘 <b>첫 장</b>에 나옵니다. <b>바닥 글 · 식재료 원산지 · 도장</b>은 <b>장마다 따로</b>
-        켜고 내용도 따로 씁니다 — [꾸미기] <b>장별</b> 탭에서 쪽을 고른 뒤 <b>바닥</b>의 체크를 풀면 통째로 사라집니다.
-        맨 위 <b>업종 · 한 줄 소개</b>도 같은 탭 <b>상단</b>의 체크입니다 — 풀면 그 줄만큼 상단이 낮아집니다.</li>
+        켜고 내용도 따로 씁니다 — [꾸미기] <b>장별</b> 탭에서 쪽을 고른 뒤 <b>바닥</b>의 스위치를 끄면 통째로 사라집니다.
+        맨 위 <b>업종 · 한 줄 소개</b>도 같은 탭 <b>상단</b>의 스위치입니다 — 끄면 그 줄만큼 상단이 낮아집니다.</li>   <!-- 263번. 체크 → 스위치 -->
+    <li><b>처음 화면</b>(빈 메뉴판 · 알프스 예시 고르기)은 [꾸미기] <b>전체</b> 탭 맨 아래 <b>[처음 화면으로]</b>에서 다시 엽니다.
+        고르면 지금 메뉴판이 통째로 바뀌지만 되돌리기가 됩니다. 같은 탭 맨 위의 <b>상호명</b>은 저장할 파일 이름이 됩니다.</li>   <!-- 264번 -->
     <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>를, 놓쳤으면 <b>Ctrl+Z</b>를 누르세요.
         인쇄될 모습이 궁금하면 <b>미리보기</b>입니다.</li>
-    <li>고친 곳이 생기면 <b>저장</b>에 불이 들어옵니다. 누르면 <b>새 파일</b>이 다운로드되니 다음부터 그 파일을 여세요.
+    <li>인터넷 주소로 연 메뉴판은 고칠 때마다 이 브라우저에 <b>자동 저장</b>되고(아래 막대의 「✓ 자동 저장됨」), 다음에 같은 주소를 열면 이어집니다.
+        <b>파일로 저장</b>은 메뉴판을 파일로 받아 두는 것 — 백업하거나 다른 컴퓨터로 옮길 때 쓰고, 옮긴 곳에서는 [꾸미기] 맨 아래 <b>[파일에서 불러오기]</b>로 올립니다.
+        컴퓨터 파일로 연 메뉴판은 자동 저장이 안 되니, 고친 뒤 <b>파일로 저장</b>을 눌러 두세요(고친 곳이 있으면 단추에 불이 들어옵니다).   <!-- 277번 -->
         <b>인쇄</b>는 인쇄 창의 <b>「설정 더보기」</b>에서 용지 A4 · <b>배율 기본값(100%)</b> · 여백 "없음" · 배경 그래픽 켜기입니다.
         가장자리의 흰 테두리는 프린터가 못 찍는 자리라 메뉴판이 일부러 비워 둔 것이고, 화면에도 같은 폭(4mm)으로 보입니다. 이보다 넓게 나오는 것은 그 프린터가 더 못 찍는 것입니다.</li>   <!-- 241번 -->
   </ol>
   <!-- 234번. [다시 보지 않기]로 끈 인쇄 안내를 되살릴 곳이 없었다. 늘 보이는 체크로 둔다(24번) -->
   <div class="row2 end foot2">
-    <label class="chk"><input type="checkbox" id="help-ph"> [인쇄]를 누르면 인쇄 안내 먼저 보기</label>
-    <button id="help-close" type="button">닫기</button>
+    <label class="chk"><input type="checkbox" class="m3sw" id="help-ph"> [인쇄]를 누르면 인쇄 안내 먼저 보기</label>
+    <button id="help-guide" type="button" class="bt-text">둘러보기 다시 보기</button>   <!-- 269번. 가이드를 다시 보는 곳(234번과 같은 자리) -->
+    <button id="help-close" type="button" class="bt-text">닫기</button>
   </div>
 </div></dialog>
 
@@ -2193,9 +2547,10 @@ body.editing .editbar{display:flex}
      ═══════════════════════════════════════════════════════════════════ -->
 <script id="menu-data">
 /* 메뉴 내용 — name: 이름, price: 숫자면 쉼표 자동(글자도 가능), vol: 용량, desc: 메뉴 설명, pick:true 면 추천 표시, out:true 면 품절 */
-const MENU = {"brand": {"title": "요리주점", "sub": "파스타랑 생맥주가 맛있는 집"}, "hours": [{"label": "점심", "time": "12:00 — 14:00"}, {"label": "저녁", "time": "17:00 — 24:00 (가끔 변동)"}], "sheets": [[[{"name": "식사", "en": "Meals", "items": [{"name": "단호박 크림 파스타", "price": 14000, "pick": true, "en": "Sweet Pumpkin Cream Pasta"}, {"name": "고사리 들깨 크림 파스타", "price": 14000, "pick": true, "en": "Bracken & Perilla Seed Cream Pasta"}, {"name": "오징어 페코리노 파스타", "price": 14000, "en": "Squid & Pecorino Pasta"}, {"name": "알프스 카레 파스타", "price": 11000, "pick": true, "en": "Alps Curry Pasta"}, {"name": "깻잎새우 파스타", "price": 11000, "en": "Perilla Leaf & Shrimp Pasta"}, {"name": "시오콘부새우 파스타", "price": 11000, "en": "Shio-Kombu Shrimp Pasta"}, {"name": "태국식 돼지고기 덮밥", "price": 10000, "en": "Thai-Style Pork Rice Bowl"}, {"name": "야끼소바", "price": 9000, "en": "Yakisoba", "pick": true}, {"name": "오일 파스타", "price": 9000, "en": "Aglio e Olio"}, {"name": "크림 파스타", "price": 9000, "en": "Cream Pasta"}, {"name": "나폴리탄 스파게티", "price": 9000, "en": "Napolitan Spaghetti"}]}, {"name": "안주", "en": "Side Dishes", "items": [{"name": "生 연어구이", "price": 10000, "en": "Grilled Salmon", "pick": true}, {"name": "국물바지락", "price": 11000, "en": "Clams in Broth"}, {"name": "바지락 마라볶음", "price": 11000, "en": "Mala Stir-Fried Clams", "pick": true}, {"name": "냉수육", "price": 11000, "en": "Chilled Boiled Pork", "pick": true}, {"name": "피망", "price": 9000, "en": "Stir-Fried Green Peppers"}, {"name": "마늘쫑돼지고기볶음", "price": 9000, "en": "Pork & Garlic Scape Stir-Fry"}, {"name": "단짠소고기볶음", "price": 9000, "en": "Sweet & Salty Beef Stir-Fry"}, {"name": "마라소고기볶음", "price": 9000, "en": "Mala Beef Stir-Fry"}]}], [{"name": "하이볼", "en": "Highball", "items": [{"name": "단풍잎 하이볼", "price": 10000, "pick": true, "desc": "버번, 메이플, 진저에일", "en": "Maple Leaf Highball"}, {"name": "버번 하이볼", "price": "가격문의", "vol": "280ml", "en": "Bourbon Highball"}, {"name": "블론드 하이볼", "price": 8000, "vol": "280ml", "en": "Blonde Highball"}, {"name": "듀어스 위스키 하이볼", "price": 8000, "vol": "280ml", "en": "Dewar's Whisky Highball"}, {"name": "고든스 진 하이볼", "price": 8000, "vol": "280ml", "pick": true, "en": "Gordon's Gin Highball"}, {"name": "츠루우메 유즈 하이볼", "price": 10000, "vol": "280ml", "pick": true, "en": "Tsuru Ume Yuzu Highball"}, {"name": "글렌피딕 12y 하이볼", "price": 13000, "en": "Glenfiddich 12y Highball", "vol": "280ml"}], "notes": ["가끔 다른 하이볼, 잔술도 있으니 편히 문의해 주세요", "소다(클래식) 혹은 토닉(단맛) 선택 가능하세요", "샷 주문은 문의 주세요"]}, {"name": "소주", "en": "Soju", "items": [{"name": "대선", "price": 7000, "en": "Daesun Soju"}, {"name": "짜배기 (화요 · 포트와인)", "price": 7000, "en": "Jjabaegi (Hwayo + Port Wine)", "pick": true}, {"name": "화요", "price": 28000, "en": "Hwayo"}]}, {"name": "생맥주", "en": "Draft Beer", "items": [{"name": "生 맥주", "price": 5000, "en": "Draft Beer"}, {"name": "生 맥주 + 포트와인", "price": 8000, "en": "Draft Beer + Port Wine", "pick": true}, {"name": "生 맥주 + 연태고량주", "price": 8000, "en": "Draft Beer + Yantai Baijiu", "pick": true}]}, {"name": "음료", "en": "Drinks", "items": [{"name": "콜라 · 사이다", "price": 3000, "en": "Cola / Cider"}]}]], [[{"name": "레드", "en": "Red", "wine": "red", "items": [{"name": "사페라비", "label": "SAPERAVI", "origin": "조지아, 카헤티", "grapes": "사페라비 100", "aroma": "오크, 바닐라, 토바코, 검은과실, 체리", "taste": "다크베리향이 어우러진 복합적 부케, 부드러운 질감과 생동감 있는 산미", "price": 59000, "score": {"sweet": 1, "body": 4, "acid": 4, "tannin": 4}}, {"name": "로드리게스 산조 데스피야다도", "label": "DESPERADO", "origin": "스페인, 카스티야 이 레온", "grapes": "시라 70 · 멜롯 20 · 템프라니요 10", "aroma": "야생딸기, 블랙베리, 정향, 후추", "taste": "바디감이 좋으며, 생기 넘치는 산도와 풍부한 과일향이 두드러짐", "price": 52000, "score": {"sweet": 1, "body": 4, "acid": 3, "tannin": 3}}, {"name": "몬테 카스카스 콜헤이타 도루 레드", "label": "MONTE CASCAS", "origin": "포르투갈, DOC 도루", "grapes": "투리가 나쇼날 60 · 투리가 프랑 30 · 틴타 로리즈 10", "aroma": "오렌지, 검은과실, 커피, 초콜렛", "taste": "자두와 익은 체리, 지속적인 피니쉬 안에 균형잡힌 구조감", "price": 45000, "score": {"sweet": 1, "body": 4, "acid": 3, "tannin": 4}}]}], [{"name": "화이트", "en": "White", "wine": "white", "items": [{"name": "알라자니 밸리 화이트 2023", "label": "ALAZANI VALLEY", "origin": "조지아, 카헤티", "grapes": "르카치텔리 70 · 카후리 므츠바네 30", "aroma": "배, 멜론, 사과, 살구", "taste": "살짝 달콤, 산뜻하고 밸런스와 구조감이 매우 좋음", "price": 59000, "score": {"sweet": 3, "body": 2, "acid": 3}}, {"name": "소뇨 디 울리쎄 샤도네이 말바시아", "label": "SOGNO DI ULISSE", "origin": "이태리, 아부르쪼", "grapes": "샤도네이 80 · 말바시아 20", "aroma": "시트러스, 복숭아, 미네랄", "taste": "부드럽고 크리미한 맛과 적당한 산도, 신선한 과실향과 뛰어난 감칠맛", "price": 45000, "score": {"sweet": 2, "body": 3, "acid": 3}}]}, {"name": "로제", "en": "Rosé", "wine": "rose", "items": [{"name": "트레디베리 로사토", "label": "TREDIBERRI", "origin": "이태리, 라 모라 · 바스티아 몬도비", "grapes": "네비올로 95 · 돌체토 5", "aroma": "딸기, 로즈, 허브, 버찌", "taste": "로즈 아로마가 화사하게 퍼지며 구조감이 좋음. 여운이 길고 활기찬 산미와 부드러운 질감", "price": 50000, "score": {"sweet": 2, "body": 2, "acid": 4}}]}]]], "feet": [{"notes": ["* 모든 메뉴 포장 가능합니다"], "origin": ""}, {"notes": [], "origin": ""}]};
+const MENU = {"brand": {"shop": "알프스", "title": "요리주점", "sub": "파스타랑 생맥주가 맛있는 집"}, "hours": [{"label": "점심", "time": "12:00 — 14:00"}, {"label": "저녁", "time": "17:00 — 24:00 (가끔 변동)"}], "sheets": [[[{"name": "식사", "en": "Meals", "items": [{"name": "단호박 크림 파스타", "price": 14000, "pick": true, "en": "Sweet Pumpkin Cream Pasta"}, {"name": "고사리 들깨 크림 파스타", "price": 14000, "pick": true, "en": "Bracken & Perilla Seed Cream Pasta"}, {"name": "오징어 페코리노 파스타", "price": 14000, "en": "Squid & Pecorino Pasta"}, {"name": "알프스 카레 파스타", "price": 11000, "pick": true, "en": "Alps Curry Pasta"}, {"name": "깻잎새우 파스타", "price": 11000, "en": "Perilla Leaf & Shrimp Pasta"}, {"name": "시오콘부새우 파스타", "price": 11000, "en": "Shio-Kombu Shrimp Pasta"}, {"name": "태국식 돼지고기 덮밥", "price": 10000, "en": "Thai-Style Pork Rice Bowl"}, {"name": "야끼소바", "price": 9000, "en": "Yakisoba", "pick": true}, {"name": "오일 파스타", "price": 9000, "en": "Aglio e Olio"}, {"name": "크림 파스타", "price": 9000, "en": "Cream Pasta"}, {"name": "나폴리탄 스파게티", "price": 9000, "en": "Napolitan Spaghetti"}]}, {"name": "안주", "en": "Side Dishes", "items": [{"name": "生 연어구이", "price": 10000, "en": "Grilled Salmon", "pick": true}, {"name": "국물바지락", "price": 11000, "en": "Clams in Broth"}, {"name": "바지락 마라볶음", "price": 11000, "en": "Mala Stir-Fried Clams", "pick": true}, {"name": "냉수육", "price": 11000, "en": "Chilled Boiled Pork", "pick": true}, {"name": "피망", "price": 9000, "en": "Stir-Fried Green Peppers"}, {"name": "마늘쫑돼지고기볶음", "price": 9000, "en": "Pork & Garlic Scape Stir-Fry"}, {"name": "단짠소고기볶음", "price": 9000, "en": "Sweet & Salty Beef Stir-Fry"}, {"name": "마라소고기볶음", "price": 9000, "en": "Mala Beef Stir-Fry"}]}], [{"name": "하이볼", "en": "Highball", "items": [{"name": "단풍잎 하이볼", "price": 10000, "pick": true, "desc": "버번, 메이플, 진저에일", "en": "Maple Leaf Highball"}, {"name": "버번 하이볼", "price": "가격문의", "vol": "280ml", "en": "Bourbon Highball"}, {"name": "블론드 하이볼", "price": 8000, "vol": "280ml", "en": "Blonde Highball"}, {"name": "듀어스 위스키 하이볼", "price": 8000, "vol": "280ml", "en": "Dewar's Whisky Highball"}, {"name": "고든스 진 하이볼", "price": 8000, "vol": "280ml", "pick": true, "en": "Gordon's Gin Highball"}, {"name": "츠루우메 유즈 하이볼", "price": 10000, "vol": "280ml", "pick": true, "en": "Tsuru Ume Yuzu Highball"}, {"name": "글렌피딕 12y 하이볼", "price": 13000, "en": "Glenfiddich 12y Highball", "vol": "280ml"}], "notes": ["가끔 다른 하이볼, 잔술도 있으니 편히 문의해 주세요", "소다(클래식) 혹은 토닉(단맛) 선택 가능하세요", "샷 주문은 문의 주세요"]}, {"name": "소주", "en": "Soju", "items": [{"name": "대선", "price": 7000, "en": "Daesun Soju"}, {"name": "짜배기 (화요 · 포트와인)", "price": 7000, "en": "Jjabaegi (Hwayo + Port Wine)", "pick": true}, {"name": "화요", "price": 28000, "en": "Hwayo"}]}, {"name": "생맥주", "en": "Draft Beer", "items": [{"name": "生 맥주", "price": 5000, "en": "Draft Beer"}, {"name": "生 맥주 + 포트와인", "price": 8000, "en": "Draft Beer + Port Wine", "pick": true}, {"name": "生 맥주 + 연태고량주", "price": 8000, "en": "Draft Beer + Yantai Baijiu", "pick": true}]}, {"name": "음료", "en": "Drinks", "items": [{"name": "콜라 · 사이다", "price": 3000, "en": "Cola / Cider"}]}]], [[{"name": "레드", "en": "Red", "wine": "red", "items": [{"name": "사페라비", "label": "SAPERAVI", "origin": "조지아, 카헤티", "grapes": "사페라비 100", "aroma": "오크, 바닐라, 토바코, 검은과실, 체리", "taste": "다크베리향이 어우러진 복합적 부케, 부드러운 질감과 생동감 있는 산미", "price": 59000, "score": {"sweet": 1, "body": 4, "acid": 4, "tannin": 4}}, {"name": "로드리게스 산조 데스피야다도", "label": "DESPERADO", "origin": "스페인, 카스티야 이 레온", "grapes": "시라 70 · 멜롯 20 · 템프라니요 10", "aroma": "야생딸기, 블랙베리, 정향, 후추", "taste": "바디감이 좋으며, 생기 넘치는 산도와 풍부한 과일향이 두드러짐", "price": 52000, "score": {"sweet": 1, "body": 4, "acid": 3, "tannin": 3}}, {"name": "몬테 카스카스 콜헤이타 도루 레드", "label": "MONTE CASCAS", "origin": "포르투갈, DOC 도루", "grapes": "투리가 나쇼날 60 · 투리가 프랑 30 · 틴타 로리즈 10", "aroma": "오렌지, 검은과실, 커피, 초콜렛", "taste": "자두와 익은 체리, 지속적인 피니쉬 안에 균형잡힌 구조감", "price": 45000, "score": {"sweet": 1, "body": 4, "acid": 3, "tannin": 4}}]}], [{"name": "화이트", "en": "White", "wine": "white", "items": [{"name": "알라자니 밸리 화이트 2023", "label": "ALAZANI VALLEY", "origin": "조지아, 카헤티", "grapes": "르카치텔리 70 · 카후리 므츠바네 30", "aroma": "배, 멜론, 사과, 살구", "taste": "살짝 달콤, 산뜻하고 밸런스와 구조감이 매우 좋음", "price": 59000, "score": {"sweet": 3, "body": 2, "acid": 3}}, {"name": "소뇨 디 울리쎄 샤도네이 말바시아", "label": "SOGNO DI ULISSE", "origin": "이태리, 아부르쪼", "grapes": "샤도네이 80 · 말바시아 20", "aroma": "시트러스, 복숭아, 미네랄", "taste": "부드럽고 크리미한 맛과 적당한 산도, 신선한 과실향과 뛰어난 감칠맛", "price": 45000, "score": {"sweet": 2, "body": 3, "acid": 3}}]}, {"name": "로제", "en": "Rosé", "wine": "rose", "items": [{"name": "트레디베리 로사토", "label": "TREDIBERRI", "origin": "이태리, 라 모라 · 바스티아 몬도비", "grapes": "네비올로 95 · 돌체토 5", "aroma": "딸기, 로즈, 허브, 버찌", "taste": "로즈 아로마가 화사하게 퍼지며 구조감이 좋음. 여운이 길고 활기찬 산미와 부드러운 질감", "price": 50000, "score": {"sweet": 2, "body": 2, "acid": 4}}]}]]], "feet": [{"notes": ["* 모든 메뉴 포장 가능합니다"], "origin": ""}, {"notes": [], "origin": ""}]};
 
 const SETTINGS = {
+  "startScreen": true,
   "font": "gungseo",
   "theme": "night",
   "custom": {
@@ -2240,6 +2595,26 @@ const SETTINGS = {
 <!-- ▲▲▲ 메뉴 내용 끝 ▲▲▲ -->
 
 <script>
+/* ── 277번. 자동 저장 · 불러오기 — 파일을 열 때 가장 먼저 ─────────────────────────────────────────
+   · 버셀 주소(http · https)에서만 자동 저장한다. 브라우저 저장소는 주소마다 따로라, 58번이 걷어낸 까닭("컴퓨터 파일끼리 저장소를 같이 써
+     지난주 백업을 열면 최근 내용이 섞인다")이 여기서는 없다. 컴퓨터 파일(file://)로 열면 자동 저장을 하지 않는다 — 58번 그대로
+   · 창을 띄우지 않는다(58번의 둘째 까닭) — 바로 이어서 열고 알림 한 줄
+   · 자동 저장본을 쓰는 것은 "처음 여는 파일"(첫 화면 표시가 있는 원본 · 버셀의 index.html)일 때만. 자기 내용이 든 파일(알프스판 · 저장본)은 그 내용 그대로
+   · [파일에서 불러오기]는 고른 파일의 메뉴 · 설정을 이 탭의 sessionStorage 에 담고 다시 연다 — 파일을 열 때의 옛 값 정리를 똑같이 거친다 */
+const AUTO_KEY = "menupan-auto", ON_WEB = /^https?:$/.test(location.protocol);
+let autoLoaded = "";
+(function(){
+  let imp = null, prev = null;
+  try { imp = sessionStorage.getItem("menupan-import"); sessionStorage.removeItem("menupan-import"); } catch(e){}
+  try {
+    const raw = imp || (ON_WEB && SETTINGS.startScreen === true ? localStorage.getItem(AUTO_KEY) : null);
+    if (!raw) return;
+    const d = JSON.parse(raw); if (!d || !d.menu || !d.settings) return;
+    Object.keys(MENU).forEach(k => delete MENU[k]);         Object.assign(MENU, d.menu);
+    Object.keys(SETTINGS).forEach(k => delete SETTINGS[k]); Object.assign(SETTINGS, d.settings); delete SETTINGS.startScreen;
+    autoLoaded = imp ? "import" : "auto";
+  } catch(e){}
+})();
 /* ── 로고 ──────────────────────────────────────────────────────────── */
 const LOGO = "data:image/png;base64,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";
 
@@ -2819,13 +3194,27 @@ const FONTS = {
   serif:{    url:"family=Noto+Serif+KR:wght@400;500;700&family=Shippori+Mincho:wght@400;500;600;700",
              kr:"'Noto Serif KR','Nanum Myeongjo',serif", jp:"'Shippori Mincho','Noto Serif KR',serif" },
   plex:{     url:"family=IBM+Plex+Sans+KR:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700",
-             kr:"'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif", jp:"'Zen Kaku Gothic New','IBM Plex Sans KR',sans-serif" }
+             kr:"'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif", jp:"'Zen Kaku Gothic New','IBM Plex Sans KR',sans-serif" },
+  /* 272번. 글꼴 셋 추가 — 구글 글꼴에 있는 무료(오픈 폰트 라이선스) 한국어 글꼴만(글꼴은 구글에서 받아 온다, 248번). 160번 기준대로 본문용 · 폭이 고른 것.
+     굵게(700)가 있는 것만. 업종 칸(.jp) 짝은 계열이 같은 것으로 */
+  nanum:{    url:"family=Nanum+Gothic:wght@400;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700",
+             kr:"'Nanum Gothic','Apple SD Gothic Neo',sans-serif", jp:"'Zen Kaku Gothic New','Nanum Gothic',sans-serif" },
+  gothica1:{ url:"family=Gothic+A1:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700",
+             kr:"'Gothic A1','Apple SD Gothic Neo',sans-serif", jp:"'Zen Kaku Gothic New','Gothic A1',sans-serif" },
+  hahmlet:{  url:"family=Hahmlet:wght@400;500;700&family=Shippori+Mincho:wght@400;500;600;700",
+             kr:"'Hahmlet','Nanum Myeongjo',serif", jp:"'Shippori Mincho','Hahmlet',serif" }
 };
 const THEMES = {
   night: { paper:"#efe3c9", ink:"#1e1811", soft:"#6f6047", band:"#1c3145", accent:"#a53528", rule:"#c9b795" },
   sumi:  { paper:"#f2ede3", ink:"#1a1a18", soft:"#6d6a63", band:"#232220", accent:"#514c45", rule:"#cfc8ba" },
   pat:   { paper:"#f3e7d5", ink:"#241a16", soft:"#7a604f", band:"#5b2230", accent:"#9c4a2f", rule:"#d3bda4" },
-  forest:{ paper:"#eee7d2", ink:"#1c211b", soft:"#5f6858", band:"#24382c", accent:"#8a6a25", rule:"#c6c0a6" }
+  forest:{ paper:"#eee7d2", ink:"#1c211b", soft:"#5f6858", band:"#24382c", accent:"#8a6a25", rule:"#c6c0a6" },
+  /* 273번. 콘셉용 색 조합 셋. board 는 어두운 판(종이가 어둡고 글자가 밝다) — 역할별로 칠하므로 새 갈림길이 없다.
+     띠는 호박색이라 종이색(어두운) 로고가 띠 위에서 또렷하다 */
+  board: { paper:"#2b1d12", ink:"#f3e6cc", soft:"#cdb792", band:"#c9861c", accent:"#e0a33a", rule:"#6b5236" },
+  chili: { paper:"#fffaf2", ink:"#1d1a17", soft:"#6b625a", band:"#d2462f", accent:"#b8321f", rule:"#e8d9c6" },
+  cafe:  { paper:"#f4ede1", ink:"#2b211a", soft:"#7c6a58", band:"#6f4e37", accent:"#a0724a", rule:"#d8c9b4" },
+  milk:  { paper:"#fbfaf7", ink:"#1f1f1d", soft:"#77736c", band:"#1f1f1d", accent:"#8a6a4a", rule:"#dcd8d0" }   // 카페 — 흰 종이 · 먹 글자 · 커피색 포인트
 };
 
 /* ── 옛 저장본 호환 ─────────────────────────────────────────────────
@@ -2855,7 +3244,7 @@ delete MENU.footline;
 const pickIn = (v, list, dflt) => list.includes(v) ? v : dflt;
 SETTINGS.font   = pickIn(SETTINGS.font,   Object.keys(FONTS),  "gungseo");
 SETTINGS.theme  = pickIn(SETTINGS.theme,  [...Object.keys(THEMES), "custom"], "night");
-SETTINGS.mark   = pickIn(SETTINGS.mark,   ["★","●","◆","✿"], "★");
+SETTINGS.mark   = markOk(SETTINGS.mark) ? SETTINGS.mark : "★";   // 274번. 기호 넷 말고 글자도(한글 4자 · 영문 6자까지)
 SETTINGS.pageno = pickIn(SETTINGS.pageno, ["of","num","none"], "of");
 /* 179번. 정렬도 목록에 없는 값이면 기본값으로 — 고를 수 있는 값과 CSS 는 한 곳에(131번) */
 const ALIGNS = ["left","center","right"];
@@ -3006,7 +3395,11 @@ const el = (t,c) => { const n=document.createElement(t); if(c) n.className=c; re
 const won = v => typeof v === "number" ? v.toLocaleString("ko-KR") : v;
 const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 /* 바닥 한 줄에 섞여 있는 추천 표시 글자만 포인트색으로 칠한다 (편집 중에는 쓰지 않는다) */
-const markHTML = s => esc(s).split(SETTINGS.mark).join('<i>'+SETTINGS.mark+'</i>');
+/* 274번. 글자 표시("추천" 등)면 줄 맨 앞의 것만 칠한다 — 문장 속 같은 낱말까지 칠하면 안 된다 */
+const markIsSym = m => m.length === 1;
+const markHTML = s => markIsSym(SETTINGS.mark) ? esc(s).split(SETTINGS.mark).join('<i>'+SETTINGS.mark+'</i>')
+  : (s.startsWith(SETTINGS.mark) ? '<i>' + esc(SETTINGS.mark) + '</i>' + esc(s.slice(SETTINGS.mark.length)) : esc(s));
+function markOk(v){ v = String(v || "").trim(); if (!v || v === "__own") return false; return /[가-힣]/.test(v) ? v.length <= 4 : v.length <= 6; }
 let editing = false, dirty = false;
 
 /* 118번. 버튼 안 기호가 상자 가운데에 오지 않는다("별이 아래로 쏠렸다").
@@ -3035,7 +3428,7 @@ function glyph(ch){
   g.innerHTML = ICON[ch]
     ? '<svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor">' + ICON[ch] + '</svg>'
     : '<svg viewBox="0 0 20 20" aria-hidden="true"><text x="10" y="10" text-anchor="middle"'
-      + ' dominant-baseline="middle" font-size="15.5" fill="currentColor">' + esc(ch) + '</text></svg>';
+      + ' dominant-baseline="middle" font-size="' + (ch.length > 1 ? 7 : 15.5) + '" fill="currentColor">' + esc(ch.length > 2 ? ch.slice(0, 2) : ch) + '</text></svg>';   // 274번. 글자 표시는 단추에 앞 두 자만 작게
   return g;
 }
 /* 편집 중에만 붙는 ✕ 버튼. 줄 안의 편집 대상 span과 형제로 둬야 한다 —
@@ -3257,7 +3650,7 @@ function drawSection(sec, path){
     }
     // 이름·용량 뒤에 붙인다. 용량은 품목을 특정하는 값이라 이름에 딸린 것이고,
     // 추천 표시는 그 품목에 대한 표시다. 표시가 이름과 용량 사이에 끼면 둘이 갈라진다
-    if (it.pick){ const t=el("span","pick"); t.textContent=SETTINGS.mark; name.appendChild(t); }
+    if (it.pick){ const t=el("span", markIsSym(SETTINGS.mark) ? "pick" : "pick tx"); t.textContent=SETTINGS.mark; name.appendChild(t); }   // 274번. 글자 표시는 작은 알약
     /* 120번. 품절은 이름에 매달지 않고 **점선과 가격 사이 고정 자리**에 둔다.
        이름 뒤에 용량 · ★ · 품절이 줄줄이 붙어 "지저분하다"는 지적. 자리를 고정하면
        품절 줄이 여럿이어도 세로로 줄이 맞고, 이름 줄은 이름·용량만 남는다 */
@@ -3589,7 +3982,7 @@ function drawWineItem(sec, it, i, path, blank){
   const name = el("span","name");
   const nm = el("span"); nm.textContent = it.name; nm.dataset.path = p+".name"; nm.dataset.ml = "1";   // 179번. 와인 이름도 Enter 로 줄을 나눈다
   name.appendChild(nm);
-  if (it.pick){ const t=el("span","pick"); t.textContent=SETTINGS.mark; name.appendChild(t); }
+  if (it.pick){ const t=el("span", markIsSym(SETTINGS.mark) ? "pick" : "pick tx"); t.textContent=SETTINGS.mark; name.appendChild(t); }   // 274번. 글자 표시는 작은 알약
   const head = el("div","wname");
   if (editing){
     const { tools, mvbox } = itemTools(sec, it, i, path, { desc:false });
@@ -3633,7 +4026,9 @@ function drawSheet(spec){
   const PS = P(spec.pi), FT = F(spec.pi);   // 152번. 이 장의 설정 · 바닥
   const sheet = el("div","sheet"+(spec.land?" land":"")+(SETTINGS.showDots===false?" nodots":"")
     /* 179번. 분류 이름 · 와인 이름 정렬은 파일 전체에 하나씩이다(두 장 모두에 걸린다) */
-    +" sa-"+(SETTINGS.secAlign||"left")+" wa-"+(SETTINGS.wineAlign||"left"));
+    +" sa-"+(SETTINGS.secAlign||"left")+" wa-"+(SETTINGS.wineAlign||"left")
+    +(SETTINGS.paper && SETTINGS.paper!=="grain" ? " pp-"+SETTINGS.paper : "")+" sh-"+(SETTINGS.secStyle||"line")
+    +(SETTINGS.leader ? " ld-"+SETTINGS.leader : ""));   // 273번. 종이 무늬 · 분류 제목 · 점선 모양(모양만)   // 273번. 종이 결 · 분류 제목 모양(모양만)
   sheet.dataset.pi = spec.pi;
   // 장별 CSS 변수는 종이에 직접 — 배율 · 상단 크기 · 로고 색(:root 가 아니라 여기여야 장마다 다를 수 있다)
   /* 182번. 그릴 때 쓰는 것은 **먹인 값**이다. 정한 값을 그대로 쓰면 `applyScale()` · `grew()` 가
@@ -3643,7 +4038,6 @@ function drawSheet(spec){
   sheet.style.setProperty("--logo", logoColorOf(PS));
 
   const noren = el("header","noren nr-" + (PS.noren || "flat"));
-  noren.appendChild(el("div","logo"));
   // 다른 편집 자리와 같은 모양으로 맞춘다. div 에 직접 걸면 테두리가 줄 전체로 퍼진다
   const brand = (cls, key) => {
     const box = el("div", cls), v = el("span","bv");
@@ -3655,6 +4049,8 @@ function drawSheet(spec){
      끄면 아예 안 그리므로 그 줄과 여백(`.ko` 의 margin-top)만큼 상단 높이가 저절로
      줄어든다 — 32번에서 술 자리 여백을 `.ko` 에서 `.noren` 으로 옮겨 둔 덕이다.
      켜져 있으면 키가 없다(`!== false`, 102번) */
+  /* 264번. 맨 위는 그림(로고 마스크) 또는 글자. 글자는 종이 위에서 바로 고치는 칸이다(brand.top) */
+  noren.appendChild(SETTINGS.topMode === "text" ? brand("logo txt", "top") : el("div","logo"));
   if (PS.showTitle !== false) noren.append(brand("jp","title"));
   if (PS.showSub   !== false) noren.append(brand("ko","sub"));
   sheet.appendChild(noren);
@@ -4052,6 +4448,7 @@ function wineFit(only){
   b.classList.remove("measuring"); if (tmp) b.classList.remove("preview");
 }
 function render(){
+  syncTitle();   // 264번
   const box = $("#pages"); box.innerHTML = "";
   buildPages().forEach(p => box.appendChild(drawSheet(p)));
   document.body.classList.toggle("editing", editing);
@@ -4184,7 +4581,7 @@ function nearAdd(el, x, y){
 }
 // 커서(포커스)도 같은 길로 넣는다. :focus-within 을 CSS 에 따로 두면 각주에 커서를
 // 둔 채 다른 곳에 마우스를 올렸을 때 **두 묶음이 동시에** 뜬다 (실측했다)
-document.addEventListener("focusin", e => { if (!editing) return; setAddHere(addTarget(e.target)); setRowHere(e.target.closest(ROWSEL)); });
+document.addEventListener("focusin", e => { if (!editing || gi >= 0) return; setAddHere(addTarget(e.target)); setRowHere(e.target.closest(ROWSEL)); });   // 269번. 가이드 중에는 억지로 켠 도구를 건드리지 않는다
 /* 238번. **줄 밖으로 옮긴 도구(`fitRowTools`)로 비스듬히 가는 길.** 도구가 줄 위 · 아래에 뜨면, 줄 왼쪽에서 곧장 가는
    동안 옆 줄을 먼저 밟아 대상이 바뀐다(가로 2단 마지막 줄에서 네 단추 전부 실패). `nearTools` 를 위로 넓히면 윗줄로
    못 넘어가므로(87번) 넓이가 아니라 **방향**으로 본다 — 마지막으로 줄 안에 있던 점과 도구 상자의 가까운 변이 이루는
@@ -4210,7 +4607,7 @@ function aimingAtTools(row, x, y, prev){
 document.addEventListener("pointermove", e => {
   ptr = {x:e.clientX, y:e.clientY};
   const prev = lastPtr; lastPtr = ptr;
-  if (!editing) return;
+  if (!editing || gi >= 0) return;   // 269번. 가이드의 가림막 위는 "종이 밖"이라 켠 도구를 꺼 버렸다
   const r = e.target.closest(ROWSEL);
   if (rowHere && r !== rowHere && (nearTools(rowHere, e.clientX, e.clientY) || aimingAtTools(rowHere, e.clientX, e.clientY, prev))){ /* 제 상자 근처 · 상자로 가는 길은 지킨다 */ }
   else if (r) setRowHere(r);                 // 못 찾으면 그대로 둔다
@@ -4225,7 +4622,7 @@ document.addEventListener("pointermove", e => {
 // 안 하면 ＋ 를 한 번 누른 뒤 (다시 움직이기 전까지) 묶음이 사라져 두 번 연속 못 누른다
 function syncAddHere(){
   addHere = null; rowHere = null;
-  if (!editing || !ptr) return;
+  if (!editing || !ptr || gi >= 0) return;   // 269번
   const el = document.elementFromPoint(ptr.x, ptr.y);
   if (el){ setAddHere(addTarget(el)); setRowHere(el.closest(ROWSEL)); }
 }
@@ -4251,21 +4648,21 @@ function setDeep(path, value){
    토스트 되돌리기는 한 번뿐이고 5초 뒤 사라진다. 늦게 알아채면 끝이므로
    바뀌기 직전 상태를 쌓아 두고 Ctrl+Z 로 거슬러 올라간다.
 
-   ※ 한때 localStorage 에 임시본을 남겨 두었다가 걷어냈다. file:// 의 저장소는
-     **로컬 HTML 파일끼리 전부 공유**되므로, 지난주 백업을 열어봤을 뿐인데
-     "저장하지 않은 내용이 있습니다"가 뜨고 불러오면 그 옛 파일에 최근 내용이
-     섞인다. 구해 주는 것보다 헷갈리게 하는 쪽이 컸다. 저장 안 하고 닫는 것은
-     beforeunload 경고가 막는다. **이 파일은 파일 하나가 전부여야 한다** */
+   ※ 한때 localStorage 에 임시본을 남겨 두었다가 걷어냈다(58번). file:// 의 저장소는
+     **로컬 HTML 파일끼리 전부 공유**되므로, 지난주 백업을 열어봤을 뿐인데 옛 파일에 최근 내용이 섞였다.
+     277번에서 **버셀 주소(http · https)에서만** 자동 저장을 되살렸다 — 저장소가 주소마다 따로라 섞이지 않는다.
+     컴퓨터 파일로 열면 지금도 자동 저장을 하지 않고, 저장 안 하고 닫는 것은 beforeunload 경고가 막는다 */
 const snapshot = () => JSON.stringify({ menu:MENU, settings:SETTINGS });
 let lastState = "", typeTimer = 0;
-const undoStack = [];
+const undoStack = [], redoStack = [];   // 271번. 다시 하기 — 새로 고치면 비운다
+function syncUndoBtns(){ const u = $("#b-undo"), r = $("#b-redo"); if (u) u.disabled = !undoStack.length; if (r) r.disabled = !redoStack.length; }
 
 function applyState(str){
   const d = JSON.parse(str);
   // MENU/SETTINGS 는 const 라 통째로 바꿀 수 없다. 안을 비우고 채운다
   Object.keys(MENU).forEach(k => delete MENU[k]);      Object.assign(MENU, d.menu);
   Object.keys(SETTINGS).forEach(k => delete SETTINGS[k]); Object.assign(SETTINGS, d.settings);
-  syncControls(); applyLook(); render();
+  syncControls(); applyLook(); render(); autoSave();   // 277번. 되돌리기 · 다시 하기도 자동 저장
 }
 /* 바뀐 뒤에 불리므로, 쌓는 것은 "직전 상태"인 lastState 다 */
 function pushHistory(){
@@ -4274,15 +4671,42 @@ function pushHistory(){
   undoStack.push(lastState);
   if (undoStack.length > 60) undoStack.shift();
   lastState = now;
+  redoStack.length = 0; syncUndoBtns();   // 271번. 새로 고치면 다시 하기는 비운다
+  autoSave();   // 277번
+}
+/* 277번. 자동 저장 — 버셀 주소에서만. 손을 멈추면 한 번(0.4초). 상태 글자는 늘 보인다 */
+let autoT = 0, autoAt = null;
+function autoStatus(k){
+  const n = $("#autost"); if (!n) return;
+  if (!ON_WEB){ n.textContent = "자동 저장 안 됨"; n.title = "컴퓨터 파일로 연 메뉴판은 자동 저장되지 않습니다. [파일로 저장]을 눌러야 남습니다"; n.className = "autost off"; return; }
+  n.className = "autost" + (k === "fail" ? " fail" : "");
+  n.textContent = k === "saving" ? "저장 중…" : k === "fail" ? "자동 저장 실패" : "✓ 자동 저장됨";
+  n.title = k === "fail" ? "이 브라우저에 저장하지 못했습니다(공간이 모자랄 수 있습니다). [파일로 저장]으로 받아 두세요"
+    : "이 컴퓨터의 이 브라우저에 자동으로 저장됩니다" + (autoAt ? " — 마지막 " + autoAt.toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" }) : "") + ". 다른 컴퓨터로 옮기거나 백업하려면 [파일로 저장]";
+}
+function autoSave(){
+  if (!ON_WEB || SETTINGS.startScreen === true) return;
+  clearTimeout(autoT); autoStatus("saving");
+  autoT = setTimeout(() => { try { localStorage.setItem(AUTO_KEY, snapshot()); autoAt = new Date(); autoStatus("ok"); } catch(e){ autoStatus("fail"); } }, 400);
 }
 function stepBack(){
   const prev = undoStack.pop();
   if (prev === undefined){ toast("되돌릴 것이 없습니다", null); return; }
+  redoStack.push(snapshot());   // 271번. 되돌리기 전 상태를 다시 하기로
   applyState(prev);
   resetShown();                       // 182번. 되돌리기도 되돌릴 자격이 있다(91번)
   lastState = prev;
   dirty = true; document.body.classList.add("unsaved");
-  toast("되돌렸습니다", null);
+  toast("되돌렸습니다", null); syncUndoBtns();
+}
+/* 271번. 다시 하기 — 되돌린 것을 다시. 되돌리기와 같은 방식(상태 한 벌을 통째로) */
+function stepFwd(){
+  const next = redoStack.pop();
+  if (next === undefined){ toast("다시 할 것이 없습니다", null); return; }
+  undoStack.push(snapshot()); if (undoStack.length > 60) undoStack.shift();
+  applyState(next); resetShown(); lastState = next;
+  dirty = true; document.body.classList.add("unsaved");
+  toast("다시 했습니다", null); syncUndoBtns();
 }
 
 const touch = () => {
@@ -4305,10 +4729,12 @@ document.addEventListener("input", e => {
   clearTimeout(typeTimer); typeTimer = setTimeout(pushHistory, 900);
 });
 document.addEventListener("keydown", e => {
-  if ((e.key !== "z" && e.key !== "Z") || !(e.ctrlKey || e.metaKey) || e.shiftKey) return;
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const k = e.key.toLowerCase(), fwd = k === "y" || (k === "z" && e.shiftKey);   // 271번. Ctrl+Y · Ctrl+Shift+Z 는 다시 하기
+  if (k !== "z" && k !== "y") return;
   // 칸 안에서 타이핑 중이면 브라우저 기본 되돌리기에 맡긴다. 거기까지 가로채면 방해가 된다
   if (e.target.closest?.('[contenteditable="true"]')) return;
-  e.preventDefault(); stepBack();
+  e.preventDefault(); if (fwd) stepFwd(); else stepBack();
 });
 /* Enter 는 contenteditable 에 <br> 을 넣는다. 값은 textContent 로 읽으므로
    화면은 두 줄인데 저장값은 붙은 한 줄이 된다 — 화면과 데이터가 어긋난다.
@@ -4357,14 +4783,15 @@ document.addEventListener("focusout", e => {
   const shown = won(node.price);
   if (n.textContent !== shown){ n.textContent = shown; n.classList.toggle("ask", typeof node.price !== "number"); }
 });
-window.addEventListener("beforeunload", e => { if (dirty){ e.preventDefault(); e.returnValue=""; } });
+window.addEventListener("beforeunload", e => { if (dirty && !ON_WEB){ e.preventDefault(); e.returnValue=""; } });   // 277번. 버셀 주소는 자동 저장 — 헛경고라 끈다
 
 /* ── 모양 적용 ─────────────────────────────────────────────────────── */
 let curTheme = null, curLC = null, panelPage = 0;   // 152번. 지금 색 세트 · 꾸미기 창이 가리키는 장
 /* 32 · 131번의 로고 색 뒤집기를 장별로: 종이색 바탕 상단 + 종이색 로고면 먹색으로 */
 function logoColorOf(pg){
   if (!curTheme) return "#efe3c9";
-  return (LIGHT_NOREN.includes(pg.noren) && pg.logoColor === "paper") ? curTheme.ink : (curLC[pg.logoColor] || curTheme.paper);
+  const lc = pg.logoColor || "paper";   // 273번. 값이 없어도 종이색과 같게 — 띠 없는 상단에서 종이 위 종이색 글자가 됐다
+  return (LIGHT_NOREN.includes(pg.noren) && lc === "paper") ? curTheme.ink : (curLC[lc] || curTheme.paper);
 }
 let fontHref = "";   // 223번
 function applyLook(){
@@ -4397,7 +4824,8 @@ function applyLook(){
   // 먹색으로 뒤집는다. 사용자가 직접 고른 값은 건드리지 않는다
   curTheme = t; curLC = LC;
   document.querySelectorAll(".sheet").forEach(sh => sh.style.setProperty("--logo", logoColorOf(P(+sh.dataset.pi))));
-  r.setProperty("--logo-src", 'url("' + LOGO + '")');
+  r.setProperty("--logo-src", 'url("' + (SETTINGS.logoImg || LOGO) + '")');   // 264번. 올린 그림이 있으면 그것
+  if (SETTINGS.logoImg && SETTINGS.logoAR > 0) r.setProperty("--logo-ar", String(SETTINGS.logoAR)); else r.removeProperty("--logo-ar");
   $("#c-logo").value = logoColorOf(P(panelPage));
   r.setProperty("--paper",t.paper); r.setProperty("--ink",t.ink); r.setProperty("--ink-soft",t.soft);
   r.setProperty("--band",t.band); r.setProperty("--accent",t.accent); r.setProperty("--rule",t.rule);
@@ -4802,6 +5230,7 @@ function saveFile(){
   hideUndo();
   if (editing) toggleEdit();
   document.body.classList.remove("unsaved");   // 직렬화 전에 꺼야 저장본에 안 박힌다
+  document.body.classList.remove("web"); { const a = $("#autost"); if (a){ a.textContent = ""; a.removeAttribute("title"); a.className = "autost"; } }   // 277번
   // ＋로 만들었다가 안 채운 빈 줄은 화면에도 안 나온다. 파일에만 쌓이므로 버린다
   MENU.hours     = MENU.hours.filter(h => String(h.label||"").trim() || String(h.time||"").trim());
   // 207번. `line` 은 F() 가 notes 로 옮겼다 — 여기서는 빈 줄만 정리한다
@@ -4878,14 +5307,16 @@ function saveFile(){
   if (undoSaved[2]) undoBtn.setAttribute("hidden", "");
   render();
   const d = new Date(), pad = n => String(n).padStart(2,"0");
-  download(html, `alps-menu-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.html`);
+  // 264번. 상호명이 있으면 그 이름(fileBase)
+  download(html, `${fileBase()}-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.html`);
   dirty = false;
   toast("저장했습니다. 내려받은 새 파일을 다음부터 여세요", null);
 }
 /* 235번. 저장본에서 화면 상태를 걷는다 — 복제본만 만진다(saveFile). 비우는 칸은 마크업에서 원래 빈 칸이다 */
 function cleanForSave(root){
   const q = sel => root.querySelectorAll(sel);
-  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub").forEach(n => { n.textContent = ""; });
+  q(".gd-block, .gd-hole, .gd-tip").forEach(n => n.remove());   // 269번. 가이드 중에 저장해도 안 남게
+  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다)
   q("#pg-title").forEach(n => { n.textContent = "1쪽 설정"; });
   q("#ow-title").forEach(n => { n.textContent = "한 장에 안 들어갑니다"; });
   q(".panel .ptab").forEach(n => n.classList.toggle("on", n.dataset.tab === "common"));
@@ -5218,7 +5649,9 @@ $("#c-logo").oninput    = e => {
 $("#f-bi").onchange     = e => { SETTINGS.bilingual = e.target.checked; render(); touch(); };
 /* 124번. 끄면 점만 안 그린다 — 상자는 그대로 있어 가격이 오른쪽에 붙고 줄 폭도 안 변한다.
    켜져 있을 때는 키를 지워 저장본에 안 남긴다(showNotes 와 같은 규칙) */
-$("#f-dots").onchange   = e => { if (e.target.checked) delete SETTINGS.showDots; else SETTINGS.showDots = false; render(); touch(); };
+$("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음은 전처럼 showDots=false(옛 저장본과 같은 키), 줄표 · 실선은 leader
+  if (v === "none"){ SETTINGS.showDots = false; delete SETTINGS.leader; } else { delete SETTINGS.showDots; if (v === "dots") delete SETTINGS.leader; else SETTINGS.leader = v; }
+  render(); touch(); };
 $("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); };
 /* 179번. 기본값(왼쪽)이면 키를 안 남긴다(15번) */
 const setAlign = (k, v) => { if (v === "left") delete SETTINGS[k]; else SETTINGS[k] = v; render(); touch(); };
@@ -5226,16 +5659,23 @@ $("#f-secalign").onchange  = e => setAlign("secAlign",  e.target.value);
 $("#f-winealign").onchange = e => setAlign("wineAlign", e.target.value);
 $("#f-art").onchange    = e => { P(panelPage).art = e.target.value; render(); touch(); };
 $("#f-pageno").onchange = e => { SETTINGS.pageno = e.target.value; render(); touch(); };
-$("#f-mark").onchange   = e => {
-  // 범례가 바닥 한 줄의 보통 글자가 됐으므로 표시를 바꾸면 그 글자도 같이 바꿔준다.
-  // 안 그러면 메뉴 앞은 ●인데 설명은 ★로 남는다
-  const old = SETTINGS.mark; SETTINGS.mark = e.target.value;
-  if (old && old !== SETTINGS.mark){
-    const swap = a => a.map(s => s.split(old).join(SETTINGS.mark));
-    MENU.feet.forEach(f => { f.line = swap(f.line || []); f.notes = swap(f.notes || []); });   // 범례가 각주로 옮겨 왔다
+/* 274번. 표시 바꾸기 — 각주 속 옛 표시는 기호끼리일 때만 새 표시로 */
+function applyMark(v){
+  const old = SETTINGS.mark; SETTINGS.mark = v;
+  if (old && old !== v){
+    /* 기호끼리일 때만 바꾼다 — 글자 표시("추천")는 문장 속 같은 낱말과 가를 수 없다("추천 메뉴는 …"까지 바뀌었다). 바닥 범례 한 줄(MENU.legend)은 표시를 따로 붙여 그리므로 늘 따라간다 */
+    if (markIsSym(old) && markIsSym(v)){ const swap = a => a.map(s => s.split(old).join(v));
+      MENU.feet.forEach(f => { f.line = swap(f.line || []); f.notes = swap(f.notes || []); }); }   // 범례가 각주로 옮겨 왔다
   }
-  render(); touch();
+  syncControls(); render(); touch();
+}
+$("#f-mark").onchange = e => {
+  if (e.target.value === "__own"){ const c = $("#f-markc"); c.hidden = false; c.value = markOk(SETTINGS.mark) && !$("#f-mark").querySelector('option[value="' + CSS.escape(SETTINGS.mark) + '"]') ? SETTINGS.mark : ""; c.focus(); return; }
+  $("#f-markc").hidden = true; applyMark(e.target.value);
 };
+$("#f-markc").addEventListener("change", e => { const v = e.target.value.trim();
+  if (!markOk(v)){ toast("추천 표시는 한글 4자 · 영문 6자까지입니다", null); e.target.focus(); return; } applyMark(v); });
+
 /* 150 · 152번. 꾸미기 창 탭 — [공통] 하나와 장마다 하나(1쪽 · 2쪽 …). 장 탭의 손잡이는 한 벌이고
    `panelPage` 가 어느 장의 값을 보여 주고 고치는지 정한다. 탭 상태는 저장하지 않는다(모양이 아니라 창 상태) */
 let panelTab = "common";
@@ -5553,7 +5993,7 @@ $("#b-help").onclick    = () => { $("#help-ph").checked = SETTINGS.printHint !==
 /* 234번. 인쇄 안내 다시 켜기. 켜져 있으면 키가 없다(15번 · printHint 는 원래 그렇다) */
 $("#help-ph").onchange  = e => { if (e.target.checked) delete SETTINGS.printHint; else SETTINGS.printHint = false; touch(); };
 $("#help-close").onclick= () => $("#help").close();
-document.querySelectorAll("dialog").forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
+document.querySelectorAll("dialog").forEach(d => d.addEventListener("click", e => { if (e.target === d && !stKeepOpen(d)) d.close(); }));   // 266번. 첫 화면은 예외(stKeepOpen)
 
 /* 원산지만 토글로 남았다. 라벨·구분선·종이 폭을 다 쓰는 별도 형태라 켜고 끌 이유가 있다.
    주소·전화는 그냥 바닥 한 줄 항목이므로 편집에서 넣고 빼면 된다 */
@@ -5606,6 +6046,504 @@ $("#f-origin").onchange = e => {
   if (empty) toast("원산지가 비어 있어 원래 메뉴판에 안 나옵니다", null);
 };
 
+/* ── 264번. 첫 화면 · 빈 메뉴판 · 상호명 · 맨 위(글자 / 그림) ──────────────────
+   · 첫 화면은 SETTINGS.startScreen === true 인 파일(배포용 사본)을 열 때만 저절로 뜬다. 길을 고르면 그 키가 없어지므로
+     저장본은 바로 열린다. "메뉴가 비었는지"로 보지 않는다 — 빈 메뉴판을 채우기 전에 저장한 파일이 또 첫 화면으로 열리기 때문
+   · 꾸미기 [처음 화면으로]로 다시 열 수 있고, 그때 고른 것은 되돌리기 한 칸이다(규칙 E). 처음 열 때 고른 것은 되돌릴 앞 상태가 없다
+   · 로고는 올린 그림의 밝기를 투명도로 바꿔 마스크로 쓴다 — 추적(trace)하지 않는다(규칙 A). 그림은 800px 안으로 줄이고 빈 가장자리를 잘라 파일에 넣는다
+   · 알프스 예시는 만든 때의 알프스 메뉴판 한 벌(ALPS_EXAMPLE)이다. 빈 메뉴판을 만든 뒤에도 [알프스 예시로 시작]이 되게 파일에 둔다 */
+const ALPS_EXAMPLE = {"menu":{"brand":{"title":"요리주점","sub":"파스타랑 생맥주가 맛있는 집"},"hours":[{"label":"점심","time":"12:00 — 14:00"},{"label":"저녁","time":"17:00 — 24:00 (가끔 변동)"}],"sheets":[[[{"name":"식사","en":"Meals","items":[{"name":"단호박 크림 파스타","price":14000,"pick":true,"en":"Sweet Pumpkin Cream Pasta"},{"name":"고사리 들깨 크림 파스타","price":14000,"pick":true,"en":"Bracken & Perilla Seed Cream Pasta"},{"name":"오징어 페코리노 파스타","price":14000,"en":"Squid & Pecorino Pasta"},{"name":"알프스 카레 파스타","price":11000,"pick":true,"en":"Alps Curry Pasta"},{"name":"깻잎새우 파스타","price":11000,"en":"Perilla Leaf & Shrimp Pasta"},{"name":"시오콘부새우 파스타","price":11000,"en":"Shio-Kombu Shrimp Pasta"},{"name":"태국식 돼지고기 덮밥","price":10000,"en":"Thai-Style Pork Rice Bowl"},{"name":"야끼소바","price":9000,"en":"Yakisoba","pick":true},{"name":"오일 파스타","price":9000,"en":"Aglio e Olio"},{"name":"크림 파스타","price":9000,"en":"Cream Pasta"},{"name":"나폴리탄 스파게티","price":9000,"en":"Napolitan Spaghetti"}]},{"name":"안주","en":"Side Dishes","items":[{"name":"生 연어구이","price":10000,"en":"Grilled Salmon","pick":true},{"name":"국물바지락","price":11000,"en":"Clams in Broth"},{"name":"바지락 마라볶음","price":11000,"en":"Mala Stir-Fried Clams","pick":true},{"name":"냉수육","price":11000,"en":"Chilled Boiled Pork","pick":true},{"name":"피망","price":9000,"en":"Stir-Fried Green Peppers"},{"name":"마늘쫑돼지고기볶음","price":9000,"en":"Pork & Garlic Scape Stir-Fry"},{"name":"단짠소고기볶음","price":9000,"en":"Sweet & Salty Beef Stir-Fry"},{"name":"마라소고기볶음","price":9000,"en":"Mala Beef Stir-Fry"}]}],[{"name":"하이볼","en":"Highball","items":[{"name":"단풍잎 하이볼","price":10000,"pick":true,"desc":"버번, 메이플, 진저에일","en":"Maple Leaf Highball"},{"name":"버번 하이볼","price":"가격문의","vol":"280ml","en":"Bourbon Highball"},{"name":"블론드 하이볼","price":8000,"vol":"280ml","en":"Blonde Highball"},{"name":"듀어스 위스키 하이볼","price":8000,"vol":"280ml","en":"Dewar's Whisky Highball"},{"name":"고든스 진 하이볼","price":8000,"vol":"280ml","pick":true,"en":"Gordon's Gin Highball"},{"name":"츠루우메 유즈 하이볼","price":10000,"vol":"280ml","pick":true,"en":"Tsuru Ume Yuzu Highball"},{"name":"글렌피딕 12y 하이볼","price":13000,"en":"Glenfiddich 12y Highball","vol":"280ml"}],"notes":["가끔 다른 하이볼, 잔술도 있으니 편히 문의해 주세요","소다(클래식) 혹은 토닉(단맛) 선택 가능하세요","샷 주문은 문의 주세요"]},{"name":"소주","en":"Soju","items":[{"name":"대선","price":7000,"en":"Daesun Soju"},{"name":"짜배기 (화요 · 포트와인)","price":7000,"en":"Jjabaegi (Hwayo + Port Wine)","pick":true},{"name":"화요","price":28000,"en":"Hwayo"}]},{"name":"생맥주","en":"Draft Beer","items":[{"name":"生 맥주","price":5000,"en":"Draft Beer"},{"name":"生 맥주 + 포트와인","price":8000,"en":"Draft Beer + Port Wine","pick":true},{"name":"生 맥주 + 연태고량주","price":8000,"en":"Draft Beer + Yantai Baijiu","pick":true}]},{"name":"음료","en":"Drinks","items":[{"name":"콜라 · 사이다","price":3000,"en":"Cola / Cider"}]}]],[[{"name":"레드","en":"Red","wine":"red","items":[{"name":"사페라비","label":"SAPERAVI","origin":"조지아, 카헤티","grapes":"사페라비 100","aroma":"오크, 바닐라, 토바코, 검은과실, 체리","taste":"다크베리향이 어우러진 복합적 부케, 부드러운 질감과 생동감 있는 산미","price":59000,"score":{"sweet":1,"body":4,"acid":4,"tannin":4}},{"name":"로드리게스 산조 데스피야다도","label":"DESPERADO","origin":"스페인, 카스티야 이 레온","grapes":"시라 70 · 멜롯 20 · 템프라니요 10","aroma":"야생딸기, 블랙베리, 정향, 후추","taste":"바디감이 좋으며, 생기 넘치는 산도와 풍부한 과일향이 두드러짐","price":52000,"score":{"sweet":1,"body":4,"acid":3,"tannin":3}},{"name":"몬테 카스카스 콜헤이타 도루 레드","label":"MONTE CASCAS","origin":"포르투갈, DOC 도루","grapes":"투리가 나쇼날 60 · 투리가 프랑 30 · 틴타 로리즈 10","aroma":"오렌지, 검은과실, 커피, 초콜렛","taste":"자두와 익은 체리, 지속적인 피니쉬 안에 균형잡힌 구조감","price":45000,"score":{"sweet":1,"body":4,"acid":3,"tannin":4}}]}],[{"name":"화이트","en":"White","wine":"white","items":[{"name":"알라자니 밸리 화이트 2023","label":"ALAZANI VALLEY","origin":"조지아, 카헤티","grapes":"르카치텔리 70 · 카후리 므츠바네 30","aroma":"배, 멜론, 사과, 살구","taste":"살짝 달콤, 산뜻하고 밸런스와 구조감이 매우 좋음","price":59000,"score":{"sweet":3,"body":2,"acid":3}},{"name":"소뇨 디 울리쎄 샤도네이 말바시아","label":"SOGNO DI ULISSE","origin":"이태리, 아부르쪼","grapes":"샤도네이 80 · 말바시아 20","aroma":"시트러스, 복숭아, 미네랄","taste":"부드럽고 크리미한 맛과 적당한 산도, 신선한 과실향과 뛰어난 감칠맛","price":45000,"score":{"sweet":2,"body":3,"acid":3}}]},{"name":"로제","en":"Rosé","wine":"rose","items":[{"name":"트레디베리 로사토","label":"TREDIBERRI","origin":"이태리, 라 모라 · 바스티아 몬도비","grapes":"네비올로 95 · 돌체토 5","aroma":"딸기, 로즈, 허브, 버찌","taste":"로즈 아로마가 화사하게 퍼지며 구조감이 좋음. 여운이 길고 활기찬 산미와 부드러운 질감","price":50000,"score":{"sweet":2,"body":2,"acid":4}}]}]]],"feet":[{"notes":["* 모든 메뉴 포장 가능합니다"],"origin":""},{"notes":[],"origin":""}]},"settings":{"font":"gungseo","theme":"night","custom":{"paper":"#efe3c9","band":"#1c3145","accent":"#a53528","logo":"#efe3c9","ink":"#1e1811"},"orient":"portrait","mark":"★","bilingual":false,"pageno":"none","bold":false,"pages":[{"noren":"flat","norenScale":0.8,"showTitle":false,"scale":1,"scalePort":1,"autofit":false,"art":"beerpasta","seal":"word","showOrigin":false},{"noren":"flat","norenScale":0.8,"showTitle":false,"scale":1,"scalePort":1,"autofit":false,"art":"vine","seal":"word","showNotes":false,"showOrigin":false}]}};
+const shopName = () => String(MENU.brand?.shop || "").trim();
+const fileBaseOf = s => { s = String(s || "").replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim(); return s ? s + "-메뉴" : "메뉴판"; };   // 265번. 상호명이 없으면 "메뉴판"
+const fileBase = () => fileBaseOf(shopName());
+function syncTitle(){ const s = shopName(); document.title = s ? s + " — 메뉴" : "메뉴판"; }   // 265번
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+let logoOrig = null, logoInv = false;   // 올린 원본(파일에는 안 남는다 — 뒤집기에만 쓴다)
+function logoMask(img, inv){
+  const k = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d", { willReadFrequently:true }); g.drawImage(img, 0, 0, w, h);
+  const d = g.getImageData(0, 0, w, h), p = d.data, n = w * h, v = new Float32Array(n);
+  let clear = 0; for (let i = 3; i < p.length; i += 4) if (p[i] < 250) clear++;
+  let amb = false;   // 268번. 자동 판단이 애매했나 — 이때만 두 모양을 보여 고르게 한다
+  if (clear > n * .05){ for (let i = 0; i < n; i++) v[i] = p[i*4+3]; }          // 이미 투명한 그림 — 투명도가 곧 모양(애매하지 않다)
+  else {
+    const lum = i => .299*p[i*4] + .587*p[i*4+1] + .114*p[i*4+2];
+    let e = 0, m = 0;
+    for (let x = 0; x < w; x++){ e += lum(x) + lum((h-1)*w + x); m += 2; }
+    for (let y = 0; y < h; y++){ e += lum(y*w) + lum(y*w + w - 1); m += 2; }
+    const darkBg = e / m < 128;                                                   // 가장자리가 바탕이다 — 어두우면 밝은 쪽이 모양
+    let br = 0; for (let x = 0; x < w; x++){ br += (lum(x) > 128) + (lum((h-1)*w + x) > 128); } for (let y = 0; y < h; y++){ br += (lum(y*w) > 128) + (lum(y*w + w - 1) > 128); }
+    amb = (e / m > 85 && e / m < 170) || (br / m > .3 && br / m < .7);           // 가장자리가 중간 밝기이거나, 밝은 곳 · 어두운 곳이 비슷하게 섞였다
+    if (!amb){ for (let i = 0; i < n; i++){ const L = lum(i); v[i] = darkBg ? L : 255 - L; } }
+    else {
+      /* 268번. 가장자리 밝기가 고르지 않다(간판 사진 · 한쪽 조명) — 한 기준으로 가르면 바탕의 밝은 쪽이 모양으로 딸려 온다.
+         자리마다 주변(넓게 흐린) 밝기를 바탕으로 보고, 그보다 튀는 쪽을 모양으로 딴다. 튀는 방향(밝게 · 어둡게)은 더 세게 튀는 쪽.
+         바탕이 고른 사진에는 쓰지 않는다 — 크고 꽉 찬 로고는 속이 주변과 같아져 비어 버린다 */
+      const Lm = new Float32Array(n); for (let i = 0; i < n; i++) Lm[i] = lum(i);
+      const S = new Float64Array((w + 1) * (h + 1));   // 합 표 — 넓은 흐림을 빠르게
+      for (let y = 0; y < h; y++){ let row = 0; for (let x = 0; x < w; x++){ row += Lm[y*w + x]; S[(y+1)*(w+1) + x + 1] = S[y*(w+1) + x + 1] + row; } }
+      const R = Math.max(4, Math.round(Math.max(w, h) / 6)), dv = new Float32Array(n);
+      let pos = 0, neg = 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+        const x0 = Math.max(0, x - R), x1 = Math.min(w, x + R + 1), y0 = Math.max(0, y - R), y1 = Math.min(h, y + R + 1);
+        const bg = (S[y1*(w+1) + x1] - S[y0*(w+1) + x1] - S[y1*(w+1) + x0] + S[y0*(w+1) + x0]) / ((x1 - x0) * (y1 - y0));
+        const d = Lm[y*w + x] - bg; dv[y*w + x] = d; if (d > 30) pos += d; else if (d < -30) neg -= d;
+      }
+      const up = pos >= neg; for (let i = 0; i < n; i++) v[i] = Math.max(0, up ? dv[i] : -dv[i]);
+    }
+  }
+  const hist = new Uint32Array(256); for (let i = 0; i < n; i++) hist[v[i] | 0]++;   // 흐린 사진도 또렷하게 — 양 끝 2% 는 버리고 늘인다
+  let lo = 0, hi = 255, acc = 0;
+  for (; lo < 255; lo++){ acc += hist[lo]; if (acc > n * .02) break; }
+  acc = 0; for (; hi > 0; hi--){ acc += hist[hi]; if (acc > n * .02) break; }
+  if (hi - lo < 16){ lo = 0; hi = 255; }
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let i = 0; i < n; i++){
+    let a = (v[i] - lo) / (hi - lo); a = a < 0 ? 0 : a > 1 ? 1 : a; if (inv) a = 1 - a;
+    const A = Math.round(a * 255); p[i*4] = p[i*4+1] = p[i*4+2] = 0; p[i*4+3] = A;
+    if (A > 24){ const x = i % w, y = (i / w) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  if (x1 < 0) return null;
+  g.putImageData(d, 0, 0);
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, o = document.createElement("canvas"); o.width = bw; o.height = bh;
+  o.getContext("2d").drawImage(c, x0, y0, bw, bh, 0, 0, bw, bh);
+  return { src:o.toDataURL("image/png"), ar:+(bw / bh).toFixed(4), amb };
+}
+function readLogo(file){
+  return new Promise(ok => { const fr = new FileReader();
+    fr.onload = () => loadImg(fr.result).then(img => { logoOrig = img; logoInv = false; const r = logoMask(img, false);
+      if (!r) toast("그림에서 모양을 찾지 못했습니다. 바탕과 글자의 밝기가 다른 그림을 골라 주세요", null); ok(r); }, () => { toast("그림을 열지 못했습니다", null); ok(null); });
+    fr.readAsDataURL(file); });
+}
+/* 첫 화면 창 */
+let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt = null;   // 273번. stPreset — 정하기 창의 추천 조합   // 268번. stAlt — 반대 모양(고르기용)
+function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
+  $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
+  $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
+  $("#st-sw").innerHTML = ""; $("#st-prev").innerHTML = ""; $("#st-prev").removeAttribute("style"); $("#st-fname").textContent = "";
+  $("#st-seg").querySelectorAll("button").forEach(b => b.removeAttribute("class"));
+}
+/* 266번. 바깥(어두운 영역)을 눌러도 안 닫히는 때 — 처음 열 때(고르기 전에는 나갈 곳이 없다)와 정하기 창(적던 상호명 · 올린 로고가
+   실수 한 번에 날아간다). 264번이 Esc 만 막고 이 길을 빠뜨렸다 — 모든 안내창을 바깥 누르기로 닫는 한 줄이 따로 있었다 */
+function stKeepOpen(d){ return d.id === "start" && (SETTINGS.startScreen === true || !$("#st-setup").hidden); }
+function openStart(){
+  stReset();
+  $("#st-closerow").hidden = SETTINGS.startScreen === true;   // 처음 열 때는 닫기 없이 고른다
+  openDlg($("#start"));
+}
+$("#start").addEventListener("cancel", e => { if (SETTINGS.startScreen === true) e.preventDefault(); });
+$("#start").addEventListener("close", stReset);
+function stSync(){
+  $("#st-seg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.m === stMode));
+  $("#st-textrow").hidden = stMode !== "text"; $("#st-imgrow").hidden = stMode !== "img";
+  if (stMode === "img" && stLogo && stAlt) drawTiles($("#st-tiles"), stLogo, stAlt, r => { if (r){ logoInv = !logoInv; stLogo = r; } stAlt = null; stSync(); }); else $("#st-tiles").innerHTML = "";   // 한 번 답하면 닫힌다
+  stTheme = PRESETS[stPreset].theme;
+  $("#st-sw").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.p === stPreset));
+  const t = THEMES[stTheme], pv = $("#st-prev"); pv.innerHTML = ""; pv.style.background = t.band; pv.style.color = t.paper;
+  const ph = txt => { const s = el("span", "ph"); s.textContent = txt; pv.append(s); };
+  if (stMode === "text"){ const v = $("#st-top").value.trim(); if (v) pv.textContent = v; else ph("가게 이름"); }
+  else if (stLogo){ const m = el("span", "st-mask"); m.style.setProperty("--src", 'url("' + stLogo.src + '")'); m.style.background = t.paper; pv.append(m); }
+  else ph("[이미지 선택]으로 로고를 올리면 여기 보입니다");
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  $("#st-fname").textContent = "저장하면 「" + fileBaseOf($("#st-shop").value) + "-" + d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + ".html」로 내려받아집니다";
+}
+function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · 포인트 색으로 작게. 이름은 PRESETS 한 곳에서(규칙 H)
+  const box = $("#st-sw"); box.innerHTML = "";
+  Object.entries(PRESETS).forEach(([k, q]) => {
+    const t = THEMES[q.theme], b = el("button", "st-swb"); b.type = "button"; b.dataset.p = k;
+    const c = el("span", "c"); c.style.background = t.paper; const band = el("i"); band.style.background = t.band; c.append(band);
+    const dot = el("em"); dot.style.background = t.accent; c.append(dot);
+    b.append(c, document.createTextNode(q.name)); b.onclick = () => { stPreset = k; stSync(); }; box.append(b);
+  });
+}
+$("#st-blank").onclick = () => {
+  stParsed = null;   // 275번. 사진으로 읽은 메뉴가 빈 메뉴판에 따라 들어가지 않게(사진 길은 이 뒤에 다시 채운다)
+  stMode = "text"; stPreset = "basic"; stTheme = PRESETS[stPreset].theme; stLogo = null; logoOrig = null; logoInv = false;
+  $("#st-shop").value = ""; $("#st-top").value = "";
+  $("#st-choose").hidden = true; $("#st-setup").hidden = false;
+  stSwatches(); stSync(); $("#start").scrollTop = 0; footShade($("#start")); $("#st-shop").focus({ preventScroll:true });
+};
+$("#st-back").onclick = () => { $("#st-setup").hidden = true; $("#st-choose").hidden = false; $("#start").scrollTop = 0; };
+$("#st-close").onclick = () => $("#start").close();
+$("#st-shop").addEventListener("input", stSync);
+$("#st-top").addEventListener("input", stSync);   // 267번. 상호명을 따라 쓰지 않는다 — 두 칸이 같은 칸처럼 보였다
+$("#st-seg").querySelectorAll("button").forEach(b => b.onclick = () => { stMode = b.dataset.m; stSync(); });
+/* 268번. 이미지 올리기 상자 — 누르기 · 끌어다 놓기. 메뉴 사진 · 와인 라벨도 이 상자를 쓴다(처리는 자리마다 — 로고만 마스크) */
+let fileCb = null;
+let picFor = false;   // 275번. 사진으로 시작의 사진 — 로고처럼 모양을 따지 않고 그대로 줄여 쓴다
+$("#st-file").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (!f) return; if (picFor){ picFor = false; takePic(f); return; } if (fileCb) readLogo(f).then(r => { if (r) fileCb(r); }); };
+function dropTarget(btn, cb){
+  btn.addEventListener("click", () => { fileCb = cb; picFor = !cb && btn.id === "st-pic"; $("#st-file").click(); });   // 275번. 받는 곳이 없으면 사진
+  btn.addEventListener("dragover", e => { e.preventDefault(); btn.classList.add("over"); });
+  btn.addEventListener("dragleave", () => btn.classList.remove("over"));
+  btn.addEventListener("drop", e => { e.preventDefault(); btn.classList.remove("over");
+    const f = e.dataTransfer.files[0]; if (!f || !/^image\//.test(f.type)) return; if (!cb){ takePic(f); return; } readLogo(f).then(r => { if (r) cb(r); }); });
+}
+/* 모양 고르기(268번) — 사용자 로고를 두 칸으로 보여 주면 무엇을 고르는지 알기 어려웠다(사용자: "이게 무슨 그림이야?").
+   로고는 위 미리보기(정하기 창) · 종이(꾸미기 창)에만 보이고, 고르는 단추는 늘 같은 "알프스" 글자 예시다 — 미리보기가 닮은 쪽을 누른다.
+   ✓ 는 그대로, ✗ 는 반대 모양으로. 누르면 질문이 닫힌다 */
+function drawTiles(box, cur, alt, onAlt){
+  box.innerHTML = "";
+  const cap = el("p", "st-tcap"); cap.textContent = "로고의 바탕을 자동으로 가리기 어려웠습니다. 로고가 어느 쪽처럼 보이나요?"; box.append(cap);
+  [["ok", "✓ 글자 · 무늬만 찍혔다", null], ["no", "✗ 바탕이 칠해지고 글자가 뚫렸다", alt]].forEach(([k, say, r]) => {
+    const b = el("button", "st-exb " + k); b.type = "button";
+    const w = el("b"); w.textContent = "알프스"; const t = el("span"); t.textContent = say; b.append(w, t);
+    b.onclick = () => { box.innerHTML = ""; if (r) onAlt(r); else onAlt(null); }; box.append(b);
+  });
+}
+dropTarget($("#st-up"), r => { stLogo = r; stAlt = r.amb && logoOrig ? logoMask(logoOrig, true) : null; stMode = "img"; stSync(); });   // 애매할 때만 반대 모양
+function startWith(menu, settings, msg){
+  const first = SETTINGS.startScreen === true;
+  $("#start").close();
+  Object.keys(MENU).forEach(k => delete MENU[k]);         Object.assign(MENU, menu);
+  const seen = SETTINGS.guideDone === true;   // 270번. 길을 다시 골라도 "가이드를 봤다"는 남긴다 — 설정을 통째로 바꿔 지워지고 가이드가 또 떴다
+  Object.keys(SETTINGS).forEach(k => delete SETTINGS[k]); Object.assign(SETTINGS, settings);
+  if (seen) SETTINGS.guideDone = true;
+  resetShown(); syncControls(); applyLook(); render(); applyScale();
+  if (first){ undoStack.length = 0; redoStack.length = 0; syncUndoBtns(); lastState = snapshot(); autoSave(); dirty = true; document.body.classList.add("unsaved"); }   // 277번. 자동 저장
+  else { touch(); toast(msg, () => stepBack()); }
+  if (SETTINGS.guideDone !== true) setTimeout(guideStart, 300);   // 269번. 길을 고른 직후에만 가이드
+}
+$("#st-go").onclick = () => {
+  const shop = $("#st-shop").value.trim(), top = $("#st-top").value.trim(), text = stMode === "text" || !stLogo;
+  const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
+  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours:[], sheets:[ stParsed ? splitCols(stParsed) : [[sec()], [sec()]] ], feet:[{ notes:[], origin:"" }] };   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로
+  if (shop) menu.brand.shop = shop;
+  const pg = Object.assign(pageDefaults(0), { art:"none", seal:"none", showTitle:false });
+  Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
+  /* 기본 글꼴은 본고딕 — 궁서는 알프스 사장님이 고른 것이다(규칙 A). 글자 도장은 "알프스"가 박혀 있어 끈다 */
+  const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", bilingual:false, pageno:"none", bold:false, pages:[pg] };
+  applyPresetTo(settings, menu, stPreset);   // 273번. 추천 조합을 새 설정에 직접 건다
+  if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
+  const fromPic = !!stParsed; stParsed = null;
+  startWith(menu, settings, fromPic ? "사진에서 읽은 메뉴로 시작했습니다" : "빈 메뉴판을 만들었습니다");
+  if (!editing) toggleEdit();
+  focusPath("sheets.0.0.0.name");
+};
+$("#st-alps").onclick = () => {
+  const d = JSON.parse(JSON.stringify(ALPS_EXAMPLE)); d.menu.brand.shop = "알프스";
+  startWith(d.menu, d.settings, "알프스 예시로 바꿨습니다");
+};
+/* 꾸미기 창 — 상호명 · 맨 위 · 첫 화면 */
+$("#f-shop").addEventListener("input", e => {
+  const v = e.target.value; if (v.trim()) MENU.brand.shop = v; else delete MENU.brand.shop;
+  syncTitle(); touchLater();
+});
+$("#f-topmode").querySelectorAll("button").forEach(b => b.onclick = () => {
+  if (b.dataset.m === "text") SETTINGS.topMode = "text";   // 267번. 상호명을 채워 넣지 않는다 — 비어 있으면 종이 위에 "가게 이름" 안내
+  else delete SETTINGS.topMode;
+  touch(); syncControls(); render();
+});
+function setLogo(r){
+  if (r.src === LOGO){ delete SETTINGS.logoImg; delete SETTINGS.logoAR; }   // 268번. 코드 안의 로고로 돌아오면 파일에 한 벌 더 넣지 않는다
+  else { SETTINGS.logoImg = r.src; SETTINGS.logoAR = r.ar; }
+  delete SETTINGS.topMode; touch(); syncControls(); applyLook(); render();
+}
+dropTarget($("#f-logo-up"), r => { panelAmb = r.amb && logoOrig ? { a:r, b:logoMask(logoOrig, true) } : null; setLogo(r); });
+/* 268번. 꾸미기 창의 모양 고르기 — 방금 올린 로고가 애매했을 때만(메모리에만 둔다). 저장한 로고 · 코드 안의 로고에는 띄우지 않는다 —
+   오려진 로고의 반대 모양은 통째로 칠한 네모라 아무도 고르지 않는다(사용자) */
+let panelAmb = null;
+function panelTiles(){
+  const box = $("#f-tiles"), cur = SETTINGS.logoImg;
+  const live = panelAmb && SETTINGS.topMode !== "text" && (cur === panelAmb.a.src || cur === panelAmb.b.src);
+  if (!live){ box.innerHTML = ""; if (SETTINGS.topMode !== "text") panelAmb = null; return; }
+  const [on, off] = cur === panelAmb.a.src ? [panelAmb.a, panelAmb.b] : [panelAmb.b, panelAmb.a];
+  drawTiles(box, on, off, r => { panelAmb = null; if (r) setLogo(r); else box.innerHTML = ""; });   // 한 번 답하면 닫힌다
+}
+$("#b-start").onclick = () => openStart();
+
+/* ── 277번. 파일에서 불러오기 — [파일로 저장]으로 받은 메뉴판 파일의 메뉴 · 설정만 꺼내 이 탭에 담고 다시 연다 ── */
+function readSavedFile(txt){
+  const m = txt.match(/const MENU = (\{[\s\S]*?\});\s*\n/), s2 = txt.match(/const SETTINGS = (\{[\s\S]*?\n\});/);
+  if (!m || !s2) return null;
+  try { return { menu:JSON.parse(m[1]), settings:JSON.parse(s2[1]) }; } catch(e){ return null; }
+}
+function importFile(f){
+  const fr = new FileReader();
+  fr.onload = () => {
+    const d = readSavedFile(String(fr.result || ""));
+    if (!d){ toast("메뉴판 파일이 아닙니다. [파일로 저장]으로 받은 파일을 골라 주세요", null); return; }
+    try {
+      if (!(SETTINGS.startScreen === true)) sessionStorage.setItem("menupan-import-prev", snapshot());   // 되돌리기용 — 다시 열면 되돌리기 칸이 비므로 따로
+      sessionStorage.setItem("menupan-import", JSON.stringify(d));
+    } catch(e){ toast("불러오지 못했습니다(브라우저 저장소)", null); return; }
+    dirty = false; location.reload();
+  };
+  fr.readAsText(f);
+}
+$("#st-hfile").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) importFile(f); };
+$("#st-import").onclick = () => $("#st-hfile").click();
+$("#b-import").onclick = () => $("#st-hfile").click();
+/* 열 때 — 자동 저장본이나 불러온 파일로 열었으면 알림 한 줄(창은 띄우지 않는다 — 58번) */
+if (ON_WEB) document.body.classList.add("web");
+autoStatus("ok");
+if (autoLoaded === "auto") toast("지난번에 만들던 메뉴판을 열었습니다", null);
+if (autoLoaded === "import"){
+  dirty = !ON_WEB; if (dirty) document.body.classList.add("unsaved");
+  let prev = null; try { prev = sessionStorage.getItem("menupan-import-prev"); sessionStorage.removeItem("menupan-import-prev"); } catch(e){}
+  autoSave();
+  toast("파일에서 불러왔습니다", prev ? () => { try { sessionStorage.setItem("menupan-import", prev); } catch(e){} dirty = false; location.reload(); } : null);
+}
+/* ── 275번. 사진으로 시작 — 사진 → (제미나이로 바로 | 다른 AI 앱의 답을 붙여 넣기) → 읽은 값 확인 → 정하기 창 → 시작 ──────────
+   · 276번부터 제미나이는 버셀 서버 함수(api/read.js)가 부른다 — 사장님은 키가 필요 없다(275번은 사장님 키를 브라우저에 두었다)
+   · 무료 구간은 보낸 내용을 구글이 서비스 개선에 쓸 수 있다(약관) — 창에 적어 둔다
+   · 두 길 모두 AI 에게 같은 모양으로 답하게 한다([분류] / 이름 | 가격 / 자신 없으면 ?). 읽기 규칙(parseMenuText)은 하나
+   · 사진 좌표 표시(9장 3번의 "읽은 자리를 사진 위에")는 하지 않는다 — 붙여 넣기 길은 글만 온다. 사진과 값을 위아래로 나란히 */
+const READ_PROMPT = [
+  "이 사진은 가게 메뉴판입니다. 적힌 메뉴를 아래 모양으로만 적어 주세요. 다른 말은 쓰지 마세요.",
+  "[분류 이름]",
+  "메뉴 이름 | 가격",
+  "",
+  "- 가격은 숫자만 적습니다(쉼표 · 원 없이). 가격이 없거나 '시가' 같은 글자면 그 글자를 그대로 적습니다.",
+  "- 분류가 안 보이면 [메뉴] 하나로 적습니다.",
+  "- 잘 안 보이거나 확실하지 않은 이름 · 가격은 그 값 바로 뒤에 ? 를 붙입니다.",
+  "- 메뉴 설명 · 원산지 · 영업시간 · 전화번호는 적지 않습니다."
+].join("\n");
+function parseMenuText(txt){
+  const secs = []; let cur = null;
+  const unq = v => { v = String(v || "").trim(); const u = /[?？]\s*$/.test(v); return [v.replace(/[?？]\s*$/, "").trim(), u]; };
+  String(txt || "").replace(/\r/g, "").split("\n").forEach(raw => {
+    let l = raw.trim(); if (!l || /^```/.test(l)) return;
+    l = l.replace(/^[-*•·]\s+/, "");
+    const h = l.match(/^\[(.+)\]$/) || l.match(/^#{1,4}\s*(.+)$/);
+    if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u, items:[] }; secs.push(cur); return; }
+    let name, price;
+    if (l.includes("|")){ [name, price] = l.split("|").map(x => x.trim()); }
+    else { const m = l.match(/^(.*?)[\s.·…\-]+([\d,]+)\s*원?\s*([?？])?$/); if (!m) return; name = m[1]; price = m[2] + (m[3] || ""); }
+    const [n, un1] = unq(name); let [p, un2] = unq(price);
+    if (!n) return;
+    const digits = p.replace(/[,원\s]/g, "");
+    p = /^\d+$/.test(digits) ? Number(digits) : p;
+    if (!cur){ cur = { name:"메뉴", un:false, items:[] }; secs.push(cur); }
+    cur.items.push({ name:n, price:p, un:un1, unp:un2 });
+  });
+  return secs.filter(s => s.items.length);
+}
+/* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
+let stPic = null, stParsed = null, stWay = "app";
+function picToJpeg(img){
+  const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
+  c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c.toDataURL("image/jpeg", .85);
+}
+function takePic(file){
+  const fr = new FileReader();
+  fr.onload = () => loadImg(fr.result).then(img => { stPic = picToJpeg(img); const im = $("#st-picimg"); im.src = stPic; im.hidden = false; stReadSync(); },
+    () => toast("사진을 열지 못했습니다", null));
+  fr.readAsDataURL(file);
+}
+function stReadSync(){
+  $("#st-way").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.w === stWay));
+  $("#st-gem").hidden = stWay !== "gem"; $("#st-app").hidden = stWay !== "app";
+  const off = !navigator.onLine;
+  $("#st-gemgo").disabled = off || !stPic || !readOn;   // 278번. 꺼져 있으면 흐리게
+  $("#st-way").querySelector('[data-w="gem"]').disabled = !readOn;
+  if (!readOn) $("#st-gemmsg").textContent = READ_OFF_MSG;
+  else if (off) $("#st-gemmsg").textContent = "인터넷에 연결돼 있지 않아 제미나이로 읽을 수 없습니다. [다른 AI 앱에서]를 쓰거나 연결한 뒤 다시 누르세요.";
+  else if (!stPic) $("#st-gemmsg").textContent = "먼저 메뉴판 사진을 올려 주세요.";   // 그 밖에는 안내 칸을 건드리지 않는다 — 오류 문구를 덮어썼다
+}
+/* 276번. 버셀 서버 함수를 부른다 — 버셀 주소에서 열면 같은 사이트의 /api/read, 컴퓨터 파일로 열면 배포 주소로.
+   서버 함수가 요청 글을 쥐고 있고 받는 것은 사진뿐이다(api/read.js). 실패하면 다른 AI 앱 길로 안내한다 */
+const READ_API = "https://menupan.vercel.app/api/read";   // 배포 주소가 바뀌면 여기와 api/read.js 의 ALLOWED_ORIGINS 를 같이
+/* 278번. 사진 읽기 스위치 — 버셀 환경 변수 READ_ENABLED. 사진 창을 열 때 한 번 묻고(3초까지), 꺼져 있으면 [제미나이로 바로]를 흐리게.
+   못 물으면(인터넷 · 서버 문제) 켜진 것으로 두고 누를 때 오류로 안내한다 */
+const READ_OFF_MSG = "지금은 사진 바로 읽기를 쉬고 있습니다. [다른 AI 앱에서]를 써 주세요.";
+let readOn = true;
+async function readStatus(){
+  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 3000);
+  try { const r = await fetch(url, { signal:ac.signal }); const j = await r.json(); readOn = j.enabled !== false; }
+  catch(e){ readOn = true; }
+  finally { clearTimeout(tm); }
+  if (!readOn && stWay === "gem") stWay = "app";
+  stReadSync();
+}
+async function geminiRead(dataUrl){
+  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
+  let r;
+  try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ image:dataUrl }) }); }
+  catch(e){ throw new Error("읽는 곳에 닿지 못했습니다. 인터넷 연결을 확인하거나 [다른 AI 앱에서]를 써 주세요."); }
+  const j = await r.json().catch(() => ({}));
+  if (r.ok && j.text) return j.text;
+  if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 누르거나 [다른 AI 앱에서]를 써 주세요.");
+  if (r.status === 413) throw new Error("사진이 너무 큽니다. 다른 사진을 올려 주세요.");
+  if (r.status === 422) throw new Error("사진에서 메뉴를 찾지 못했습니다. 더 밝고 반듯하게 찍어 다시 올려 주세요.");
+  if (r.status === 403) throw new Error("이 메뉴판에서는 읽기를 부를 수 없습니다(허락되지 않은 주소). [다른 AI 앱에서]를 써 주세요.");
+  if (r.status === 503 && j.code === "off"){ readOn = false; stReadSync(); throw new Error(READ_OFF_MSG); }   // 278번
+  throw new Error("지금은 읽을 수 없습니다(" + (j.code || r.status) + "). [다른 AI 앱에서]를 써 주세요.");
+}
+function toCheck(txt, msgEl){
+  const secs = parseMenuText(txt);
+  if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
+  stParsed = secs; drawCheck();
+  $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
+}
+function drawCheck(){
+  const box = $("#st-ctab"); box.innerHTML = ""; const im = $("#st-cimg");
+  if (stPic){ im.src = stPic; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
+  stParsed.forEach((s, si) => {
+    const h = el("input", "st-cin st-csec" + (s.un ? " un" : "")); h.value = s.name; h.dataset.s = si; h.setAttribute("aria-label", "분류 이름"); box.append(h);
+    s.items.forEach((it, ii) => {
+      const row = el("div", "st-crow");
+      const n = el("input", "st-cin" + (it.un ? " un" : "")); n.value = it.name; n.dataset.s = si; n.dataset.i = ii; n.dataset.k = "name"; n.setAttribute("aria-label", "메뉴 이름");
+      const p = el("input", "st-cin st-cp" + (it.unp ? " un" : "")); p.value = it.price === "" ? "" : String(it.price); p.dataset.s = si; p.dataset.i = ii; p.dataset.k = "price"; p.setAttribute("aria-label", "가격");
+      row.append(n, p); box.append(row);
+    });
+  });
+  box.querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));   // 고치면 노란 표시를 뗀다
+}
+function readCheck(){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
+  const secs = stParsed.map(s => ({ name:s.name, items:s.items.map(it => ({ ...it })) }));
+  $("#st-ctab").querySelectorAll("input").forEach(x => {
+    const s = secs[+x.dataset.s]; if (!s) return;
+    if (x.dataset.i === undefined){ s.name = x.value.trim(); return; }
+    const it = s.items[+x.dataset.i], v = x.value.trim();
+    if (x.dataset.k === "name") it.name = v; else { const d = v.replace(/[,원\s]/g, ""); it.price = /^\d+$/.test(d) ? Number(d) : v; }
+  });
+  return secs.map(s => ({ name:s.name, items:s.items.filter(it => it.name).map(it => ({ name:it.name, price:it.price })) })).filter(s => s.items.length);
+}
+function splitCols(secs){   // 분류를 두 단에 나눈다 — 줄 수가 고르게(분류 순서는 그대로)
+  const n = secs.reduce((a, s) => a + s.items.length + 1.5, 0); let acc = 0; const L = [], R = [];
+  secs.forEach(s => { const w = s.items.length + 1.5; (acc + w / 2 <= n / 2 ? L : R).push(s); acc += w; });   // 분류의 가운데가 절반을 넘으면 오른쪽
+  if (!R.length && L.length > 1) R.push(L.pop());
+  return [L.length ? L : [{ name:"", items:[{ name:"", price:"" }] }], R.length ? R : [{ name:"", items:[{ name:"", price:"" }] }]];
+}
+$("#st-photo").onclick = () => {
+  stPic = null; stParsed = null; stWay = "gem";   // 276번. 키가 필요 없어 제미나이가 기본
+  $("#st-ans").value = ""; $("#st-appmsg").textContent = "";
+  const im = $("#st-picimg"); im.removeAttribute("src"); im.hidden = true;
+  $("#st-choose").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; footShade($("#start"));
+  readStatus();   // 278번. 켜져 있는지 묻는다
+};
+dropTarget($("#st-pic"), null);   // 받는 곳은 아래에서 사진용으로 바꾼다(로고와 달리 모양을 따지 않는다)
+$("#st-pic").addEventListener("click", () => { fileCb = null; picFor = true; }, true);
+$("#st-way").querySelectorAll("button").forEach(b => b.onclick = () => { stWay = b.dataset.w; stReadSync(); });
+addEventListener("online", () => { if (!$("#st-read").hidden) stReadSync(); }); addEventListener("offline", () => { if (!$("#st-read").hidden) stReadSync(); });
+$("#st-gemgo").onclick = async () => {
+  const msg = $("#st-gemmsg");
+  if (!stPic){ msg.textContent = "먼저 메뉴판 사진을 올려 주세요."; return; }
+  const b = $("#st-gemgo"); b.disabled = true; msg.textContent = "읽는 중입니다… (10초쯤 걸릴 수 있습니다)";
+  try { const t = await geminiRead(stPic); msg.textContent = ""; toCheck(t, msg); }
+  catch(e){ msg.textContent = e.message; }
+  finally { b.disabled = false; stReadSync(); }
+};
+$("#st-copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(READ_PROMPT); }
+  catch(e){ const t = el("textarea"); t.value = READ_PROMPT; document.body.append(t); t.select(); document.execCommand("copy"); t.remove(); }
+  toast("요청 글을 복사했습니다. AI 앱에 사진과 함께 붙여 넣으세요", null);
+};
+$("#st-appgo").onclick = () => toCheck($("#st-ans").value, $("#st-appmsg"));
+$("#st-read-back").onclick = () => { $("#st-read").hidden = true; $("#st-choose").hidden = false; $("#start").scrollTop = 0; };
+$("#st-manual").onclick = () => { stParsed = null; $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-blank").onclick(); };
+$("#st-check-back").onclick = () => { $("#st-check").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; };
+$("#st-check-go").onclick = () => {
+  const secs = readCheck(); if (!secs.length){ toast("메뉴 이름이 한 줄도 없습니다", null); return; }
+  stParsed = secs; const keep = stParsed;
+  $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
+};
+
+/* ── 273번. 추천 조합(프리셋) — 이미 있는 손잡이 값의 묶음. 누르면 한 번 맞추고 끝난다(저장되는 설정이 아니다 — 규칙 H · 89번).
+   글자 크기 · 내용 · 맨 위(글자 / 로고)는 건드리지 않는다 — 채운 메뉴가 바로 넘치지 않게(크기는 사장님 몫). 값을 늘리면 t52 가 이름 · 값을 본다 */
+const PRESETS = {
+  basic:  { name:"기본",        font:"gothic",   bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴)
+  hansik: { name:"한식 식당",   font:"serif",    bold:false, theme:"pat",   paper:"hanji",   sec:"band", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"추천" },
+  cafe:   { name:"카페",        font:"gothica1", bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"none", seal:"none", mark:"✿" },
+  bunsik: { name:"분식",        font:"round",    bold:true,  theme:"chili", paper:"gingham", sec:"pill", align:"left",   leader:"none", noren:"arch",  art:"none", seal:"none", mark:"best" },
+  hof:    { name:"호프 · 치킨", font:"nanum",    bold:true,  theme:"board", paper:"wood",    sec:"band", align:"left",   leader:"dash", noren:"twin",  art:"beer", seal:"star", mark:"hot" },
+  alps:   { name:"알프스 모양", font:"gungseo",  bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:null,   seal:"tri",  mark:"★" }   // 그림은 예시의 장별 값. 도장은 모양 도장 — 예시의 "알프스" 글자 도장을 다른 가게에 찍지 않는다
+};
+function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하기 창은 새로 만들 설정에, 꾸미기 창은 지금 설정에
+  const q = PRESETS[k]; if (!q) return;
+  S.font = q.font; S.bold = q.bold; S.theme = q.theme; S.custom = {};
+  if (q.paper === "grain") delete S.paper; else S.paper = q.paper;
+  if (q.sec === "line") delete S.secStyle; else S.secStyle = q.sec;
+  S.secAlign = q.align;
+  if (q.leader === "none"){ S.showDots = false; delete S.leader; } else { delete S.showDots; if (q.leader === "dots") delete S.leader; else S.leader = q.leader; }
+  const ex = ALPS_EXAMPLE.settings.pages || []; S.pages = S.pages || [];
+  (M.sheets || []).forEach((_, i) => { const pp = S.pages[i] || (S.pages[i] = pageDefaults(i)), e = ex[i] || ex[0] || {};
+    pp.noren = q.noren; pp.art = q.art ?? (e.art || "none"); pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; });
+  const old = S.mark; S.mark = q.mark;
+  if (old && old !== q.mark && markIsSym(old) && markIsSym(q.mark)){ const sw = a => a.map(t => t.split(old).join(q.mark)); (M.feet || []).forEach(f => { f.line = sw(f.line || []); f.notes = sw(f.notes || []); }); }
+}
+/* 꾸미기 창 — "추천 조합으로 맞추기". 고르면 맞추고 목록은 처음 글로 돌아간다(지금 조합을 보여 주는 칸이 아니다) */
+$("#f-preset").onchange = e => { const k = e.target.value; e.target.value = ""; if (!PRESETS[k]) return;
+  applyPresetTo(SETTINGS, MENU, k); syncControls(); applyLook(); render(); applyScale(); touch(); toast("‘" + PRESETS[k].name + "’ 조합으로 맞췄습니다", () => stepBack()); };
+/* 273번. 종이 결 · 분류 제목 모양 — 기본값이면 키를 지운다(showDots 와 같은 방식) */
+$("#f-paper").onchange = e => { if (e.target.value === "grain") delete SETTINGS.paper; else SETTINGS.paper = e.target.value; render(); touch(); };
+$("#f-secstyle").onchange = e => { if (e.target.value === "line") delete SETTINGS.secStyle; else SETTINGS.secStyle = e.target.value; render(); touch(); };
+$("#b-undo").onclick = () => stepBack(); $("#b-redo").onclick = () => stepFwd();   // 271번
+
+/* ── 269번. 가이드 — 실제 화면을 짚는 말풍선 다섯 단계(9장) ─────────────────────
+   · 첫 화면에서 길을 고른 직후에만 저절로 뜬다(startWith). 그냥 연 파일에는 뜨지 않는다 — 열자마자 뜨면 검사와 알프스판 사용자를 막는다
+   · 끝내거나 건너뛰면 SETTINGS.guideDone(인쇄 안내의 "다시 보지 않기"와 같은 방식). 다시 보기는 도움말 바닥 줄
+   · 짚는 것은 오래 안 바뀐 다섯 곳만 — 단추를 옮기면 가이드가 먼저 깨진다. t49 가 단계마다 짚는 것이 화면에 있는지 본다
+   · 가이드 중에는 뒤를 누를 수 없다(.gd-block). 줄 도구 · ＋ 묶음은 평소 올렸을 때만 보이므로(규칙 D) 그 단계에서 억지로 켠다 */
+const firstRow = () => document.querySelector(".sheet section .row");
+const firstSec = () => [...document.querySelectorAll(".sheet section")].find(s => s.querySelector(":scope > .addrow"));
+const unionRect = els => { const rs = els.filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
+  if (!rs.length) return null; const L = Math.min(...rs.map(r => r.left)), T = Math.min(...rs.map(r => r.top));
+  return { left:L, top:T, right:Math.max(...rs.map(r => r.right)), bottom:Math.max(...rs.map(r => r.bottom)) }; };
+/* 270번. 설명 글에 화면의 이름을 섞지 않는다 — 화면에 있는 것은 실제 모양을 닮은 표지(kbd · .gd-b)로, 뜻은 옆에(사용자: "버튼명과 설명이 같은 텍스트라 헷갈려") */
+const K = x => '<kbd>' + x + '</kbd>', BTN = x => '<span class="gd-b">' + x + '</span>';   // kbd = 종이 위의 밝은 도구 · 단추, gd-b = 막대 · 꾸미기 창의 어두운 단추
+const GUIDE = [
+  { h:"글자를 눌러 바로 고칩니다", p:"종이 위 글자를 누르면 그 자리에서 고쳐집니다.<small>메뉴 이름 · 가격 · 분류 제목 · 맨 위 글자 모두 같습니다</small>",
+    at:() => { const r = firstRow(); return r && r.querySelector("[data-path]"); } },
+  { h:"메뉴 줄에 마우스를 올리면", p:"도구가 나옵니다. 인쇄에는 안 나옵니다.",
+    dl:[[K("✕"), "줄 지우기"], [K("▲") + K("▼"), "순서 옮기기"], [K("★"), "추천 — 이름을 적은 줄"], [K("품"), "품절 — 이름을 적은 줄"], [K("설"), "메뉴 설명 — 이름을 적은 줄"]],
+    prep:() => setRowHere(firstRow()), at:() => firstRow(), wide:r => [r, ...r.querySelectorAll(".rowtools, .rowtools *")] },
+  { h:"분류에 마우스를 올리면", p:"분류 아래에 넣고 빼는 단추가 나옵니다.",
+    dl:[[K("＋ 메뉴 추가"), "메뉴 한 줄"], [K("＋ 안내 추가"), "※ 로 시작하는 안내"], [K("＋ 분류 추가"), "새 분류"], [K("◀") + K("▶"), "분류를 옆 단으로 — 분류 제목 옆"]],   // 종이 위 ＋ 단추는 밝은 테두리 — 표지도 같은 모양
+    prep:() => setAddHere(firstSec()), at:() => firstSec()?.querySelector(":scope > .addrow") },
+  { h:"꾸미기 창", p:"글꼴 · 색 · 상단 모양 · 그림 · 도장을 고릅니다.",
+    dl:[[BTN("전체"), "파일 전체에"], [BTN("장별"), "고른 장에만"]],
+    prep:() => { if ($("#panel").hidden) $("#b-style").click(); }, at:() => $("#panel") },
+  { h: ON_WEB ? "저장은 알아서 됩니다" : "다 고쳤으면 파일로 저장",   // 277번. 인터넷 주소는 자동 저장 — 컴퓨터 파일은 전처럼
+    p: ON_WEB ? "고칠 때마다 이 브라우저에 자동 저장됩니다(막대의 ✓ 자동 저장됨). " + BTN("파일로 저장") + " 은 파일로 받아 두는 것입니다.<small>백업하거나 다른 컴퓨터로 옮길 때 씁니다</small>"
+              : BTN("파일로 저장") + " 을 누르면 지금 모습 그대로 새 파일이 내려받아집니다.<small>다음부터는 그 파일을 여세요</small>", at:() => $("#b-save") }
+];
+let gi = -1, gdPrev = null;
+function guideStart(){ gdPrev = document.activeElement; if (!editing) toggleEdit(); gi = 0; guideShow(); }   // 270번. 시작 전 커서 자리를 기억한다
+function guideClear(){ document.querySelectorAll(".gd-block, .gd-hole, .gd-tip").forEach(n => n.remove()); setRowHere(null); setAddHere(null); }
+function guideEnd(){
+  gi = -1; guideClear();
+  if (gdPrev && gdPrev !== document.body && document.contains(gdPrev)) gdPrev.focus({ preventScroll:true });   // 270번. 가이드가 가져간 커서를 돌려준다 — 빈 메뉴판은 첫 분류 이름
+  gdPrev = null;
+  /* 270번. "가이드를 봤다"는 되돌리기에 넣지 않는다 — 넣으면 되돌리기 한 번이 화면 변화 없이 쓰인다. 저장할 것 있음만 표시 */
+  if (SETTINGS.guideDone !== true){ SETTINGS.guideDone = true; lastState = snapshot(); dirty = true; document.body.classList.add("unsaved"); autoSave(); }
+}
+function guideShow(){
+  guideClear(); const g = GUIDE[gi]; g.prep?.();
+  const t = g.at(); if (!t){ guideEnd(); return; }
+  t.scrollIntoView({ block:"nearest", inline:"nearest" });
+  requestAnimationFrame(() => {
+    const r = g.wide ? unionRect(g.wide(t)) : t.getBoundingClientRect(); if (!r){ guideEnd(); return; }
+    const pad = 6, block = el("div", "gd-block"), hole = el("div", "gd-hole"), tip = el("div", "gd-tip");
+    Object.assign(hole.style, { left:(r.left - pad) + "px", top:(r.top - pad) + "px", width:(r.right - r.left + pad*2) + "px", height:(r.bottom - r.top + pad*2) + "px" });
+    const n = el("div", "n"); n.setAttribute("aria-label", (gi + 1) + " / " + GUIDE.length);   // 270번. 단계는 점으로
+    GUIDE.forEach((_, i) => n.append(el("i", i === gi ? "on" : i < gi ? "past" : "")));
+    const h = el("h4"); h.textContent = g.h; const p = el("p"); p.innerHTML = g.p;   // 문구는 코드 안의 고정 글 — 사용자 입력이 아니다
+    let dl = null; if (g.dl){ dl = el("dl", "gd-dl"); g.dl.forEach(([k, v]) => { const dt = el("dt"), dd = el("dd"); dt.innerHTML = k; dd.textContent = v; dl.append(dt, dd); }); }
+    const row = el("div", "r"), bt = (txt, cls, fn) => { const b = el("button", cls); b.type = "button"; b.textContent = txt; b.onclick = fn; row.append(b); return b; };
+    bt("건너뛰기", "skip", guideEnd);
+    if (gi > 0) bt("이전", "", () => { gi--; guideShow(); });
+    if (gi < GUIDE.length - 1) bt("다음", "tonal", () => { gi++; guideShow(); }); else bt("끝내기", "fill", guideEnd);
+    tip.append(n, h, p); if (dl) tip.append(dl); tip.append(row); document.body.append(block, hole, tip);
+    const tw = tip.offsetWidth, th = tip.offsetHeight, W = innerWidth, H = innerHeight, gap = 16;   // 오른쪽 → 왼쪽 → 아래 → 위
+    let x, y;
+    if (r.right + gap + tw < W - 8){ x = r.right + gap; y = r.top - 8; }
+    else if (r.left - gap - tw > 8){ x = r.left - gap - tw; y = r.top - 8; }
+    else if (r.bottom + gap + th < H - 8){ x = r.left; y = r.bottom + gap; }
+    else { x = r.left; y = r.top - gap - th; }
+    tip.style.left = Math.max(8, Math.min(x, W - tw - 8)) + "px"; tip.style.top = Math.max(8, Math.min(y, H - th - 8)) + "px";
+    row.lastChild.focus({ preventScroll:true });
+  });
+}
+document.addEventListener("keydown", e => { if (gi >= 0 && e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); guideEnd(); } }, true);
+addEventListener("resize", () => { if (gi >= 0) guideShow(); });
+$("#help-guide").onclick = () => { $("#help").close(); guideStart(); };
+
 /* ── 시작 ──────────────────────────────────────────────────────────── */
 /* 되돌리기·임시본 되살리기도 이 함수를 쓴다. 값을 채우는 곳은 여기 하나뿐이어야
    한다 — 두 군데가 되면 한쪽만 고쳐져 창과 종이가 어긋난다 (24번과 같은 이유) */
@@ -5613,14 +6551,21 @@ function syncControls(){
   $("#f-layout").value = SETTINGS.orient || "portrait";
   $("#f-font").value   = SETTINGS.font;
   $("#f-theme").value  = SETTINGS.theme;
-  $("#f-mark").value   = SETTINGS.mark;
+  { const known = !!$("#f-mark").querySelector('option[value="' + CSS.escape(SETTINGS.mark) + '"]');   // 274번. 목록에 없는 글자면 "직접 쓰기" + 칸
+    $("#f-mark").value = known ? SETTINGS.mark : "__own"; const c = $("#f-markc"); c.hidden = known; if (!known) c.value = SETTINGS.mark; }
   syncPageTabs(); syncPage();
   $("#f-bi").checked   = !!SETTINGS.bilingual;
-  $("#f-dots").checked = SETTINGS.showDots !== false;   // 켜져 있으면 키 자체가 없다(showNotes 와 같은 규칙)
+  $("#f-paper").value = SETTINGS.paper || "grain"; $("#f-secstyle").value = SETTINGS.secStyle || "line";   // 273번
+  $("#f-leader").value = SETTINGS.showDots === false ? "none" : (SETTINGS.leader || "dots");   // 273번   // 켜져 있으면 키 자체가 없다(showNotes 와 같은 규칙)
   $("#f-pageno").value = SETTINGS.pageno;
   $("#f-secalign").value  = SETTINGS.secAlign  || "left";
   $("#f-winealign").value = SETTINGS.wineAlign || "left";
   syncWineFields(); syncBottles();
+  /* 264번. 상호명 · 맨 위 */
+  $("#f-shop").value = MENU.brand?.shop || "";
+  $("#f-topmode").querySelectorAll("button").forEach(b => b.classList.toggle("on", (SETTINGS.topMode === "text") === (b.dataset.m === "text")));
+  $("#f-logorow").hidden = SETTINGS.topMode === "text";
+  panelTiles();   // 268번
   /* 색 상자 다섯 개의 값은 applyLook() 이 채운다 — 늘 지금 쓰는 색을 보여준다 */
 }
 syncControls();
@@ -5629,6 +6574,7 @@ render();
 lastState = snapshot();
 
 requestAnimationFrame(() => applyScale());   // 처음 열 때 넘치면 살짝 줄여 맞춤
+if (SETTINGS.startScreen === true) openStart();   // 264번. 처음 여는 파일이면 첫 화면
 </script>
 </body>
 </html>
