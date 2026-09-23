@@ -15,7 +15,7 @@
 // 버셀 설정  Settings → Environment Variables
 //   GEMINI_API_KEY   필수
 //   GEMINI_MODEL     선택. 비우면 gemini-3.5-flash-lite
-//   ALLOWED_ORIGINS  선택. 쉼표로. 비우면 https://menupan.vercel.app 와 컴퓨터 파일(null)
+//   ALLOWED_ORIGINS  선택. 쉼표로. 비우면 https://menupan-jin.vercel.app 와 컴퓨터 파일(null)
 //   READ_ENABLED     선택. off 면 사진 읽기를 끈다(278번 — 제미나이를 아예 부르지 않는다). 비우거나 on 이면 켜짐
 //   바꾼 뒤에는 Deployments 에서 Redeploy 해야 적용된다
 
@@ -33,7 +33,7 @@ const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const MAX_B64 = 4000000;   // 사진(base64) 약 3MB. 메뉴판은 긴 쪽 1600px JPEG 로 줄여 보낸다(보통 0.5MB 안)
 
 function allowed(origin){
-  const list = (process.env.ALLOWED_ORIGINS || "https://menupan.vercel.app,null").split(",").map(s => s.trim()).filter(Boolean);
+  const list = (process.env.ALLOWED_ORIGINS || "https://menupan-jin.vercel.app,null").split(",").map(s => s.trim()).filter(Boolean);
   return !!origin && list.includes(origin);
 }
 
