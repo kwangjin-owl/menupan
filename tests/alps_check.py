@@ -284,7 +284,7 @@ def t14(b, f):
     c.js("(s)=>{const it=MENU.sheets[0][0][0].items[0]; it.name=s; it.desc=s; F(0).notes.push(s); MENU.brand.sub=s; render(); touch();}", SPECIAL)
     before = c.js("()=>JSON.stringify([MENU,SETTINGS])")
     fin = c.js(POS, '.row, h2, .note')
-    with c.pg.expect_download() as d: c.pg.click('#b-save')
+    with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
     p = D + 'res/rt_' + f; d.value.save_as(p); c.close()
     c = Ctx(b, 'res/rt_' + f)
     out['roundtrip_same'] = c.js("()=>JSON.stringify([MENU,SETTINGS])") == before
@@ -304,7 +304,7 @@ def t14(b, f):
     open(D + 'res/legacy_' + f, 'w', encoding='utf-8').write(src[:m.start(2)] + '\n' + legacy.replace('<', '\\u003C') + src[m.end(2):])
     c = Ctx(b, 'res/legacy_' + f, dl=True)
     out['legacy_open'] = c.js("()=>({sheets:MENU.sheets.length, cols:MENU.sheets[0].length, columns:'columns' in MENU, notes:F(0).notes, origin:F(0).origin, hours:MENU.hours[1].time, noren:P(0).noren, ns:P(0).norenScale, orient:SETTINGS.orient, drawn:document.querySelectorAll('.sheet .row').length})")
-    with c.pg.expect_download() as d: c.pg.click('#b-save')
+    with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
     p = D + 'res/legacy_saved_' + f; d.value.save_as(p)
     saved = open(p, encoding='utf-8').read(); md = re.search(r'\n<script id="menu-data">(.*?)</script>', saved, re.S).group(1)
     out['legacy_saved_oldkeys'] = [k for k in ['"columns"', '"legend"', '"unit"', '"address"', '"tel"', '"note"', '"footnotes"', '"footline"', '"layout"', '"norenTall"', '"sheetArt"', '"line"'] if k in md]
@@ -413,7 +413,7 @@ def t17(b, f):
 def t21(b, f):
     c = Ctx(b, f, 1400, 900, dl=True)
     c.js(FIT); c.pg.wait_for_timeout(150)
-    with c.pg.expect_download() as d: c.pg.click('#b-save')
+    with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
     p = D + 'res/w21_' + f; d.value.save_as(p); c.close()
     out = {}
     for W in (1400, 1024, 900, 780, 640):
@@ -448,7 +448,7 @@ def t23(b, f):
             r['sheetW_' + str(ed)] = c.js("()=>+document.querySelector('.sheet').getBoundingClientRect().width.toFixed(1)")
             if ed:
                 r['panel'] = c.js("""()=>{scrollTo(0,0); const p=document.querySelector('#panel').getBoundingClientRect(), bar=document.querySelector('#barwrap').getBoundingClientRect();
-                   return {inView: p.left>=-0.5 && p.right<=innerWidth+0.5 && p.top>=-0.5 && p.bottom<=innerHeight+0.5, overBar: p.bottom>bar.top+0.5 && p.left<bar.right && p.right>bar.left}}""")
+                   return {inView: p.left>=-0.5 && p.right<=innerWidth+0.5 && p.top>=-0.5 && p.bottom<=innerHeight+0.5, overBar: p.top<bar.bottom-0.5 && p.bottom>bar.top+0.5 && p.left<bar.right && p.right>bar.left}   /* 283번. 두 상자가 실제로 겹치는가 — 전에는 막대가 아래라고 가정했다 */}""")
             r['fit_' + str(ed)] = c.js("()=>{MENU.sheets.forEach((_,i)=>P(i).autofit=true); fitNow(); applyScale(); return MENU.sheets.map((_,i)=>P(i).scale)}")
             r['err_' + str(ed)] = c.errs; c.close()
         out['narrow'][W] = r
@@ -459,7 +459,7 @@ def t24(b, f):
     c = Ctx(b, f, dl=True); sizes = []
     for k in range(3):
         if k == 1: c.pg.click('#b-print') if False else None
-        with c.pg.expect_download() as d: c.pg.click('#b-save')
+        with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
         p = D + f'res/s24_{k}_' + f; d.value.save_as(p); sizes.append(os.path.getsize(p)); c.pg.wait_for_timeout(300)
         if k == 0:   # 두 번째 저장 전에 화면 상태를 흔든다: 편집 · 꾸미기 탭 · 인쇄 경고 · 도움말
             c.js("()=>{document.querySelector('#b-edit').click(); panelTab='page'; panelPage=1; syncPageTabs(); syncPage(); document.querySelector('#b-edit').click();}")
@@ -768,7 +768,7 @@ def t43(b, f):
         lh = loc2.evaluate("e=>[e.getBoundingClientRect().height, parseFloat(getComputedStyle(e).lineHeight), e.scrollHeight, e.clientHeight]")
         out[name] = {'value': v, 'newlines': v.count('\n'), 'heightLines': round(lh[0] / lh[1], 1), 'raw': lh}
     c.js("()=>document.querySelector('#b-edit').click()")
-    with pg.expect_download() as d: pg.click('#b-save')
+    with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     p = D + 'res/t43_' + f; d.value.save_as(p); c.close()
     c = Ctx(b, 'res/t43_' + f)
     out['saved'] = c.js("()=>[MENU.sheets[0][0][0].name, MENU.sheets[1][0][0].items[0].name, MENU.sheets[1][0][0].items[0].label]")
@@ -1047,12 +1047,12 @@ def t47(b, f):
     pg.click('#st-go'); pg.wait_for_timeout(700)
     out['guide_up'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)   # 269번부터 시작하면 가이드가 뜬다 — 닫고 간다
     out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:P(0).seal, art:P(0).art, logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
-    with pg.expect_download() as d: pg.click('#b-save')
+    with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     out['save_name'] = d.value.suggested_filename; d.value.save_as(D + 'res/start_saved_' + f)
     out['err'] = list(c.errs); c.close()
     c = Ctx(b, 'res/start_saved_' + f); pg = c.pg
     out['saved_opens_direct'] = not c.js("()=>document.querySelector('#start').open")
-    pg.click('#b-edit'); pg.wait_for_timeout(200); c.js("()=>document.querySelector('#b-start').scrollIntoView()"); pg.click('#b-start'); pg.wait_for_timeout(200)
+    pg.click('#b-edit'); pg.wait_for_timeout(200); pg.click('#b-file'); pg.click('#b-start')   # 283번. [파일 ▾] 안; pg.wait_for_timeout(200)
     out['reopen_close'] = c.js("()=>!document.querySelector('#st-closerow').hidden")
     pg.click('#st-blank'); pg.wait_for_timeout(150); pg.mouse.click(8, 8); pg.wait_for_timeout(150)
     out['setup_backdrop_stays'] = c.js("()=>document.querySelector('#start').open && !document.querySelector('#st-setup').hidden")   # 266번 — 다시 연 정하기 창도
@@ -1065,7 +1065,7 @@ def t47(b, f):
     out['err'] += c.errs; c.close()
     c = Ctx(b, 'start_' + f, dl=True); pg = c.pg                               # 265 — 상호명을 비우면 "메뉴판"
     pg.click('#st-blank'); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
-    with pg.expect_download() as d: pg.click('#b-save')
+    with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     out['noname'] = [c.js("()=>document.title"), d.value.suggested_filename]
     out['err'] += c.errs; c.close()
     return out
@@ -1130,8 +1130,8 @@ def t52(b, f):
     before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
     keys = c.js("()=>Object.keys(PRESETS)")
     for k in keys:
-        pg.select_option('#f-preset', k); pg.wait_for_timeout(200)
-        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', document.querySelector('#f-preset').value==='']}", k)
+        c.js("()=>document.querySelector('#f-presets').scrollIntoView()"); pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
+        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
     out['same_size_content'] = c.js(snap) == before
     for _ in keys: pg.keyboard.press('Control+z'); pg.wait_for_timeout(120)
     out['undo_back'] = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})") == st
@@ -1150,6 +1150,7 @@ def t53(b, f):
         const real=[...sh.querySelectorAll('.row')].some(r=>r.getBoundingClientRect().bottom > lim + 1); return real === !!overWhy(i); })""")
     c.close(); return out
 
+# 283번. [파일로 저장] · [새로 만들기]는 위쪽 막대 [파일 ▾] 안 — 누르기 전에 메뉴를 연다
 # ───────────────────────── 54. 사진으로 시작(275번) — 붙여 넣기 길과 제미나이 길(인터넷 대신 가짜 답). 요청 모양 · 키는 브라우저에만 · 확인 화면 · 노란 칸 · 시작 뒤 메뉴
 ANS54 = "[식사]\n단호박 크림 파스타 | 14000\n고사리 들깨 크림 파스타? | 14000\n오징어 페코리노 파스타 | 14,000원\n[안주]\n生 연어구이 | 10000\n국물바지락 | 11000?\n피망 | 시가\n[음료]\n콜라 · 사이다 | 3000"
 def t54(b, f):
@@ -1217,7 +1218,7 @@ def t55(b, f):
         out['saved'] = ['자동 저장됨' in pg.inner_text('#autost'), '자동 저장 시험' in (pg.evaluate("localStorage.getItem('menupan-auto')") or ''), not pg.evaluate("getComputedStyle(document.querySelector('#b-save')).backgroundColor").startswith('rgb(239')]
         pg.reload(); pg.wait_for_timeout(600)
         out['reopen'] = [not pg.evaluate("document.querySelector('#start').open"), pg.evaluate("MENU.sheets[0][0][0].name") == '자동 저장 시험', '지난번' in pg.evaluate("document.querySelector('#undo')?.innerText||''")]
-        with pg.expect_download() as d: pg.click('#b-save')
+        with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
         sv = open(d.value.path(), encoding='utf-8').read(); mm = re.search(r'id="autost"[^>]*>([^<]*)</span>', sv)
         out['file_clean'] = [' web' not in sv.split('<body')[1][:80], bool(mm) and mm.group(1).strip() == '']   # 칸 안의 글자만 — 옆 주석을 세지 않는다
         pg.set_input_files('#st-hfile', D + f); pg.wait_for_timeout(1200)
