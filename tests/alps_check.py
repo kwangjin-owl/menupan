@@ -230,6 +230,24 @@ def margins(p):
         W, H = float(W), float(H)
         res.append([round(min(w[0] for w in ws) * MM, 1), round((W - max(w[2] for w in ws)) * MM, 1), round((H - max(w[3] for w in ws)) * MM, 1), round(W * MM), round(H * MM)])
     return res, bb
+def ink_bottom(p, bb):
+    """296번. 아래 여백은 **잉크**로 잰다 — 파일의 넘침 판정(252번)이 캔버스로 잰 글자 모양이다. 글자 상자(pdftotext)는 글꼴의 아래 빈 공간까지라
+    [한 장에 맞춤]이 여백선까지 채운 줄(잉크 11.09mm)이 상자로는 10.6mm 로 나왔다. 쪽마다 가장 아래 낱말 다섯의 잉크 아래 끝(mm)"""
+    out = []
+    for n, (W, H, body) in enumerate(re.findall(r'<page width="([\d.]+)" height="([\d.]+)">(.*?)</page>', bb, re.S), 1):
+        W, H = float(W), float(H)
+        ws = sorted((tuple(map(float, w)) for w in re.findall(r'xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)"', body)), key=lambda w: -w[3])[:5]
+        pre = D + 'res/ink_' + os.path.basename(p)[:-4]
+        subprocess.run(['pdftoppm', '-r', '300', '-f', str(n), '-l', str(n), '-gray', '-png', p, pre], check=True)
+        f = sorted(x for x in os.listdir(D + 'res') if x.startswith(os.path.basename(pre) + '-'))[-1]
+        im = Image.open(D + 'res/' + f).convert('L'); sx, sy = im.size[0] / W, im.size[1] / H; low = 0
+        for x0, y0, x1, y1 in ws:
+            X0, X1, Y0, Y1 = int(x0 * sx), int(x1 * sx), int(y0 * sy), min(im.size[1] - 1, int((y1 + 6) * sy))
+            for y in range(Y1, Y0, -1):
+                if any(im.getpixel((x, y)) < 90 for x in range(X0, X1, 2)): low = max(low, y); break
+        out.append(round((im.size[1] - low) / sy * MM, 2))
+        os.remove(D + 'res/' + f)
+    return out
 def raster(p):
     subprocess.run(['pdftoppm', '-r', '60', '-png', p, p[:-4]], check=True)
     return sorted(x for x in os.listdir(D + 'res') if x.startswith(os.path.basename(p)[:-4] + '-'))
@@ -241,6 +259,7 @@ def t07(b, f):
         c.pg.wait_for_timeout(150)
         p1 = pdf_of(c, f'p7_{o}_final_{f}')
         m1, bb1 = margins(p1)
+        ink1 = ink_bottom(p1, bb1)   # 296번
         lay = subprocess.run(['pdftotext', '-layout', '-f', '1', '-l', '1', p1, '-'], capture_output=True, text=True).stdout
         multi = any(re.search(r'\d{1,3},\d{3}\s.{3,}?\S.*\d{1,3},\d{3}', l) for l in lay.splitlines())
         # 편집 중(마우스 올린 줄 · 빈 칸 · 넘침 띠 없음) 그대로 Ctrl+P
@@ -252,7 +271,7 @@ def t07(b, f):
         for a, bq in zip(i1, i2):
             A = Image.open(D + 'res/' + a).convert('RGB'); B = Image.open(D + 'res/' + bq).convert('RGB')
             px.append(sum(1 for q in pixels(ImageChops.difference(A, B)) if max(q) > 16) if A.size == B.size else 'size')
-        out[o] = {'pages': len(m1), 'size': [x[3:] for x in m1], 'margins': [x[:3] for x in m1], 'multicol': multi,
+        out[o] = {'pages': len(m1), 'size': [x[3:] for x in m1], 'margins': [x[:3] for x in m1], 'inkBottom': ink1, 'multicol': multi,
                   'edit_text_same': re.sub(r'<head>.*?</head>', '', bb1, flags=re.S) == re.sub(r'<head>.*?</head>', '', bb2, flags=re.S),
                   'edit_px_diff': px, 'err': c.errs}
         c.close()
@@ -1259,12 +1278,14 @@ def judge(t, r):
             m = {'portrait': (14, 14, 11.6), 'landscape': (13, 13, 11.3)}; bad = []
             for o in m:
                 for pg in r[o]['margins']:
-                    if not all(near(x, y, 0.4) for x, y in zip(pg, m[o])): bad.append((o, pg))
+                    if not (near(pg[0], m[o][0], 0.4) and near(pg[1], m[o][1], 0.4)): bad.append((o, pg))   # 좌우는 글자 상자
+                for ib in r[o].get('inkBottom', []):   # 296번. 아래는 잉크 — 여백선(11mm) 밖으로 나가지 않을 것
+                    if ib < 10.9: bad.append((o, '아래 잉크', ib))
                 if not r[o]['multicol']: bad.append((o, '다단 아님'))
                 if max(r[o]['edit_px_diff'] or [0]) > 100: bad.append((o, '편집 중 인쇄 화소', r[o]['edit_px_diff']))
             for L, v in r['long'].items():
                 if not (v['priceIn'] and v['prevIn'] and all(x <= v['colRightMm'] + 0.5 for x in v['pdfPriceXmm'])): bad.append(('긴 이름', L))
-            return not bad, f"여백 세로 {r['portrait']['margins'][0]} · 가로 {r['landscape']['margins'][0]} · 편집 중 인쇄 {r['portrait']['edit_px_diff']}/{r['landscape']['edit_px_diff']} {bad or ''}"
+            return not bad, f"여백 세로 {r['portrait']['margins'][0]} · 가로 {r['landscape']['margins'][0]} · 아래 잉크 {r['portrait'].get('inkBottom')}/{r['landscape'].get('inkBottom')} mm · 편집 중 인쇄 {r['portrait']['edit_px_diff']}/{r['landscape']['edit_px_diff']} {bad or ''}"
         if t == 't08':
             bad = [(k, n) for k, v in r.items() if k != '_sec' for n, x in v['r'].items() if x.get('notOpen') or not (x['foot'] and x['hit'] and x['over'] == 0 and x['shadeOk'] and x['detVis'] in (None, True) and (x['h3'] or n.endswith('-open')))] + [(k, 'err') for k, v in r.items() if k != '_sec' and v['err']]
             return not bad, f"창 14구성 문제 {len(bad)} {bad[:4]}"
@@ -1343,8 +1364,8 @@ def judge(t, r):
         if t == 't46':
             g = r['244_foot_fixed']; top = r['256_logo_top_mm']
             ok = (near(g[0], g[1], 1) and g[2] == 'tall' and r['245_invisible'] is None and all(r[f'sec_pad_{n}'] is None for n in (10, 30, 45, 60))
-                  and r['254_line_on'][0] == 'tall' and r['254_line_off'][0] is None and all(near(v, 11, 0.4) for v in top.values()) and r['246_loadingdone'] >= 1 and not r['err'])
-            return ok, f"바닥 고정 {g} · 안 보이는 3px {r['245_invisible']} · 빈 자리 10·30·45·60px {[r[f'sec_pad_{n}'] for n in (10, 30, 45, 60)]} · 밑줄이 도장 +20px 켬/끔 {r['254_line_on'][0]}/{r['254_line_off'][0]} · 로고 윗변 mm {top} · 글꼴 도착 뒤 다시 재기 {r['246_loadingdone']}회"
+                  and r['254_line_on'][0] is None and r['254_line_off'][0] is None and all(near(v, 11, 0.4) for v in top.values()) and r['246_loadingdone'] >= 1 and not r['err'])
+            return ok, f"바닥 고정 {g} · 안 보이는 3px {r['245_invisible']} · 빈 자리 10·30·45·60px {[r[f'sec_pad_{n}'] for n in (10, 30, 45, 60)]} · 밑줄이 도장 +20px 켬/끔(296번 — 도장은 판정에서 빠졌다: 둘 다 None) {r['254_line_on'][0]}/{r['254_line_off'][0]} · 로고 윗변 mm {top} · 글꼴 도착 뒤 다시 재기 {r['246_loadingdone']}회"
         if t == 't47':
             s = r['started']; import re as _re
             ok = (r['open_first'] == [True, 'none', False] and   # 275번 — 사진으로 시작이 준비 중(흐림)에서 눌림으로

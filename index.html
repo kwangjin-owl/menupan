@@ -2275,6 +2275,22 @@ dialog .st-picrow.has button.st-drop{margin:0}
 /* ══ 295번. 읽은 메뉴 확인 — 사진 칸이 남는 폭(1fr)을 다 먹고 사진은 그 가운데라, 두 칸 폭이 달라 보이고 사이가 약 230 비었다(사용자 화면).
    두 칸 모두 내용만큼(auto), 같은 높이로 가운데에 모으고 틈 24 — 나란히 대조하는 화면이다 */
 @media screen and (min-width:821px){ .st-cbody:not(.nopic){grid-template-columns:auto auto;justify-content:center;gap:24px} }
+
+/* ══ 296번. 도장은 넘침 판정에서 뺀다(사용자 — 그림과 같은 장식. 화면 = 인쇄라 겹친 것이 보이고, "넘침"이라는 말도 사실과 달랐다). 바닥 글은 그대로 판정(내용이라 겹치면 둘 다 못 읽는다)
+   도장 · 그림 색 · 그림 진하기(변수) · 줄 도구 ★품설✕ 를 키움(9px · 높이 13 — 종이 위 도구 중 가장 작았다. 다른 도구는 그대로 — 사용자) · 확인 화면 가로 종이 · 빠진 메뉴 넣기 · 사진 크게 */
+.seal{color:var(--seal-col, var(--accent));z-index:0}   /* 296번. 그림처럼 글자 뒤 — 겹쳐도 글자가 읽히고, 완성본 인쇄(도장이 위)와 편집 중 인쇄(글자가 위)가 달랐다(t07) */
+.art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
+.editing .row .namewrap > .rowtools:not(.rowmove) button svg{transform:scale(1.35)}   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
+.panel .colrow{display:flex;gap:6px;align-items:center}
+.panel .colrow select{flex:1 1 auto;min-width:0}
+.panel .colrow input[type=color]{flex:0 0 32px;width:32px;height:32px;padding:2px}
+.st-cpaper.land{aspect-ratio:297/210;height:auto;width:min(46vw, 900px)}
+dialog .st-cadd{align-self:flex-start;margin-top:4px;height:28px;padding:0 12px;border:1px solid #9c8a68;border-radius:14px;background:transparent;font-size:12px}
+.st-cphoto img{cursor:zoom-in}
+dialog p.st-czoomhint{margin:6px 0 0;text-align:center}
+#st-zoom{position:fixed;inset:0;z-index:10;background:rgba(20,14,8,.86);overflow:auto;cursor:zoom-out;display:flex}
+#st-zoom[hidden]{display:none}
+#st-zoom img{margin:auto;max-width:none;max-height:none}
 </style>
 </head>
 <body>
@@ -2580,6 +2596,8 @@ dialog .st-picrow.has button.st-drop{margin:0}
     <option value="edelweiss">에델바이스</option>
     <option value="vine">포도나무</option>
     </select></span>
+    <span class="fld"><label for="f-artcol">그림 색</label><span class="colrow"><select id="f-artcol"><option value="ink">글자색 (기본)</option><option value="accent">포인트색</option><option value="band">띠색</option><option value="custom">직접 고르기</option></select><input type="color" id="c-art" aria-label="그림 색 직접 고르기"></span></span>
+    <span class="fld"><label for="f-artop">그림 진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span>   <!-- 296번. 한 줄에 셋이면 글자가 잘렸다(t35) -->
     <span class="fld"><label for="f-seal">도장</label>
     <select id="f-seal">
       <option value="none">없음</option>
@@ -2593,6 +2611,7 @@ dialog .st-picrow.has button.st-drop{margin:0}
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
+    <span class="fld"><label for="f-sealcol">도장 색</label><span class="colrow"><select id="f-sealcol"><option value="accent">포인트색 (기본)</option><option value="ink">글자색</option><option value="band">띠색</option><option value="custom">직접 고르기</option></select><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"></span></span>   <!-- 296번 -->
   </span>
 
   </div>
@@ -2731,9 +2750,10 @@ dialog .st-picrow.has button.st-drop{margin:0}
   </div>
   <div id="st-check" hidden>   <!-- 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단으로 · 창을 넓게 -->
     <div class="st-head"><button type="button" class="st-icon" id="st-check-back" aria-label="사진 다시 읽기" title="사진 다시 읽기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">읽은 메뉴 확인</h3><span class="st-pg stepdots" role="img" aria-label="3단계 중 2단계" title="3단계 중 2단계"><i class="past"></i><i class="on"></i><i></i></span></div>
-    <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요. 메뉴 이름을 지우면 그 줄은 빠집니다.</p>   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
+    <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요. 메뉴 이름을 지우면 그 줄은 빠집니다.</p>
+    <p class="sub st-note" id="st-ccount"></p>   <!-- 296번. 몇 개를 읽었는지 · 어떤 모양으로 놓았는지 -->   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
     <p class="st-legend"><i></i>노랗게 칠한 칸은 사진이 흐려서 잘못 읽었을 수 있는 곳입니다. 먼저 확인해 주세요.</p>
-    <div class="st-cbody"><div class="st-cphoto"><img id="st-cimg" alt="올린 메뉴판 사진"></div>
+    <div class="st-cbody"><div class="st-cphoto"><img id="st-cimg" alt="올린 메뉴판 사진" title="누르면 크게 봅니다"><p class="st-note st-czoomhint">사진을 누르면 크게 봅니다</p></div>
       <div class="st-cpaper"><div class="st-cband"><input type="text" id="st-cshop" class="st-cshopin" placeholder="가게 이름" aria-label="가게 이름" autocomplete="off"></div>   <!-- 290번. 읽은 가게 이름 — 고칠 수 있다 --><div id="st-ctab" class="st-ctab"></div></div></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
   </div>
@@ -2755,6 +2775,7 @@ dialog .st-picrow.has button.st-drop{margin:0}
     <div class="st-sw" id="st-sw"></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-go">이대로 시작</button></div>
   </div>
+<div id="st-zoom" hidden title="누르면 닫힙니다"><img alt="올린 메뉴판 사진(크게)"></div>   <!-- 296번. 사진 크게 보기 -->
 </div></dialog>
 
 <div class="undo" id="undo" hidden><span class="t"></span><button type="button" id="undo-btn">되돌리기</button></div>
@@ -3562,7 +3583,7 @@ MENU.sheets.forEach((sh,i) => { if (!sh.length) MENU.sheets[i] = [[]]; });
    옛 저장본의 맨 위 키(noren · scale · art · seal …)는 1쪽 값으로 옮기고 지운다(15번). 89 · 92번의 옛 변환(low · norenTall ·
    scalePort)도 여기서 장마다 한다 */
 const PAGE_KEYS = ["noren","norenScale","norenTall","showTitle","showSub","logoColor","scale","scalePort","scaleLand","autofit",
-                   "showNotes","showOrigin","art","seal"];
+                   "showNotes","showOrigin","art","seal","artColor","artOp","sealColor"];   // 296번. 그림 색 · 진하기 · 도장 색
 /* 198 · 200번. 상단 크기 기본값. **출처는 하나다**(24 · 55번) —
    211번에서 `pageDefaults` · 122번 방어 · `drawSheet()` 대체값 · 창 표시 · ± · 막대가
    0.8 / 0.9 / 1 로 **셋으로 갈라져 있던 것**을 이 상수 하나로 모았다.
@@ -3638,6 +3659,8 @@ MENU.sheets.forEach((_, i) => {
   pg.seal  = pickIn(pg.seal,  Object.keys(SEALS), "word");
   pg.noren = pickIn(pg.noren, NOREN_KINDS, "flat");   // 180번. 기본은 곧은 띠
   pg.logoColor = pickIn(pg.logoColor, ["paper","white","ink","accent","custom"], "paper");
+  { const ok = (v, l) => v === undefined || l.includes(v) || /^#[0-9a-f]{6}$/i.test(v);   // 296번. 망가진 값은 기본으로(키를 지운다)
+    if (!ok(pg.artColor, ["accent","band"])) delete pg.artColor; if (!ok(pg.sealColor, ["ink","band"])) delete pg.sealColor; if (pg.artOp !== undefined && !["mid","strong"].includes(pg.artOp)) delete pg.artOp; }
   if (typeof pg.scale !== "number" || !(pg.scale > 0)) pg.scale = SCALE_DEFAULT;   // 212번
   if (!(pg.norenScale > 0)) pg.norenScale = NSCALE_DEFAULT;
   if (typeof pg.autofit !== "boolean") pg.autofit = false;
@@ -4313,7 +4336,7 @@ function drawSheet(spec){
      내려 둔 값이 다음 `render()` 에서 조용히 원복돼 종이를 넘긴다(실측 89.5px) */
   sheet.style.setProperty("--scale", shown[spec.pi] ?? PS.scale);
   sheet.style.setProperty("--nscale", PS.norenScale ?? NSCALE_DEFAULT);
-  sheet.style.setProperty("--logo", logoColorOf(PS));
+  sheet.style.setProperty("--logo", logoColorOf(PS)); pageColVars(sheet, PS);   // 296번
 
   const noren = el("header","noren nr-" + (PS.noren || "flat"));
   // 다른 편집 자리와 같은 모양으로 맞춘다. div 에 직접 걸면 테두리가 줄 전체로 퍼진다
@@ -5067,6 +5090,11 @@ window.addEventListener("beforeunload", e => { if (dirty && !ON_WEB){ e.preventD
 /* ── 모양 적용 ─────────────────────────────────────────────────────── */
 let curTheme = null, curLC = null, panelPage = 0;   // 152번. 지금 색 세트 · 꾸미기 창이 가리키는 장
 /* 32 · 131번의 로고 색 뒤집기를 장별로: 종이색 바탕 상단 + 종이색 로고면 먹색으로 */
+/* 296번. 도장 · 그림 색(사용자: "다른 추천 조합에서는 잘 안 보인다"). 도장 — 포인트색(기본) · 글자색 · 띠색 · 직접. 그림 — 글자색(기본) · 포인트색 · 띠색 · 직접, 진하기 셋 */
+const COLVAR = { ink:"var(--ink)", accent:"var(--accent)", band:"var(--band)" }, ART_OP = { mid:.14, strong:.24 };
+function pageColVars(sh, pg){ const v = (k, d) => !k ? d : COLVAR[k] || k;
+  sh.style.setProperty("--seal-col", v(pg.sealColor, "var(--accent)")); sh.style.setProperty("--art-col", v(pg.artColor, "var(--ink)")); sh.style.setProperty("--art-op", ART_OP[pg.artOp] || .07); }
+function cssHex(c){ const m = String(c).match(/\d+(\.\d+)?/g); if (!m) return "#000000"; return "#" + m.slice(0, 3).map(x => Math.round(+x).toString(16).padStart(2, "0")).join(""); }
 function logoColorOf(pg){
   if (!curTheme) return "#efe3c9";
   const lc = pg.logoColor || "paper";   // 273번. 값이 없어도 종이색과 같게 — 띠 없는 상단에서 종이 위 종이색 글자가 됐다
@@ -5102,7 +5130,7 @@ function applyLook(){
   // 띠가 없으면 로고가 종이 위에 바로 얹힌다. 기본값(종이색) 그대로면 안 보이므로
   // 먹색으로 뒤집는다. 사용자가 직접 고른 값은 건드리지 않는다
   curTheme = t; curLC = LC;
-  document.querySelectorAll(".sheet").forEach(sh => sh.style.setProperty("--logo", logoColorOf(P(+sh.dataset.pi))));
+  document.querySelectorAll(".sheet").forEach(sh => { sh.style.setProperty("--logo", logoColorOf(P(+sh.dataset.pi))); pageColVars(sh, P(+sh.dataset.pi)); });
   r.setProperty("--logo-src", 'url("' + (SETTINGS.logoImg || LOGO) + '")');   // 264번. 올린 그림이 있으면 그것
   if (SETTINGS.logoImg && SETTINGS.logoAR > 0) r.setProperty("--logo-ar", String(SETTINGS.logoAR)); else r.removeProperty("--logo-ar");
   $("#c-logo").value = logoColorOf(P(panelPage));
@@ -5243,8 +5271,10 @@ window.addEventListener("beforeprint", () => { if (overA4()) applyScale(); });
    단 안의 **글자 · 병 그림**의 실제 아래 끝을 쓴다. 무엇에 닿았는지(여백선 · 바닥 글 · 도장)도 함께 돌려준다 */
 function colReach(sh){
   const S = sh.getBoundingClientRect(), mg = parseFloat(getComputedStyle(sh).paddingBottom);
-  const obs = [...sh.querySelectorAll(".foot .left > *, .foot .left p")].map(e => ["바닥 글", e.getBoundingClientRect()])
-    .concat([...sh.querySelectorAll(".seal")].map(e => ["도장", e.getBoundingClientRect()]))
+  /* 296번. 바닥 글은 **글자가 있는 만큼**으로 잰다(Range) — 상자로 재면 완성본에서는 한 줄이 종이 폭 전체(블록)라 짧은 글 옆 빈 곳까지 막혔고,
+     편집 화면에서는 글자 폭(인라인)이라, [한 장에 맞춤]이 두 모드에서 다른 크기를 냈다(15.55 · 15.84px — 도장이 경계일 때는 가려져 있었다). 251번 원칙 그대로 */
+  const inkBox = e => { const r = document.createRange(); r.selectNodeContents(e); const k = r.getBoundingClientRect(); return k.width > 0 && k.height > 0 ? k : e.getBoundingClientRect(); };
+  const obs = [...sh.querySelectorAll(".foot .left > *, .foot .left p")].filter(e => !e.querySelector("p")).map(e => ["바닥 글", inkBox(e)])   // 줄(p)을 담은 틀(.zone)은 빼고 줄만 — 틀의 Range 는 안의 블록 줄 상자(종이 폭)를 품는다
     .filter(([, k]) => k.height > 0 && k.width > 0);
   /* 255번. **도장을 끄면 도장은 장애물이 아니다.** 끈 도장은 `.seal.blank`(visibility:hidden)로 자리만 남아 있어 상자 크기가 그대로였고,
      254번까지는 그 **안 보이는 도장**에 겹쳐도 넘침이라 했다("도장을 없애면 안 겹쳐야지"). 보이는 것만 센다 */
@@ -5933,6 +5963,13 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
   if (v === "none"){ SETTINGS.showDots = false; delete SETTINGS.leader; } else { delete SETTINGS.showDots; if (v === "dots") delete SETTINGS.leader; else SETTINGS.leader = v; }
   render(); touch(); };
 $("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); };
+/* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
+function colPick(key, def, sel, box){
+  $(sel).onchange = e => { const v = e.target.value, pg = P(panelPage); if (v === def) delete pg[key]; else pg[key] = v === "custom" ? $(box).value : v; applyLook(); touch(); syncPage(); };
+  $(box).addEventListener("input", e => { P(panelPage)[key] = e.target.value; $(sel).value = "custom"; applyLook(); touchLater(); });
+}
+colPick("artColor", "ink", "#f-artcol", "#c-art"); colPick("sealColor", "accent", "#f-sealcol", "#c-seal");
+$("#f-artop").onchange = e => { const pg = P(panelPage); if (e.target.value === "light") delete pg.artOp; else pg.artOp = e.target.value; applyLook(); touch(); };
 /* 179번. 기본값(왼쪽)이면 키를 안 남긴다(15번) */
 const setAlign = (k, v) => { if (v === "left") delete SETTINGS[k]; else SETTINGS[k] = v; render(); touch(); };
 $("#f-secalign").onchange  = e => setAlign("secAlign",  e.target.value);
@@ -5996,6 +6033,10 @@ function syncPage(){
   $("#f-logo").value   = pg.logoColor || "paper";
   $("#f-noren").value  = pg.noren || "flat";   // 234번. 기본은 곧은 띠(180번)
   $("#f-seal").value   = pg.seal || "word";
+  { const hx = /^#/, sh = document.querySelector('.sheet[data-pi="' + panelPage + '"]');   // 296번
+    $("#f-artcol").value = !pg.artColor ? "ink" : hx.test(pg.artColor) ? "custom" : pg.artColor; $("#f-sealcol").value = !pg.sealColor ? "accent" : hx.test(pg.sealColor) ? "custom" : pg.sealColor;
+    $("#f-artop").value = pg.artOp || "light";
+    if (sh){ const a = sh.querySelector(".art"), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
   $("#f-art").value    = pg.art || "none";
   $("#f-origin").checked = !!pg.showOrigin;
   $("#f-notes").checked  = pg.showNotes !== false;
@@ -6409,7 +6450,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stLook = {}; delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -6434,7 +6475,7 @@ function stSync(){
   if (stMode === "img" && stLogo && stAlt) drawTiles($("#st-tiles"), stLogo, stAlt, r => { if (r){ logoInv = !logoInv; stLogo = r; } stAlt = null; stSync(); }); else $("#st-tiles").innerHTML = "";   // 한 번 답하면 닫힌다
   stTheme = PRESETS[stPreset].theme;
   $("#st-sw").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.p === stPreset));
-  const t = THEMES[stTheme], pv = $("#st-prev"), nr = PRESETS[stPreset].noren, light = LIGHT_NOREN.includes(nr); pv.innerHTML = "";
+  const t = presetT(stPreset), pv = $("#st-prev"), nr = PRESETS[stPreset].noren, light = LIGHT_NOREN.includes(nr); pv.innerHTML = "";
   pv.style.background = light ? t.paper : t.band; pv.style.color = light ? t.ink : t.paper;   // 290번. 띠 없는 모양이면 종이색 위에 글자 — 미리보기가 결과와 달랐다(사용자)
   pv.style.fontFamily = (FONTS[PRESETS[stPreset].font] || {}).kr || "";   // 291번. 미리보기가 뒤 메뉴판의 글꼴(궁서)을 따라갔다 — 고른 조합의 글꼴로
   pv.style.boxShadow = !light ? "none" : nr === "frame" ? "inset 0 0 0 2px " + t.band : "inset 0 -2px 0 " + t.band;
@@ -6444,10 +6485,11 @@ function stSync(){
   else ph("[이미지 선택]으로 로고를 올리면 여기 보입니다");
   
 }
+function presetT(k){ const q = PRESETS[k] || PRESETS.basic; return q.custom ? Object.assign({}, THEMES.night, q.custom) : THEMES[q.theme] || THEMES.night; }   // 296번
 function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · 포인트 색으로 작게. 이름은 PRESETS 한 곳에서(규칙 H)
   const box = $("#st-sw"); box.innerHTML = "";
-  Object.entries(PRESETS).forEach(([k, q]) => {
-    const t = THEMES[q.theme], b = el("button", "st-swb"); b.type = "button"; b.dataset.p = k;
+  Object.entries(PRESETS).sort(([a], [b]) => (b === "photo") - (a === "photo")).forEach(([k, q]) => {   // 296번. 「사진처럼」은 맨 앞
+    const t = presetT(k), b = el("button", "st-swb"); b.type = "button"; b.dataset.p = k;
     const c = el("span", "c"); c.style.background = t.paper; const band = el("i"); tileBand(band, t, q.noren); c.append(band);   // 290번
     const dot = el("em"); dot.style.background = t.accent; c.append(dot);
     b.append(c, document.createTextNode(q.name)); b.onclick = () => { stPreset = k; stSync(); }; box.append(b);
@@ -6455,7 +6497,7 @@ function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · �
 }
 $("#st-blank").onclick = () => {
   stParsed = null;   // 275번. 사진으로 읽은 메뉴가 빈 메뉴판에 따라 들어가지 않게(사진 길은 이 뒤에 다시 채운다)
-  stMode = "text"; stPreset = "basic"; stTheme = PRESETS[stPreset].theme; stLogo = null; logoOrig = null; logoInv = false;
+  stMode = "text"; stPreset = "basic"; delete PRESETS.photo; stTheme = PRESETS[stPreset].theme; stLogo = null; logoOrig = null; logoInv = false;
   $("#st-shop").value = ""; $("#st-top").value = "";
   $("#start").classList.remove("wide");   // 280번. 확인 화면에서 넘어오면 창 폭을 되돌린다
   $("#st-choose").hidden = true; $("#st-setup").hidden = false;
@@ -6509,13 +6551,14 @@ function startWith(menu, settings, msg){
 $("#st-go").onclick = () => {
   const shop = $("#st-shop").value.trim(), top = $("#st-top").value.trim(), text = stMode === "text" || !stLogo;
   const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
-  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours:[], sheets:[ stParsed ? splitCols(stParsed) : [[sec()], [sec()]] ], feet:[{ notes:[], origin:"" }] };   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로
+  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours:[], sheets:[ stParsed ? splitCols(stParsed, stLook.cols || 2) : [[sec()], [sec()]] ], feet:[{ notes:[], origin:"" }] };   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로
   if (shop) menu.brand.shop = shop;
   const pg = Object.assign(pageDefaults(0), { art:"none", seal:"none", showTitle:false });
   Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
   /* 기본 글꼴은 본고딕 — 궁서는 알프스 사장님이 고른 것이다(규칙 A). 글자 도장은 "알프스"가 박혀 있어 끈다 */
   const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", bilingual:false, pageno:"none", bold:false, pages:[pg] };
   applyPresetTo(settings, menu, stPreset);   // 273번. 추천 조합을 새 설정에 직접 건다
+  if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages[0].autofit = true; }   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
   const fromPic = !!stParsed; stParsed = null;
   startWith(menu, settings, fromPic ? "사진에서 읽은 메뉴로 시작했습니다" : "빈 메뉴판을 만들었습니다");
@@ -6605,14 +6648,20 @@ if (autoLoaded === "import"){
    · 사진 좌표 표시(9장 3번의 "읽은 자리를 사진 위에")는 하지 않는다 — 붙여 넣기 길은 글만 온다. 사진과 값을 위아래로 나란히 */
 const READ_PROMPT = [
   "이 사진은 가게 메뉴판입니다. 적힌 메뉴를 아래 모양으로만 적어 주세요. 다른 말은 쓰지 마세요.",
-  "[분류 이름]",
+  "[분류 이름] 칸 번호",
   "메뉴 이름 | 가격",
   "",
   "- 가격은 숫자만 적습니다(쉼표 · 원 없이). 가격이 없거나 '시가' 같은 글자면 그 글자를 그대로 적습니다.",
   "- 분류가 안 보이면 [메뉴] 하나로 적습니다.",
   "- 잘 안 보이거나 확실하지 않은 이름 · 가격은 그 값 바로 뒤에 ? 를 붙입니다.",
   "- 메뉴 설명 · 원산지 · 영업시간 · 전화번호는 적지 않습니다.",
-  "- 가게 이름이 보이면 맨 첫 줄에 '가게: 가게 이름' 으로 적습니다. 안 보이면 이 줄은 쓰지 않습니다."
+  "- 맨 앞 몇 줄에 이 메뉴판의 모양을 적습니다. 알 수 없는 것은 그 줄을 쓰지 않습니다.",
+  "가게: 가게 이름",
+  "방향: 세로 또는 가로",
+  "단: 메뉴가 세로로 나뉜 칸 수(1~4)",
+  "글꼴: 명조 · 고딕 · 손글씨 · 둥근 · 붓 중 가장 가까운 것",
+  "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB (맨 위에 색 띠가 없으면 「띠 없음」)",
+  "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
 ].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이
 function parseMenuText(txt){
   const secs = []; let cur = null;
@@ -6621,8 +6670,9 @@ function parseMenuText(txt){
     let l = raw.trim(); if (!l || /^```/.test(l)) return;
     l = l.replace(/^[-*•·]\s+/, "");
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
-    const h = l.match(/^\[(.+)\]$/) || l.match(/^#{1,4}\s*(.+)$/);
-    if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u, items:[] }; secs.push(cur); return; }
+    const lk = l.match(/^(방향|단|글꼴|색)\s*[:：]\s*(.+)$/); if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
+    const hc = l.match(/^\[(.+?)\]\s*([1-4])?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);
+    if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; secs.push(cur); return; }
     let name, price;
     if (l.includes("|")){ [name, price] = l.split("|").map(x => x.trim()); }
     else { const m = l.match(/^(.*?)[\s.·…\-]+([\d,]+)\s*원?\s*([?？])?$/); if (!m) return; name = m[1]; price = m[2] + (m[3] || ""); }
@@ -6633,10 +6683,26 @@ function parseMenuText(txt){
     if (!cur){ cur = { name:"메뉴", un:false, items:[] }; secs.push(cur); }
     cur.items.push({ name:n, price:p, un:un1, unp:un2 });
   });
-  const out = secs.filter(s => s.items.length); out.shop = secs.shop || ""; return out;
+  const out = secs.filter(s => s.items.length); out.shop = secs.shop || ""; out.look = readLook(secs.lk || {}); return out;
+}
+/* 296번. 사진의 모양 → 메뉴판(사용자: "AI 를 쓰는 거면 처음 찍은 사진과 가장 비슷한 형태로 — 글자 크기든 구성이든 색깔이든").
+   방향 · 단 수 · 분류가 놓인 칸 · 글꼴 · 색(종이 · 글자 · 띠 · 포인트). 못 읽은 것은 비워 두고 지금 기본값을 쓴다.
+   색은 글자와 종이의 대비가 4.5 : 1 밑이면 쓰지 않는다(읽을 수 없는 메뉴판을 만들지 않게 — WCAG 본문 기준) */
+function readLook(lk){
+  const L = {}, hex = (t, k) => { const m = String(t || "").match(new RegExp(k + "\\s*(#[0-9a-fA-F]{6})")); return m ? m[1].toLowerCase() : null; };
+  if (/가로/.test(lk["방향"] || "")) L.orient = "landscape"; else if (/세로/.test(lk["방향"] || "")) L.orient = "portrait";
+  const c = +(String(lk["단"] || "").match(/[1-4]/) || [])[0]; if (c) L.cols = c;
+  const f = lk["글꼴"] || ""; L.font = /명조|바탕|세리프/.test(f) ? "myeongjo" : /손글씨|손 글씨|필기/.test(f) ? "hand" : /둥근/.test(f) ? "round" : /붓|궁서/.test(f) ? "gungseo" : /고딕|돋움|산세리프/.test(f) ? "gothic" : null;
+  if (!L.font) delete L.font;
+  const col = lk["색"] || "", pa = hex(col, "종이"), ink = hex(col, "글자"), band = hex(col, "띠"), ac = hex(col, "포인트");
+  const lum = h => { const v = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16) / 255).map(x => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4)); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+  const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  if (pa && ink && cr(pa, ink) >= 4.5){ L.colors = { paper:pa, ink, band: band || ink, accent: ac || band || ink }; }
+  L.band = !/띠\s*없음/.test(col) && !!band;
+  return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
-let stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "";   // 290번. 사진에서 읽은 가게 이름
+let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "";   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img){
   const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
@@ -6702,7 +6768,7 @@ async function geminiRead(dataUrl){
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stParsed = secs; stShopRead = secs.shop || ""; $("#st-cshop").value = stShopRead; drawCheck();
+  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; $("#st-cshop").value = stShopRead; drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
 }
 function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단(시작할 때 쓰는 splitCols 와 같은 나눔)
@@ -6710,7 +6776,11 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   if (stPic){ im.src = stPic; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
   $(".st-cbody").classList.toggle("nopic", !stPic); $("#start").classList.add("wide");
   const money = v => typeof v === "number" ? v.toLocaleString("ko-KR") : String(v);   // 읽을 때 쉼표는 다시 뺀다(readCheck)
-  splitCols(stParsed).forEach(col => {
+  const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
+  $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))";
+  const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
+  $("#st-ccount").textContent = "분류 " + stParsed.length + "개 · 메뉴 " + nItems + "개를 읽었습니다. " + (land ? "가로" : "세로") + " A4 · " + nc + "단으로 놓았습니다.";
+  splitCols(stParsed, nc).forEach(col => {
     const c = el("div", "st-ccol");
     col.forEach(s => {
       const si = stParsed.indexOf(s); if (si < 0) return;   // 한쪽이 비어 splitCols 가 넣은 빈 분류는 그리지 않는다
@@ -6722,6 +6792,9 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
         const p = el("input", "st-cin st-cp" + (it.unp ? " un" : "")); p.value = it.price === "" ? "" : money(it.price); p.dataset.s = si; p.dataset.i = ii; p.dataset.k = "price"; p.setAttribute("aria-label", "가격");
         row.append(n, p); sb.append(row);
       });
+      const add = el("button", "st-cadd"); add.type = "button"; add.textContent = "＋ 메뉴"; add.title = "빠진 메뉴를 이 분류에 넣습니다";   // 296번. 빠진 것을 여기서 채운다(280번에 미뤘던 것)
+      add.onclick = () => { syncCheck(); stParsed[si].items.push({ name:"", price:"" }); drawCheck(); const ins = $("#st-ctab").querySelectorAll('input[data-s="' + si + '"][data-k="name"]'); ins[ins.length - 1]?.focus(); };
+      sb.append(add);
       c.append(sb);
     });
     box.append(c);
@@ -6729,21 +6802,27 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   box.querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
   $(".st-legend").hidden = !box.querySelector(".un");   // 290번. 노란 칸이 없으면 설명도 없다   // 고치면 노란 표시를 뗀다
 }
-function readCheck(){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
-  const secs = stParsed.map(s => ({ name:s.name, items:s.items.map(it => ({ ...it })) }));
+function syncCheck(){ const keep = readCheck(false); keep.forEach((s, i) => { stParsed[i].name = s.name; stParsed[i].items = s.items; }); }   // 296번. 칸에 고친 것을 그대로 담아 둔다(다시 그리기 전에)
+function readCheck(drop = true){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
+  const secs = stParsed.map(s => ({ name:s.name, col:s.col, items:s.items.map(it => ({ ...it })) }));
   $("#st-ctab").querySelectorAll("input").forEach(x => {
     const s = secs[+x.dataset.s]; if (!s) return;
     if (x.dataset.i === undefined){ s.name = x.value.trim(); return; }
     const it = s.items[+x.dataset.i], v = x.value.trim();
     if (x.dataset.k === "name") it.name = v; else { const d = v.replace(/[,원\s]/g, ""); it.price = /^\d+$/.test(d) ? Number(d) : v; }
   });
-  return secs.map(s => ({ name:s.name, items:s.items.filter(it => it.name).map(it => ({ name:it.name, price:it.price })) })).filter(s => s.items.length);
+  if (!drop) return secs;
+  return secs.map(s => ({ name:s.name, col:s.col, items:s.items.filter(it => it.name).map(it => ({ name:it.name, price:it.price })) })).filter(s => s.items.length);
 }
-function splitCols(secs){   // 분류를 두 단에 나눈다 — 줄 수가 고르게(분류 순서는 그대로)
-  const n = secs.reduce((a, s) => a + s.items.length + 1.5, 0); let acc = 0; const L = [], R = [];
-  secs.forEach(s => { const w = s.items.length + 1.5; (acc + w / 2 <= n / 2 ? L : R).push(s); acc += w; });   // 분류의 가운데가 절반을 넘으면 오른쪽
-  if (!R.length && L.length > 1) R.push(L.pop());
-  return [L.length ? L : [{ name:"", items:[{ name:"", price:"" }] }], R.length ? R : [{ name:"", items:[{ name:"", price:"" }] }]];
+function splitCols(secs, n = 2){   // 분류를 n 단에 나눈다 — 줄 수가 고르게(분류 순서는 그대로). 296번. 단 수 · 사진이 알려 준 칸 번호
+  const C = Array.from({ length:n }, () => []);
+  if (n > 1 && secs.length && secs.every(s => s.col >= 1 && s.col <= n)) secs.forEach(s => C[s.col - 1].push(s));   // 사진에서 놓인 칸 그대로
+  else {
+    const tot = secs.reduce((a, s) => a + s.items.length + 1.5, 0); let acc = 0;
+    secs.forEach(s => { const w = s.items.length + 1.5; let k = 0; while (k < n - 1 && acc + w / 2 > tot * (k + 1) / n) k++; C[k].push(s); acc += w; });   // 분류의 가운데가 넘은 몫만큼 오른쪽
+    for (let k = n - 1; k > 0; k--) if (!C[k].length && C[k - 1].length > 1) C[k].push(C[k - 1].pop());
+  }
+  return C.map(c => c.length ? c : [{ name:"", items:[{ name:"", price:"" }] }]);
 }
 $("#st-photo").onclick = () => {
   stPic = null; stParsed = null; stWay = "gem"; stOther = false;   // 288번   // 276번. 키가 필요 없어 제미나이가 기본
@@ -6781,11 +6860,16 @@ $("#st-read-back").onclick = () => { $("#st-read").hidden = true; $("#st-choose"
 /* 281번. [사진 없이 직접 적기]는 걷었다 — 첫 화면의 [빈 메뉴판으로 시작]과 같은 길이고, [읽기] 옆에 붙어 무엇을 누르는지 헷갈렸다. ← 로 돌아가 고른다 */
 $("#st-ans").addEventListener("input", () => { $("#st-appgo").disabled = !$("#st-ans").value.trim(); });   // 284번
 $("#st-check-back").onclick = () => { $("#start").classList.remove("wide"); $("#st-check").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; };
+$("#st-cimg").onclick = () => { const z = $("#st-zoom"); z.querySelector("img").src = stPic; z.hidden = false; };   // 296번
+$("#st-zoom").onclick = () => { $("#st-zoom").hidden = true; };
 $("#st-check-go").onclick = () => {
   const secs = readCheck(); if (!secs.length){ toast("메뉴 이름이 한 줄도 없습니다", null); return; }
   stParsed = secs; const keep = stParsed;
   $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;
   stFromPhoto = true; $("#st-pg3").hidden = false;
+  if (stLook.font || stLook.colors){   // 296번. 사진에서 읽은 글꼴 · 색을 「사진처럼」 조합으로 — 처음 골라져 있다. 고르지 않으면 다른 조합
+    const B = PRESETS.basic; PRESETS.photo = Object.assign({}, B, { name:"사진처럼", hidden:true, font: stLook.font || B.font, custom: stLook.colors || null, noren: stLook.band ? "flat" : "plain" });
+    stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(); if (nm){ $("#st-top").value = nm; $("#st-topfrom").hidden = false; stSync(); } }   // 291번. 사진의 가게 이름은 맨 위 글자에만 — 두 칸이 같으면 무엇이 다른지 안 보였다(267번 · 사용자). 어디서 온 글자인지 적는다   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
 };
 
@@ -6801,14 +6885,14 @@ const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타�
 };
 function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하기 창은 새로 만들 설정에, 꾸미기 창은 지금 설정에
   const q = PRESETS[k]; if (!q) return;
-  S.font = q.font; S.bold = q.bold; S.theme = q.theme; S.custom = {};
+  S.font = q.font; S.bold = q.bold; S.theme = q.custom ? "custom" : q.theme; S.custom = q.custom ? { ...q.custom } : {};   // 296번. 「사진처럼」은 색을 직접
   if (q.paper === "grain") delete S.paper; else S.paper = q.paper;
   if (q.sec === "line") delete S.secStyle; else S.secStyle = q.sec;
   S.secAlign = q.align;
   if (q.leader === "none"){ S.showDots = false; delete S.leader; } else { delete S.showDots; if (q.leader === "dots") delete S.leader; else S.leader = q.leader; }
   const ex = ALPS_EXAMPLE.settings.pages || []; S.pages = S.pages || [];
   (M.sheets || []).forEach((_, i) => { const pp = S.pages[i] || (S.pages[i] = pageDefaults(i)), e = ex[i] || ex[0] || {};
-    pp.noren = q.noren; pp.art = q.art ?? (e.art || "none"); pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; });
+    pp.noren = q.noren; pp.art = q.art ?? (e.art || "none"); pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; delete pp.artColor; delete pp.artOp; delete pp.sealColor; });   // 296번. 조합은 색도 처음으로
   const old = S.mark; S.mark = q.mark;
   if (old && old !== q.mark && markIsSym(old) && markIsSym(q.mark)){ const sw = a => a.map(t => t.split(old).join(q.mark)); (M.feet || []).forEach(f => { f.line = sw(f.line || []); f.notes = sw(f.notes || []); }); }
 }
@@ -6816,11 +6900,11 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
    · 조합이 바꾸는 값(LOOK_KEYS · 장마다 PAGE_LOOK)이 곧 「모양 한 벌」이다. 지금 모양이 어느 추천 조합과 같으면 그 타일이 켜지고, 아니면 「내 조합」이 켜진다
    · 지금 모양이 어느 조합과도 다르면 그것이 내 조합이다 — 고칠 때마다(touch) SETTINGS.myLook 에 그대로 적어 둔다. 그래서 다른 조합을 눌러 봐도 내 조합은 남는다
    · 글자 크기 · 내용 · 맨 위는 조합이 안 건드린다(273번 그대로) */
-const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","art","seal","logoColor"];
+const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","art","seal","logoColor","artColor","artOp","sealColor"];   // 296번
 function lookOf(S){ const o = {}; LOOK_KEYS.forEach(k => { if (S[k] !== undefined) o[k] = JSON.parse(JSON.stringify(S[k])); });
   o.pages = (S.pages || []).map(p => { const q = {}; PAGE_LOOK.forEach(k => { if (p && p[k] !== undefined) q[k] = p[k]; }); return q; }); return o; }
 function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)); if (c.theme !== "custom") delete c.custom;   /* applyLook() 이 프리셋 색도 custom 에 늘 채운다(239번) — 직접 고른 색일 때만 비교 */ if (c.secAlign === "left") delete c.secAlign; if (!c.bold) delete c.bold; return JSON.stringify(c, Object.keys(c).sort()); };
-  const pa = JSON.stringify((a.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper"])), pb = JSON.stringify((b.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper"]));
+  const pa = JSON.stringify((a.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper", p.artColor, p.artOp, p.sealColor])), pb = JSON.stringify((b.pages||[]).map(p => [p.noren, p.art, p.seal, p.logoColor || "paper", p.artColor, p.artOp, p.sealColor]));
   const x = Object.assign({}, a), y = Object.assign({}, b); delete x.pages; delete y.pages; return n(x) === n(y) && pa === pb; }
 function presetLook(k){ const S = JSON.parse(JSON.stringify(SETTINGS)), M = JSON.parse(JSON.stringify(MENU)); applyPresetTo(S, M, k); return lookOf(S); }
 function applyLookTo(S, L){ LOOK_KEYS.forEach(k => { if (L[k] === undefined) delete S[k]; else S[k] = JSON.parse(JSON.stringify(L[k])); });
