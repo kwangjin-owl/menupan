@@ -1034,7 +1034,7 @@ def t47(b, f):
     pg.keyboard.press('Escape'); pg.wait_for_timeout(150); out['esc_stays'] = c.js("()=>document.querySelector('#start').open")
     pg.mouse.click(8, 8); pg.wait_for_timeout(150); out['backdrop_stays'] = c.js("()=>document.querySelector('#start').open")   # 266번 — 바깥 누르기
     pg.click('#st-blank'); pg.fill('#st-shop', '시험 가게'); pg.wait_for_timeout(100)
-    out['top_follows'] = [pg.input_value('#st-top'), pg.inner_text('#st-prev'), '시험 가게-메뉴-' in pg.inner_text('#st-fname')]
+    out['top_follows'] = [pg.input_value('#st-top'), pg.inner_text('#st-prev'), pg.query_selector('#st-fname') is None]   # 293번 — 「저장하면 ○○.html」 줄은 걷었다(배포 주소는 자동 저장이라 사실과 달랐다)
     pg.click('#st-seg button[data-m="img"]')
     def up(f):   # 268번 — 점선 상자를 실제로 눌러 파일 창에 넣는다(앱의 받는 곳을 그대로 거친다. 흉내 낸 받는 곳이 낡아 헛실패가 났다)
         with pg.expect_file_chooser() as fc: pg.click('#st-up')

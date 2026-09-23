@@ -2245,6 +2245,10 @@ dialog .st-picrow.has button.st-drop{margin-left:0}
 dialog label,.panel label,.gd-tip dt,.panel .copynote{text-wrap:pretty}
 dialog button:not(:disabled):active,.gd-tip button:active,.rowtools button:not(:disabled):active,.addrow button:not(:disabled):active,.pagebar button:not(:disabled):active{box-shadow:inset 0 0 0 100px rgba(36,28,18,.10)}
 .panel button:not(:disabled):active,.topbar button:not(:disabled):active,.tb-menu button:active,.undo button:active{box-shadow:inset 0 0 0 100px rgba(240,230,205,.14)}
+
+/* ══ 293번. 올린 뒤의 사진 상자 — 상자 전체가 누르기 · 끌어다 놓기 자리(손 모양 · 올리면 테가 짙어진다) */
+dialog .st-picrow.has{cursor:pointer}
+dialog .st-picrow.has:hover,dialog .st-picrow.has.over{border-color:#6b5438;background:#fffaf0}
 </style>
 </head>
 <body>
@@ -2661,7 +2665,7 @@ dialog button:not(:disabled):active,.gd-tip button:active,.rowtools button:not(:
   <!-- 264번. 첫 화면 — 처음 여는 파일(SETTINGS.startScreen)이면 열자마자, 아니면 꾸미기 [처음 화면으로]로 연다 -->
   <div id="st-choose">   <!-- 280번. 넷을 한 줄로 늘어놓지 않고 두 갈래로 — 새로 만들기(큰 둘) · 이미 있는 메뉴판(작은 둘) -->
     <div class="st-head"><h3 tabindex="-1">메뉴판을 어떻게 시작할까요?</h3></div>   <!-- 281번. 닫기는 머리 오른쪽 ✕ -->
-    <p class="sub">고르고 나면 다음부터는 이 창 없이 만들던 메뉴판이 바로 열립니다. 이 화면은 위쪽 막대의 [파일 ▾] → [새로 만들기]에서 다시 열 수 있습니다.</p>
+    <p class="sub">고른 뒤에도 위쪽 [파일 ▾] → [새로 만들기]에서 다시 고를 수 있습니다.</p>   <!-- 293번. 처음 여는 사람에게 필요한 것은 "되돌릴 수 있다" 하나 — 자동 저장 동작 설명은 뺐다 -->
     <p class="st-grp">새로 만들기</p>
     <div class="st-big">
     <button type="button" class="st-opt" id="st-blank"><span class="st-th"><i></i></span><span class="st-tx"><b>빈 메뉴판으로 시작</b><span>가게 이름과 모양을 정하고, 메뉴는 직접 적습니다</span></span></button>
@@ -2710,19 +2714,18 @@ dialog button:not(:disabled):active,.gd-tip button:active,.rowtools button:not(:
   <div id="st-setup" hidden>
     <div class="st-head"><button type="button" class="st-icon" id="st-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1" id="st-setup-h">이름과 모양 정하기</h3><span class="st-pg stepdots" id="st-pg3" role="img" aria-label="3단계 중 3단계" title="3단계 중 3단계" hidden><i class="past"></i><i class="past"></i><i class="on"></i></span></div>
     <p class="sub">나중에 [편집] · [꾸미기]에서 전부 다시 바꿀 수 있습니다.</p>
-    <p class="sub st-cap">메뉴판 맨 위가 이렇게 보입니다</p>
+    <p class="sub st-cap">미리보기</p>   <!-- 293번 -->
     <div class="st-prev" id="st-prev"></div>
-    <label class="st-lbl" for="st-shop">상호명 <small>저장할 파일 이름에 씁니다</small></label>
+    <label class="st-lbl" for="st-shop">상호명 <small>파일로 저장할 때 이름이 됩니다</small></label>   <!-- 293번. 아래 「저장하면 ○○.html 로 내려받아집니다」는 걷었다 — 배포 주소에서는 자동 저장이라 사실과 달랐고, 같은 말을 두 줄로 했다 -->
     <input type="text" id="st-shop" class="st-in" autocomplete="off" placeholder="예: 우리 식당">   <!-- 291번. 빈칸이 무엇을 받는지 -->
-    <p class="sub st-help" id="st-fname"></p>
     <div class="st-toprow"><span class="st-lbl">메뉴판 맨 위</span>
     <span class="st-seg" id="st-seg"><button type="button" data-m="text">글자</button><button type="button" data-m="img">로고</button></span></div>   <!-- 268번 [글자 | 로고] · 267번. 꾸미기 창과 같은 이름(규칙 H) · 이름표와 한 줄 -->
-    <div id="st-textrow"><input type="text" id="st-top" class="st-in" aria-label="메뉴판 맨 위 글자" autocomplete="off"><p class="sub st-help"><span id="st-topfrom" hidden>사진에서 읽은 가게 이름입니다. </span>메뉴판 맨 위에 크게 찍히는 글자입니다. 상호명과 따로 적습니다</p></div>   <!-- 292번. 한 칸에 딸린 안내는 한 덩어리로 -->   <!-- 267번. 상호명을 따라 쓰지 않는다 -->
+    <div id="st-textrow"><input type="text" id="st-top" class="st-in" aria-label="메뉴판 맨 위 글자" autocomplete="off"><p class="sub st-help"><span id="st-topfrom" hidden>사진에서 읽은 가게 이름입니다. </span>종이에 찍히는 글자입니다</p></div>   <!-- 292번. 한 칸에 딸린 안내는 한 덩어리로 -->   <!-- 267번. 상호명을 따라 쓰지 않는다 -->
     <div id="st-imgrow" hidden><button type="button" class="st-drop" id="st-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으세요 · 로고는 모양만 따서 한 가지 색으로 칠합니다</small></button>   <!-- 268번 -->
       <div class="st-tiles" id="st-tiles"></div></div>
     <input type="file" id="st-file" accept="image/*" hidden>
     <input type="file" id="st-hfile" accept=".html,text/html" hidden>   <!-- 277번. 불러올 메뉴판 파일 -->
-    <span class="st-lbl">조합 <small>「내 조합」은 수수한 기본 모양입니다 · 추천 조합은 [꾸미기]에서 언제든 눌러 볼 수 있습니다</small></span>   <!-- 273번. 색 → 추천 조합 -->
+    <span class="st-lbl">조합 <small>「내 조합」은 꾸밈 없는 기본 모양입니다</small></span>   <!-- 293번. 「[꾸미기]에서 언제든」은 창 머리의 「나중에 전부 바꿀 수 있습니다」와 같은 말 -->   <!-- 273번. 색 → 추천 조합 -->
     <div class="st-sw" id="st-sw"></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-go">이대로 시작</button></div>
   </div>
@@ -6384,7 +6387,7 @@ function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
-  $("#st-sw").innerHTML = ""; $("#st-prev").innerHTML = ""; $("#st-prev").removeAttribute("style"); $("#st-fname").textContent = "";
+  $("#st-sw").innerHTML = ""; $("#st-prev").innerHTML = ""; $("#st-prev").removeAttribute("style");
   $("#st-seg").querySelectorAll("button").forEach(b => b.removeAttribute("class"));
 }
 /* 266번. 바깥(어두운 영역)을 눌러도 안 닫히는 때 — 처음 열 때(고르기 전에는 나갈 곳이 없다)와 정하기 창(적던 상호명 · 올린 로고가
@@ -6413,8 +6416,7 @@ function stSync(){
   if (stMode === "text"){ const v = $("#st-top").value.trim(); if (v) pv.textContent = v; else ph("가게 이름"); }
   else if (stLogo){ const m = el("span", "st-mask"); m.style.setProperty("--src", 'url("' + stLogo.src + '")'); m.style.background = light ? t.ink : t.paper; pv.append(m); }
   else ph("[이미지 선택]으로 로고를 올리면 여기 보입니다");
-  const d = new Date(), pad = n => String(n).padStart(2, "0");
-  $("#st-fname").textContent = "저장하면 「" + fileBaseOf($("#st-shop").value) + "-" + d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + ".html」로 내려받아집니다";
+  
 }
 function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · 포인트 색으로 작게. 이름은 PRESETS 한 곳에서(규칙 H)
   const box = $("#st-sw"); box.innerHTML = "";
@@ -6723,7 +6725,13 @@ $("#st-photo").onclick = () => {
   $("#st-choose").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; footShade($("#start"));
   readStatus();   // 278번. 켜져 있는지 묻는다
 };
-dropTarget($("#st-pic"), null);   // 받는 곳은 아래에서 사진용으로 바꾼다(로고와 달리 모양을 따지 않는다)
+dropTarget($("#st-pic"), null);
+/* 293번. 올린 뒤 [사진 바꾸기]가 작은 단추로 줄면 점선 상자의 나머지는 눌러도 · 끌어다 놓아도 아무 일이 없었다(점선은 "여기에 놓으세요"라는 모양) — 상자 전체가 받는다 */
+{ const row = $(".st-picrow");
+  row.addEventListener("click", e => { if (row.classList.contains("has") && !e.target.closest("#st-pic")) $("#st-pic").click(); });
+  row.addEventListener("dragover", e => { if (!row.classList.contains("has")) return; e.preventDefault(); row.classList.add("over"); });
+  row.addEventListener("dragleave", () => row.classList.remove("over"));
+  row.addEventListener("drop", e => { if (!row.classList.contains("has") || e.target.closest("#st-pic")) return; e.preventDefault(); row.classList.remove("over"); const f = e.dataTransfer.files[0]; if (f && /^image\//.test(f.type)) takePic(f); }); }   // 받는 곳은 아래에서 사진용으로 바꾼다(로고와 달리 모양을 따지 않는다)
 $("#st-pic").addEventListener("click", () => { fileCb = null; picFor = true; }, true);
 $("#st-way").querySelectorAll("button").forEach(b => b.onclick = () => { stWay = b.dataset.w; stReadSync(); });
 addEventListener("online", () => { if (!$("#st-read").hidden) stReadSync(); }); addEventListener("offline", () => { if (!$("#st-read").hidden) stReadSync(); });
