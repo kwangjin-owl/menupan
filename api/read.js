@@ -66,22 +66,26 @@ module.exports = async function handler(req, res){
   const first = process.env.GEMINI_MODEL || DEFAULT_MODEL;
   const models = [...new Set([first, DEFAULT_MODEL, "gemini-2.5-flash-lite", "gemini-2.5-flash"])];
   let lastStatus = 0, lastDetail = "";
+  const t0 = Date.now(), tries = [];   // 292번. 모델마다 걸린 시간 — 버셀 Logs 에 남긴다(느려진 까닭을 가리려고)
+  const log = extra => console.log(JSON.stringify({ route:"read", ms:Date.now() - t0, tries, ...extra }));
   for (const model of models){
-    let r;
+    let r; const t1 = Date.now();
     try {
       r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
         method:"POST", headers:{ "Content-Type":"application/json", "x-goog-api-key":key },
         body:JSON.stringify({ contents:[{ parts:[{ text:PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }] }],
                               generationConfig:{ temperature:0, maxOutputTokens:2048 } })
       });
-    } catch(e){ lastStatus = 502; lastDetail = String(e && e.message || e).slice(0, 200); continue; }
+    } catch(e){ lastStatus = 502; lastDetail = String(e && e.message || e).slice(0, 200); tries.push({ model, status:"fetch", ms:Date.now() - t1 }); continue; }
+    tries.push({ model, status:r.status, ms:Date.now() - t1 });
     if (r.status === 404 || r.status === 429){ lastStatus = r.status; lastDetail = (await r.text()).slice(0, 300); continue; }   // 모델이 없거나 그 모델 한도 — 다음 모델
-    if (!r.ok){ res.status(502).json({ error:"제미나이 응답 오류 " + r.status, code:"gemini", detail:(await r.text()).slice(0, 300), model }); return; }
+    if (!r.ok){ log({ result:"error" }); res.status(502).json({ error:"제미나이 응답 오류 " + r.status, code:"gemini", detail:(await r.text()).slice(0, 300), model }); return; }
     const data = await r.json();
     const text = ((((data.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || "").join("");
-    if (!text.trim()){ res.status(422).json({ error:"빈 답", code:"empty", model }); return; }
-    res.status(200).json({ text:text.slice(0, 20000), model });
+    if (!text.trim()){ log({ result:"empty" }); res.status(422).json({ error:"빈 답", code:"empty", model }); return; }
+    log({ result:"ok", model }); res.status(200).json({ text:text.slice(0, 20000), model, ms:Date.now() - t0, tries:tries.length });
     return;
   }
+  log({ result:"fail" });
   res.status(lastStatus === 429 ? 429 : 502).json({ error: lastStatus === 429 ? "무료 사용 한도" : "쓸 수 있는 모델이 없습니다", code: lastStatus === 429 ? "limit" : "model", detail:lastDetail });
 };
