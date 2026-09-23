@@ -1408,6 +1408,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .pgpick .pill.on{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 .panel .pgrp.pgtitle{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .panel .pgrp.pgtitle button{font-size:10.5px;padding:4px 8px;letter-spacing:0;font-weight:400}
+.panel .pgrp.pgtitle button#b-copypage{white-space:nowrap;flex:0 0 auto}   /* 290번. 두 줄로 접혀 둥근 단추 안이 답답했다 */
 /* 191번. 세 단추를 **같은 폭**으로. 전에는 `auto auto 1fr` 이라 [한 장에 맞춤]만 남는 자리를 다 먹었다 */
 .panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:5px}
 .panel .grp.typo3 button{padding:5px 4px;white-space:nowrap}
@@ -1499,6 +1500,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .grp.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:end}
 .panel .grp.two .fld{min-width:0}
 .panel .grp.two .fld label{margin-top:0}
+.panel .grp.two.artseal{grid-template-columns:minmax(0,1fr)}   /* 290번 */
 .panel .grp{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
 /* 159번. 글꼴과 [굵게]가 두 줄을 잡아먹고 있었다. 한 줄에 세운다(34번의 typo 줄과 같은 처방) */
 .panel .grp.fontrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px}
@@ -2052,7 +2054,10 @@ dialog .st-picrow.has button.st-drop{flex:0 0 auto;width:auto;min-height:0;heigh
 .st-cpaper{height:min(calc(100vh - 290px), 860px);min-height:440px;aspect-ratio:210/297;box-sizing:border-box;overflow:auto;background:#efe3c9;
   border:1px solid #c9bda6;box-shadow:0 1px 4px rgba(0,0,0,.18);display:flex;flex-direction:column;
   background-image:repeating-linear-gradient(0deg, rgba(120,96,60,.035) 0 1px, transparent 1px 3px)}
-.st-cband{flex:0 0 auto;height:13%;min-height:52px;display:flex;align-items:center;justify-content:center;background:#1c3145;color:rgba(239,227,201,.7);font:500 18px/1 var(--ui-font);letter-spacing:.08em}
+.st-cband{flex:0 0 auto;height:13%;min-height:52px;display:flex;align-items:center;justify-content:center;background:#ddd2bb;color:#3b3022;font:500 18px/1 var(--ui-font);letter-spacing:.08em}   /* 290번. 색은 다음 창에서 고른다 — 여기서는 색 없이 */
+.st-cband input.st-cshopin{width:70%;text-align:center;font:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:1px dashed rgba(59,48,34,.35);border-radius:6px;padding:6px 8px}
+.st-cband input.st-cshopin:focus{outline:none;border-style:solid;background:#fffdf6}
+.st-legend[hidden]{display:none}
 .st-ctab{display:grid;grid-template-columns:1fr 1fr;gap:0 5%;padding:5% 6% 6%;max-height:none;overflow:visible;margin:0}
 .st-ccol{gap:14px}
 .st-crow{grid-template-columns:minmax(0,1fr) 5em;gap:4px}
@@ -2112,7 +2117,7 @@ header.topbar input.tb-name::placeholder{color:rgba(240,230,205,.45)}
 header.topbar .bar.tb-edit{height:38px;margin-top:4px;padding:2px 6px}   /* 뒤의 285번 규칙보다 구체적으로 */
 header.topbar .tb-edit button{height:32px;border-radius:16px}
 header.topbar .tb-edit button.ib{width:32px}
-.topbar .tb-name{flex:0 0 10em;width:10em;max-width:10em;text-align:left}   /* 288번. 늘 왼쪽 — 오른쪽에 붙였다가 누르면 왼쪽으로 튀었다(사용자) */
+.topbar .tb-name{flex:0 0 auto;min-width:0;max-width:14em;text-align:left}   /* 290번. 폭 고정(286번)을 걷었다 — 짧은 이름 뒤가 비어 글자가 허공에 뜬 것처럼 보였다(사용자). 폭은 fitName() 이 글자 길이로 */
 .topbar .autost{transition:color .5s, opacity .3s}
 .topbar .autost.saving{opacity:.5}
 .topbar .autost.just{color:#c4f2b8;background:rgba(120,200,110,.22)}   /* 288번. 저장된 순간을 더 또렷하게(사용자) — 색에 옅은 바탕까지. 자리는 안 바뀐다(padding 은 늘 같다) */
@@ -2484,7 +2489,7 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
        바로 위 영문 병기가 같은 성격의 켜고 끄기이므로 형태를 맞춘다 -->
 
   <div class="pgrp">꾸밈</div>
-  <span class="grp two">
+  <span class="grp two artseal">   <!-- 290번. 그림 이름이 잘렸다('생맥주와 파스') — 한 줄에 하나 -->
     <span class="fld"><label for="f-art">그림</label>
     <select id="f-art">
     <option value="none">없음</option>
@@ -2657,11 +2662,10 @@ body.web.unsaved #b-save{background:rgba(240,230,205,.14);border-color:rgba(240,
   </div>
   <div id="st-check" hidden>   <!-- 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단으로 · 창을 넓게 -->
     <div class="st-head"><button type="button" class="st-icon" id="st-check-back" aria-label="사진 다시 읽기" title="사진 다시 읽기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">읽은 메뉴 확인</h3><span class="st-pg">3단계 중 2단계</span></div>
-    <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요.</p>
+    <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요. 메뉴 이름을 지우면 그 줄은 빠집니다.</p>   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
     <p class="st-legend"><i></i>노랗게 칠한 칸은 사진이 흐려서 잘못 읽었을 수 있는 곳입니다. 먼저 확인해 주세요.</p>
-    <p class="st-cnote">종이는 A4 세로 비율 그대로입니다. 메뉴 이름을 지우면 그 줄은 넣지 않습니다. 가게 이름 · 색 · 모양은 다음 화면에서 정합니다.</p>
     <div class="st-cbody"><div class="st-cphoto"><img id="st-cimg" alt="올린 메뉴판 사진"></div>
-      <div class="st-cpaper"><div class="st-cband">가게 이름</div><div id="st-ctab" class="st-ctab"></div></div></div>
+      <div class="st-cpaper"><div class="st-cband"><input type="text" id="st-cshop" class="st-cshopin" placeholder="가게 이름" aria-label="가게 이름" autocomplete="off"></div>   <!-- 290번. 읽은 가게 이름 — 고칠 수 있다 --><div id="st-ctab" class="st-ctab"></div></div></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
   </div>
   <div id="st-setup" hidden>
@@ -5524,6 +5528,7 @@ function cleanForSave(root){
   const q = sel => root.querySelectorAll(sel);
   q(".gd-block, .gd-hole, .gd-tip").forEach(n => n.remove());   // 269번. 가이드 중에 저장해도 안 남게
   q("#f-presets, #f-mine").forEach(n => { n.textContent = ""; n.removeAttribute("data-keys"); });   // 284 · 286번
+  q("#f-shop").forEach(n => n.removeAttribute("style"));   // 290번. 글자 길이로 잰 폭
   q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다)
   q("#pg-title").forEach(n => { n.textContent = "1쪽 설정"; });
   q("#ow-title").forEach(n => { n.textContent = "한 장에 안 들어갑니다"; });
@@ -6263,7 +6268,11 @@ const ALPS_EXAMPLE = {"menu":{"brand":{"title":"요리주점","sub":"파스타�
 const shopName = () => String(MENU.brand?.shop || "").trim();
 const fileBaseOf = s => { s = String(s || "").replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim(); return s ? s + "-메뉴" : "메뉴판"; };   // 265번. 상호명이 없으면 "메뉴판"
 const fileBase = () => fileBaseOf(shopName());
-function syncTitle(){ const s = SETTINGS.startScreen === true ? "" : shopName(); document.title = s ? s + " — 메뉴" : "메뉴판"; const t = $("#f-shop"); if (t && document.activeElement !== t) t.value = s || ""; }   // 287번. 막대의 이름 칸   // 283번. 막대 왼쪽 이름도   // 265번 · 280번. 첫 화면이 떠 있는 동안은 뒤에 깔린 예시의 이름을 쓰지 않는다
+function syncTitle(){ const s = SETTINGS.startScreen === true ? "" : shopName(); document.title = s ? s + " — 메뉴" : "메뉴판"; const t = $("#f-shop"); if (t && document.activeElement !== t) t.value = s || ""; fitName(); }
+/* 290번. 막대의 상호명 칸은 글자 길이만큼 — 이름을 고치는 동안에만 옆 단추가 움직인다(그때는 눈이 이름에 있다). 저장본에는 폭을 안 남긴다(cleanForSave) */
+function fitName(){ const t = $("#f-shop"); if (!t) return; const cs = getComputedStyle(t), c = fitName.c || (fitName.c = document.createElement("canvas").getContext("2d"));
+  c.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily; const w = c.measureText(t.value || t.placeholder || "").width;
+  t.style.width = Math.ceil(w + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 4) + "px"; }   // 287번. 막대의 이름 칸   // 283번. 막대 왼쪽 이름도   // 265번 · 280번. 첫 화면이 떠 있는 동안은 뒤에 깔린 예시의 이름을 쓰지 않는다
 const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
 let logoOrig = null, logoInv = false;   // 올린 원본(파일에는 안 남는다 — 뒤집기에만 쓴다)
 function logoMask(img, inv){
@@ -6329,7 +6338,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; $("#st-setup-h").textContent = "빈 메뉴판 만들기"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = "";
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -6354,10 +6363,12 @@ function stSync(){
   if (stMode === "img" && stLogo && stAlt) drawTiles($("#st-tiles"), stLogo, stAlt, r => { if (r){ logoInv = !logoInv; stLogo = r; } stAlt = null; stSync(); }); else $("#st-tiles").innerHTML = "";   // 한 번 답하면 닫힌다
   stTheme = PRESETS[stPreset].theme;
   $("#st-sw").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.p === stPreset));
-  const t = THEMES[stTheme], pv = $("#st-prev"); pv.innerHTML = ""; pv.style.background = t.band; pv.style.color = t.paper;
+  const t = THEMES[stTheme], pv = $("#st-prev"), nr = PRESETS[stPreset].noren, light = LIGHT_NOREN.includes(nr); pv.innerHTML = "";
+  pv.style.background = light ? t.paper : t.band; pv.style.color = light ? t.ink : t.paper;   // 290번. 띠 없는 모양이면 종이색 위에 글자 — 미리보기가 결과와 달랐다(사용자)
+  pv.style.boxShadow = !light ? "none" : nr === "frame" ? "inset 0 0 0 2px " + t.band : "inset 0 -2px 0 " + t.band;
   const ph = txt => { const s = el("span", "ph"); s.textContent = txt; pv.append(s); };
   if (stMode === "text"){ const v = $("#st-top").value.trim(); if (v) pv.textContent = v; else ph("가게 이름"); }
-  else if (stLogo){ const m = el("span", "st-mask"); m.style.setProperty("--src", 'url("' + stLogo.src + '")'); m.style.background = t.paper; pv.append(m); }
+  else if (stLogo){ const m = el("span", "st-mask"); m.style.setProperty("--src", 'url("' + stLogo.src + '")'); m.style.background = light ? t.ink : t.paper; pv.append(m); }
   else ph("[이미지 선택]으로 로고를 올리면 여기 보입니다");
   const d = new Date(), pad = n => String(n).padStart(2, "0");
   $("#st-fname").textContent = "저장하면 「" + fileBaseOf($("#st-shop").value) + "-" + d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + ".html」로 내려받아집니다";
@@ -6366,7 +6377,7 @@ function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · �
   const box = $("#st-sw"); box.innerHTML = "";
   Object.entries(PRESETS).forEach(([k, q]) => {
     const t = THEMES[q.theme], b = el("button", "st-swb"); b.type = "button"; b.dataset.p = k;
-    const c = el("span", "c"); c.style.background = t.paper; const band = el("i"); band.style.background = t.band; c.append(band);
+    const c = el("span", "c"); c.style.background = t.paper; const band = el("i"); tileBand(band, t, q.noren); c.append(band);   // 290번
     const dot = el("em"); dot.style.background = t.accent; c.append(dot);
     b.append(c, document.createTextNode(q.name)); b.onclick = () => { stPreset = k; stSync(); }; box.append(b);
   });
@@ -6447,7 +6458,7 @@ $("#st-alps").onclick = () => {
 /* 꾸미기 창 — 상호명 · 맨 위 · 첫 화면 */
 $("#f-shop").addEventListener("input", e => {
   const v = e.target.value; if (v.trim()) MENU.brand.shop = v; else delete MENU.brand.shop;
-  syncTitle(); touchLater();
+  syncTitle(); fitName(); touchLater();
 });
 $("#f-shop").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === "Escape"){ e.preventDefault(); e.target.blur(); } });   // 287번. 막대의 이름 칸 — Enter 로 마친다
 $("#f-topmode").querySelectorAll("button").forEach(b => b.onclick = () => {
@@ -6529,14 +6540,16 @@ const READ_PROMPT = [
   "- 가격은 숫자만 적습니다(쉼표 · 원 없이). 가격이 없거나 '시가' 같은 글자면 그 글자를 그대로 적습니다.",
   "- 분류가 안 보이면 [메뉴] 하나로 적습니다.",
   "- 잘 안 보이거나 확실하지 않은 이름 · 가격은 그 값 바로 뒤에 ? 를 붙입니다.",
-  "- 메뉴 설명 · 원산지 · 영업시간 · 전화번호는 적지 않습니다."
-].join("\n");
+  "- 메뉴 설명 · 원산지 · 영업시간 · 전화번호는 적지 않습니다.",
+  "- 가게 이름이 보이면 맨 첫 줄에 '가게: 가게 이름' 으로 적습니다. 안 보이면 이 줄은 쓰지 않습니다."
+].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이
 function parseMenuText(txt){
   const secs = []; let cur = null;
   const unq = v => { v = String(v || "").trim(); const u = /[?？]\s*$/.test(v); return [v.replace(/[?？]\s*$/, "").trim(), u]; };
   String(txt || "").replace(/\r/g, "").split("\n").forEach(raw => {
     let l = raw.trim(); if (!l || /^```/.test(l)) return;
     l = l.replace(/^[-*•·]\s+/, "");
+    const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
     const h = l.match(/^\[(.+)\]$/) || l.match(/^#{1,4}\s*(.+)$/);
     if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u, items:[] }; secs.push(cur); return; }
     let name, price;
@@ -6549,10 +6562,11 @@ function parseMenuText(txt){
     if (!cur){ cur = { name:"메뉴", un:false, items:[] }; secs.push(cur); }
     cur.items.push({ name:n, price:p, un:un1, unp:un2 });
   });
-  return secs.filter(s => s.items.length);
+  const out = secs.filter(s => s.items.length); out.shop = secs.shop || ""; return out;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
-let stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false;   // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
+let stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "";   // 290번. 사진에서 읽은 가게 이름
+   // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img){
   const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
   c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
@@ -6616,7 +6630,7 @@ async function geminiRead(dataUrl){
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stParsed = secs; drawCheck();
+  stParsed = secs; stShopRead = secs.shop || ""; $("#st-cshop").value = stShopRead; drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
 }
 function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단(시작할 때 쓰는 splitCols 와 같은 나눔)
@@ -6640,7 +6654,8 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
     });
     box.append(c);
   });
-  box.querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));   // 고치면 노란 표시를 뗀다
+  box.querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
+  $(".st-legend").hidden = !box.querySelector(".un");   // 290번. 노란 칸이 없으면 설명도 없다   // 고치면 노란 표시를 뗀다
 }
 function readCheck(){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
   const secs = stParsed.map(s => ({ name:s.name, items:s.items.map(it => ({ ...it })) }));
@@ -6691,7 +6706,8 @@ $("#st-check-go").onclick = () => {
   const secs = readCheck(); if (!secs.length){ toast("메뉴 이름이 한 줄도 없습니다", null); return; }
   stParsed = secs; const keep = stParsed;
   $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;
-  stFromPhoto = true; $("#st-setup-h").textContent = "이름과 모양 정하기"; $("#st-pg3").hidden = false;   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
+  stFromPhoto = true; $("#st-setup-h").textContent = "이름과 모양 정하기"; $("#st-pg3").hidden = false;
+  { const nm = $("#st-cshop").value.trim(); if (nm){ $("#st-shop").value = nm; $("#st-top").value = nm; stSync(); } }   // 290번. 사진의 가게 이름을 두 칸에 한 번 채운다(따라 쓰는 것은 아니다 — 267번)   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
 };
 
 /* ── 273번. 추천 조합(프리셋) — 이미 있는 손잡이 값의 묶음. 누르면 한 번 맞추고 끝난다(저장되는 설정이 아니다 — 규칙 H · 89번).
@@ -6748,10 +6764,13 @@ function trackLook(){
   const p = visPresets().find(k => sameLook(now, presetLook(k))); if (p){ if (SETTINGS.lookBase !== "p:" + p) setKey("lookBase", "p:" + p); return; }
   S[0] = now; if (SETTINGS.lookBase !== "m:0") setKey("lookBase", "m:0");   // 289번. 어느 추천 조합과도 다르면 그것이 내 조합 — 한 칸을 덮는다
 }
-function lookTile(key, name, theme, on, del){
+/* 290번. 타일의 윗부분 — 띠를 쓰는 모양이면 띠 색, 종이색 상단(LIGHT_NOREN)이면 종이색에 선(액자는 테두리). 색만 칠해 「내 조합」과 「카페」가 똑같아 보였다 */
+function tileBand(i, t, noren){ const light = LIGHT_NOREN.includes(noren || "flat");
+  i.style.background = light ? t.paper : t.band; i.style.boxShadow = !light ? "none" : noren === "frame" ? "inset 0 0 0 1.5px " + t.band : "inset 0 -1.5px 0 " + t.band; }
+function lookTile(key, name, theme, on, del, noren){
   const b = el("button", "pl-tile" + (on ? " on" : "")); b.type = "button"; b.dataset.p = key; b.title = name; b.setAttribute("aria-pressed", on ? "true" : "false");
   const t = THEMES[theme] || THEMES.night, c = el("span", "c"), band = el("i"), dot = el("em");
-  c.style.background = t.paper; band.style.background = t.band; dot.style.background = t.accent; c.append(band, dot);
+  c.style.background = t.paper; tileBand(band, t, noren); dot.style.background = t.accent; c.append(band, dot);
   b.append(c, document.createTextNode(name));
   if (del){ const x = el("span", "x"); x.textContent = "✕"; x.title = "이 칸 지우기"; x.onclick = e => { e.stopPropagation(); del(); }; b.append(x); }
   return b;
@@ -6761,8 +6780,8 @@ function presetTiles(){
   trackLook();
   const S = lookSlots(), base = SETTINGS.lookBase || "";
   mm.innerHTML = ""; pm.innerHTML = "";
-  S.forEach((L, i) => mm.append(lookTile("m" + i, "내 조합", L.theme, base === "m:" + i)));   // 289번. 한 칸 — 지우기(✕) 없음
-  visPresets().forEach(k => pm.append(lookTile(k, PRESETS[k].name, PRESETS[k].theme, base === "p:" + k)));
+  S.forEach((L, i) => mm.append(lookTile("m" + i, "내 조합", L.theme, base === "m:" + i, null, ((L.pages || [])[0] || {}).noren)));   // 289번. 한 칸 — 지우기(✕) 없음
+  visPresets().forEach(k => pm.append(lookTile(k, PRESETS[k].name, PRESETS[k].theme, base === "p:" + k, null, PRESETS[k].noren)));
   mm.querySelectorAll(".pl-tile").forEach(b => b.onclick = () => pickLook("m:" + b.dataset.p.slice(1)));
   pm.querySelectorAll(".pl-tile").forEach(b => b.onclick = () => pickLook("p:" + b.dataset.p));
 }

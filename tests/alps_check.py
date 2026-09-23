@@ -629,7 +629,10 @@ def t35(b, f):
             c.js("([t,p])=>{panelTab=t; panelPage=p; syncPageTabs(); syncPage();}", [tab, pp])
             for kind in ['red', 'white', 'sparkling', 'rose', 'orange']:
                 c.js("(k)=>{panelBottle=k; syncBottles();}", kind)
-                cut += c.js("()=>[...document.querySelectorAll('select')].filter(s=>s.offsetWidth>0 && s.scrollWidth>s.clientWidth).map(s=>(s.id||s.className||s.title)+':'+s.options[s.selectedIndex]?.text)")
+                # 290번 — select 는 scrollWidth 가 글자 폭을 안 따른다('생맥주와 파스'가 잘렸는데 못 잡았다). 고른 글자의 폭을 캔버스로 재 안쪽 폭과 비교한다
+                cut += c.js("""()=>{const g=document.createElement('canvas').getContext('2d'); return [...document.querySelectorAll('select')].filter(s=>s.offsetWidth>0).filter(s=>{const cs=getComputedStyle(s);
+                  g.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily; const tx=s.options[s.selectedIndex]?.text||'';
+                  return s.scrollWidth>s.clientWidth || g.measureText(tx).width > s.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)}).map(s=>(s.id||s.className||s.title)+':'+s.options[s.selectedIndex]?.text)}""")
     out = {'cut': sorted(set(cut)), 'err': c.errs}; c.close(); return out
 
 # ───────────────────────── 36. 실물 사진 대조 — 그림 코드 동일성
@@ -1172,7 +1175,7 @@ def t54(b, f):
     def ok_route(r):   # 276번 — 버셀 서버 함수(파일로 열었으니 배포 주소)를 가로챈다. 278번 — 켜져 있나 묻는 GET 은 켜짐으로
         if r.request.method == 'GET': r.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
         reqs.append({'url': r.request.url, 'body': r.request.post_data or '', 'hdr': dict(r.request.headers)})
-        r.fulfill(status=200, content_type='application/json', body=json.dumps({'text': ANS54, 'model': 'test'}))
+        r.fulfill(status=200, content_type='application/json', body=json.dumps({'text': '가게: 솔밭식당\n' + ANS54, 'model': 'test'}))   # 290번 — 가게 이름 줄
     pg.route('**/api/read', ok_route)
     pg.click('#st-photo'); pg.wait_for_timeout(300)
     out['other'] = [c.js("()=>document.querySelector('#st-other').hidden")]   # 288번 — 바로 읽기가 되면 한 길만
@@ -1182,7 +1185,7 @@ def t54(b, f):
     pg.click('#st-gemgo'); pg.wait_for_timeout(700)
     q = reqs[0] if reqs else {'url': '', 'body': '', 'hdr': {}}
     bd = json.loads(q['body'] or '{}')
-    out['gem'] = [q['url'].endswith('/api/read'), (bd.get('image') or '').startswith('data:image/jpeg;base64,'), set(bd) == {'image'}, not any(k.lower() == 'x-goog-api-key' for k in q['hdr']), c.js("()=>!document.querySelector('#st-check').hidden")]
+    out['gem'] = [q['url'].endswith('/api/read'), (bd.get('image') or '').startswith('data:image/jpeg;base64,'), set(bd) == {'image'}, not any(k.lower() == 'x-goog-api-key' for k in q['hdr']), c.js("()=>!document.querySelector('#st-check').hidden"), c.js("()=>document.querySelector('#st-cshop').value") == '솔밭식당']   # 290번 — 읽은 가게 이름이 확인 화면에
     pg.unroute('**/api/read')
     pg.route('**/api/read', lambda r: r.fulfill(status=429, content_type='application/json', body='{"error":"limit","code":"limit"}'))
     pg.click('#st-check-back'); pg.click('#st-gemgo'); pg.wait_for_timeout(500)
@@ -1312,7 +1315,7 @@ def judge(t, r):
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
             ok = r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
-            return ok, f"다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            return ok, f"다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"
