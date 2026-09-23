@@ -78,6 +78,13 @@ module.exports = async function handler(req, res){
       });
     } catch(e){ lastStatus = 502; lastDetail = String(e && e.message || e).slice(0, 200); tries.push({ model, status:"fetch", ms:Date.now() - t1 }); continue; }
     tries.push({ model, status:r.status, ms:Date.now() - t1 });
+    if (r.status >= 500 && !r.retried){   // 295번. 구글 쪽 일시 오류(500 · 503 등)는 같은 모델로 1초 뒤 한 번 더 — 사장님이 [읽기]를 다시 눌러야 했다(2.7초 만의 502)
+      await new Promise(ok => setTimeout(ok, 1000)); const t2 = Date.now();
+      try { const r2 = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+          method:"POST", headers:{ "Content-Type":"application/json", "x-goog-api-key":key },
+          body:JSON.stringify({ contents:[{ parts:[{ text:PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }] }], generationConfig:{ temperature:0, maxOutputTokens:2048 } }) });
+        r2.retried = true; tries.push({ model, status:r2.status, ms:Date.now() - t2, retry:true }); r = r2; } catch(e){ tries.push({ model, status:"fetch", ms:Date.now() - t2, retry:true }); }
+    }
     if (r.status === 404 || r.status === 429){ lastStatus = r.status; lastDetail = (await r.text()).slice(0, 300); continue; }   // 모델이 없거나 그 모델 한도 — 다음 모델
     if (!r.ok){ log({ result:"error" }); res.status(502).json({ error:"제미나이 응답 오류 " + r.status, code:"gemini", detail:(await r.text()).slice(0, 300), model }); return; }
     const data = await r.json();

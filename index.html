@@ -2271,6 +2271,10 @@ dialog .st-picrow.has button.st-drop{margin:0}
 .editing .sheet.sh-pill:not(.sa-center):not(.sa-right) .sec-head .rowtools{padding-left:.95em}
 /* ⑥ 오른쪽 정렬에서는 제목도 분류 메모(오른쪽 아래, 179번)도 오른쪽이라 겹쳤다 — 메모를 왼쪽으로 */
 .sheet.sa-right .sec-head .ml{right:auto;left:0}
+
+/* ══ 295번. 읽은 메뉴 확인 — 사진 칸이 남는 폭(1fr)을 다 먹고 사진은 그 가운데라, 두 칸 폭이 달라 보이고 사이가 약 230 비었다(사용자 화면).
+   두 칸 모두 내용만큼(auto), 같은 높이로 가운데에 모으고 틈 24 — 나란히 대조하는 화면이다 */
+@media screen and (min-width:821px){ .st-cbody:not(.nopic){grid-template-columns:auto auto;justify-content:center;gap:24px} }
 </style>
 </head>
 <body>
@@ -3768,7 +3772,7 @@ function focusLast(sel){
    `desc:false` 면 [설] 이 빠진다(와인은 맛 칸이 따로 있다) */
 function itemTools(sec, it, i, path, opt = {}){
     const tools = el("span","rowtools");
-    const bp = el("button"); bp.type="button"; bp.appendChild(glyph(SETTINGS.mark)); bp.title="추천 표시";
+    const bp = el("button"); bp.type="button"; bp.appendChild(glyph("★")); bp.title="추천 표시";   // 295번. 단추는 늘 ★ — 고른 추천 표시가 글자(hot · 추천)면 한 글자 칸에 여러 글자가 들어가 안 읽혔고, 단추 얼굴이 설정 따라 바뀌었다. ★ 는 널리 쓰는 추천 모양이라 외우지 않아도 알아보고, 옆의 [품] · [설] 과도 확 다르다(사용자와 판단)
     if (it.pick) bp.classList.add("on");
     bp.onclick = () => { it.pick = !it.pick; touch(); render(); };
     const bo = el("button"); bo.type="button"; bo.appendChild(glyph("품")); bo.title="품절 표시";
@@ -6690,9 +6694,10 @@ async function geminiRead(dataUrl){
   if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 누르거나 [다른 AI 앱에서]를 써 주세요.");
   if (r.status === 413) throw new Error("사진이 너무 큽니다. 다른 사진을 올려 주세요.");
   if (r.status === 422) throw new Error("사진에서 메뉴를 찾지 못했습니다. 더 밝고 반듯하게 찍어 다시 올려 주세요.");
-  if (r.status === 403) throw new Error("이 메뉴판에서는 읽기를 부를 수 없습니다(허락되지 않은 주소). [다른 AI 앱에서]를 써 주세요.");
+  if (r.status === 403) throw new Error("이 메뉴판에서는 읽기를 쓸 수 없습니다. 아래 [다른 AI 앱에서]를 써 주세요.");   // 295번. 괄호 속 설명을 뺐다
   if (r.status === 503 && j.code === "off"){ readOn = false; stReadSync(); throw new Error(READ_OFF_MSG); }   // 278번
-  throw new Error("지금은 읽을 수 없습니다(" + (j.code || r.status) + "). [다른 AI 앱에서]를 써 주세요.");
+  console.warn("사진 읽기 실패", r.status, j);   // 295번. 까닭 글자(gemini 등)는 화면이 아니라 여기에 — 사장님이 알 수 없는 말이었다(수업 정리 6-5)
+  throw new Error("읽는 곳(구글)이 잠시 답하지 못했습니다. 잠시 뒤 [읽기]를 다시 누르거나 아래 [다른 AI 앱에서]를 써 주세요.");
 }
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
