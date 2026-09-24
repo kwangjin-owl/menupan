@@ -713,7 +713,7 @@ def t39(b, f):
     S.update({'font': 'nope', 'theme': 42, 'mark': 'toolongmark', 'pageno': 'zzz', 'secAlign': 'diag', 'wineAlign': 5})   # 274번. 'X' 는 이제 올바른 글자 표시(영문 1자) — 7자 넘는 글자로 시험
     new = 'function normArts' in src   # 302번. 새 형식 파일은 칸 목록을 망가뜨린다(옛 키 art 가 있으면 그쪽이 먼저 옮겨지므로 넣지 않는다)
     for k, pg in enumerate(S.get('pages', [])):
-        if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'sealPos': 17})
+        if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'sealCells': [9, 2, 2, 'x', 1.5, -1]})   # 303번. 도장 칸 목록
         pg.update({'noren': 'bogus', 'seal': 7, **({} if new else {'art': 'dragon'}),
                    'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4]})
     bad = src[:m.start(2)] + json.dumps(S, ensure_ascii=False, indent=2).replace('<', '\\u003C') + src[m.end(2):]
@@ -722,7 +722,7 @@ def t39(b, f):
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200)
     out = c.js("""()=>{const r={}; r.S={font:SETTINGS.font, theme:SETTINGS.theme, mark:SETTINGS.mark, pageno:SETTINGS.pageno, sec:SETTINGS.secAlign, wine:SETTINGS.wineAlign};
       r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).arts ? P(i).arts.map(x=>x.art).join(',') : P(i).art, P(i).seal, P(i).scale, P(i).norenScale]);
-      r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+(P(i).sealPos ?? '') : null);   // 302번
+      r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+JSON.stringify(P(i).sealCells ?? null) : null);   // 302 · 303번
       r.ui={font:document.querySelector('#f-font').value, theme:document.querySelector('#f-theme').value, mark:document.querySelector('#f-mark').value, pageno:document.querySelector('#f-pageno').value,
             sec:document.querySelector('#f-secalign').value, wine:document.querySelector('#f-winealign').value};
       r.pageui=[]; for (const i of [0,1]){ panelPage=i; panelTab='page'; syncPageTabs(); syncPage(); r.pageui.push([document.querySelector('#f-noren').value, document.querySelector('#f-art').value, document.querySelector('#f-seal').value, document.querySelector('#sz-val').textContent, document.querySelector('#nsz-val').textContent]); }
@@ -748,12 +748,15 @@ def t40(b, f):
     st('prev', "()=>document.querySelector('#b-preview').click()")
     st('editEnd', "()=>{document.querySelector('#b-preview').click(); document.querySelector('#b-edit').click();}")
     out = {'base': base, 'steps': steps, 'allSame': all(s[1] for s in steps), 'err': c.errs}
-    # 302번. 자리를 고르면 그 칸에 선다 — 가운데점이 종이를 2 × 3 으로 나눈 그 칸에 있는지(두 방향). 기준 파일은 자리를 모른다(늘 오른쪽 아래)
+    # 302 · 303번. 고른 칸에 선다 — 가운데점이 **상단 아래부터** 종이를 2 × 3 으로 나눈 그 칸에 있는지(두 방향 · 칸 여섯). 도장은 여러 칸을 한꺼번에 켜 본다
     out['pos'] = c.js("""()=>{ const o=[]; for (const or of ['portrait','landscape']){ SETTINGS.orient=or;
-        for (let k=0;k<6;k++){ P(0).seal='tri'; P(0).sealPos=k; P(0).arts=[{cell:k, art:'horse'}]; P(0).art='horse'; render(); applyScale();
-          const sh=document.querySelector('.sheet'), S=sh.getBoundingClientRect(), at=e=>{ if(!e) return -1; const q=e.getBoundingClientRect(); const cx=(q.left+q.right)/2-S.left, cy=(q.top+q.bottom)/2-S.top; return Math.floor(cx/(S.width/2)) + 2*Math.floor(cy/(S.height/3)); };
-          o.push([or, k, at(sh.querySelector('.seal')), at(sh.querySelector('.art'))]); } } return o; }""")
-    out['posOk'] = all(x[1] == x[2] == x[3] for x in out['pos']); c.close(); return out
+        for (let k=0;k<6;k++){ P(0).seal='tri'; P(0).sealCells=[k, (k+3)%6].sort((a,b)=>a-b); P(0).arts=[{cell:k, art:'horse'}]; render(); applyScale();
+          const sh=document.querySelector('.sheet'), S=sh.getBoundingClientRect(), tb=sh.querySelector('.noren').getBoundingClientRect().bottom-S.top;
+          const at=e=>{ const q=e.getBoundingClientRect(); const cx=(q.left+q.right)/2-S.left, cy=(q.top+q.bottom)/2-S.top; return Math.floor(cx/(S.width/2)) + 2*Math.floor((cy-tb)/((S.height-tb)/3)); };
+          const seals=[...sh.querySelectorAll('.seal:not(.blank)')].map(at).sort((a,b)=>a-b);
+          o.push([or, k, JSON.stringify(seals)===JSON.stringify(P(0).sealCells) ? k : 'seal '+JSON.stringify(seals), at(sh.querySelector('.art'))]); } } return o; }""")
+    out['sealPosMove'] = c.js("()=>{ if (typeof normArts!=='function') return null; const p={seal:'tri', sealPos:0}; normArts(p, []); return JSON.stringify(p.sealCells) + (('sealPos' in p) ? ' 남음' : '') }")   # 302번 파일의 sealPos → [0]
+    out['posOk'] = all(x[1] == x[2] == x[3] for x in out['pos']) and out['sealPosMove'] == '[0]'; c.close(); return out
 
 # ───────────────────────── 41. 칸 아래 구멍 · 틈
 def t41(b, f):
@@ -945,9 +948,9 @@ def t44(b, f):
     # (a) [다른 장에도 똑같이] — 켜짐(키 없음)도 옮겨 가는지. 2쪽을 끄고 1쪽은 켠 채 복사
     out['copy'] = c.js("""()=>{ panelPage=0; delete P(0).showNotes; delete P(0).showTitle; delete P(0).showSub;
       P(1).showNotes=false; P(1).showTitle=false; P(1).showSub=false;
-      P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).sealPos=2; delete P(1).sealPos;   /* 302번. 그림 칸 · 도장 자리도 옮겨 가는지 */
+      P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).seal='tri'; P(0).sealCells=[1,2]; delete P(1).sealCells;   /* 302번. 그림 칸 · 도장 자리도 옮겨 가는지 */
       syncPage(); document.querySelector('#b-copypage').click();
-      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && P(1).sealPos===2 }""")
+      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).sealCells)==='[1,2]' }""")
     # 302번. [모든 그림에 같게] — 고른 칸의 색 · 진하기가 이 장의 다른 그림 전부에. 없으면(기준 파일) 실패
     out['artsame'] = c.js("""()=>{ const b=document.querySelector('#b-artsame'); if (!b) return null; panelPage=0;
       P(0).arts=[{cell:0, art:'horse', color:'#aa0000', op:'strong'}, {cell:1, art:'zebra'}, {cell:5, art:'fir', op:'mid'}]; panelCell=0; render(); syncPage(); b.click();
@@ -1171,9 +1174,9 @@ def t52(b, f):
     before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
     keys = c.js("()=>Object.keys(PRESETS).filter(k=>!PRESETS[k].hidden)")   # 285번. 숨긴 조합(basic = 내 조합의 시작 모양)은 타일이 없다
     for k in keys:
-        c.js("()=>{ P(0).sealPos=1; P(0).arts=[{cell:0, art:'horse', color:'#123456'}]; P(0).art='horse'; document.querySelector('#f-presets').scrollIntoView(); }")   # 302번. 조합을 누르면 그림 칸 · 도장 자리가 처음 값으로
+        c.js("()=>{ P(0).sealCells=[1,3]; P(0).arts=[{cell:0, art:'horse', color:'#123456'}]; P(0).art='horse'; document.querySelector('#f-presets').scrollIntoView(); }")   # 302번. 조합을 누르면 그림 칸 · 도장 자리가 처음 값으로
         pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
-        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', P(0).sealPos===undefined && (!q.art || JSON.stringify(P(0).arts)===JSON.stringify(q.art==='none'?[]:[{cell:5, art:q.art}])), (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
+        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', P(0).sealCells===undefined && (!q.art || JSON.stringify(P(0).arts)===JSON.stringify(q.art==='none'?[]:[{cell:5, art:q.art}])), (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
     out['same_size_content'] = c.js(snap) == before
     for _ in keys: pg.keyboard.press('Control+z'); pg.wait_for_timeout(120)
     out['undo_back'] = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})") == st
@@ -1334,8 +1337,8 @@ def judge(t, r):
         if t == 't36': return None, '그림 코드 해시 — 기준과 같으면 그림을 안 건드린 것(참고 사진 대조는 사진이 있어야 한다)'
         if t == 't37': return r['nbad'] == 0, f"병 잉크 바닥 {r['n'] - r['nbad']}/{r['n']} 1px 이내 · 최대 {r['worst']}"
         if t == 't38': vals = {k: v for k, v in r.items() if k != '_sec'}; ok = all(v[0] == 190 and v[1] <= 1 for v in vals.values()); return ok, f"잉크 바닥 · 호일 {vals}"
-        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|' for a in r.get('arts', [])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')}"
-        if t == 't40': return r['allSame'] and r.get('posOk'), f"도장 9가지 동작 고정 {r['allSame']} · 도장 · 그림이 고른 칸에 섬 {r.get('posOk')} {[x for x in r.get('pos', []) if not x[1] == x[2] == x[3]][:4]}"
+        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|[2]' for a in r.get('arts', [])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')}"
+        if t == 't40': return r['allSame'] and r.get('posOk'), f"도장 9가지 동작 고정 {r['allSame']} · 도장(여럿) · 그림이 상단 아래 고른 칸에 섬 {r.get('posOk')} {[x for x in r.get('pos', []) if not x[1] == x[2] == x[3]][:4]} · 302번 sealPos → {r.get('sealPosMove')}"
         if t == 't41': ok = all(len(x['secGaps']) <= 1 for x in r['sheets']); return ok, f"칸 아래 구멍 {[x['holes'] for x in r['sheets']]} · 분류 틈 {[x['secGaps'] for x in r['sheets']]}"
         if t == 't42': ok = all(v['edit'] == 0 and v['prev'] == 0 for k, v in r.items() if k != '_sec') and all(x == 0 for x in r['center']['centerMarginDiff']); return ok, '정렬 셋 · 세 모드 0.0px'
         if t == 't43': ok = all(r[k]['newlines'] == 4 for k in ('sec', 'wine', 'label')) and all(x.count('\n') == 4 for x in r['saved']); return ok, '두 줄 쓰기 · 제한 없음 · 저장 보존'

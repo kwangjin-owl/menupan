@@ -2369,26 +2369,34 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .art{width:50%}
 .sheet.land .art{width:36%}
 .art.ax0{left:0;right:auto} .art.ax1{left:auto;right:0}
-.art.ay0{top:2%;bottom:auto} .art.ay1{top:50%;bottom:auto;transform:translateY(-50%)} .art.ay2{top:auto;bottom:2%}
-.sheet.land .art.ay0{top:4%;bottom:auto} .sheet.land .art.ay1{bottom:auto} .sheet.land .art.ay2{bottom:4%}
+/* 303번. 칸은 **상단 아래부터** 종이 끝까지를 셋으로 나눈다(사용자 — 위 칸 그림 · 도장이 띠 뒤에 가려 안 보였다). `--topband` 는 applyScale() 이 잰 상단 아래 끝 */
+.art.ay0{top:var(--topband, 2%);bottom:auto} .art.ay1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px)) / 2);bottom:auto;transform:translateY(-50%)} .art.ay2{top:auto;bottom:2%}
+.sheet.land .art.ay0{top:var(--topband, 4%);bottom:auto} .sheet.land .art.ay1{bottom:auto} .sheet.land .art.ay2{bottom:4%}
 /* 도장 자리 — 좌우는 여백선, 위아래는 11mm, 가운데 줄은 한가운데 높이. 기본은 오른쪽 아래(키 없음) */
 .seal.sx0{left:var(--mg);right:auto}
-.seal.sy0{top:11mm;bottom:auto} .seal.sy1{top:calc(50% - var(--sealw) / 2);bottom:auto}
+.seal.sy0{top:calc(var(--topband, 0px) + 5mm);bottom:auto} .seal.sy1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px) - var(--sealw)) / 2);bottom:auto}   /* 303번. 상단 아래부터 */
 /* 바닥 글이 도장을 피하는 자리(179번 `.sealgap` · 원산지 오른쪽 여백)는 도장이 왼쪽 아래면 왼쪽으로. 그 밖에서는 전처럼 오른쪽에 남긴다(155번 — 빼면 바닥 높이가 변한다) */
 .sheet.seal-l .sealgap{order:-1}
 .sheet.seal-l .origin{padding-right:0;padding-left:calc(var(--sealw) + 1.1em)}
-/* 꾸미기 창의 격자 — 종이 모양(A4 비율) 2 × 3, 칸마다 그 칸의 그림. 고른 칸은 옅은 바탕 + 안쪽 테. 칸 이름은 글자로 안 적는다(사용자 — 격자가 보여 준다. 이름은 aria-label 에만) */
-.panel .pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));width:110px;aspect-ratio:210 / 297;
+/* 꾸미기 창의 격자 — 종이 모양(방향을 따른다). 303번. 맨 위에 그 장의 상단(고를 수 없는 자리 — 실제 높이 비율), 그 아래 2 × 3 칸. 칸마다 그 칸의 그림과 도장.
+   고른 칸은 옅은 바탕 + 안쪽 테. 칸 이름은 글자로 안 적는다(302번 — 이름은 aria-label 에만) */
+.panel .pgrid{display:flex;flex-direction:column;width:110px;aspect-ratio:210 / 297;
   border:1px solid rgba(240,230,205,.3);border-radius:8px;overflow:hidden;background:rgba(240,230,205,.04);box-sizing:border-box}
 .panel .pgrid.land{width:156px;aspect-ratio:297 / 210}
-.panel .grp .pgrid button{min-height:0;height:auto;width:auto;border:0;border-radius:0;padding:4px;background:none;display:flex;align-items:center;justify-content:center;
+.panel .pgrid .pband{flex:none;height:15%;background:rgba(240,230,205,.16);border-bottom:1px solid rgba(240,230,205,.3);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-style:normal;color:rgba(240,230,205,.55);overflow:hidden;white-space:nowrap}
+.panel .pgrid .pcells{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
+.panel .grp .pgrid button{position:relative;min-height:0;height:auto;width:auto;border:0;border-radius:0;padding:4px;background:none;display:flex;align-items:center;justify-content:center;
   color:rgba(240,230,205,.8);border-right:1px dashed rgba(240,230,205,.16);border-bottom:1px dashed rgba(240,230,205,.16);min-width:0;overflow:hidden}
 .panel .grp .pgrid button:nth-child(2n){border-right:0}
 .panel .grp .pgrid button:nth-child(n+5){border-bottom:0}
 .panel .grp .pgrid button:hover{background:rgba(240,230,205,.06)}
 .panel .grp .pgrid button.on{background:rgba(240,230,205,.2);box-shadow:inset 0 0 0 2px #efe3c9}
-.panel .pgrid svg{width:100%;height:100%;display:block}   /* 칸 안에 맞춘다 — 가로 격자는 칸이 납작해 폭으로만 맞추면 잘렸다 */
-.panel #g-seal svg{width:62%;height:62%}
+.panel .pgrid button > svg{width:100%;height:100%;display:block}
+.panel .pgrid .psl{position:absolute;width:30%;aspect-ratio:1;color:#e0b0a8}   /* 칸 속 도장 — 종이에서 서는 쪽(좌우 · 위아래)에 */
+.panel .pgrid .psl svg{width:100%;height:100%;display:block}
+.panel .pgrid .psl.sx0{left:4px} .panel .pgrid .psl.sx1{right:4px}
+.panel .pgrid .psl.sy0{top:4px} .panel .pgrid .psl.sy1{top:35%} .panel .pgrid .psl.sy2{bottom:4px}
 .panel .artpick{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .panel .artpick > label{margin:0}
 .panel #art-opts{display:flex;flex-direction:column;gap:6px}
@@ -2681,7 +2689,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <div class="pgrp">꾸밈</div>
   <span class="grp two artseal">   <!-- 290번. 그림 이름이 잘렸다('생맥주와 파스') — 한 줄에 하나 -->
     <!-- 302번. 그림은 종이 모양의 6칸 격자(2 × 3) — 칸을 누르면 그 칸이 골라지고, 밑의 손잡이 한 벌(그림 · 색 · 진하기)이 고른 칸만 고친다(칸마다 늘어놓으면 창이 끝없이 길어진다) -->
-    <span class="fld artpick"><label id="l-gart">그림</label>
+    <span class="fld artpick"><label id="l-gart">그림 · 도장</label>   <!-- 303번. 격자 하나 — 칸마다 그림과 도장 -->
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="subrow nosw"><label for="f-art">그림</label>
@@ -2708,8 +2716,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <span id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span>
-      <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span></span>   <!-- 302번. [다른 장에도 똑같이]처럼 한 번 맞추는 단추 -->
-    <span class="fld"><label for="f-seal">도장</label>
+      <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span>   <!-- 302번. [다른 장에도 똑같이]처럼 한 번 맞추는 단추 -->
+      <span class="subrow nosw"><label for="f-sealhere">도장</label><span><input type="checkbox" class="m3sw" id="f-sealhere" aria-label="이 칸에 도장"></span></span></span>   <!-- 303번. 도장도 칸마다 — 여러 개 찍을 수 있다(사용자). 모양 · 색은 장에 하나(아래) -->
+    <span class="fld"><label for="f-seal">도장 모양</label>
     <select id="f-seal">
       <option value="none">없음</option>
       <option value="tri">네모 · 삼각</option>
@@ -2722,8 +2731,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span>
-      <span class="subrow nosw top"><label id="l-gseal">자리</label><span class="pgrid" id="g-seal" role="group" aria-labelledby="l-gseal"></span></span></span>   <!-- 297번 --><!-- 302번. 도장 자리 6칸 — 누르면 바로 그 자리 -->
+    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span></span>   <!-- 297번 --><!-- 303번. 302번의 도장 자리 격자는 걷었다 — 그림 격자와 똑같이 생겼는데 누르면 다른 일(바로 옮기기)을 했다(301번 교훈). 자리는 위 격자의 칸마다 -->
   </span>
 
   </div>
@@ -3695,7 +3703,7 @@ MENU.sheets.forEach((sh,i) => { if (!sh.length) MENU.sheets[i] = [[]]; });
    옛 저장본의 맨 위 키(noren · scale · art · seal …)는 1쪽 값으로 옮기고 지운다(15번). 89 · 92번의 옛 변환(low · norenTall ·
    scalePort)도 여기서 장마다 한다 */
 const PAGE_KEYS = ["noren","norenScale","norenTall","showTitle","showSub","logoColor","scale","scalePort","scaleLand","autofit",
-                   "showNotes","showOrigin","arts","seal","sealPos","sealColor"];   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) · 도장 자리(sealPos)
+                   "showNotes","showOrigin","arts","seal","sealCells","sealColor"];   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) → 303번. 도장 자리도 칸마다 여럿(sealCells)
 /* 198 · 200번. 상단 크기 기본값. **출처는 하나다**(24 · 55번) —
    211번에서 `pageDefaults` · 122번 방어 · `drawSheet()` 대체값 · 창 표시 · ± · 막대가
    0.8 / 0.9 / 1 로 **셋으로 갈라져 있던 것**을 이 상수 하나로 모았다.
@@ -3714,7 +3722,8 @@ function pageDefaults(i){
            showNotes: i ? false : undefined, showOrigin:false };
 }
 /* 302번. **그림은 칸 여섯(2단 × 3줄 — 두 방향 모두)** — `pg.arts = [{cell, art, color?, op?}]`(칸 차례 · 빈 칸은 목록에 없음 · 색 · 진하기는 칸마다, 기본이면 키 없음).
-   **도장 자리** `pg.sealPos`(0 ~ 5 — 왼쪽 위부터 가로로, 기본 5 = 오른쪽 아래 · 키 없음).
+   **도장 자리** `pg.sealCells`(303번 — 칸 목록, 여럿 가능 · 칸 번호는 왼쪽 위부터 가로로 0 ~ 5, 기본 [5] = 오른쪽 아래 · 키 없음). 302번의 `sealPos`(하나)는 목록으로 옮긴다.
+   도장 모양 `seal` 이 "none" 이면 칸 목록과 상관없이 안 찍힌다. 칸은 **상단 아래부터** 종이 끝까지를 셋으로 나눈 것이다(303번).
    옛 파일의 그림 하나(`art` · `artColor` · `artOp`)는 오른쪽 아래 칸으로 옮긴다 — 옛 그림이 그려지던 자리(재서 정함). 망가진 값은 기본으로(122번 방어와 같은 자리에서 부른다) */
 const CELL_NAMES = ["왼쪽 위","오른쪽 위","왼쪽 가운데","오른쪽 가운데","왼쪽 아래","오른쪽 아래"], NCELL = 6, ART_CELL_OLD = 5, SEAL_POS_DEF = 5;
 function normArts(pg, dflt){
@@ -3730,9 +3739,15 @@ function normArts(pg, dflt){
   pg.arts = pg.arts.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && x.cell >= 0 && x.cell < NCELL && okArt(x.art) && !seen.has(x.cell) && seen.add(x.cell))
     .map(x => { const q = { cell:x.cell, art:x.art }; if (okCol(x.color)) q.color = x.color; if (["mid","strong"].includes(x.op)) q.op = x.op; return q; })
     .sort((a, b) => a.cell - b.cell);
-  if (pg.sealPos !== undefined && !(Number.isInteger(pg.sealPos) && pg.sealPos >= 0 && pg.sealPos < SEAL_POS_DEF)) delete pg.sealPos;
+  /* 303번. 도장 자리 — 여럿. 302번 파일의 sealPos(하나)는 목록으로 */
+  if (pg.sealPos !== undefined){ if (!Array.isArray(pg.sealCells) && Number.isInteger(pg.sealPos) && pg.sealPos >= 0 && pg.sealPos < NCELL) pg.sealCells = [pg.sealPos]; delete pg.sealPos; }
+  if (pg.sealCells !== undefined){
+    const c = Array.isArray(pg.sealCells) ? [...new Set(pg.sealCells.filter(x => Number.isInteger(x) && x >= 0 && x < NCELL))].sort((a, b) => a - b) : [SEAL_POS_DEF];
+    if (c.length === 1 && c[0] === SEAL_POS_DEF) delete pg.sealCells; else if (!c.length){ delete pg.sealCells; if (pg.seal !== undefined) pg.seal = "none"; } else pg.sealCells = c; }
   return pg;
 }
+/* 303번. 그 장에서 도장이 찍히는 칸 — 모양이 없음이면 빈 목록 */
+const sealCellsOf = p => p && p.seal && p.seal !== "none" ? (Array.isArray(p.sealCells) ? p.sealCells : [SEAL_POS_DEF]) : [];
 function P(i){
   const ps = SETTINGS.pages = Array.isArray(SETTINGS.pages) ? SETTINGS.pages : [];
   if (!ps[i]) ps[i] = pageDefaults(i);
@@ -4667,10 +4682,11 @@ function drawSheet(spec){
   }
   sheet.appendChild(el("div","guide"));   // 194번. 인쇄 여백선(편집 중에만 보인다)
   /* 179번. 도장은 종이 기준 absolute 다(위 `.seal`). 그려도 흐름에는 영향이 없다 */
-  const sp = PS.sealPos ?? SEAL_POS_DEF, sealOn = !!(PS.seal && PS.seal !== "none");   // 302번. 도장 자리 6칸(기본 오른쪽 아래)
-  const seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
-  seal.innerHTML = SEALS[sealOn ? PS.seal : "word"]; sheet.appendChild(seal);
-  sheet.classList.toggle("seal-l", sealOn && sp === 4);   // 302번. 왼쪽 아래 도장이면 바닥 글이 피하는 자리도 왼쪽으로
+  /* 302번 → 303번. 도장은 고른 칸마다(여럿). 없음이면 전처럼 안 보이는 도장 하나를 오른쪽 아래에 둔다(255번 — 판정은 보이는 것만 센다) */
+  const sc = sealCellsOf(PS), sealOn = sc.length > 0;
+  (sealOn ? sc : [SEAL_POS_DEF]).forEach(sp => { const seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
+    seal.innerHTML = SEALS[sealOn ? PS.seal : "word"]; sheet.appendChild(seal); });
+  sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
     const a = el("div","art ax" + (x.cell % 2) + " ay" + Math.floor(x.cell / 2)); a.dataset.cell = x.cell; a.innerHTML = ART[x.art]; artVars(a, x); sheet.appendChild(a); });
@@ -5555,10 +5571,19 @@ if (document.fonts && document.fonts.addEventListener)
   document.fonts.addEventListener("loadingdone", () => {
     clearTimeout(fontsT); fontsT = setTimeout(() => { try { applyScale(); } catch(e){} }, 80);
   });
+/* 303번. 장마다 상단 아래 끝(종이 위에서 px)을 `--topband` 로 — 칸(그림 · 도장 자리)이 그 아래부터다. 꾸미기 창 격자의 상단 띠도 이 비율 */
+function topBands(){
+  document.querySelectorAll(".sheet").forEach(sh => { const n = sh.querySelector(".noren");
+    const t = n ? Math.max(0, n.getBoundingClientRect().bottom - sh.getBoundingClientRect().top) : 0; sh.style.setProperty("--topband", t.toFixed(1) + "px"); });
+  const b = document.querySelector("#g-art .pband"); if (b) b.style.height = bandPct(panelPage) + "%";
+}
+function bandPct(i){ const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 15;
+  const t = parseFloat(sh.style.getPropertyValue("--topband")), h = sh.getBoundingClientRect().height; return h > 0 && t >= 0 ? +(t / h * 100).toFixed(2) : 15; }
 function applyScale(){
   /* 128번. **배율은 기본 간격에서 찾는다.** 벌려 둔 간격은 px 이라 배율을 바꿔도 안 따라오고,
      그 상태로 재면 "앞 상태에서 벌린 자리"까지 내용으로 세어 필요 없이 한 눈금 더 줄인다 */
   document.querySelectorAll(".col").forEach(c => c.style.rowGap = "");
+  topBands();   // 303번. 그림 · 도장 칸은 상단 아래부터
   /* 152번. 장마다 따로 — 자동이면 그 장에 맞는 최대치, 아니면 정한 값에서 넘칠 때만 내려간다(91번) */
   const shrunk = [], full = [];
   MENU.sheets.forEach((_, i) => {
@@ -6096,7 +6121,13 @@ $("#f-bi").onchange     = e => { SETTINGS.bilingual = e.target.checked; render()
 $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음은 전처럼 showDots=false(옛 저장본과 같은 키), 줄표 · 실선은 leader
   if (v === "none"){ SETTINGS.showDots = false; delete SETTINGS.leader; } else { delete SETTINGS.showDots; if (v === "dots") delete SETTINGS.leader; else SETTINGS.leader = v; }
   render(); touch(); };
-$("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); syncPage(); };
+$("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); syncPage(); };   // 303번. 모양만 — 자리(칸)는 격자에서
+/* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
+$("#f-sealhere").onchange = e => { const p = P(panelPage); let c = sealCellsOf(p);
+  if (e.target.checked){ if (!c.length){ p.seal = "tri"; c = []; } c = [...new Set([...c, panelCell])].sort((a, b) => a - b); }
+  else c = c.filter(x => x !== panelCell);
+  if (!c.length){ p.seal = "none"; delete p.sealCells; } else if (c.length === 1 && c[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = c;
+  render(); touch(); syncPage(); };
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 function colPick(key, def, sel, box){
   /* 298번. 목록 → 색 칩(전체 탭의 종이 · 글자 · 띠 · 포인트 상자처럼 무슨 색인지 바로 보이게 — 사용자). 칩 셋 + 직접 */
@@ -6186,6 +6217,7 @@ function syncPage(){
     const x = artAt(pg, panelCell);
     $("#f-artop").value = (x && x.op) || "light";
     $("#art-opts").hidden = !x; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
+    $("#f-sealhere").checked = sealCellsOf(pg).includes(panelCell);   // 303번
     $("#b-artsame").disabled = !x || (pg.arts || []).length < 2;   // 302번. 맞출 다른 그림이 없으면 흐리게(284번)
     drawGrids(pg);
     if (sh){ const a = sh.querySelector('.art[data-cell="' + panelCell + '"]'), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
@@ -6197,18 +6229,20 @@ function syncPage(){
   $("#nsz-val").textContent = Math.round((pg.norenScale ?? NSCALE_DEFAULT) * 100) + "%";
   syncSize();
 }
-/* 302번. 격자 둘(그림 · 도장 자리) — 단추 여섯은 한 번만 만들고 채움만 바꾼다(누른 단추가 다시 만들어지면 초점을 잃는다) */
+/* 302번 → 303번. 격자 하나 — 맨 위 상단(고를 수 없다 · 실제 비율), 그 아래 칸 여섯. 칸마다 그 칸의 그림과 도장을 그린다.
+   단추 여섯은 한 번만 만들고 채움만 바꾼다(누른 단추가 다시 만들어지면 초점을 잃는다) */
 function drawGrids(pg){
-  const land = SETTINGS.orient === "landscape", sp = pg.sealPos ?? SEAL_POS_DEF, sealKey = pg.seal && pg.seal !== "none" ? pg.seal : "word";
+  const box = $("#g-art"), sc = sealCellsOf(pg), sk = pg.seal && pg.seal !== "none" ? pg.seal : "word";
   const artNm = k => { const o = [...$("#f-art").options].find(o => o.value === k); return o ? o.textContent : k; };
-  const fill = (box, inner, on, name, pick) => { box.classList.toggle("land", land);
-    if (box.children.length !== NCELL){ box.innerHTML = ""; for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => pick(c); box.appendChild(b); } }
-    [...box.children].forEach((b, c) => { const h = inner(c); if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
-      b.classList.toggle("on", c === on); b.setAttribute("aria-pressed", String(c === on)); b.title = name(c); b.setAttribute("aria-label", name(c)); }); };
-  fill($("#g-art"), c => { const x = artAt(pg, c); return x ? ART[x.art] : ""; }, panelCell,
-       c => { const x = artAt(pg, c); return CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "비어 있음"); }, c => { panelCell = c; syncPage(); });
-  fill($("#g-seal"), c => c === sp ? SEALS[sealKey] : "", sp, c => "도장 자리 — " + CELL_NAMES[c],
-       c => { const p = P(panelPage); if (c === SEAL_POS_DEF) delete p.sealPos; else p.sealPos = c; render(); touch(); syncPage(); });
+  box.classList.toggle("land", SETTINGS.orient === "landscape");
+  if (!box.querySelector(".pcells")){ box.innerHTML = '<i class="pband" aria-hidden="true">상단</i><span class="pcells"></span>';
+    const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
+  box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
+  [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
+    const h = (x ? ART[x.art] : "") + (on ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + SEALS[sk] + "</span>" : "");
+    if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
+    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (on ? " · 도장" : "");
+    b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
 }
 /* [다른 장에도 똑같이] — 이 장의 **모양 설정**을 모든 장에 복사한다.
    157번. 바닥 글(안내 문구 · 한 줄 항목 · 원산지)은 **내용**이라 안 옮긴다 — 장마다 다른 말이 들어가는 자리다.
@@ -7059,7 +7093,7 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
   if (q.leader === "none"){ S.showDots = false; delete S.leader; } else { delete S.showDots; if (q.leader === "dots") delete S.leader; else S.leader = q.leader; }
   const ex = ALPS_EXAMPLE.settings.pages || []; S.pages = S.pages || [];
   (M.sheets || []).forEach((_, i) => { const pp = S.pages[i] || (S.pages[i] = pageDefaults(i)), e = ex[i] || ex[0] || {};
-    pp.noren = q.noren; pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; delete pp.sealColor; delete pp.sealPos;   // 296번. 조합은 색도 처음으로
+    pp.noren = q.noren; pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; delete pp.sealColor; delete pp.sealPos; delete pp.sealCells;   // 296번. 조합은 색도 처음으로 · 303번. 도장 칸도
     pp.arts = q.art ? (q.art === "none" ? [] : [{ cell:ART_CELL_OLD, art:q.art }]) : JSON.parse(JSON.stringify(e.arts || [])); delete pp.art; delete pp.artColor; delete pp.artOp; });   // 302번. 그림 칸 · 도장 자리도 처음으로
   const old = S.mark; S.mark = q.mark;
   if (old && old !== q.mark && markIsSym(old) && markIsSym(q.mark)){ const sw = a => a.map(t => t.split(old).join(q.mark)); (M.feet || []).forEach(f => { f.line = sw(f.line || []); f.notes = sw(f.notes || []); }); }
@@ -7068,11 +7102,11 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
    · 조합이 바꾸는 값(LOOK_KEYS · 장마다 PAGE_LOOK)이 곧 「모양 한 벌」이다. 지금 모양이 어느 추천 조합과 같으면 그 타일이 켜지고, 아니면 「내 조합」이 켜진다
    · 지금 모양이 어느 조합과도 다르면 그것이 내 조합이다 — 고칠 때마다(touch) SETTINGS.myLook 에 그대로 적어 둔다. 그래서 다른 조합을 눌러 봐도 내 조합은 남는다
    · 글자 크기 · 내용 · 맨 위는 조합이 안 건드린다(273번 그대로) */
-const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","arts","seal","logoColor","sealPos","sealColor"];   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
+const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","arts","seal","logoColor","sealCells","sealColor"];   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
 function lookOf(S){ const o = {}; LOOK_KEYS.forEach(k => { if (S[k] !== undefined) o[k] = JSON.parse(JSON.stringify(S[k])); });
   o.pages = (S.pages || []).map(p => { const q = {}; PAGE_LOOK.forEach(k => { if (p && p[k] !== undefined) q[k] = JSON.parse(JSON.stringify(p[k])); }); return q; }); return o; }   // 302번. 목록(arts)은 떼어서 담는다 — 같은 목록을 가리키면 종이를 고칠 때 담아 둔 조합까지 바뀐다
 function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)); if (c.theme !== "custom") delete c.custom;   /* applyLook() 이 프리셋 색도 custom 에 늘 채운다(239번) — 직접 고른 색일 때만 비교 */ if (c.secAlign === "left") delete c.secAlign; if (!c.bold) delete c.bold; return JSON.stringify(c, Object.keys(c).sort()); };
-  const pl = p => [p.noren, (p.arts || []).map(x => [x.cell, x.art, x.color || null, x.op || null]), p.seal, p.logoColor || "paper", p.sealPos ?? SEAL_POS_DEF, p.sealColor];   // 302번
+  const pl = p => [p.noren, (p.arts || []).map(x => [x.cell, x.art, x.color || null, x.op || null]), p.seal, p.logoColor || "paper", sealCellsOf(p), p.sealColor];   // 302번 · 303번. 도장 칸 목록
   const pa = JSON.stringify((a.pages||[]).map(pl)), pb = JSON.stringify((b.pages||[]).map(pl));
   const x = Object.assign({}, a), y = Object.assign({}, b); delete x.pages; delete y.pages; return n(x) === n(y) && pa === pb; }
 function presetLook(k){ const S = JSON.parse(JSON.stringify(SETTINGS)), M = JSON.parse(JSON.stringify(MENU)); applyPresetTo(S, M, k); return lookOf(S); }
