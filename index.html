@@ -2351,6 +2351,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .chips i,.panel .chips .chip-own input[type=color]{width:30px;height:26px;border-radius:8px}
 .panel .chips button,.panel .chips .chip-own{font-size:10.5px;color:rgba(240,230,205,.55)}
 .panel .chips .on{color:#efe3c9}
+
+/* 301번. 그림 · 도장 색 상자는 이름표 바로 옆(왼쪽 맞춤) */
+.panel .subrow .pk{justify-self:start;margin:0}
 </style>
 </head>
 <body>
@@ -2657,7 +2660,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <option value="vine">포도나무</option>
     </select></span>
     <span class="fld sub" id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
-      <span class="subrow nosw"><label>색</label><span class="chips" id="f-artcol" role="group" aria-label="그림 색"><button type="button" data-v="ink"><i></i>글자색</button><button type="button" data-v="band"><i></i>띠색</button><button type="button" data-v="accent"><i></i>포인트색</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-art" aria-label="그림 색 직접 고르기"><span>직접</span></label></span></span>
+      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
     <span class="fld"><label for="f-seal">도장</label>
     <select id="f-seal">
@@ -2672,7 +2675,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="chips" id="f-sealcol" role="group" aria-label="도장 색"><button type="button" data-v="ink"><i></i>글자색</button><button type="button" data-v="band"><i></i>띠색</button><button type="button" data-v="accent"><i></i>포인트색</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"><span>직접</span></label></span></span></span>   <!-- 297번 -->
+    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span></span>   <!-- 297번 -->
   </span>
 
   </div>
@@ -6025,7 +6028,6 @@ $("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); t
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 function colPick(key, def, sel, box){
   /* 298번. 목록 → 색 칩(전체 탭의 종이 · 글자 · 띠 · 포인트 상자처럼 무슨 색인지 바로 보이게 — 사용자). 칩 셋 + 직접 */
-  $(sel).querySelectorAll("button").forEach(b => b.onclick = () => { const v = b.dataset.v, pg = P(panelPage); if (v === def) delete pg[key]; else pg[key] = v; applyLook(); touch(); syncPage(); });
   $(box).addEventListener("input", e => { P(panelPage)[key] = e.target.value; applyLook(); touchLater(); });
   $(box).addEventListener("change", () => syncPage());
 }
@@ -6095,9 +6097,10 @@ function syncPage(){
   $("#f-noren").value  = pg.noren || "flat";   // 234번. 기본은 곧은 띠(180번)
   $("#f-seal").value   = pg.seal || "word";
   { const hx = /^#/, sh = document.querySelector('.sheet[data-pi="' + panelPage + '"]');   // 296번
-    const chip = (sel, v, def) => { const cur = !v ? def : hx.test(v) ? "custom" : v; $(sel).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cur)); $(sel).querySelector(".chip-own").classList.toggle("on", cur === "custom");
+    /* 301번. 따라가기 칩(글자색 · 띠색 · 포인트색)을 걷었다 — 색 상자는 지금 칠해진 색을 보여 준다 */
+    const chip = (sel, v, def) => {}; const chipOld = (sel, v, def) => { const cur = !v ? def : hx.test(v) ? "custom" : v; $(sel).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cur)); $(sel).querySelector(".chip-own").classList.toggle("on", cur === "custom");
       if (sh){ const cs = getComputedStyle(sh); $(sel).querySelectorAll("button i").forEach(i => { i.style.background = cs.getPropertyValue("--" + i.parentNode.dataset.v).trim(); }); } };   // 298번. 칩은 이 장의 실제 색
-    chip("#f-artcol", pg.artColor, "ink"); chip("#f-sealcol", pg.sealColor, "accent");
+
     $("#f-artop").value = pg.artOp || "light";
     $("#art-opts").hidden = (pg.art || "none") === "none"; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
     if (sh){ const a = sh.querySelector(".art"), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
