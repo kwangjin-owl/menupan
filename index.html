@@ -2315,6 +2315,18 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .subrow{grid-template-columns:2.6em minmax(0,1fr) 32px;gap:5px}
 .panel .subrow.nosw{grid-template-columns:2.6em minmax(0,1fr)}
 .panel .subrow label{font-size:11.5px;letter-spacing:-.02em}
+
+/* ══ 298번. 그림 · 도장 색 칩 · 편집 선(여백선 · 가장자리)을 잘 보이게.
+   여백선 1px · 42% 갈색은 흰 종이 · 어두운 종이 모두에서 흐렸다(사용자) — 1.5px · 75%, 밖에 얇은 밝은 테를 둘러 어두운 종이에서도 보이게. 가장자리 4mm 는 안쪽 경계를 같은 점선으로(전에는 반투명 흰 띠뿐이라 흰 종이에서 안 보였다).
+   색은 갈색 그대로 — 빈 칸 점선(글자색) · 넘침(붉은)과 갈린다(213 · 294번). 레이아웃에는 안 걸린다(테두리 · outline 은 흐름 밖) */
+.editing .guide{border-width:1.5px;border-color:rgba(95,68,32,.75);box-shadow:0 0 0 1px rgba(255,253,246,.35)}
+.editing .sheet.over .guide{border-color:color-mix(in srgb, var(--accent) 85%, transparent)}
+@media screen{ .editing:not(.preview) .nogo{outline:1.5px dashed rgba(95,68,32,.6);outline-offset:-4mm} }   /* 화면에만 — 편집 중 인쇄에 찍히면 안 된다 */
+.panel .chips{display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch}   /* 넷이 한 줄에 */
+.panel .chips button,.panel .chips .chip-own{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1 1 0;height:auto;min-height:0;padding:4px 2px;font-size:11px;line-height:1.2;border-radius:8px;border:1px solid rgba(240,230,205,.22);background:none;color:rgba(240,230,205,.85);cursor:pointer}
+.panel .chips i{display:block;width:26px;height:16px;border-radius:4px;border:1px solid rgba(240,230,205,.35)}
+.panel .chips .on{border-color:#efe3c9;background:rgba(240,230,205,.16);color:#efe3c9}
+.panel .chips .chip-own input[type=color]{width:26px;height:16px;padding:0;border:1px solid rgba(240,230,205,.35);border-radius:4px;background:none}
 </style>
 </head>
 <body>
@@ -2621,7 +2633,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <option value="vine">포도나무</option>
     </select></span>
     <span class="fld sub" id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
-      <span class="subrow"><label for="f-artcol">색</label><select id="f-artcol"><option value="ink">글자색 (기본)</option><option value="accent">포인트색</option><option value="band">띠색</option><option value="custom">직접 고르기</option></select><input type="color" id="c-art" aria-label="그림 색 직접 고르기"></span>
+      <span class="subrow nosw"><label>색</label><span class="chips" id="f-artcol" role="group" aria-label="그림 색"><button type="button" data-v="ink"><i></i>글자</button><button type="button" data-v="accent"><i></i>포인트</button><button type="button" data-v="band"><i></i>띠</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-art" aria-label="그림 색 직접 고르기"><span>직접</span></label></span></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
     <span class="fld"><label for="f-seal">도장</label>
     <select id="f-seal">
@@ -2636,7 +2648,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts"><span class="subrow"><label for="f-sealcol">색</label><select id="f-sealcol"><option value="accent">포인트색 (기본)</option><option value="ink">글자색</option><option value="band">띠색</option><option value="custom">직접 고르기</option></select><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"></span></span>   <!-- 297번 -->
+    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="chips" id="f-sealcol" role="group" aria-label="도장 색"><button type="button" data-v="accent"><i></i>포인트</button><button type="button" data-v="ink"><i></i>글자</button><button type="button" data-v="band"><i></i>띠</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"><span>직접</span></label></span></span></span>   <!-- 297번 -->
   </span>
 
   </div>
@@ -5059,6 +5071,7 @@ document.addEventListener("keydown", e => {
   if (!(e.ctrlKey || e.metaKey)) return;
   const k = e.key.toLowerCase(), fwd = k === "y" || (k === "z" && e.shiftKey);   // 271번. Ctrl+Y · Ctrl+Shift+Z 는 다시 하기
   if (k !== "z" && k !== "y") return;
+  if (document.querySelector("dialog[open]")) return;   // 298번. 창(사진으로 시작 등)이 열려 있으면 그 창의 칸에 맡긴다 — 뒤 메뉴판은 마우스로는 못 건드리는데 Ctrl+Z 는 먹었다(사용자)
   // 칸 안에서 타이핑 중이면 브라우저 기본 되돌리기에 맡긴다. 거기까지 가로채면 방해가 된다
   if (e.target.closest?.('[contenteditable="true"]')) return;
   e.preventDefault(); if (fwd) stepFwd(); else stepBack();
@@ -5791,6 +5804,7 @@ $("#c-paper").oninput   = e => pickColor("paper",  e.target.value);
 $("#c-ink").oninput     = e => pickColor("ink",    e.target.value);
 $("#c-band").oninput    = e => pickColor("band",   e.target.value);
 $("#c-accent").oninput  = e => pickColor("accent", e.target.value);
+["#c-paper","#c-ink","#c-band","#c-accent"].forEach(id => $(id).addEventListener("change", () => presetTiles()));   // 298번. 추천 조합 뒤 색 상자로 바꿔도 「내 조합」이 되게 — 색 상자만 판정을 다시 안 해 조합이 그대로 남았다(사용자). 끄는 동안(input)은 가볍게, 손을 떼면(change) 판정
 /* 한 장에 들어가는 데까지만 키운다. 넘긴 채로 두면 [편집 끝]에서 fit() 이 조용히
    되돌려 방금 누른 것이 통째로 사라진다 — ＋를 여덟 번 눌러도 결과가 같았고,
    그 사이 종이만 A4 의 1.8배(1123 -> 2017px)로 늘어나 인쇄될 모습을 알 수 없었다 */
@@ -5989,8 +6003,10 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
 $("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); syncPage(); };
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 function colPick(key, def, sel, box){
-  $(sel).onchange = e => { const v = e.target.value, pg = P(panelPage); if (v === def) delete pg[key]; else pg[key] = v === "custom" ? $(box).value : v; applyLook(); touch(); syncPage(); };
-  $(box).addEventListener("input", e => { P(panelPage)[key] = e.target.value; $(sel).value = "custom"; applyLook(); touchLater(); });
+  /* 298번. 목록 → 색 칩(전체 탭의 종이 · 글자 · 띠 · 포인트 상자처럼 무슨 색인지 바로 보이게 — 사용자). 칩 셋 + 직접 */
+  $(sel).querySelectorAll("button").forEach(b => b.onclick = () => { const v = b.dataset.v, pg = P(panelPage); if (v === def) delete pg[key]; else pg[key] = v; applyLook(); touch(); syncPage(); });
+  $(box).addEventListener("input", e => { P(panelPage)[key] = e.target.value; applyLook(); touchLater(); });
+  $(box).addEventListener("change", () => syncPage());
 }
 colPick("artColor", "ink", "#f-artcol", "#c-art"); colPick("sealColor", "accent", "#f-sealcol", "#c-seal");
 $("#f-artop").onchange = e => { const pg = P(panelPage); if (e.target.value === "light") delete pg.artOp; else pg.artOp = e.target.value; applyLook(); touch(); };
@@ -6058,7 +6074,9 @@ function syncPage(){
   $("#f-noren").value  = pg.noren || "flat";   // 234번. 기본은 곧은 띠(180번)
   $("#f-seal").value   = pg.seal || "word";
   { const hx = /^#/, sh = document.querySelector('.sheet[data-pi="' + panelPage + '"]');   // 296번
-    $("#f-artcol").value = !pg.artColor ? "ink" : hx.test(pg.artColor) ? "custom" : pg.artColor; $("#f-sealcol").value = !pg.sealColor ? "accent" : hx.test(pg.sealColor) ? "custom" : pg.sealColor;
+    const chip = (sel, v, def) => { const cur = !v ? def : hx.test(v) ? "custom" : v; $(sel).querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === cur)); $(sel).querySelector(".chip-own").classList.toggle("on", cur === "custom");
+      if (sh){ const cs = getComputedStyle(sh); $(sel).querySelectorAll("button i").forEach(i => { i.style.background = cs.getPropertyValue("--" + i.parentNode.dataset.v).trim(); }); } };   // 298번. 칩은 이 장의 실제 색
+    chip("#f-artcol", pg.artColor, "ink"); chip("#f-sealcol", pg.sealColor, "accent");
     $("#f-artop").value = pg.artOp || "light";
     $("#art-opts").hidden = (pg.art || "none") === "none"; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
     if (sh){ const a = sh.querySelector(".art"), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
