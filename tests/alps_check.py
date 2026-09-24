@@ -65,7 +65,7 @@ def t02(b, f):
         arts = []
         for a in ['none','horse','zebra','ibex','mountain','fir','cabin','night','bridge','highball','beer','soju','sake','wine','pasta','beerpasta','edelweiss','vine']:
             c.pg.goto(url(f))
-            r = c.js("""([o,a,sel])=>{SETTINGS.orient=o; MENU.sheets.forEach((_,i)=>P(i).art=a); syncControls(); applyLook(); render(); fitNow(); applyScale();
+            r = c.js("""([o,a,sel])=>{SETTINGS.orient=o; MENU.sheets.forEach((_,i)=>{ const p=P(i); if (typeof normArts==='function') p.arts = a==='none' ? [] : [0,1,2,3,4,5].map(c=>({cell:c, art:a})); else p.art=a; }); syncControls(); applyLook(); render(); fitNow(); applyScale();
               let hid=0, n=0; document.querySelectorAll(sel).forEach(e=>{ if(!e.offsetHeight) return; const r=e.getBoundingClientRect(); n++;
                 if (r.top<0||r.bottom>innerHeight){ e.scrollIntoView({block:'center'}); }
                 const q=e.getBoundingClientRect(); const hit=document.elementFromPoint(q.left+Math.min(4,q.width/2), q.top+q.height/2);
@@ -322,6 +322,7 @@ def t14(b, f):
     c.close()
     open(D + 'res/legacy_' + f, 'w', encoding='utf-8').write(src[:m.start(2)] + '\n' + legacy.replace('<', '\\u003C') + src[m.end(2):])
     c = Ctx(b, 'res/legacy_' + f, dl=True)
+    out['legacy_art'] = c.js("()=>JSON.stringify(P(0).arts ?? null)")   # 302번. 옛 맨 위 art:'horse' → [{cell:5, art:'horse'}]
     out['legacy_open'] = c.js("()=>({sheets:MENU.sheets.length, cols:MENU.sheets[0].length, columns:'columns' in MENU, notes:F(0).notes, origin:F(0).origin, hours:MENU.hours[1].time, noren:P(0).noren, ns:P(0).norenScale, orient:SETTINGS.orient, drawn:document.querySelectorAll('.sheet .row').length})")
     with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
     p = D + 'res/legacy_saved_' + f; d.value.save_as(p)
@@ -329,6 +330,7 @@ def t14(b, f):
     out['legacy_saved_oldkeys'] = [k for k in ['"columns"', '"legend"', '"unit"', '"address"', '"tel"', '"note"', '"footnotes"', '"footline"', '"layout"', '"norenTall"', '"sheetArt"', '"line"'] if k in md]
     top = re.search(r'const SETTINGS = (\{.*\});', md, re.S).group(1)
     S = json.loads(top); out['legacy_saved_toplevel_pagekeys'] = [k for k in ['noren','norenScale','scale','art','seal','showNotes','showOrigin','autofit'] if k in S]
+    out['legacy_saved_pagekeys'] = sorted({k for pg in S.get('pages', []) for k in ('art', 'artColor', 'artOp') if k in pg})   # 302번
     out['legacy_err'] = c.errs; c.close()
     return out
 
@@ -669,7 +671,7 @@ def t37(b, f):
         for fo in font_list(c):
             for sh in SHAPES:
                 c.js("""([o,fo,sh,K])=>{SETTINGS.orient=o; SETTINGS.font=fo; SETTINGS.bottles={}; K.forEach(k=>SETTINGS.bottles[k]={shape:sh,color:'ink'});
-                   MENU.sheets.forEach((_,i)=>{P(i).art='none'; P(i).autofit=true;}); syncControls(); applyLook(); render(); fitNow(); applyScale();}""", [o, fo, sh, KINDS])
+                   MENU.sheets.forEach((_,i)=>{ if (typeof normArts==='function') P(i).arts=[]; else P(i).art='none'; P(i).autofit=true;}); syncControls(); applyLook(); render(); fitNow(); applyScale();}""", [o, fo, sh, KINDS])
                 c.pg.wait_for_timeout(30)
                 boxes = c.js("""()=>{const s=document.querySelectorAll('.sheet')[1]; s.scrollIntoView(); return [...s.querySelectorAll('.row.wine')].map(r=>{
                     const b=r.querySelector('.wbottle svg').getBoundingClientRect(), g=r.querySelector('.wscore').getBoundingClientRect();
@@ -709,15 +711,18 @@ def t39(b, f):
     m = re.search(r'(\nconst SETTINGS = )(\{.*?\})(;\n)', src, re.S)
     S = json.loads(m.group(2))
     S.update({'font': 'nope', 'theme': 42, 'mark': 'toolongmark', 'pageno': 'zzz', 'secAlign': 'diag', 'wineAlign': 5})   # 274번. 'X' 는 이제 올바른 글자 표시(영문 1자) — 7자 넘는 글자로 시험
+    new = 'function normArts' in src   # 302번. 새 형식 파일은 칸 목록을 망가뜨린다(옛 키 art 가 있으면 그쪽이 먼저 옮겨지므로 넣지 않는다)
     for k, pg in enumerate(S.get('pages', [])):
-        pg.update({'noren': 'bogus', 'art': 'dragon', 'seal': 7,
+        if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'sealPos': 17})
+        pg.update({'noren': 'bogus', 'seal': 7, **({} if new else {'art': 'dragon'}),
                    'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4]})
     bad = src[:m.start(2)] + json.dumps(S, ensure_ascii=False, indent=2).replace('<', '\\u003C') + src[m.end(2):]
     open(D + 'res/bad_' + f, 'w', encoding='utf-8').write(bad)
     c = Ctx(b, 'res/bad_' + f)
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200)
     out = c.js("""()=>{const r={}; r.S={font:SETTINGS.font, theme:SETTINGS.theme, mark:SETTINGS.mark, pageno:SETTINGS.pageno, sec:SETTINGS.secAlign, wine:SETTINGS.wineAlign};
-      r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).art, P(i).seal, P(i).scale, P(i).norenScale]);
+      r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).arts ? P(i).arts.map(x=>x.art).join(',') : P(i).art, P(i).seal, P(i).scale, P(i).norenScale]);
+      r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+(P(i).sealPos ?? '') : null);   // 302번
       r.ui={font:document.querySelector('#f-font').value, theme:document.querySelector('#f-theme').value, mark:document.querySelector('#f-mark').value, pageno:document.querySelector('#f-pageno').value,
             sec:document.querySelector('#f-secalign').value, wine:document.querySelector('#f-winealign').value};
       r.pageui=[]; for (const i of [0,1]){ panelPage=i; panelTab='page'; syncPageTabs(); syncPage(); r.pageui.push([document.querySelector('#f-noren').value, document.querySelector('#f-art').value, document.querySelector('#f-seal').value, document.querySelector('#sz-val').textContent, document.querySelector('#nsz-val').textContent]); }
@@ -742,7 +747,13 @@ def t40(b, f):
     st('edit', "()=>document.querySelector('#b-edit').click()")
     st('prev', "()=>document.querySelector('#b-preview').click()")
     st('editEnd', "()=>{document.querySelector('#b-preview').click(); document.querySelector('#b-edit').click();}")
-    out = {'base': base, 'steps': steps, 'allSame': all(s[1] for s in steps), 'err': c.errs}; c.close(); return out
+    out = {'base': base, 'steps': steps, 'allSame': all(s[1] for s in steps), 'err': c.errs}
+    # 302번. 자리를 고르면 그 칸에 선다 — 가운데점이 종이를 2 × 3 으로 나눈 그 칸에 있는지(두 방향). 기준 파일은 자리를 모른다(늘 오른쪽 아래)
+    out['pos'] = c.js("""()=>{ const o=[]; for (const or of ['portrait','landscape']){ SETTINGS.orient=or;
+        for (let k=0;k<6;k++){ P(0).seal='tri'; P(0).sealPos=k; P(0).arts=[{cell:k, art:'horse'}]; P(0).art='horse'; render(); applyScale();
+          const sh=document.querySelector('.sheet'), S=sh.getBoundingClientRect(), at=e=>{ if(!e) return -1; const q=e.getBoundingClientRect(); const cx=(q.left+q.right)/2-S.left, cy=(q.top+q.bottom)/2-S.top; return Math.floor(cx/(S.width/2)) + 2*Math.floor(cy/(S.height/3)); };
+          o.push([or, k, at(sh.querySelector('.seal')), at(sh.querySelector('.art'))]); } } return o; }""")
+    out['posOk'] = all(x[1] == x[2] == x[3] for x in out['pos']); c.close(); return out
 
 # ───────────────────────── 41. 칸 아래 구멍 · 틈
 def t41(b, f):
@@ -933,8 +944,14 @@ def t44(b, f):
     c = Ctx(b, f); pg = c.pg; pg.click('#b-edit'); pg.wait_for_timeout(200)
     # (a) [다른 장에도 똑같이] — 켜짐(키 없음)도 옮겨 가는지. 2쪽을 끄고 1쪽은 켠 채 복사
     out['copy'] = c.js("""()=>{ panelPage=0; delete P(0).showNotes; delete P(0).showTitle; delete P(0).showSub;
-      P(1).showNotes=false; P(1).showTitle=false; P(1).showSub=false; syncPage(); document.querySelector('#b-copypage').click();
-      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) }""")
+      P(1).showNotes=false; P(1).showTitle=false; P(1).showSub=false;
+      P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).sealPos=2; delete P(1).sealPos;   /* 302번. 그림 칸 · 도장 자리도 옮겨 가는지 */
+      syncPage(); document.querySelector('#b-copypage').click();
+      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && P(1).sealPos===2 }""")
+    # 302번. [모든 그림에 같게] — 고른 칸의 색 · 진하기가 이 장의 다른 그림 전부에. 없으면(기준 파일) 실패
+    out['artsame'] = c.js("""()=>{ const b=document.querySelector('#b-artsame'); if (!b) return null; panelPage=0;
+      P(0).arts=[{cell:0, art:'horse', color:'#aa0000', op:'strong'}, {cell:1, art:'zebra'}, {cell:5, art:'fir', op:'mid'}]; panelCell=0; render(); syncPage(); b.click();
+      return JSON.stringify(P(0).arts.map(x=>[x.color||'', x.op||''])) }""")
     # (b) 병 색 상자가 지금 쓰는 색인지 — color-mix 값(짚색 등)이 검게 나오면 안 된다
     out['swatch'] = c.js("""()=>{ const o={}; for (const k of ['white','sparkling','rose','orange']){ panelBottle=k; syncBottles();
       const v=document.querySelectorAll('#f-bottle input[type=color]')[0].value; o[k]=[v, bottleProbeHex(COLOR_CSS.bottle[bottleOf(k).color])]; } return o }""")
@@ -1070,7 +1087,7 @@ def t47(b, f):
     out['logo_mask_invert'] = [m1 > 0, m1 != m2, t_clear == 0, t_amb == 2]
     pg.click('#st-go'); pg.wait_for_timeout(700)
     out['guide_up'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)   # 269번부터 시작하면 가이드가 뜬다 — 닫고 간다
-    out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:P(0).seal, art:P(0).art, logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
+    out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:P(0).seal, art:(P(0).arts ? (P(0).arts.map(x=>x.art).join(',')||'none') : P(0).art), logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
     with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     out['save_name'] = d.value.suggested_filename; d.value.save_as(D + 'res/start_saved_' + f)
     out['err'] = list(c.errs); c.close()
@@ -1154,8 +1171,9 @@ def t52(b, f):
     before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
     keys = c.js("()=>Object.keys(PRESETS).filter(k=>!PRESETS[k].hidden)")   # 285번. 숨긴 조합(basic = 내 조합의 시작 모양)은 타일이 없다
     for k in keys:
-        c.js("()=>document.querySelector('#f-presets').scrollIntoView()"); pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
-        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
+        c.js("()=>{ P(0).sealPos=1; P(0).arts=[{cell:0, art:'horse', color:'#123456'}]; P(0).art='horse'; document.querySelector('#f-presets').scrollIntoView(); }")   # 302번. 조합을 누르면 그림 칸 · 도장 자리가 처음 값으로
+        pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
+        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', P(0).sealPos===undefined && (!q.art || JSON.stringify(P(0).arts)===JSON.stringify(q.art==='none'?[]:[{cell:5, art:q.art}])), (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
     out['same_size_content'] = c.js(snap) == before
     for _ in keys: pg.keyboard.press('Control+z'); pg.wait_for_timeout(120)
     out['undo_back'] = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})") == st
@@ -1296,7 +1314,7 @@ def judge(t, r):
             fake = [x for x in ('[＋ 장 추가]', '[+ 장 추가]') if x in tl.get('tab', '') + wd.get('tab', '')]; ok = ok and not fake   # 297번
             return ok, f"세로: {tl['warn'][1]} / 가로: {wd['warn'][1]} · 탭 줄 없는 단추 이름 {fake or 0}"
         if t == 't11': return all(x[1] for x in r['steps']), str(r['steps'])
-        if t == 't14': ok = r['roundtrip_same'] and r['roundtrip_pos'] and not r['legacy_saved_oldkeys'] and not r['legacy_saved_toplevel_pagekeys'] and not (r['rt_err'] or r['legacy_err']) and r['legacy_open']['ns'] == 0.9; return ok, f"왕복 {r['roundtrip_same']} · 옛 저장본 상단 {r['legacy_open']['ns']}(낮게 → 0.9) · 옛 키 {r['legacy_saved_oldkeys']}"
+        if t == 't14': ok = r['roundtrip_same'] and r['roundtrip_pos'] and not r['legacy_saved_oldkeys'] and not r['legacy_saved_toplevel_pagekeys'] and not (r['rt_err'] or r['legacy_err']) and r['legacy_open']['ns'] == 0.9 and r.get('legacy_art') == '[{"cell":5,"art":"horse"}]' and not r.get('legacy_saved_pagekeys'); return ok, f"왕복 {r['roundtrip_same']} · 옛 저장본 상단 {r['legacy_open']['ns']}(낮게 → 0.9) · 옛 키 {r['legacy_saved_oldkeys']} · 옛 그림 → {r.get('legacy_art')} · 저장본 장별 옛 그림 키 {r.get('legacy_saved_pagekeys')}"
         if t == 't15': return None, f"참고 수(기준과 대조 · 사용법에는 수를 안 적는다, 258번): 영문 알림 '{r['bilingual_toast'][:40]}…' · pt {r['pt']} · 원산지 {r['origin_push']}px · 와인 {r['wine']} · 창 밀림 {r['panel_push'][:5]}"
         if t == 't16': mv = [v['maxmove'] for k, v in r.items() if k != '_sec']; return all(x == 0 for x in mv), f"줌 뒤 [편집] 이동 {mv}"
         if t == 't17': ok = r['restore'][0] == r['restore'][1] and r['focus'] and r['accum'][1] == 0; return ok, str({k: r[k] for k in ('restore', 'focus', 'accum')})
@@ -1316,16 +1334,16 @@ def judge(t, r):
         if t == 't36': return None, '그림 코드 해시 — 기준과 같으면 그림을 안 건드린 것(참고 사진 대조는 사진이 있어야 한다)'
         if t == 't37': return r['nbad'] == 0, f"병 잉크 바닥 {r['n'] - r['nbad']}/{r['n']} 1px 이내 · 최대 {r['worst']}"
         if t == 't38': vals = {k: v for k, v in r.items() if k != '_sec'}; ok = all(v[0] == 190 and v[1] <= 1 for v in vals.values()); return ok, f"잉크 바닥 · 호일 {vals}"
-        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo'; return ok, f"복구 {r['S']} · 장 {p}"
-        if t == 't40': return r['allSame'], '도장 9가지 동작 고정'
+        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|' for a in r.get('arts', [])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')}"
+        if t == 't40': return r['allSame'] and r.get('posOk'), f"도장 9가지 동작 고정 {r['allSame']} · 도장 · 그림이 고른 칸에 섬 {r.get('posOk')} {[x for x in r.get('pos', []) if not x[1] == x[2] == x[3]][:4]}"
         if t == 't41': ok = all(len(x['secGaps']) <= 1 for x in r['sheets']); return ok, f"칸 아래 구멍 {[x['holes'] for x in r['sheets']]} · 분류 틈 {[x['secGaps'] for x in r['sheets']]}"
         if t == 't42': ok = all(v['edit'] == 0 and v['prev'] == 0 for k, v in r.items() if k != '_sec') and all(x == 0 for x in r['center']['centerMarginDiff']); return ok, '정렬 셋 · 세 모드 0.0px'
         if t == 't43': ok = all(r[k]['newlines'] == 4 for k in ('sec', 'wine', 'label')) and all(x.count('\n') == 4 for x in r['saved']); return ok, '두 줄 쓰기 · 제한 없음 · 저장 보존'
         if t == 't44':
             dark = lambda h: sum(int(h[i:i+2], 16) for i in (1, 3, 5)) < 60
-            sw = r['swatch']; ok = (r['copy'] and all(v[0] == v[1] and not dark(v[0]) for v in sw.values()) and r['drag'][0] and r['drag'][1] == 0
+            sw = r['swatch']; ok = (r['copy'] and r.get('artsame') == '[["#aa0000","strong"],["#aa0000","strong"],["#aa0000","strong"]]' and all(v[0] == v[1] and not dark(v[0]) for v in sw.values()) and r['drag'][0] and r['drag'][1] == 0
                   and r['drag'][2] == '#203079' and r['drag'][3] == 0 and r['live'] == [0, 4, True, False] and r['wineprice'] == '' and r['nstep'] == 0.84 and r['saveadd'] == [1, True] and not r['err'])
-            return ok, f"복사 {r['copy']} · 병 색 상자 {sw} · 끄는 중 {r['drag']} · 끄는 중 다시 그리기 · 레드 병 카드 · 바뀜 · 다른 병도 바뀜 {r['live']} · 빈 와인 카드 가격 '{r['wineprice']}' · 상단 걸음 {r['nstep']} · 저장 뒤 병 추가 {r['saveadd']}"
+            return ok, f"복사 {r['copy']} · 모든 그림에 같게 {r.get('artsame')} · 병 색 상자 {sw} · 끄는 중 {r['drag']} · 끄는 중 다시 그리기 · 레드 병 카드 · 바뀜 · 다른 병도 바뀜 {r['live']} · 빈 와인 카드 가격 '{r['wineprice']}' · 상단 걸음 {r['nstep']} · 저장 뒤 병 추가 {r['saveadd']}"
         if t == 't45':
             w = r['worst']; bad = {k: v for k, v in w.items() if v[0] < 5.0}
             sh = r['show']; W = 'rgb(255, 255, 255)'; H = 'rgba(255, 255, 255, 0.35)'   # 243번
