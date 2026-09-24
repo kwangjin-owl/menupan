@@ -2341,6 +2341,16 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .chips .chip-own input[type=color]::-moz-color-swatch{border:0;border-radius:7px}
 .panel .chips .on{background:none;color:#efe3c9}
 .panel .chips .on i,.panel .chips .chip-own.on input[type=color]{outline:2px solid #efe3c9;outline-offset:2px}
+
+/* ══ 300번. 사용자 점검 다섯(299번 기록): ① 줄 도구를 가격에 딱 붙임(틀 안 여백 14 → 2px, 재 보니 18px 떨어져 있었다)
+   ② 줄 도구 단추 = ＋ 묶음 단추 모양(둘 다 종이 위 글자 단추 — 9px · 점선 테 · 알약 · 같은 바탕 · 글자색. 쟀던 값 그대로)
+   ③ 「글자 · 띠 · 포인트」 → 「글자색 · 띠색 · 포인트색」(메뉴판 색 세트를 따른다는 뜻이 안 읽혔다) ④ 상자 크기를 「색」 상자 그대로(30 × 26 · 둥글기 8 · 이름 10.5px)
+   ⑤ 순서를 두 곳 모두 글자색 · 띠색 · 포인트색 · 직접으로 고정(기본값을 앞에 두느라 그림 · 도장이 달랐다) — 기본값은 테로만 */
+.editing .row .namewrap > .rowtools:not(.rowmove){padding-left:2px}
+.editing .row .namewrap > .rowtools:not(.rowmove) button{font-size:9px;padding:1px 6px;border:1px dashed rgb(201,183,149);border-radius:99px;background:rgb(239,227,201);color:rgb(111,96,71);line-height:1.45;letter-spacing:0}
+.panel .chips i,.panel .chips .chip-own input[type=color]{width:30px;height:26px;border-radius:8px}
+.panel .chips button,.panel .chips .chip-own{font-size:10.5px;color:rgba(240,230,205,.55)}
+.panel .chips .on{color:#efe3c9}
 </style>
 </head>
 <body>
@@ -2647,7 +2657,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <option value="vine">포도나무</option>
     </select></span>
     <span class="fld sub" id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
-      <span class="subrow nosw"><label>색</label><span class="chips" id="f-artcol" role="group" aria-label="그림 색"><button type="button" data-v="ink"><i></i>글자</button><button type="button" data-v="accent"><i></i>포인트</button><button type="button" data-v="band"><i></i>띠</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-art" aria-label="그림 색 직접 고르기"><span>직접</span></label></span></span>
+      <span class="subrow nosw"><label>색</label><span class="chips" id="f-artcol" role="group" aria-label="그림 색"><button type="button" data-v="ink"><i></i>글자색</button><button type="button" data-v="band"><i></i>띠색</button><button type="button" data-v="accent"><i></i>포인트색</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-art" aria-label="그림 색 직접 고르기"><span>직접</span></label></span></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
     <span class="fld"><label for="f-seal">도장</label>
     <select id="f-seal">
@@ -2662,7 +2672,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="chips" id="f-sealcol" role="group" aria-label="도장 색"><button type="button" data-v="accent"><i></i>포인트</button><button type="button" data-v="ink"><i></i>글자</button><button type="button" data-v="band"><i></i>띠</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"><span>직접</span></label></span></span></span>   <!-- 297번 -->
+    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="chips" id="f-sealcol" role="group" aria-label="도장 색"><button type="button" data-v="ink"><i></i>글자색</button><button type="button" data-v="band"><i></i>띠색</button><button type="button" data-v="accent"><i></i>포인트색</button><label class="chip-own" title="직접 고르기"><input type="color" id="c-seal" aria-label="도장 색 직접 고르기"><span>직접</span></label></span></span></span>   <!-- 297번 -->
   </span>
 
   </div>
@@ -4905,7 +4915,7 @@ function fitRowTools(row){
      줄마다 자리가 달랐다. 두 줄로 접어 폭을 줄였고, 가격 오른쪽은 단 사이 틈 · 종이 여백이라 이 줄의 글자를 덮지 않는다 */
   ["left","top","bottom","transform"].forEach(k => t.style.removeProperty(k));
   const nw = t.parentElement.getBoundingClientRect(), pr = p.getBoundingClientRect();
-  t.style.left = (pr.right + 4 - nw.left) + "px"; t.style.top = (pr.top + pr.height / 2 - nw.top) + "px"; t.style.bottom = "auto"; t.style.transform = "translateY(-50%)";
+  t.style.left = (pr.right - nw.left) + "px";   // 300번. 틀 안 왼쪽 여백(14px)이 더해져 18px 떨어져 보였다 — 틀 여백 2px 로(CSS) t.style.top = (pr.top + pr.height / 2 - nw.top) + "px"; t.style.bottom = "auto"; t.style.transform = "translateY(-50%)";
 }
 document.addEventListener("input", e => { if (rowHere && rowHere.contains(e.target)) fitRowTools(rowHere); });
 /* 108번. `syncAddHere()` 는 그린 뒤 **마우스 자리**로 대상을 다시 잡는다 — ＋ 를 두 번
