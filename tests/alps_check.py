@@ -835,7 +835,9 @@ def t10(b, f):
         why = c.js("()=>[...MENU.sheets.keys()].map(i=>overWhy(i))")
         c.js("()=>document.querySelector('#b-print').click()"); c.pg.wait_for_timeout(150)
         w = c.js(W); t = c.js("()=>document.querySelector('#undo').hidden?'':document.querySelector('#undo .t').textContent")
-        out[k] = {'why': why, 'warn': w, 'toast': t, 'err': c.errs}; c.close()
+        c.js("()=>{const d=document.querySelector('#overwarn'); if(d.open) d.close(); if(!editing) document.querySelector('#b-edit').click();}"); c.pg.wait_for_timeout(250)   # 쪽 탭 줄은 편집 중에만 보인다
+        tab = c.js("()=>[...document.querySelectorAll('.pagebar .pstat')].map(e=>e.textContent+' | '+e.title).join(' / ')")   # 297번. 쪽 탭 줄 글자도 본다 — 없는 단추 이름이 여기 남아 있었는데 알림만 봐서 놓쳤다
+        out[k] = {'why': why, 'warn': w, 'toast': t, 'tab': tab, 'err': c.errs}; c.close()
     return out
 
 # ───────────────────────── 11. 인쇄 안내 끄고 되살리기
@@ -1291,7 +1293,8 @@ def judge(t, r):
             return not bad, f"창 14구성 문제 {len(bad)} {bad[:4]}"
         if t == 't10':
             tl, wd = r['tall'], r['wide']; ok = ('tall' in tl['why'] and '잘립니다' in tl['warn'][2] and 'wide' in wd['why'] and '잘립니다' not in wd['warn'][2] and '[＋ 장 추가]' not in tl['toast'] + tl['warn'][3])
-            return ok, f"세로: {tl['warn'][1]} / 가로: {wd['warn'][1]}"
+            fake = [x for x in ('[＋ 장 추가]', '[+ 장 추가]') if x in tl.get('tab', '') + wd.get('tab', '')]; ok = ok and not fake   # 297번
+            return ok, f"세로: {tl['warn'][1]} / 가로: {wd['warn'][1]} · 탭 줄 없는 단추 이름 {fake or 0}"
         if t == 't11': return all(x[1] for x in r['steps']), str(r['steps'])
         if t == 't14': ok = r['roundtrip_same'] and r['roundtrip_pos'] and not r['legacy_saved_oldkeys'] and not r['legacy_saved_toplevel_pagekeys'] and not (r['rt_err'] or r['legacy_err']) and r['legacy_open']['ns'] == 0.9; return ok, f"왕복 {r['roundtrip_same']} · 옛 저장본 상단 {r['legacy_open']['ns']}(낮게 → 0.9) · 옛 키 {r['legacy_saved_oldkeys']}"
         if t == 't15': return None, f"참고 수(기준과 대조 · 사용법에는 수를 안 적는다, 258번): 영문 알림 '{r['bilingual_toast'][:40]}…' · pt {r['pt']} · 원산지 {r['origin_push']}px · 와인 {r['wine']} · 창 밀림 {r['panel_push'][:5]}"
