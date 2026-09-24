@@ -2280,7 +2280,7 @@ dialog .st-picrow.has button.st-drop{margin:0}
    도장 · 그림 색 · 그림 진하기(변수) · 줄 도구 ★품설✕ 를 키움(9px · 높이 13 — 종이 위 도구 중 가장 작았다. 다른 도구는 그대로 — 사용자) · 확인 화면 가로 종이 · 빠진 메뉴 넣기 · 사진 크게 */
 .seal{color:var(--seal-col, var(--accent));z-index:0}   /* 296번. 그림처럼 글자 뒤 — 겹쳐도 글자가 읽히고, 완성본 인쇄(도장이 위)와 편집 중 인쇄(글자가 위)가 달랐다(t07) */
 .art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
-.editing .row .namewrap > .rowtools:not(.rowmove) button svg{transform:scale(1.35)}   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
+/* 299번 — 296번의 그림 키우기는 글자 단추로 바뀌어 걷었다 */   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
 .panel .colrow{display:flex;gap:6px;align-items:center}
 .panel .colrow select{flex:1 1 auto;min-width:0}
 .panel .colrow input[type=color]{flex:0 0 32px;width:32px;height:32px;padding:2px}
@@ -2327,6 +2327,20 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .chips i{display:block;width:26px;height:16px;border-radius:4px;border:1px solid rgba(240,230,205,.35)}
 .panel .chips .on{border-color:#efe3c9;background:rgba(240,230,205,.16);color:#efe3c9}
 .panel .chips .chip-own input[type=color]{width:26px;height:16px;padding:0;border:1px solid rgba(240,230,205,.35);border-radius:4px;background:none}
+
+/* ══ 299번. 줄 도구 두 줄 · 그림 · 도장 색을 「색」 상자와 같은 모양으로(사용자: "같은 방식으로 하라고 한 색(종이 · 글자 · 띠 · 포인트)을 잘 봐. 뭔가 다르잖아").
+   색 상자는 **상자 자체가 칸이고 이름은 밑** — 테두리 친 단추 안에 조각 · 이름을 넣지 않는다. 고른 것에만 테 */
+.editing .row .namewrap > .rowtools:not(.rowmove){display:grid;grid-template-columns:max-content max-content;gap:2px;white-space:nowrap;width:max-content}
+.editing .row .namewrap > .rowtools:not(.rowmove) button{font-size:calc(var(--ed-fs) * 1.1);min-width:0;width:auto;height:auto;padding:.1em .2em;line-height:1.35;letter-spacing:-.03em}
+.panel .chips{gap:6px;flex-wrap:nowrap}
+.panel .chips button,.panel .chips .chip-own{flex:0 0 auto;border:0;background:none;padding:0;gap:3px;color:rgba(240,230,205,.7)}
+.panel .chips i,.panel .chips .chip-own input[type=color]{width:38px;height:30px;border-radius:8px;border:1px solid rgba(240,230,205,.3);box-sizing:border-box}
+.panel .chips .chip-own input[type=color]{padding:0;background:none;-webkit-appearance:none;appearance:none;overflow:hidden}
+.panel .chips .chip-own input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.panel .chips .chip-own input[type=color]::-webkit-color-swatch{border:0;border-radius:7px}
+.panel .chips .chip-own input[type=color]::-moz-color-swatch{border:0;border-radius:7px}
+.panel .chips .on{background:none;color:#efe3c9}
+.panel .chips .on i,.panel .chips .chip-own.on input[type=color]{outline:2px solid #efe3c9;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -2857,7 +2871,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <li>새로 만들기 · 파일에서 불러오기 · 파일로 저장은 위쪽 <b>[파일 ▾]</b>에 있습니다.</li></ul>
   <h4>글자와 메뉴 고치기</h4>
   <ul><li><b>글자를 눌러</b> 고칩니다. Enter 는 칸에서 빠져나옵니다(분류 이름 · 와인 이름 · 와인 라벨에서는 줄을 나눕니다).</li>
-    <li>메뉴 줄에 마우스를 올리면 이름 뒤에 <b>★</b> 추천 · <b>품</b> 품절 · <b>설</b> 메뉴 설명 · <b>✕</b> 지우기, 이름 앞에 <b>▲ ▼</b> 옮기기가 뜹니다.</li>
+    <li>메뉴 줄에 마우스를 올리면 가격 오른쪽에 <b>추천 · 품절 · 설명 · ✕</b>(지우기), 이름 앞에 <b>▲ ▼</b> 옮기기가 뜹니다.</li>
     <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
     <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>나 <b>↶</b> · Ctrl+Z.</li></ul>
   <h4>모양 바꾸기</h4>
@@ -3832,10 +3846,10 @@ function focusLast(sel){
    `desc:false` 면 [설] 이 빠진다(와인은 맛 칸이 따로 있다) */
 function itemTools(sec, it, i, path, opt = {}){
     const tools = el("span","rowtools");
-    const bp = el("button"); bp.type="button"; bp.appendChild(glyph("★")); bp.title="추천 표시";   // 295번. 단추는 늘 ★ — 고른 추천 표시가 글자(hot · 추천)면 한 글자 칸에 여러 글자가 들어가 안 읽혔고, 단추 얼굴이 설정 따라 바뀌었다. ★ 는 널리 쓰는 추천 모양이라 외우지 않아도 알아보고, 옆의 [품] · [설] 과도 확 다르다(사용자와 판단)
+    const bp = el("button"); bp.type="button"; bp.textContent = "추천"; bp.title="추천 표시";   /* 299번. 글자 단추 둘 × 두 줄([추천][품절] / [설명][✕]) — 사용자. 뜻이 바로 읽히고, 두 줄로 접어 폭이 줄었다 */    // 295번. 단추는 늘 ★ — 고른 추천 표시가 글자(hot · 추천)면 한 글자 칸에 여러 글자가 들어가 안 읽혔고, 단추 얼굴이 설정 따라 바뀌었다. ★ 는 널리 쓰는 추천 모양이라 외우지 않아도 알아보고, 옆의 [품] · [설] 과도 확 다르다(사용자와 판단)
     if (it.pick) bp.classList.add("on");
     bp.onclick = () => { it.pick = !it.pick; touch(); render(); };
-    const bo = el("button"); bo.type="button"; bo.appendChild(glyph("품")); bo.title="품절 표시";
+    const bo = el("button"); bo.type="button"; bo.textContent = "품절"; bo.title="품절 표시";
     if (it.out) bo.classList.add("on");
     bo.onclick = () => { it.out = !it.out; touch(); render(); };
     /* 125번. **메뉴 설명은 그 줄에 딸린 한 줄이라 넣고 빼는 것도 줄에서 해야 한다.**
@@ -3844,7 +3858,7 @@ function itemTools(sec, it, i, path, opt = {}){
        길어져 18번이 깨지고 `spread()` 가 어긋난다(97번). 올렸을 때만 흐름 안에 넣으면
        이번엔 들썩임이 생긴다(99번). 그래서 ★·품 과 같은 **켜고 끄는 버튼**으로 둔다 —
        이미 떠 있는 상자에 넣으므로 새 자리를 만들지 않고(83번), 넣기와 빼기가 한 자리다 */
-    const bs = el("button"); bs.type="button"; bs.appendChild(glyph("설")); bs.title="메뉴 설명 넣고 빼기";
+    const bs = el("button"); bs.type="button"; bs.textContent = "설명"; bs.title="메뉴 설명 넣고 빼기";
     if (it.desc != null) bs.classList.add("on");
     bs.onclick = () => {
       if (it.desc == null){
@@ -3856,7 +3870,7 @@ function itemTools(sec, it, i, path, opt = {}){
         if (String(gone).trim()) toast("메뉴 설명 지웠습니다", () => { it.desc = gone; touch(); render(); });
       }
     };
-    const bd = el("button","del"); bd.type="button"; bd.appendChild(glyph("✕")); bd.title="이 줄 지우기";
+    const bd = el("button","del"); bd.type="button"; bd.textContent = "✕"; bd.title="이 줄 지우기";
     bd.onclick = () => { const gone = sec.items.splice(i,1)[0]; touch(); render(); undoDel(sec.items, i, gone, gone.name); };
     /* 108번. **나눠 놓았으면 옮길 수도 있어야 한다**(81번). 분류는 ◀▶ 로 단 사이를
        옮기는데 **분류 안의 줄은 옮길 수단이 없어** 지우고 다시 치는 수밖에 없었다 —
@@ -4887,14 +4901,11 @@ function fitRowTools(row){
   const t = row.querySelector(":scope > .line > .namewrap > .rowtools:not(.rowmove)");
   const p = row.querySelector(":scope > .line > .price");
   if (!t || !p) return;
+  /* 299번. **늘 가격 바로 오른쪽 · 가격 줄 가운데 높이**(사용자: "위치랑 높이가 계속 달라"). 238번은 이름 뒤에 두고 가격과 겹치면 줄 위 · 아래로 옮겨
+     줄마다 자리가 달랐다. 두 줄로 접어 폭을 줄였고, 가격 오른쪽은 단 사이 틈 · 종이 여백이라 이 줄의 글자를 덮지 않는다 */
   ["left","top","bottom","transform"].forEach(k => t.style.removeProperty(k));
-  const nw = t.parentElement.getBoundingClientRect();
-  const tr = t.getBoundingClientRect(), pr = p.getBoundingClientRect(), GAP = 3;
-  if (!(tr.right > pr.left - GAP && tr.left < pr.right && tr.bottom > pr.top && tr.top < pr.bottom)) return;
-  const left = Math.max(0, Math.min(tr.left - nw.left, (pr.left - GAP - tr.width) - nw.left));
-  const last = !row.nextElementSibling || !row.nextElementSibling.classList.contains("row");
-  t.style.left = left + "px"; t.style.transform = "none";
-  if (last){ t.style.top = "auto"; t.style.bottom = "100%"; } else t.style.top = "100%";
+  const nw = t.parentElement.getBoundingClientRect(), pr = p.getBoundingClientRect();
+  t.style.left = (pr.right + 4 - nw.left) + "px"; t.style.top = (pr.top + pr.height / 2 - nw.top) + "px"; t.style.bottom = "auto"; t.style.transform = "translateY(-50%)";
 }
 document.addEventListener("input", e => { if (rowHere && rowHere.contains(e.target)) fitRowTools(rowHere); });
 /* 108번. `syncAddHere()` 는 그린 뒤 **마우스 자리**로 대상을 다시 잡는다 — ＋ 를 두 번
@@ -7024,7 +7035,7 @@ const GUIDE = [
   { h:"글자를 눌러 바로 고칩니다", p:"종이 위 글자를 누르면 그 자리에서 고쳐집니다.<small>메뉴 이름 · 가격 · 분류 제목 · 맨 위 글자 모두 같습니다</small>",
     at:() => { const r = firstRow(); return r && r.querySelector("[data-path]"); } },
   { h:"메뉴 줄에 마우스를 올리면", p:"도구가 나옵니다. 인쇄에는 안 나옵니다.",
-    dl:[[K("✕"), "줄 지우기"], [K("▲") + K("▼"), "순서 옮기기"], [K("★"), "추천 — 이름을 적은 줄"], [K("품"), "품절 — 이름을 적은 줄"], [K("설"), "메뉴 설명 — 이름을 적은 줄"]],
+    dl:[[K("✕"), "줄 지우기"], [K("▲") + K("▼"), "순서 옮기기"], [K("추천"), "추천 — 이름을 적은 줄"], [K("품절"), "품절 — 이름을 적은 줄"], [K("설명"), "메뉴 설명 — 이름을 적은 줄"]],
     prep:() => setRowHere(firstRow()), at:() => firstRow(), wide:r => [r, ...r.querySelectorAll(".rowtools, .rowtools *")] },
   { h:"분류에 마우스를 올리면", p:"분류 아래에 넣고 빼는 단추가 나옵니다.",
     dl:[[K("＋ 메뉴 추가"), "메뉴 한 줄"], [K("＋ 안내 추가"), "※ 로 시작하는 안내"], [K("＋ 분류 추가"), "새 분류"], [K("◀") + K("▶"), "분류를 옆 단으로 — 분류 제목 옆"]],   // 종이 위 ＋ 단추는 밝은 테두리 — 표지도 같은 모양
