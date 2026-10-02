@@ -2432,6 +2432,12 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .editing .row .desc.tr:empty{display:none}
 .editing .row.tohere .desc.tr:empty, .editing .row:hover .desc.tr:empty, .editing .row:focus-within .desc.tr:empty{display:block}
 #f-tr{width:100%}
+/* ══ 307번. 꾸미기 창 [모든 장] 정리 — 머리 사이를 띄우고, 손잡이 밑에 하는 일 한 줄(.pnote) */
+.panel .pblock .pgrp{margin-top:20px}
+.panel .pblock .pbhead + .pgrp{margin-top:12px}
+.panel .pnote{font-size:11px;line-height:1.45;color:rgba(240,230,205,.46);margin:5px 0 0}
+.panel #pickers{margin-top:6px}
+.panel .grp.two .fld select, .panel .grp.two .fld button{width:100%}
 </style>
 </head>
 <body>
@@ -2466,8 +2472,10 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <div class="pl-presets" id="f-presets" role="group" aria-label="추천 조합"></div>
   <div class="pblock" data-kind="all">
   <div class="pbhead"><span class="pbadge">모든 장</span> 파일 전체에 하나씩</div>
+  <!-- 307번. **모든 장 묶음을 하는 일별로 다시 나눴다**(사용자: "다닥다닥 붙어 있어서 무슨 버튼 기능인지 헷갈려").
+       전에는 [글자] 머리 밑에 글꼴 · 색 · 언어 · 추천 표시 · 쪽 번호 · 분류 정렬이 다 들어 있었고, 종이 결은 글자 밑에 있었다.
+       머리 여섯 — 종이 · 글자 · 색 · 분류 제목 · 메뉴 표시 · 외국어. 탭(전체 · 장별)은 그대로(사용자) -->
   <div class="pgrp">종이</div>
-
   <label for="f-layout">종이 방향</label>
   <select id="f-layout">
     <!-- 80번. 예전 [구성]은 세 가지를 한꺼번에 정했다 — 방향 · 단 수 · 장 수.
@@ -2489,6 +2497,8 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <span class="layinfo" id="lay-info"></span>
     <button id="b-balance" type="button" title="지금 단 수는 그대로 두고, 분류를 단에 고르게 나눠 글자를 최대한 키웁니다">고르게 나누기</button>
   </span>
+  <label for="f-paper">종이 결</label>
+  <select id="f-paper"><option value="grain">결 무늬</option><option value="plain">민무늬</option><option value="hanji">한지</option><option value="kraft">크라프트지</option><option value="gingham">깅엄 체크</option><option value="wood">나무결</option></select>
 
   <!-- 띠를 먼저 고르고 그 위에 얹힌 로고 색을 정한다. "띠 없음"은 로고 색을
        뒤집으므로(32번) 인과 순서상으로도 띠가 앞이어야 한다 -->
@@ -2511,7 +2521,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     </select>
     <button id="b-bold" type="button">굵게</button>
   </span>
-  <label for="f-theme">색 (종이 · 글자 · 띠 · 포인트)</label>
+
+  <div class="pgrp">색</div>
+  <label for="f-theme">색 조합 <small>(아래 네 칸으로 하나씩 바꿀 수도)</small></label>
   <span class="grp">
     <select id="f-theme">
       <option value="night">밤 남색</option>
@@ -2533,22 +2545,26 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     </span>
   </span>
 
+  <!-- 179번. 분류 이름 정렬은 메뉴 장 · 와인 장 둘 다에 걸리므로 [모든 장] 이다(161번: 걸리는 곳이 두 장이면 공통) -->
+  <!-- 273번. 모양만 바꾸는 손잡이 둘 — 칸의 자리 · 크기는 그대로(검사가 조합마다 늘지 않게. t51 이 0px 를 본다) -->
+  <div class="pgrp">분류 제목</div>
+  <span class="grp two">
+    <span class="fld"><label for="f-secstyle">모양</label>
+      <select id="f-secstyle"><option value="line">밑줄</option><option value="band">색 띠</option><option value="pill">알약</option></select></span>
+    <span class="fld"><label for="f-secalign">정렬</label>
+    <select id="f-secalign">
+    <option value="left">왼쪽</option>
+    <option value="center">가운데</option>
+    <option value="right">오른쪽</option>
+  </select></span>
+  </span>
+  <div class="pnote">분류 이름 안에서 Enter 를 누르면 줄이 바뀝니다</div>
+
   <!-- 96번. 안내 문구 · 한 줄 항목 · 원산지는 **모두 종이 바닥**에 나오는 것이라
        갈래를 따로 뒀다. "표시" 안에 메뉴 줄 이야기(영문 병기 · 추천 표시)와 섞여 있으면
        어디에 나오는 설정인지 알 수 없다(49번: 갈래로 묶어야 훑을 수 있다) -->
-
   <!-- 159번. 짧은 손잡이 둘은 한 줄에. 한 줄씩 쌓으면 창만 길어진다 -->
-  <!-- 160 → 161번. **영문 병기는 공통이 맞다.** 메뉴 줄만의 일인 줄 알고 [메뉴 장]으로 옮겼는데,
-       **분류 제목의 영문**은 와인 장에도 붙는다. 걸리는 곳이 두 장이면 공통이다 -->
-  <!-- 306번. 영문 병기 스위치 → **함께 적을 언어 고르기**(없음 · English · 中文 · 日本語 — 사용자와 정함). 한국어 아래 작게 한 언어.
-       [빈 칸 번역]은 그 언어의 **빈 칸만** AI 로 채운다 — 사람이 고친 값(176번)을 덮지 않는다. 언어마다 한 번, 누를 때만 부른다 -->
-  <span class="grp two">
-    <span class="fld"><label for="f-lang" title="분류 · 메뉴 이름 아래에 작게">함께 적을 언어</label>
-      <select id="f-lang"><option value="">없음</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select></span>
-    <span class="fld"><label for="f-tr">AI 번역</label>
-      <button id="f-tr" type="button" title="분류 · 메뉴 이름 · 메뉴 설명 중 비어 있는 칸만 구글 제미나이(무료)로 번역해 채웁니다. 이미 적힌 칸은 그대로 둡니다">빈 칸 번역</button></span>
-  </span>
-
+  <div class="pgrp">메뉴 표시</div>
   <span class="grp two">
     <span class="fld"><label for="f-mark">추천 표시</label>
       <select id="f-mark">
@@ -2569,18 +2585,19 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
       </select></span>
   </span>
 
-  <!-- 179번. 분류 이름 정렬은 메뉴 장 · 와인 장 둘 다에 걸리므로 [모든 장] 이다(161번: 걸리는 곳이 두 장이면 공통) -->
-  <label for="f-secalign">분류 이름 정렬 <small>(Enter 로 줄바꿈)</small></label>
-  <select id="f-secalign">
-    <option value="left">왼쪽 (기본)</option>
-    <option value="center">가운데</option>
-    <option value="right">오른쪽</option>
-  </select>
-  <!-- 273번. 모양만 바꾸는 손잡이 둘 — 칸의 자리 · 크기는 그대로(검사가 조합마다 늘지 않게. t51 이 0px 를 본다) -->
-  <span class="grp pair2"><span><label for="f-paper">종이 결</label>
-    <select id="f-paper"><option value="grain">결 무늬</option><option value="plain">민무늬</option><option value="hanji">한지</option><option value="kraft">크라프트지</option><option value="gingham">깅엄 체크</option><option value="wood">나무결</option></select></span>
-  <span><label for="f-secstyle">분류 제목</label>
-    <select id="f-secstyle"><option value="line">밑줄</option><option value="band">색 띠</option><option value="pill">알약</option></select></span></span>
+  <!-- 160 → 161번. **영문 병기는 공통이 맞다.** 메뉴 줄만의 일인 줄 알고 [메뉴 장]으로 옮겼는데,
+       **분류 제목의 영문**은 와인 장에도 붙는다. 걸리는 곳이 두 장이면 공통이다 -->
+  <!-- 306번. 영문 병기 스위치 → **함께 적을 언어 고르기**(없음 · English · 中文 · 日本語 — 사용자와 정함). 한국어 아래 작게 한 언어.
+       [빈 칸 번역]은 그 언어의 **빈 칸만** AI 로 채운다 — 사람이 고친 값(176번)을 덮지 않는다. 언어마다 한 번, 누를 때만 부른다 -->
+  <!-- 307번. [번역] — 빈 칸만 있으면 바로, 이미 적힌 칸이 있으면 「빈 칸만 · 전부 다시」를 고른다(사용자) -->
+  <div class="pgrp">외국어</div>
+  <span class="grp two">
+    <span class="fld"><label for="f-lang">함께 적을 언어</label>
+      <select id="f-lang"><option value="">없음</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select></span>
+    <span class="fld"><label for="f-tr">AI 번역</label>
+      <button id="f-tr" type="button" title="분류 · 메뉴 이름 · 메뉴 설명을 구글 제미나이(무료)로 번역해 채웁니다">번역하기</button></span>
+  </span>
+  <div class="pnote">분류 · 메뉴 이름 아래에 작게 적힙니다. 번역한 칸도 눌러서 고칠 수 있습니다</div>
   </div>
 
   <!-- 157번. 갈래 머리에 작은 이름표를 다는 것만으로는 "아직도 구분이 잘 안 된다"는 지적을 받았다.
@@ -2774,6 +2791,17 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 
 <!-- 195번. `confirm()` 은 브라우저가 **창 맨 위**에 붙여 띄우고 자리를 바꿀 수 없다.
      다른 안내창과 같은 `<dialog>` 로 바꾼다 — `::backdrop` 과 함께 **화면 한가운데**에 선다 -->
+<!-- 307번. 이미 적힌 번역이 있을 때 [번역하기] — 빈 칸만 · 전부 다시 를 고른다(사용자: "빈칸만 번역할지, 적혀 있는 칸 포함해서 전체 다시 번역할지").
+     다 비어 있으면 묻지 않고 바로 번역한다 -->
+<dialog id="trask"><div class="in"><button type="button" class="dlg-x" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  <h3 id="ta-title">번역</h3>
+  <p id="ta-msg"></p>
+  <p class="sub">전부 다시 하면 손으로 고친 칸도 새 번역으로 바뀝니다. 바뀐 뒤 ↶ 를 한 번 누르면 통째로 되돌아갑니다.</p>
+  <div class="row2 end">
+    <button id="ta-empty" type="button" class="bt-fill">빈 칸만</button>
+    <button id="ta-all" type="button" class="bt-out">전부 다시</button>
+  </div>
+</div></dialog>
 <dialog id="overwarn"><div class="in"><button type="button" class="dlg-x" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>   <!-- 284번. 모든 안내창이 같은 닫기(✕) -->
   <!-- 263번. 단추 위계는 M3 — 권하는 동작은 채운 단추(bt-fill), 덜 중요한 것은 글자 단추(bt-text) · 280번. 안내창의 글자 단추는 전부 테두리 단추(bt-out)로 -->
   <!-- 234번. 가로만 좁은 장에도 "아래가 잘립니다"라고 했다 — 제목 · 본문 · 보충을 넘친 이유에 따라 JS 가 채운다 -->
@@ -7011,14 +7039,14 @@ const TR_API = READ_API.replace(/\/api\/read$/, "/api/translate");
 const TR_MAX = 150, TR_LEN = 120;   // api/translate.js 의 상한과 같게
 function syncTr(){ const b = $("#f-tr"); if (b && !b.dataset.busy) b.disabled = !L2(); }
 /* 번역할 칸 — 그 언어 칸이 비어 있고 한국어가 있는 것만. 와인 카드(와인 장의 메뉴)는 이번에 뺀다 — 영문 칸이 없고 이름이 이미 음차다 */
-function trTargets(L){
-  const jobs = [], t = v => String(v == null ? "" : v).trim();
+function trTargets(L, all){   // 307번. all 이면 적힌 칸도(전부 다시)
+  const jobs = [], t = v => String(v == null ? "" : v).trim(), want = v => all || !t(v);
   MENU.sheets.forEach(sh => sh.forEach(col => col.forEach(sec => {
-    if (t(sec.name) && !t(sec[L])) jobs.push({ node:sec, key:L, ko:t(sec.name) });
+    if (t(sec.name) && want(sec[L])) jobs.push({ node:sec, key:L, ko:t(sec.name) });
     if (sec.wine) return;
     (sec.items || []).forEach(it => {
-      if (t(it.name) && !t(it[L])) jobs.push({ node:it, key:L, ko:t(it.name) });
-      if (t(it.desc) && !t(it["desc_"+L])) jobs.push({ node:it, key:"desc_"+L, ko:t(it.desc) });
+      if (t(it.name) && want(it[L])) jobs.push({ node:it, key:L, ko:t(it.name) });
+      if (t(it.desc) && want(it["desc_"+L])) jobs.push({ node:it, key:"desc_"+L, ko:t(it.desc) });
     });
   })));
   return jobs.filter(j => j.ko.length <= TR_LEN);
@@ -7036,21 +7064,34 @@ async function trCall(L, texts){
   console.warn("번역 실패", r.status, j);   // 까닭 글자는 화면이 아니라 여기에(295번과 같게)
   throw new Error("번역하는 곳(구글)이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요.");
 }
-async function translateEmpty(){
+/* 307번. [번역하기] — 다 비어 있으면 바로, 적힌 칸이 있으면 안내창에서 「빈 칸만 · 전부 다시」 */
+function translateEmpty(){
   const L = L2(), b = $("#f-tr"); if (!L || b.dataset.busy) return;
-  const jobs = trTargets(L);
-  if (!jobs.length){ toast(LANGS[L].name + " 칸이 다 차 있습니다. 고칠 칸은 눌러서 고쳐 주세요", null); return; }
+  const all = trTargets(L, true), empty = trTargets(L, false);
+  if (!all.length){ toast("번역할 글이 없습니다. 분류 · 메뉴 이름을 먼저 적어 주세요", null); return; }
+  if (empty.length === all.length){ trRun(L, empty, false); return; }
+  $("#ta-title").textContent = LANGS[L].name + " 번역";
+  $("#ta-msg").textContent = "이미 적힌 칸이 " + (all.length - empty.length) + "칸 있습니다. " + (empty.length ? "빈 칸은 " + empty.length + "칸입니다." : "빈 칸은 없습니다.");
+  const e = $("#ta-empty"); e.disabled = !empty.length; e.textContent = "빈 칸만" + (empty.length ? " (" + empty.length + "칸)" : "");
+  $("#ta-all").textContent = "전부 다시 (" + all.length + "칸)";
+  openDlg($("#trask"));
+}
+async function trRun(L, jobs, overwrite){
+  const b = $("#f-tr"); if (b.dataset.busy || !jobs.length) return;
   const uniq = [...new Set(jobs.map(j => j.ko))].slice(0, TR_MAX);   // 같은 글은 한 번만(소주가 두 장에 있어도)
   b.dataset.busy = "1"; b.disabled = true; const was = b.textContent; b.textContent = "번역 중…";
   try {
     const out = await trCall(L, uniq), map = new Map(uniq.map((k, i) => [k, out[i]]));
     let n = 0;
-    jobs.forEach(j => { const v = String(map.get(j.ko) || "").trim(); if (v && !String(j.node[j.key] || "").trim()){ j.node[j.key] = v; n++; } });
-    if (n){ touch(); render(); }   // touch 가 되돌리기 한 칸 — Ctrl+Z 로 번역 전체를 되돌린다
-    toast(n ? n + "칸을 채웠습니다. 어색한 곳은 눌러서 고쳐 주세요" : "채운 칸이 없습니다", null);
+    jobs.forEach(j => { const v = String(map.get(j.ko) || "").trim();
+      if (v && (overwrite || !String(j.node[j.key] || "").trim()) && v !== j.node[j.key]){ j.node[j.key] = v; n++; } });
+    if (n){ touch(); render(); }   // touch 가 되돌리기 한 칸 — ↶ · Ctrl+Z 로 번역 전체를 되돌린다
+    toast(n ? n + "칸을 " + (overwrite ? "새로 " : "") + "채웠습니다. 어색한 곳은 눌러서 고쳐 주세요" : "바뀐 칸이 없습니다", null);
   } catch(e){ toast(e.message, null); }
   finally { delete b.dataset.busy; b.textContent = was; syncTr(); }
 }
+$("#ta-empty").onclick = () => { $("#trask").close(); const L = L2(); if (L) trRun(L, trTargets(L, false), false); };
+$("#ta-all").onclick   = () => { $("#trask").close(); const L = L2(); if (L) trRun(L, trTargets(L, true), true); };
 async function readStatus(){
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 3000);
   try { const r = await fetch(url, { signal:ac.signal }); const j = await r.json(); readOn = j.enabled !== false; }

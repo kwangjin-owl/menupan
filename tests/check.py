@@ -1284,7 +1284,7 @@ def t56(b, f):
     out['err'] += c.errs; c.close()
     return out
 
-# ───────────────────────── 57. 번역(306번) — 가짜 서버로: 언어 고르기 · 빈 칸만 채움 · 고친 칸 안 덮음 · 와인 카드 뺌 · 되돌리기 · 옛 영문 병기 · 저장 왕복 · 서버 함수
+# ───────────────────────── 57. 번역(306 · 307번) — 가짜 서버로: 언어 고르기 · 빈 칸만 채움 · 적힌 칸이 있으면 묻기(빈 칸만 · 전부 다시) · 고친 칸 안 덮음 · 와인 카드 뺌 · 되돌리기 · 옛 영문 병기 · 저장 왕복 · 서버 함수
 NODE57 = r"""
 const h = require(process.argv[2]); let next = null; global.fetch = async (u, o) => next(JSON.parse(o.body));
 const ok = a => ({ status:200, ok:true, json:async()=>({ candidates:[{content:{parts:[{text:JSON.stringify(a)}]}}] }), text:async()=>'' });
@@ -1324,12 +1324,19 @@ def t57(b, f):
         out['filled'] = c.js("""()=>{let miss=0,wine=0,ds=0; MENU.sheets.forEach(s=>s.forEach(c=>c.forEach(x=>{ if(String(x.name||'').trim() && !x.zh) miss++;
             (x.items||[]).forEach(i=>{ if(x.wine){ if(i.zh) wine++; return; } if(String(i.name||'').trim() && !i.zh) miss++; if(String(i.desc||'').trim() && !i.desc_zh) miss++; if(i.desc_zh) ds++; }); }))); return [miss, wine, ds > 0]}""")
         out['en_same'] = c.js(EN) == en0
-        n = len(sent); pg.click('#f-tr'); pg.wait_for_timeout(300); out['full_no_call'] = len(sent) == n
+        # 307번 — 다 차 있으면 묻는다(부르지 않고), 빈 칸만은 흐림
+        n = len(sent); pg.click('#f-tr'); pg.wait_for_timeout(300)
+        out['ask_full'] = [c.js("()=>document.querySelector('#trask').open"), c.js("()=>document.querySelector('#ta-empty').disabled"), len(sent) == n]
+        c.js("()=>document.querySelector('#trask').close()")
         c.js("()=>{const s=MENU.sheets[0][0][0]; s.items[0].zh='사람이 고침'; delete s.items[1].zh; render(); touch();}")
-        pg.click('#f-tr'); pg.wait_for_timeout(400)
+        pg.click('#f-tr'); pg.wait_for_timeout(300); pg.click('#ta-empty'); pg.wait_for_timeout(400)
         out['keep'] = [len(sent[-1]['texts']), c.js("()=>[MENU.sheets[0][0][0].items[0].zh, !!MENU.sheets[0][0][0].items[1].zh]")]
         pg.click('#b-undo'); pg.wait_for_timeout(300); out['undo'] = c.js("()=>!MENU.sheets[0][0][0].items[1].zh")
         pg.click('#b-redo'); pg.wait_for_timeout(300)
+        total = c.js("()=>trTargets('zh', true).length")
+        pg.click('#f-tr'); pg.wait_for_timeout(300); pg.click('#ta-all'); pg.wait_for_timeout(400)
+        out['all'] = [len(sent[-1]['texts']) == len(set(j for j in sent[-1]['texts'])), c.js("()=>MENU.sheets[0][0][0].items[0].zh") != '사람이 고침', total > 1]
+        pg.click('#b-undo'); pg.wait_for_timeout(300); out['all_undo'] = c.js("()=>MENU.sheets[0][0][0].items[0].zh") == '사람이 고침'
         out['final_lines'] = c.js("()=>{toggleEdit(); return [document.querySelectorAll('.sheet .en[lang=zh-Hans]:empty').length, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0]}")
         with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
         p = D + 'res/tr_' + f; d.value.save_as(p)
@@ -1463,10 +1470,10 @@ def judge(t, r):
         if t == 't57':
             sv = r.get('server') or {}
             ok = (not r.get('fail') and r['start'] == ['', True] and r['zh'] == ['zh', False, False, True, True] and r['sent'][0] == 1 and r['sent'][2]
-                  and r['filled'] == [0, 0, True] and r['en_same'] and r['full_no_call'] and r['keep'] == [1, ['사람이 고침', True]] and r['undo']
+                  and r['filled'] == [0, 0, True] and r['en_same'] and r['ask_full'] == [True, True, True] and r['keep'] == [1, ['사람이 고침', True]] and r['undo'] and r['all'] == [True, True, True] and r['all_undo']
                   and r['final_lines'] == [0, True] and r['reopen'] == ['zh', 'zh', True, True] and r['legacy'] == ['en', 'en', True] and not r['err']
                   and sv == {'ok': 200, 'origin': 403, 'lang': 400, 'many': 400, 'long': 400, 'count': 422, 'clip': 60, 'off': 503})
-            return ok, (f"실패: {r['fail']}" if r.get('fail') else f"고르기 {r['zh']} · 보냄 {r['sent']} · 빈 칸 [남음, 와인 카드, 설명] {r['filled']} · 영문 그대로 {r['en_same']} · 다 차면 안 부름 {r['full_no_call']} · 고친 칸 {r['keep']} · 되돌리기 {r['undo']} · 완성본 빈 줄 없음 {r['final_lines']} · 저장 왕복 {r['reopen']} · 옛 영문 병기 {r['legacy']}") + f" · 서버 {sv}"
+            return ok, (f"실패: {r['fail']}" if r.get('fail') else f"고르기 {r['zh']} · 보냄 {r['sent']} · 빈 칸 [남음, 와인 카드, 설명] {r['filled']} · 영문 그대로 {r['en_same']} · 다 차면 묻기 [열림, 빈 칸만 흐림, 안 부름] {r['ask_full']} · 빈 칸만 — 고친 칸 그대로 {r['keep']} · 되돌리기 {r['undo']} · 전부 다시 {r['all']} → 되돌리기 {r['all_undo']} · 완성본 빈 줄 없음 {r['final_lines']} · 저장 왕복 {r['reopen']} · 옛 영문 병기 {r['legacy']}") + f" · 서버 {sv}"
         if t == 't56':
             ok = r['top_px_landscape'] == r['top_px_portrait'] and all(r[k] <= 0.5 for k in r if k.startswith('pill_')) and r['tools_out_4col'] == 0 and r['empty_hours_border'] and r['hours_parse'] == [{'label': '점심', 'time': '11:00 - 15:00'}, {'label': '저녁', 'time': '17:00 - 23:00'}] and not r['err']
             return ok, f"맨 위 글자 세로 · 가로 {r['top_px_portrait']} · {r['top_px_landscape']}px · 알약이 여백선 밖 {[r[k] for k in r if k.startswith('pill_')]}px · 가로 4단 분류 도구 칸 밖 {r['tools_out_4col']}px · 빈 영업시간 선 없음 {r['empty_hours_border']} · 영업 줄 읽기 {bool(r['hours_parse'])}"
