@@ -1,6 +1,7 @@
-"""알프스 메뉴판 검사 — 인수인계 8장 목록을 새 파일과 기준 파일에 똑같이 돌리고 판정한다.
-사용:  python3 alps_check.py 새.html 기준.html [검사이름 ...] [-j 동시실행수]
-       검사이름을 안 주면 전부. 결과는 ./_check/ 에 쌓이고 마지막에 표로 나온다.
+"""메뉴판 검사 — 인수인계 8장 목록을 새 파일과 기준 파일에 똑같이 돌리고 판정한다.
+사용:  python3 check.py 새.html 기준.html [검사이름 ... | quick] [-j 동시실행수]
+       검사이름을 안 주면 전부(46종, 한 파일에 1시간 안팎). quick 은 빠른 묶음(31종, 하나에 45초 이하 — 305번).
+       quick 은 매 작업마다, 전부는 크기 · 배치 · 맞춤 규칙을 건드렸을 때와 동결 전에(인수인계 8장). 결과는 ./_check/ 에 쌓이고 마지막에 표로 나온다.
 필요:  pip install playwright pillow --break-system-packages && playwright install chromium ;  poppler-utils(pdftotext · pdftoppm) ; node(있으면 문법 검사)
 주의:  -j 를 크게 주면 전환 도중에 찍혀 헛차이가 난다(235번). 차이가 나면 그 검사만 -j 1 로 다시 돌릴 것"""
 from playwright.sync_api import sync_playwright
@@ -1443,6 +1444,9 @@ def judge(t, r):
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
        't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56']
+# 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
+QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
@@ -1464,6 +1468,7 @@ if __name__ == '__main__':
     if '-j' in args: i = args.index('-j'); jobs = int(args[i + 1]); del args[i:i + 2]
     if len(args) < 2: print(__doc__); sys.exit(1)
     new, base, tests = args[0], args[1], (args[2:] or ALL)
+    if tests == ['quick']: tests = QUICK   # 305번
     os.makedirs(D + 'res', exist_ok=True)
     shutil.copy(new, D + 'new.html'); shutil.copy(base, D + 'base.html')
     heavy = ['t02', 't37', 't25', 't05']
