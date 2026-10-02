@@ -1248,6 +1248,40 @@ def t54(b, f):
         out['prompt_same'] = arr(src, 'const READ_PROMPT = ') == arr(open(fn, encoding='utf-8').read(), 'const PROMPT = ')
     return out
 
+# ───────────────────────── 56. 가로 모드(304번) — 맨 위 글자 크기 · 알약이 여백선 안 · 좁은 단의 분류 도구 · 빈 영업시간 선 · 영업시간 읽기
+L56 = [["회 · 모둠", 5], ["식사", 3], ["구이 · 튀김", 4], ["안주", 3], ["주류", 4], ["음료", 3]]
+def t56(b, f):
+    out = {}
+    for o in ('portrait', 'landscape'):
+        c = Ctx(b, f, W=1700)
+        out['top_px_' + o] = c.js("""(o)=>{SETTINGS.orient=o; SETTINGS.topMode='text'; MENU.brand.top='바다향 횟집'; syncControls(); applyLook(); render(); applyScale();
+          return +parseFloat(getComputedStyle(document.querySelector('.sheet .noren .logo.txt')).fontSize).toFixed(1)}""", o)
+        c.close()
+    for o in ('portrait', 'landscape'):
+        for al in ('left', 'right'):   # 알약 — 칠한 폭(그림자 .72em)까지 여백선 안
+            c = Ctx(b, f, W=1700)
+            out[f'pill_{o}_{al}'] = c.js("""([o,al])=>{SETTINGS.orient=o; applyPresetTo(SETTINGS, MENU, 'bunsik'); SETTINGS.secAlign=al; syncControls(); applyLook(); render(); applyScale(); toggleEdit();   // 여백선은 편집 중에만 그려진다(종이 자리는 같다)
+              const sh=document.querySelector('.sheet'), g=sh.querySelector('.guide').getBoundingClientRect(); let w=0;
+              sh.querySelectorAll('section > .sec-head h2 .hv').forEach(h=>{const r=h.getBoundingClientRect(), em=parseFloat(getComputedStyle(h).fontSize)*.72;
+                w=Math.max(w, g.left-(r.left-em), (r.right+em)-g.right)}); return +w.toFixed(1)}""", [o, al])
+            c.close()
+    c = Ctx(b, f, W=1700)   # 가로 4단 — 분류 도구가 칸 안
+    c.js("""(L)=>{const cols=[[],[],[],[]]; L.forEach((s,i)=>cols[Math.floor(i*4/L.length)].push({name:s[0], items:Array.from({length:s[1]},(_,k)=>({name:'메뉴'+k, price:1000}))}));
+      MENU.sheets=[cols]; MENU.feet=[{notes:[],origin:''}]; SETTINGS.pages=[pageDefaults(0)]; SETTINGS.orient='landscape'; syncControls(); applyLook(); render(); applyScale(); toggleEdit();}""", L56)
+    c.pg.wait_for_timeout(300); outs = []
+    for i, hd in enumerate(c.pg.query_selector_all('.sheet section > .sec-head')):
+        hd.scroll_into_view_if_needed(); bb = hd.bounding_box(); c.pg.mouse.move(bb['x'] + 4, bb['y'] + bb['height'] / 2); c.pg.wait_for_timeout(50)
+        outs.append(c.js("""(i)=>{const hd=document.querySelectorAll('.sheet section > .sec-head')[i], s=hd.closest('section').getBoundingClientRect();
+          const bs=[...hd.querySelectorAll('.rowtools button, .rowtools select')].filter(x=>x.offsetWidth).map(x=>x.getBoundingClientRect());
+          return Math.round(Math.max(0, ...bs.map(r=>Math.max(s.left-r.left, r.right-s.right))))}""", i))
+    out['tools_out_4col'] = max(outs or [0]); out['err'] = list(c.errs); c.close()
+    c = Ctx(b, f)   # 빈 영업시간 — 완성본에 선이 안 찍힌다
+    out['empty_hours_border'] = c.js("""()=>{MENU.hours=[]; render(); applyScale(); const h=document.querySelector('.sheet .hours'); const cs=getComputedStyle(h);
+      return [cs.borderTopColor, cs.borderBottomColor].every(x=>x==='rgba(0, 0, 0, 0)' || x==='transparent')}""")
+    out['hours_parse'] = c.js("""()=>{const r=parseMenuText('가게: 바다향\\n영업: 점심 11:00 - 15:00 · 저녁 17:00 - 23:00\\n[회] 1\\n광어회 | 35000'); return r.hours || null}""")
+    out['err'] += c.errs; c.close()
+    return out
+
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
 def t55(b, f):
     import threading, http.server, socketserver, functools
@@ -1354,6 +1388,9 @@ def judge(t, r):
                 and all(all(x[2] == H for x in o['edit']) and all(x[2] == W for x in o['idle'] + o['preview'] + o['editPrint']) for o in sh.values())
             mins = {k: v[0] for k, v in w.items()}
             return not bad and okv and not (r['err_portrait'] or r['err_landscape']), f"가장자리 최소 {mins} {bad or ''} · 흰 테두리 4mm · 편집만 반투명 {okv}"
+        if t == 't56':
+            ok = r['top_px_landscape'] == r['top_px_portrait'] and all(r[k] <= 0.5 for k in r if k.startswith('pill_')) and r['tools_out_4col'] == 0 and r['empty_hours_border'] and r['hours_parse'] == [{'label': '점심', 'time': '11:00 - 15:00'}, {'label': '저녁', 'time': '17:00 - 23:00'}] and not r['err']
+            return ok, f"맨 위 글자 세로 · 가로 {r['top_px_portrait']} · {r['top_px_landscape']}px · 알약이 여백선 밖 {[r[k] for k in r if k.startswith('pill_')]}px · 가로 4단 분류 도구 칸 밖 {r['tools_out_4col']}px · 빈 영업시간 선 없음 {r['empty_hours_border']} · 영업 줄 읽기 {bool(r['hours_parse'])}"
         if t == 't55':
             ok = all(r['first']) and all(r['saved']) and all(r['reopen']) and all(r['file_clean']) and r['import'][:1] == [2] and all(r['import'][1:]) and all(r['file']) and not r['err']
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
@@ -1405,7 +1442,7 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

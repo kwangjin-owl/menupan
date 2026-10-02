@@ -2404,6 +2404,24 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .grp #b-artsame{align-self:flex-start}
 .panel .subrow.top{align-items:start}
 .panel .subrow.top label{padding-top:4px}
+/* ══ 304번. 가로 모드 점검(299번 목록 — 조합 6 × 가로 2 · 3 · 4단을 재서 고친 것)
+   ① 맨 위 글자: 가로는 상단 기준 크기를 10.5px 로 낮춰 둔다(로고 그림이 띠를 24% 넘기지 않게 — 92번). 글자(4em)도 그것을 따라 33.6px 로,
+      세로(49.6px)의 68% 였다 — 넓은 띠에 작은 글씨(사용자: "띠 안 제목이 작다"). 글자는 세로와 같은 px 로. 띠는 105 → 125px(15.7%)
+   ② 알약 제목은 그림자로 양옆 .72em 을 더 칠한다 — 왼쪽 정렬이면 왼쪽 칠한 끝이 여백선 밖 15px(가로 · 세로 모두). 그만큼 안쪽에서 시작
+   ③ 분류 도구(◀▶ · 분류 형식)가 좁은 단(가로 4단)에서 칸 밖으로 68 ~ 79px — 자리가 모자라면 제목 위로(`.up`, fitSecTools — 294번의 가운데 · 오른쪽 정렬과 같은 자리)
+   ④ 빈 칸 · 빈 구역의 점선이 무늬 종이(깅엄 · 나무결)에 묻혔다 — 빈 칸에 종이색 바탕. 구역 점선은 검은색 고정(rgba 0,0,0,.18)이라 어두운 종이에서 안 보였다 — 글자색에서 섞는다(294번과 같게)
+   ⑤ 영업시간이 비면 완성본 · 인쇄에 상자의 위아래 선 두 줄만 찍혔다(빈 메뉴판 · 사진으로 시작 — 둘 다 영업시간 없이 시작한다). 선을 지운다. 자리는 그대로(편집 = 완성본) */
+.sheet.land .noren .logo.txt{font-size:calc(62px * var(--nscale))}
+.sheet.sh-pill:not(.sa-center):not(.sa-right) section > .sec-head h2{padding-left:.72em}
+.sheet.sh-pill.sa-right section > .sec-head h2{padding-right:.72em}
+.editing .sheet .sec-head.up .rowtools{top:auto;bottom:100%;left:0;right:auto;transform:none;padding:0 0 3px 0}
+.editing .sheet.sh-pill .sec-head.up .rowtools{padding-left:0}
+.editing .zone{outline-color:color-mix(in srgb, var(--ink) 30%, transparent)}
+.editing:not(.preview) .foot .zone::after{border-color:color-mix(in srgb, var(--ink) 30%, transparent)}
+.editing:not(.preview) .sheet :is(.hours, .body, .foot) [contenteditable="true"]:empty:not(:focus),
+.editing:not(.preview) .row:not(.wine) .vol:empty:not(:focus)::before,
+.editing:not(.preview) .sheet .zone:not(:has([contenteditable="true"])){background-color:var(--paper)}
+.hours:empty{border-color:transparent}
 </style>
 </head>
 <body>
@@ -3832,7 +3850,10 @@ const SECNOTE_MAX = 4;    // 분류의 ※ 안내
    하나로 묶는다. 값은 1.20 을 택했다 — 1.38 까지도 넘치지는 않지만 `.noren .jp` 가
    배율을 따라 커져(46번) 상단 띠가 종이의 27% 를 먹는다. 37번이 32.8% 에서 20% 대로
    끌어내린 것을 되돌리는 셈이라 그 선은 넘지 않는다(1.20 에서 상단 23.6%) */
-const SCALE_MAX = 1.20;
+/* 304번. 1.20 → 1.40. 75번이 1.20 에 멈춘 까닭(상단 `.jp` 가 배율을 따라 커져 띠가 27%)은 93번에서 상단을 본문 배율에서 떼며 사라졌다 —
+   상단은 `--nscale` 만 따른다. 남은 것은 상한 탓에 [한 장에 맞춤]이 종이를 못 채우는 것뿐이었다(가로 3단에서 아래가 비었다 — 299번 목록 2)
+   75번의 "하나로 묶는다"는 그대로 — 막대 · ＋ · 맞춤이 이 한 값을 쓴다 */
+const SCALE_MAX = 1.40;
 /* 점선(leader)이 이만큼은 남아야 한다. 0 으로 두면 이름과 가격이 맞닿고, 한 눈금만
    더 키우면 가격이 아랫줄로 내려간다. 눈으로 "붙었다"고 느끼기 직전 값이다 */
 const DOTS_MIN = 6;
@@ -5579,6 +5600,14 @@ function topBands(){
 }
 function bandPct(i){ const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 15;
   const t = parseFloat(sh.style.getPropertyValue("--topband")), h = sh.getBoundingClientRect().height; return h > 0 && t >= 0 ? +(t / h * 100).toFixed(2) : 15; }
+/* 304번. 분류 도구가 제목 뒤에 들어갈 자리가 없으면(좁은 단) 제목 위로. 흐름 밖(absolute)이라 재도 자리가 안 바뀐다 */
+function fitSecTools(){
+  document.querySelectorAll(".sheet .sec-head").forEach(hd => {
+    hd.classList.remove("up"); if (!editing) return;
+    const t = hd.querySelector(":scope > .titlewrap > .rowtools, :scope .rowtools"), sec = hd.closest("section"); if (!t || !sec) return;
+    if (t.getBoundingClientRect().right > sec.getBoundingClientRect().right + 1) hd.classList.add("up");
+  });
+}
 function applyScale(){
   /* 128번. **배율은 기본 간격에서 찾는다.** 벌려 둔 간격은 px 이라 배율을 바꿔도 안 따라오고,
      그 상태로 재면 "앞 상태에서 벌린 자리"까지 내용으로 세어 필요 없이 한 눈금 더 줄인다 */
@@ -5599,7 +5628,7 @@ function applyScale(){
     scaleTo(i, want); shown[i] = want;
     if (overA4(i)) full.push(i+1);
   });
-  spread(); syncSize();
+  spread(); syncSize(); fitSecTools();   // 304번
   /* 190번. 넘친 장에 표시를 남긴다 — 화면에만 보이고 인쇄에는 안 나온다.
      198번. **띠는 세로로 넘쳤을 때만** 단다 — 가로(점선 자리) 문제는 여백선과 무관하다 */
   const why = {};
@@ -6649,7 +6678,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stLook = {}; delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stHours = []; stLook = {}; delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -6751,7 +6780,7 @@ function startWith(menu, settings, msg){
 $("#st-go").onclick = () => {
   const shop = $("#st-shop").value.trim(), top = $("#st-top").value.trim(), text = stMode === "text" || !stLogo;
   const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
-  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours:[], sheets:[ stParsed ? splitCols(stParsed, stLook.cols || 2) : [[sec()], [sec()]] ], feet:[{ notes:[], origin:"" }] };   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로
+  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours: stParsed ? stHours.map(h => ({ ...h })) : [], sheets:[ stParsed ? splitCols(stParsed, stLook.cols || 2) : [[sec()], [sec()]] ], feet:[{ notes:[], origin:"" }] };   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로 · 304번. 읽은 영업시간도
   if (shop) menu.brand.shop = shop;
   const pg = Object.assign(pageDefaults(0), { arts:[], seal:"none", showTitle:false });   // 302번
   Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
@@ -6854,15 +6883,16 @@ const READ_PROMPT = [
   "- 가격은 숫자만 적습니다(쉼표 · 원 없이). 가격이 없거나 '시가' 같은 글자면 그 글자를 그대로 적습니다.",
   "- 분류가 안 보이면 [메뉴] 하나로 적습니다.",
   "- 잘 안 보이거나 확실하지 않은 이름 · 가격은 그 값 바로 뒤에 ? 를 붙입니다.",
-  "- 메뉴 설명 · 원산지 · 영업시간 · 전화번호는 적지 않습니다.",
+  "- 메뉴 설명 · 원산지 · 전화번호는 적지 않습니다.",
   "- 맨 앞 몇 줄에 이 메뉴판의 모양을 적습니다. 알 수 없는 것은 그 줄을 쓰지 않습니다.",
   "가게: 가게 이름",
+  "영업: 이름 시간 · 이름 시간 (예: 점심 11:00 - 15:00 · 저녁 17:00 - 23:00)",
   "방향: 세로 또는 가로",
   "단: 메뉴가 세로로 나뉜 칸 수(1~4)",
   "글꼴: 명조 · 고딕 · 손글씨 · 둥근 · 붓 중 가장 가까운 것",
   "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB (맨 위에 색 띠가 없으면 「띠 없음」)",
   "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
-].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이
+].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이 · 304번. 영업시간 줄
 function parseMenuText(txt){
   const secs = []; let cur = null;
   const unq = v => { v = String(v || "").trim(); const u = /[?？]\s*$/.test(v); return [v.replace(/[?？]\s*$/, "").trim(), u]; };
@@ -6870,6 +6900,8 @@ function parseMenuText(txt){
     let l = raw.trim(); if (!l || /^```/.test(l)) return;
     l = l.replace(/^[-*•·]\s+/, "");
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
+    const hr = l.match(/^영업(?:\s*시간)?\s*[:：]\s*(.+)$/);   // 304번. 영업시간 — "점심 11:00 - 15:00 · 저녁 17:00 - 23:00"
+    if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x => { const m = x.match(/^(\D*?)\s*(\d.*)$/); return m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; }); return; }
     const lk = l.match(/^(방향|단|글꼴|색)\s*[:：]\s*(.+)$/); if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
     const hc = l.match(/^\[(.+?)\]\s*([1-4])?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);
     if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; secs.push(cur); return; }
@@ -6883,7 +6915,7 @@ function parseMenuText(txt){
     if (!cur){ cur = { name:"메뉴", un:false, items:[] }; secs.push(cur); }
     cur.items.push({ name:n, price:p, un:un1, unp:un2 });
   });
-  const out = secs.filter(s => s.items.length); out.shop = secs.shop || ""; out.look = readLook(secs.lk || {}); return out;
+  const out = secs.filter(s => s.items.length); out.shop = secs.shop || ""; out.hours = secs.hours || []; out.look = readLook(secs.lk || {}); return out;
 }
 /* 296번. 사진의 모양 → 메뉴판(사용자: "AI 를 쓰는 거면 처음 찍은 사진과 가장 비슷한 형태로 — 글자 크기든 구성이든 색깔이든").
    방향 · 단 수 · 분류가 놓인 칸 · 글꼴 · 색(종이 · 글자 · 띠 · 포인트). 못 읽은 것은 비워 두고 지금 기본값을 쓴다.
@@ -6902,7 +6934,7 @@ function readLook(lk){
   return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
-let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "";   // 290번. 사진에서 읽은 가게 이름
+let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [];   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img){
   const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
@@ -6968,7 +7000,7 @@ async function geminiRead(dataUrl){
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; $("#st-cshop").value = stShopRead; drawCheck();
+  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stHours = secs.hours || []; $("#st-cshop").value = stShopRead; drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
 }
 function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단(시작할 때 쓰는 splitCols 와 같은 나눔)
@@ -6979,7 +7011,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
   $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))";
   const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
-  $("#st-ccount").innerHTML = "읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b> · " + (land ? "가로" : "세로") + " A4 · <b>" + nc + "</b>단";   // 297번. 사진과 먼저 맞춰 볼 상태 — 숫자를 굵게, 설명 글 크기로(보조 12px 로 두어 안 보였다)
+  $("#st-ccount").innerHTML = "읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b> · " + (land ? "가로" : "세로") + " A4 · <b>" + nc + "</b>단" + (stHours.length ? " · 영업시간 <b>" + stHours.length + "</b>줄" : "");   // 304번   // 297번. 사진과 먼저 맞춰 볼 상태 — 숫자를 굵게, 설명 글 크기로(보조 12px 로 두어 안 보였다)
   splitCols(stParsed, nc).forEach(col => {
     const c = el("div", "st-ccol");
     col.forEach(s => {
