@@ -797,6 +797,16 @@ body{transition:padding-right .18s ease}
    카드 안 어느 글자와도 안 겹친다. 카드에서 "그 줄"은 이름 줄이므로 높이는 이름 줄에 맞춘다 */
 .editing .row.wine .wname .name{position:relative}
 .editing .row.wine .name > .rowtools{left:100%;right:auto;top:50%;transform:translateY(-50%);margin-left:.4em}
+/* 308번. 와인 카드의 줄 도구 — 299번이 단추 글자를 [추천][품절] 두 글자로 바꾸고 300번이 메뉴 줄만 ＋ 묶음 모양으로 맞춰,
+   와인 카드는 한 글자 폭 단추가 남아 「추/천」 「품/절」로 두 줄에 접혔다(흐름 밖 상자라 폭이 줄어든다).
+   카드 도구는 메뉴 줄과 같은 꼴(규칙 F · 138번) — 같은 알약 모양, 한 줄 */
+.editing .row.wine .name > .rowtools:not(.rowmove){white-space:nowrap;display:inline-flex;gap:3px}
+.editing .row.wine .name > .rowtools:not(.rowmove) button{white-space:nowrap;font-size:9px;min-width:0;width:auto;height:auto;padding:1px 6px;border:1px dashed rgb(201,183,149);border-radius:99px;background:rgb(239,227,201);color:rgb(111,96,71);line-height:1.45;letter-spacing:0}
+/* 308번. 켜진 상태([추천] · [품절] · [설명]) — 300번이 메뉴 줄 단추를 ＋ 묶음 모양으로 바꾸며 색을 고정해 `.on` 규칙(포인트색)이 졌다.
+   켠 단추와 끈 단추가 색 · 바탕 · 테 · 굵기까지 똑같아, 단추만 보고는 켜졌는지 알 수 없었다(기준 파일에서 쟀다).
+   상태 여섯(292번)의 「켜짐」 — 올림(7%) · 누름(14%)보다 확 달라 보이게: 실선 테 · 짙은 바탕 · 굵게. 종이 색과 무관하게 읽히도록 고정색(＋ 묶음과 같은 갈색 계열) */
+.editing .row .namewrap > .rowtools:not(.rowmove) button.on,
+.editing .row.wine .name > .rowtools:not(.rowmove) button.on{border-style:solid;border-color:rgb(111,96,71);background:rgb(214,194,152);color:rgb(58,46,28);font-weight:700}
 .editing .row.wine > .rowtools.rowmove{left:2px;right:auto;top:.1em;transform:none}
 .editing.preview .row.wine .name{white-space:normal}
 .editing.preview .row.wine .wlabel{background:var(--lcol, var(--paper)) !important}
@@ -2588,7 +2598,8 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <!-- 160 → 161번. **영문 병기는 공통이 맞다.** 메뉴 줄만의 일인 줄 알고 [메뉴 장]으로 옮겼는데,
        **분류 제목의 영문**은 와인 장에도 붙는다. 걸리는 곳이 두 장이면 공통이다 -->
   <!-- 306번. 영문 병기 스위치 → **함께 적을 언어 고르기**(없음 · English · 中文 · 日本語 — 사용자와 정함). 한국어 아래 작게 한 언어.
-       [빈 칸 번역]은 그 언어의 **빈 칸만** AI 로 채운다 — 사람이 고친 값(176번)을 덮지 않는다. 언어마다 한 번, 누를 때만 부른다 -->
+       [빈 칸 번역]은 그 언어의 **빈 칸만** AI 로 채운다 — 사람이 고친 값(176번)을 덮지 않는다. 언어마다 한 번, 누를 때만 부른다.
+       307번에 단추가 [번역하기]로 바뀌고, 적힌 칸이 있으면 「빈 칸만 · 전부 다시」를 묻는다(308번에 이 주석을 고침) -->
   <!-- 307번. [번역] — 빈 칸만 있으면 바로, 이미 적힌 칸이 있으면 「빈 칸만 · 전부 다시」를 고른다(사용자) -->
   <div class="pgrp">외국어</div>
   <span class="grp two">
@@ -2715,7 +2726,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <label>크기 <b id="sz-val"></b></label>
   <!-- 191번. **끌어서 1% 단위로.** ＋ㅡ 는 4% 단위라 원하는 크기에 못 앉는다는 지적.
        ＋ㅡ 는 미세 조정으로 남기고, 세 단추는 같은 크기로 둔다(맞춤만 대문짝만하다는 지적) -->
-  <input type="range" id="sz-range" min="56" max="120" step="1" title="글자 크기">
+  <input type="range" id="sz-range" min="56" max="140" step="1" title="글자 크기">   <!-- 308번. 끝은 SCALE_MIN · SCALE_MAX 를 따른다(JS 가 다시 맞춘다) — 304번이 상한을 140% 로 올리며 이 막대만 120 에 남아, 140% 에서 막대를 건드리면 120% 로 떨어졌다 -->
   <span class="grp typo3">
     <button id="b-minus" type="button" title="작게">ㅡ</button>
     <button id="b-plus" type="button" title="크게">＋</button>
@@ -6015,6 +6026,8 @@ $("#c-accent").oninput  = e => pickColor("accent", e.target.value);
    그 사이 종이만 A4 의 1.8배(1123 -> 2017px)로 늘어나 인쇄될 모습을 알 수 없었다 */
 /* 191번. 끄는 동안에는 **배율만** 바꿔 가볍게 보여 주고(scaleTo), 손을 떼면 그때 제대로 맞춘다
    (applyScale 이 넘침 표시 · 알림까지 한다). 자동은 손으로 정한 순간 꺼진다(86번) */
+$("#sz-range").min = Math.round(SCALE_MIN*100);   /* 308번. 막대의 양 끝은 상한 상수 하나에서(규칙 G — 막대 · ＋ · 맞춤이 같은 상한). 마크업 숫자만 두면 상수를 바꿀 때 또 남는다 */
+$("#sz-range").max = Math.round(SCALE_MAX*100);
 $("#sz-range").oninput = e => {
   const i = panelPage, pg = P(i);
   pg.autofit = false; pg.scale = Math.round(+e.target.value) / 100;

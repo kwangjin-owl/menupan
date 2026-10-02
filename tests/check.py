@@ -1,6 +1,6 @@
 """메뉴판 검사 — 인수인계 8장 목록을 새 파일과 기준 파일에 똑같이 돌리고 판정한다.
 사용:  python3 check.py 새.html 기준.html [검사이름 ... | quick] [-j 동시실행수]
-       검사이름을 안 주면 전부(46종, 한 파일에 1시간 안팎). quick 은 빠른 묶음(31종, 하나에 45초 이하 — 305번).
+       검사이름을 안 주면 전부(47종, 한 파일에 1시간 안팎). quick 은 빠른 묶음(32종, 하나에 45초 이하 — 305번).
        quick 은 매 작업마다, 전부는 크기 · 배치 · 맞춤 규칙을 건드렸을 때와 동결 전에(인수인계 8장). 결과는 ./_check/ 에 쌓이고 마지막에 표로 나온다.
 필요:  pip install playwright pillow --break-system-packages && playwright install chromium ;  poppler-utils(pdftotext · pdftoppm) ; node(있으면 문법 검사)
 주의:  -j 를 크게 주면 전환 도중에 찍혀 헛차이가 난다(235번). 차이가 나면 그 검사만 -j 1 로 다시 돌릴 것"""
@@ -1122,7 +1122,22 @@ def t48(b, f):
     a = w(); c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); e = w()
     h = c.js("()=>[[...document.querySelectorAll('#btpick button')].map(b=>Math.round(b.getBoundingClientRect().height)), [...document.querySelectorAll('.wfrow button')].map(b=>Math.round(b.getBoundingClientRect().height))]")   # 268번 — 병 단추 · ▲▼ 높이
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); z = w()
-    out = {'idle': a, 'edit': e, 'back': z, 'heights': h, 'err': c.errs}; c.close(); return out
+    # 308번 — ① 글자 크기 막대의 양 끝 = SCALE_MIN · SCALE_MAX(304번이 상한을 140% 로 올리며 막대만 120 에 남았다) · 140% 에서 막대 값도 140
+    #         ② 줄 도구의 켜진 단추가 꺼진 단추와 달라 보일 것(300번부터 같았다) ③ 와인 카드 줄 도구가 한 줄(「추/천」으로 접혔다)
+    c.pg.click('#b-edit'); c.pg.wait_for_timeout(200)
+    c.js("()=>{const t=[...document.querySelectorAll('#ptabs button')]; t[t.length-1].click()}"); c.pg.wait_for_timeout(150)
+    for _ in range(16): c.pg.click('#b-plus'); c.pg.wait_for_timeout(40)
+    rng = c.js("()=>[+$('#sz-range').min, +$('#sz-range').max, Math.round(SCALE_MIN*100), Math.round(SCALE_MAX*100), +$('#sz-range').value, Math.round(P(panelPage).scale*100)]")
+    c.js("()=>{const t=[...document.querySelectorAll('#ptabs button')]; t[0].click()}")
+    c.js("()=>{P(0).scale=1; P(0).autofit=false; render(); applyScale();}"); c.pg.wait_for_timeout(150)
+    def hover(sel):
+        r = c.pg.query_selector(sel); r.scroll_into_view_if_needed(); bb = r.bounding_box()
+        c.pg.mouse.move(bb['x'] + 40, bb['y'] + 8); c.pg.wait_for_timeout(250)
+    STY = "(sel)=>[...document.querySelectorAll(sel)].filter(b=>b.getBoundingClientRect().width>0).map(b=>{const s=getComputedStyle(b);return [b.textContent, b.classList.contains('on'), s.backgroundColor+'|'+s.borderStyle+'|'+s.color+'|'+s.fontWeight, (()=>{const rg=document.createRange(); rg.selectNodeContents(b); const ys=new Set([...rg.getClientRects()].filter(q=>q.width>0).map(q=>Math.round(q.top))); return ys.size})()]})"   # 마지막 값 = 단추 안 글자 줄 수
+    hover('.row:not(.wine):has(.pick)'); menu = c.js(STY, '.row .namewrap > .rowtools:not(.rowmove) button')
+    c.js("()=>{const it=MENU.sheets.flatMap(p=>p.flat()).flatMap(s=>s.wine?s.items:[])[0]; if(it) it.pick=true; render(); applyScale();}"); c.pg.wait_for_timeout(150)
+    hover('.row.wine'); wine = c.js(STY, '.row.wine .name > .rowtools:not(.rowmove) button')
+    out = {'idle': a, 'edit': e, 'back': z, 'heights': h, 'range308': rng, 'menu308': menu, 'wine308': wine, 'err': c.errs}; c.close(); return out
 
 # ───────────────────────── 49. 가이드(269번) — 첫 화면에서 길을 고른 직후에만 뜨고, 단계마다 짚는 것이 화면에 있고 보이는지
 def t49(b, f):
@@ -1507,7 +1522,14 @@ def judge(t, r):
             d = {k: v for k, v in r['idle']}; e = {k: v for k, v in r['edit']}; z = {k: v for k, v in r['back']}
             bad = {k: (d[k], e.get(k)) for k in d if k and k in e and d[k] and e[k] and abs(d[k] - e[k]) > 0.5}   # 폭 0 = 그 모드에서 숨은 단추(편집 도구 막대) — 뺀다
             hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 24   # 병은 병 모양이 보이는 높이 · ▲▼는 줄보다 작게(268번)
-            return not bad and d == z and hok and not r['err'], f"편집 켜고 끌 때 폭이 바뀐 막대 단추 {bad or '없음'} · 편집 단추 {d.get('b-edit')}/{e.get('b-edit')} · 병 단추 높이 {sorted(set(hb))} · ▲▼ {sorted(set(hw))}"
+            rg = r.get('range308') or [0] * 6; rok = rg[0] == rg[2] and rg[1] == rg[3] and rg[4] == rg[5] == rg[3]   # 308번 — 막대 끝 = 상한 상수 · 140% 에서 막대도 140
+            def onoff(L):   # 켜진 단추와 꺼진 단추의 모양이 다른가 — 둘 다 있어야 잴 수 있다
+                on = {x[2] for x in L if x[1]}; off = {x[2] for x in L if not x[1]}
+                return bool(on) and bool(off) and not (on & off)
+            mw, ww = r.get('menu308') or [], r.get('wine308') or []
+            one = bool(ww) and all(x[3] == 1 for x in ww)   # 와인 줄 도구 — 단추마다 글자가 한 줄(「추/천」 두 줄이면 2)
+            ok308 = rok and onoff(mw) and onoff(ww) and one
+            return not bad and d == z and hok and ok308 and not r['err'], f"편집 켜고 끌 때 폭이 바뀐 막대 단추 {bad or '없음'} · 편집 단추 {d.get('b-edit')}/{e.get('b-edit')} · 병 단추 높이 {sorted(set(hb))} · ▲▼ {sorted(set(hw))} · 308번 [막대 끝 = 상한, 켜짐 구별 메뉴 · 와인, 와인 도구 한 줄] [{rok}, {onoff(mw)}, {onoff(ww)}, {one}] 막대 {rg} 와인 단추 글자 줄 수 {sorted({x[3] for x in ww})}"
         if t == 't46':
             g = r['244_foot_fixed']; top = r['256_logo_top_mm']
             ok = (near(g[0], g[1], 1) and g[2] == 'tall' and r['245_invisible'] is None and all(r[f'sec_pad_{n}'] is None for n in (10, 30, 45, 60))
