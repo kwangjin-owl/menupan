@@ -1419,7 +1419,10 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .pgrp.pgtitle{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .panel .pgrp.pgtitle button{font-size:10.5px;padding:4px 8px;letter-spacing:0;font-weight:400}
 .panel .pgrp.pgtitle button#b-copypage{white-space:nowrap;flex:0 0 auto}
-.panel .chk:has(input:disabled){opacity:.45;cursor:default}   /* 309번. 막힌 스위치도 흐리게(284번) — 스위치는 비활성 모양이 없어 켤 수 있는 것처럼 보였다 */
+.panel .chk:has(input:disabled){opacity:.45;cursor:default}
+.panel button.busy{cursor:progress;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:10px;padding-right:10px}   /* 310번. 로딩 — 흐리지 않는다(비활성과 가른다) */
+.panel button.busy::before{content:"";display:inline-block;width:12px;height:12px;margin:0 6px -1px 0;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;flex:0 0 auto;animation:spin310 .8s linear infinite}
+@keyframes spin310{to{transform:rotate(360deg)}}   /* 309번. 막힌 스위치도 흐리게(284번) — 스위치는 비활성 모양이 없어 켤 수 있는 것처럼 보였다 */
 .panel .chk input:disabled{cursor:default}   /* 290번. 두 줄로 접혀 둥근 단추 안이 답답했다 */
 /* 191번. 세 단추를 **같은 폭**으로. 전에는 `auto auto 1fr` 이라 [한 장에 맞춤]만 남는 자리를 다 먹었다 */
 .panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:5px}
@@ -1904,10 +1907,13 @@ dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius
 .gd-tip .n{font-size:12px;color:#5c4f3c}
 .gd-tip h4{margin:4px 0 6px;font-size:16px;font-weight:500}
 .gd-tip p{margin:0;font-size:14px;line-height:1.6}
-.gd-tip .r{display:flex;gap:4px;align-items:center;justify-content:flex-end;margin-top:12px}
+.gd-tip .r{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}   /* 310번. 단추 사이 8 — 안내창(.row2)과 같게 */
 .gd-tip button{height:40px;border-radius:20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;padding:0 16px;border:1px solid #9c8a68;background:transparent;color:#241c12}   /* 280번. 글자만 있던 [건너뛰기] · [이전] → 테두리 단추 */
 .gd-tip button:hover{background:rgba(36,28,18,.06)}
 .gd-tip button.skip{margin-right:auto}
+.gd-tip button.gd-x{position:absolute;top:12px;right:12px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center}   /* 310번. 안내창 ✕(.dlg-x)와 같은 그림 */
+.gd-tip button.gd-x svg{width:22px;height:22px}
+.gd-tip .n, .gd-tip h4{padding-right:44px}
 .gd-tip button.tonal{background:#e7dac0;border-color:#e7dac0;color:#241c12;padding:0 20px}
 .gd-tip button.fill{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff;padding:0 20px}
 @media print{.gd-block,.gd-hole,.gd-tip{display:none !important}}
@@ -2036,7 +2042,7 @@ dialog#start p.st-msg.err{color:#a3321f}
 .st-cin.un{background:#fff1b8;border-color:#d9b43a}
 /* ── 281번. 위계와 길잡이(사용자: "버튼이 다 위계 없이 똑같이 생겼다 · [사진 없이 직접 적기][읽기] 보고 잘 할 수 있겠냐 · 메뉴판 비율은 지켜야지").
    흔한 단계형 창의 짜임 — 머리 왼쪽 ← (뒤로) · 오른쪽 ✕ (닫기) · 바닥에는 그 단계의 주된 동작 하나(채운 단추). 첫 화면의 둘째 갈래는 목록(›)으로 한 급 낮춘다 */
-.st-head{display:flex;align-items:center;gap:8px;margin:-4px 0 12px}
+.st-head{display:flex;align-items:center;gap:8px;margin:-4px 0 12px;min-height:40px}   /* 310번. 아이콘이 없는 머리(처음 화면)도 40 줄 — 제목 가운데가 ← · ✕ 가운데와 같은 높이 */
 dialog .st-head h3{margin:0;flex:1 1 auto}
 #st-closerow[hidden]{display:none}
 dialog button.st-icon{flex:0 0 auto;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center}
@@ -2092,7 +2098,7 @@ dialog::backdrop{background:transparent}
 dialog{box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.12)}
 dialog#start.first::backdrop{background:#141009}
 dialog .in{position:relative}
-dialog button.dlg-x{position:absolute;top:14px;right:14px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center;z-index:2}
+dialog button.dlg-x{position:absolute;top:20px;right:20px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center;z-index:2}
 dialog button.dlg-x:hover{background:#dccca9}
 dialog button.dlg-x svg{width:22px;height:22px}
 dialog h3{padding-right:48px}
@@ -2437,7 +2443,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 /* ══ 306번. 번역 병기 — 고른 언어의 줄(`.en` 모양 그대로)과 설명 번역(`.desc.tr`)
    글꼴: 일본어는 글꼴마다 이미 받는 `--jp`(가나가 있다), 중국어(간체)는 고를 때만 받는 Noto Sans/Serif SC. 나머지 글자는 본문 글꼴로
    빈 칸 안내 글자는 그 언어 이름(`data-ph`). 빈 설명 번역 칸은 이름 번역 칸(161번)처럼 마우스를 올린 줄에서만 펼친다 */
-.en:lang(ja), .row .desc.tr:lang(ja){font-family:var(--jp)}
+.en:lang(ja), .row .desc.tr:lang(ja){font-family:var(--ja, var(--jp))}   /* 310번. 번역 줄은 일본어 글꼴이 먼저인 --ja(궁서만 jp 와 다르다) */
 .en:lang(zh), .row .desc.tr:lang(zh){font-family:var(--zh), var(--kr)}
 .editing .en[data-ph]:empty::before, .editing .row .desc.tr[data-ph]:empty::before{content:attr(data-ph);opacity:.45}
 .row .desc.tr{margin-top:0}
@@ -2816,9 +2822,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <h3 id="ta-title">번역</h3>
   <p id="ta-msg"></p>
   <p class="sub">전부 다시 하면 손으로 고친 칸도 새 번역으로 바뀝니다. 바뀐 뒤 ↶ 를 한 번 누르면 통째로 되돌아갑니다.</p>
-  <div class="row2 end">
-    <button id="ta-empty" type="button" class="bt-fill">빈 칸만</button>
+  <div class="row2 end">   <!-- 310번. 채운 단추는 오른쪽 끝 -->
     <button id="ta-all" type="button" class="bt-out">전부 다시</button>
+    <button id="ta-empty" type="button" class="bt-fill">빈 칸만</button>
   </div>
 </div></dialog>
 <dialog id="overwarn"><div class="in"><button type="button" class="dlg-x" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>   <!-- 284번. 모든 안내창이 같은 닫기(✕) -->
@@ -2827,9 +2833,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <h3 id="ow-title">한 장에 안 들어갑니다</h3>
   <p id="ow-msg"></p>
   <p class="sub" id="ow-sub"></p>
-  <div class="row2 end">
-    <button id="ow-cancel" type="button" class="bt-fill">고치러 가기</button>
+  <div class="row2 end">   <!-- 310번. 앞으로 가는 채운 단추는 오른쪽 끝(다른 안내창 · 시작 흐름과 같게) -->
     <button id="ow-go" type="button" class="bt-out">그냥 인쇄</button>
+    <button id="ow-cancel" type="button" class="bt-fill">고치러 가기</button>
   </div>
 </div></dialog>
 
@@ -3677,7 +3683,8 @@ const SEALS = {
 const FONTS = {
   gungseo:{  url:"family=Song+Myung&family=Shippori+Mincho:wght@400;500;600",
              kr:"Gungsuh,'궁서',GungsuhChe,'Song Myung','Nanum Myeongjo',serif",
-             jp:"Gungsuh,'Song Myung','Shippori Mincho',serif" },
+             jp:"Gungsuh,'Song Myung','Shippori Mincho',serif",
+             ja:"'Shippori Mincho',Gungsuh,'Song Myung',serif" },   /* 310번. 일본어 번역 줄 — 궁서에는 한자는 있고 가나가 없어 「塩昆布海老パスタ」의 한자는 궁서 · 가나는 Shippori 로 갈렸다(사용자 화면). 번역 줄만 일본어 글꼴을 먼저. 업종 · 가격(jp)은 그대로 궁서 */
   myeongjo:{ url:"family=Nanum+Myeongjo:wght@400;700;800&family=Shippori+Mincho:wght@400;500;600;700",
              kr:"'Nanum Myeongjo','Apple SD Gothic Neo',serif", jp:"'Shippori Mincho','Nanum Myeongjo',serif" },
   gothic:{   url:"family=Noto+Sans+KR:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700",
@@ -5356,7 +5363,7 @@ function applyLook(){
   const href = "https://fonts.googleapis.com/css2?" + f.url + (zh ? (zhSerif ? "&family=Noto+Serif+SC:wght@400;500" : "&family=Noto+Sans+SC:wght@400;500") : "") + "&display=swap";
   if (href !== fontHref){ fontHref = href; const fl = $("#font-link"); fl.onload = afterFonts; fl.href = href; afterFonts(); }   // 246번. CSS 가 다 온 뒤에도
   const r = document.documentElement.style;
-  r.setProperty("--kr", f.kr); r.setProperty("--jp", f.jp); r.setProperty("--zh", zhSerif ? "'Noto Serif SC'" : "'Noto Sans SC'");
+  r.setProperty("--kr", f.kr); r.setProperty("--jp", f.jp); r.setProperty("--ja", f.ja || f.jp); r.setProperty("--zh", zhSerif ? "'Noto Serif SC'" : "'Noto Sans SC'");
   // 152번. 배율 · 상단 크기 · 로고 색은 장마다 — drawSheet 가 종이에 직접 넣는다. 여기서는 표시 값만
   $("#nsz-val").textContent = Math.round((P(panelPage).norenScale ?? NSCALE_DEFAULT) * 100) + "%";
   r.setProperty("--w-name", SETTINGS.bold ? 700 : 400);
@@ -7140,7 +7147,13 @@ function translateEmpty(){
 async function trRun(L, jobs, overwrite){
   const b = $("#f-tr"); if (b.dataset.busy || !jobs.length) return;
   const uniq = [...new Set(jobs.map(j => j.ko))].slice(0, TR_MAX);   // 같은 글은 한 번만(소주가 두 장에 있어도)
-  b.dataset.busy = "1"; b.disabled = true; const was = b.textContent; b.textContent = "번역 중…";
+  /* 310번. **번역 중은 「로딩」이지 「비활성」이 아니다**(상태 여섯 — 292번). 전에는 단추를 막아(disabled) 흐리게 「번역 중…」만 적어,
+     누를 수 없는 단추처럼 보였고 꾸미기 창 구석이라 종이를 보는 눈에 안 들어왔다(사용자). 단추는 그대로 진하게 · 돌아가는 표시 · 지난 초(사진 읽기와 같게 — 291번),
+     화면 아래 알림에도 같은 말을 띄운다(끝나면 결과 알림으로 바뀐다). 누르면 아무 일 없게 하는 것은 busy 표시가 한다 */
+  b.dataset.busy = "1"; b.classList.add("busy"); b.setAttribute("aria-busy", "true"); const was = b.textContent;
+  const t0 = Date.now(), tick = () => { const n = Math.floor((Date.now() - t0) / 1000);
+    b.textContent = "번역 중 " + n + "초"; toast(LANGS[L].name + " 번역 중… " + n + "초 · " + uniq.length + "개", null); };
+  tick(); const tm = setInterval(tick, 1000);
   try {
     const out = await trCall(L, uniq), map = new Map(uniq.map((k, i) => [k, out[i]]));
     let n = 0;
@@ -7149,7 +7162,7 @@ async function trRun(L, jobs, overwrite){
     if (n){ touch(); render(); }   // touch 가 되돌리기 한 칸 — ↶ · Ctrl+Z 로 번역 전체를 되돌린다
     toast(n ? n + "칸을 " + (overwrite ? "새로 " : "") + "채웠습니다. 어색한 곳은 눌러서 고쳐 주세요" : "바뀐 칸이 없습니다", null);
   } catch(e){ toast(e.message, null); }
-  finally { delete b.dataset.busy; b.textContent = was; syncTr(); }
+  finally { clearInterval(tm); delete b.dataset.busy; b.classList.remove("busy"); b.removeAttribute("aria-busy"); b.textContent = was; syncTr(); }
 }
 $("#ta-empty").onclick = () => { $("#trask").close(); const L = L2(); if (L) trRun(L, trTargets(L, false), false); };
 $("#ta-all").onclick   = () => { $("#trask").close(); const L = L2(); if (L) trRun(L, trTargets(L, true), true); };
@@ -7424,15 +7437,17 @@ function guideShow(){
     const r = g.wide ? unionRect(g.wide(t)) : t.getBoundingClientRect(); if (!r){ guideEnd(); return; }
     const pad = 6, block = el("div", "gd-block"), hole = el("div", "gd-hole"), tip = el("div", "gd-tip");
     Object.assign(hole.style, { left:(r.left - pad) + "px", top:(r.top - pad) + "px", width:(r.right - r.left + pad*2) + "px", height:(r.bottom - r.top + pad*2) + "px" });
-    const n = el("div", "n"); n.setAttribute("aria-label", (gi + 1) + " / " + GUIDE.length);   // 270번. 단계는 점으로
+    const n = el("div", "n stepdots"); n.setAttribute("aria-label", (gi + 1) + " / " + GUIDE.length);   // 270번. 단계는 점으로 · 310번. 안내창의 진행 점과 같은 부품(지나온 점이 진하다)
     GUIDE.forEach((_, i) => n.append(el("i", i === gi ? "on" : i < gi ? "past" : "")));
     const h = el("h4"); h.textContent = g.h; const p = el("p"); p.innerHTML = g.p;   // 문구는 코드 안의 고정 글 — 사용자 입력이 아니다
     let dl = null; if (g.dl){ dl = el("dl", "gd-dl"); g.dl.forEach(([k, v]) => { const dt = el("dt"), dd = el("dd"); dt.innerHTML = k; dd.textContent = v; dl.append(dt, dd); }); }
     const row = el("div", "r"), bt = (txt, cls, fn) => { const b = el("button", cls); b.type = "button"; b.textContent = txt; b.onclick = fn; row.append(b); return b; };
-    bt("건너뛰기", "skip", guideEnd);
+    /* 310번. 닫기는 안내창과 같은 둥근 ✕ 하나(규칙 I — 「모든 안내창이 같은 닫기」). 전에는 [건너뛰기] 글자 단추라 창들과 결이 달랐다(사용자: 다른 창들과 결을 맞춰야). 하는 일은 같다 — guideEnd */
+    const gx = el("button", "gd-x"); gx.type = "button"; gx.title = "둘러보기 닫기"; gx.setAttribute("aria-label", "둘러보기 닫기"); gx.onclick = guideEnd;
+    gx.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
     if (gi > 0) bt("이전", "", () => { gi--; guideShow(); });
     if (gi < GUIDE.length - 1) bt("다음", "fill", () => { gi++; guideShow(); }); else bt("끝내기", "fill", guideEnd);   // 291번. 앞으로 가기는 채운 단추(안내창과 같다)
-    tip.append(n, h, p); if (dl) tip.append(dl); tip.append(row); document.body.append(block, hole, tip);
+    tip.append(gx, n, h, p); if (dl) tip.append(dl); tip.append(row); document.body.append(block, hole, tip);
     const tw = tip.offsetWidth, th = tip.offsetHeight, W = innerWidth, H = innerHeight, gap = 16;   // 오른쪽 → 왼쪽 → 아래 → 위
     let x, y;
     if (r.right + gap + tw < W - 8){ x = r.right + gap; y = r.top - 8; }

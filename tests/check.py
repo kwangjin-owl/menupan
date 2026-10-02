@@ -862,6 +862,15 @@ def t08(b, f):
                     if state == 'closed' and dlg == 'printhint': res[f'{dlg}-{state}']['atOpenTop'] = res[f'{dlg}-{state}']['top'] == 0
                 pg.keyboard.press('Escape'); pg.wait_for_timeout(80)
             out[f'{W}x{H}'] = {'r': res, 'err': c.errs}; c.close()
+    # 310번. 채운 단추(앞으로 가기)는 그 줄의 오른쪽 끝 — 인쇄 안내 · 넘침 경고 · 번역 창(309번까지 넘침 경고 · 번역 창은 채운 단추가 왼쪽)
+    c = Ctx(b, f); pg = c.pg; LAST = "(sel)=>{const d=document.querySelector(sel); const f=[...d.querySelectorAll('.bt-fill')].find(e=>e.offsetParent); if(!f) return null; const row=[...f.parentElement.children].filter(e=>e.tagName==='BUTTON'&&e.offsetParent); return row[row.length-1]===f}"
+    o = {}
+    c.js("()=>{delete SETTINGS.printHint}"); pg.click('#b-print'); pg.wait_for_timeout(250); o['printhint'] = c.js(LAST, '#printhint'); pg.keyboard.press('Escape'); pg.wait_for_timeout(120)
+    c.js("()=>{P(0).scale=1.3; P(0).autofit=false; render(); applyScale();}"); pg.click('#b-print'); pg.wait_for_timeout(250); o['overwarn'] = c.js(LAST, '#overwarn'); pg.keyboard.press('Escape'); pg.wait_for_timeout(120)
+    c.js("()=>{P(0).scale=1; render(); applyScale();}"); pg.click('#b-edit'); pg.wait_for_timeout(200)
+    c.js("()=>{const l=document.querySelector('#f-lang'); if(!l) return; l.value='en'; l.dispatchEvent(new Event('change',{bubbles:true})); document.querySelector('#f-tr').click();}"); pg.wait_for_timeout(250)
+    o['trask'] = c.js(LAST, '#trask') if c.js("()=>!!document.querySelector('#trask')?.open") else 'no'
+    out['order310'] = o; c.close()
     return out
 
 # ───────────────────────── 10. 넘침 경고창 문구
@@ -1186,7 +1195,13 @@ def t49(b, f):
     out['done'] = c.js("()=>[SETTINGS.guideDone === true, document.querySelectorAll('.gd-tip,.gd-hole,.gd-block').length]")
     pg.click('#b-help'); pg.wait_for_timeout(200); pg.click('#help-guide'); pg.wait_for_timeout(500)
     out['again'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
-    out['esc'] = c.js("()=>document.querySelectorAll('.gd-tip').length"); out['err'] = c.errs; c.close()
+    out['esc'] = c.js("()=>document.querySelectorAll('.gd-tip').length")
+    # 310번. 닫기는 안내창과 같은 ✕(.gd-x) · 진행 점은 안내창과 같은 부품(.stepdots) · ✕ 를 누르면 끝(다시 저절로 안 뜸)
+    c.js("()=>{delete SETTINGS.guideDone; guideStart();}"); pg.wait_for_timeout(450)
+    has = c.js("()=>[!!document.querySelector('.gd-tip .gd-x'), !!document.querySelector('.gd-tip .stepdots'), !document.querySelector('.gd-tip button.skip')]")
+    if has[0]: pg.click('.gd-tip .gd-x'); pg.wait_for_timeout(250)
+    out['x310'] = has + [c.js("()=>[document.querySelectorAll('.gd-tip,.gd-hole,.gd-block').length, SETTINGS.guideDone === true]")]
+    out['err'] = c.errs; c.close()
     return out
 
 # ───────────────────────── 50. 되돌리기 · 다시 하기(271번) — 막대 단추의 흐림과 Ctrl+Z · Ctrl+Y
@@ -1397,6 +1412,17 @@ def t57(b, f):
         out['fail'] = str(e)[:300]
         try: c.close()
         except Exception: pass
+    # 310번. 번역 중은 「로딩」 — 단추가 막히지 않고(흐리지 않음) 지난 초를 센다 · 아래 알림에도 / 궁서체의 일본어 줄은 일본어 글꼴이 먼저(한자 · 가나가 한 글꼴로)
+    try:
+        c = Ctx(b, f); pg = c.pg; pg.click('#b-edit'); pg.wait_for_timeout(200)
+        c.js("()=>{SETTINGS.font='gungseo'; MENU.sheets[0][0][0].items[0].ja='塩昆布海老パスタ'; const l=document.querySelector('#f-lang'); l.value='ja'; l.dispatchEvent(new Event('change',{bubbles:true})); applyLook(); render(); trCall=(L,t)=>new Promise(r=>setTimeout(()=>r(t.map(_=>'テスト')),4000));}")
+        pg.wait_for_timeout(200)
+        out['ja310'] = c.js("()=>{const e=document.querySelector('.sheet .en:lang(ja)'); return e ? getComputedStyle(e).fontFamily : null}")
+        c.js("()=>{document.querySelector('#f-tr').click(); const d=document.querySelector('#trask'); if (d && d.open) document.querySelector('#ta-empty').click();}"); pg.wait_for_timeout(1400)   # 일본어 칸 하나를 채워 두어 묻는 창이 뜬다 — 빈 칸만
+        out['busy310'] = c.js("()=>{const b=document.querySelector('#f-tr'), u=document.querySelector('#undo'); return [b.disabled, getComputedStyle(b).opacity, /초/.test(b.textContent), !u.hidden && /초/.test(u.textContent)]}")
+        out['err'] += c.errs; c.close()
+    except Exception as e:
+        out['busy310'] = str(e)[:200]
     here = os.path.dirname(os.path.abspath(__file__))
     fn = next((p for p in [os.path.join(here, 'api', 'translate.js'), os.path.join(here, '..', 'api', 'translate.js')] if os.path.exists(p)), None)
     out['server'] = None
@@ -1469,8 +1495,9 @@ def judge(t, r):
                 if not (v['priceIn'] and v['prevIn'] and all(x <= v['colRightMm'] + 0.5 for x in v['pdfPriceXmm'])): bad.append(('긴 이름', L))
             return not bad, f"여백 세로 {r['portrait']['margins'][0]} · 가로 {r['landscape']['margins'][0]} · 아래 잉크 {r['portrait'].get('inkBottom')}/{r['landscape'].get('inkBottom')} mm · 편집 중 인쇄 {r['portrait']['edit_px_diff']}/{r['landscape']['edit_px_diff']} {bad or ''}"
         if t == 't08':
-            bad = [(k, n) for k, v in r.items() if k != '_sec' for n, x in v['r'].items() if x.get('notOpen') or not (x['foot'] and x['hit'] and x['over'] == 0 and x['shadeOk'] and x['detVis'] in (None, True) and (x['h3'] or n.endswith('-open')))] + [(k, 'err') for k, v in r.items() if k != '_sec' and v['err']]
-            return not bad, f"창 14구성 문제 {len(bad)} {bad[:4]}"
+            od = r.get('order310') or {}; obad = [k for k, v in od.items() if v is not True]   # 310번
+            bad = [(k, n) for k, v in r.items() if k not in ('_sec', 'order310') for n, x in v['r'].items() if x.get('notOpen') or not (x['foot'] and x['hit'] and x['over'] == 0 and x['shadeOk'] and x['detVis'] in (None, True) and (x['h3'] or n.endswith('-open')))] + [(k, 'err') for k, v in r.items() if k not in ('_sec', 'order310') and v['err']]
+            return not bad and bool(od) and not obad, f"창 14구성 문제 {len(bad)} {bad[:4]} · 310번 채운 단추가 오른쪽 끝 아님 {obad or '없음'} {od}"
         if t == 't10':
             tl, wd = r['tall'], r['wide']; ok = ('tall' in tl['why'] and '잘립니다' in tl['warn'][2] and 'wide' in wd['why'] and '잘립니다' not in wd['warn'][2] and '[＋ 장 추가]' not in tl['toast'] + tl['warn'][3])
             fake = [x for x in ('[＋ 장 추가]', '[+ 장 추가]') if x in tl.get('tab', '') + wd.get('tab', '')]; ok = ok and not fake   # 297번
@@ -1523,6 +1550,7 @@ def judge(t, r):
             ok = (not r.get('fail') and r['start'] == ['', True] and r['zh'] == ['zh', False, False, True, True] and r['sent'][0] == 1 and r['sent'][2]
                   and r['filled'] == [0, 0, True] and r['en_same'] and r['ask_full'] == [True, True, True] and r['keep'] == [1, ['사람이 고침', True]] and r['undo'] and r['all'] == [True, True, True] and r['all_undo']
                   and r['final_lines'] == [0, True] and r['reopen'] == ['zh', 'zh', True, True] and r['legacy'] == ['en', 'en', True] and not r['err']
+                  and r.get('busy310') == [False, '1', True, True] and str(r.get('ja310') or '').lstrip('"\'').startswith('Shippori')
                   and sv == {'ok': 200, 'origin': 403, 'lang': 400, 'many': 400, 'long': 400, 'count': 422, 'clip': 60, 'off': 503})
             return ok, (f"실패: {r['fail']}" if r.get('fail') else f"고르기 {r['zh']} · 보냄 {r['sent']} · 빈 칸 [남음, 와인 카드, 설명] {r['filled']} · 영문 그대로 {r['en_same']} · 다 차면 묻기 [열림, 빈 칸만 흐림, 안 부름] {r['ask_full']} · 빈 칸만 — 고친 칸 그대로 {r['keep']} · 되돌리기 {r['undo']} · 전부 다시 {r['all']} → 되돌리기 {r['all_undo']} · 완성본 빈 줄 없음 {r['final_lines']} · 저장 왕복 {r['reopen']} · 옛 영문 병기 {r['legacy']}") + f" · 서버 {sv}"
         if t == 't56':
@@ -1552,8 +1580,8 @@ def judge(t, r):
             return ok, f"[↶흐림, ↷흐림, 줄 수] 처음 {r['start']} · 고침 {r['edited']} · ↶ {r['undo']} · ↷ {r['redo']} · Ctrl+Z {r['ctrlz']} · Ctrl+Y {r['ctrly']} · 되돌린 뒤 새로 고침 {r['newedit']} · 오류 {r['err'][:2]}"
         if t == 't49':
             st = r['steps']; ok = (r['plain_open'] == 0 and len(st) == 5 and all(x and x['hole'][0] > 10 and x['hole'][1] > 10 and not x['cover'] and x['inview'] for x in st)
-                  and st[1]['tools'] and st[2]['tools'] and r['done'] == [True, 0] and r['again'] and r['esc'] == 0 and not r['err'])
-            return ok, f"그냥 열면 {r['plain_open']} · 단계 {[ (x or {}).get('h','없음')[:6] for x in st]} · 짚은 칸 {[ (x or {}).get('hole') for x in st]} · 말풍선이 가림 {[ (x or {}).get('cover') for x in st]} · 도구 보임 2/3단계 {st[1].get('tools') if len(st)>1 and st[1] else None}/{st[2].get('tools') if len(st)>2 and st[2] else None} · 끝 {r['done']} · 다시 {r['again']} · Esc {r['esc']} · 오류 {r['err'][:2]}"
+                  and st[1]['tools'] and st[2]['tools'] and r['done'] == [True, 0] and r['again'] and r['esc'] == 0 and r.get('x310') == [True, True, True, [0, True]] and not r['err'])
+            return ok, f"그냥 열면 {r['plain_open']} · 단계 {[ (x or {}).get('h','없음')[:6] for x in st]} · 짚은 칸 {[ (x or {}).get('hole') for x in st]} · 말풍선이 가림 {[ (x or {}).get('cover') for x in st]} · 도구 보임 2/3단계 {st[1].get('tools') if len(st)>1 and st[1] else None}/{st[2].get('tools') if len(st)>2 and st[2] else None} · 끝 {r['done']} · 다시 {r['again']} · Esc {r['esc']} · 310번 [✕ · 같은 점 · 건너뛰기 없음, 닫힘] {r.get('x310')} · 오류 {r['err'][:2]}"
         if t == 't48':
             d = {k: v for k, v in r['idle']}; e = {k: v for k, v in r['edit']}; z = {k: v for k, v in r['back']}
             bad = {k: (d[k], e.get(k)) for k in d if k and k in e and d[k] and e[k] and abs(d[k] - e[k]) > 0.5}   # 폭 0 = 그 모드에서 숨은 단추(편집 도구 막대) — 뺀다
