@@ -2422,6 +2422,16 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .editing:not(.preview) .row:not(.wine) .vol:empty:not(:focus)::before,
 .editing:not(.preview) .sheet .zone:not(:has([contenteditable="true"])){background-color:var(--paper)}
 .hours:empty{border-color:transparent}
+/* ══ 306번. 번역 병기 — 고른 언어의 줄(`.en` 모양 그대로)과 설명 번역(`.desc.tr`)
+   글꼴: 일본어는 글꼴마다 이미 받는 `--jp`(가나가 있다), 중국어(간체)는 고를 때만 받는 Noto Sans/Serif SC. 나머지 글자는 본문 글꼴로
+   빈 칸 안내 글자는 그 언어 이름(`data-ph`). 빈 설명 번역 칸은 이름 번역 칸(161번)처럼 마우스를 올린 줄에서만 펼친다 */
+.en:lang(ja), .row .desc.tr:lang(ja){font-family:var(--jp)}
+.en:lang(zh), .row .desc.tr:lang(zh){font-family:var(--zh), var(--kr)}
+.editing .en[data-ph]:empty::before, .editing .row .desc.tr[data-ph]:empty::before{content:attr(data-ph);opacity:.45}
+.row .desc.tr{margin-top:0}
+.editing .row .desc.tr:empty{display:none}
+.editing .row.tohere .desc.tr:empty, .editing .row:hover .desc.tr:empty, .editing .row:focus-within .desc.tr:empty{display:block}
+#f-tr{width:100%}
 </style>
 </head>
 <body>
@@ -2530,7 +2540,14 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
   <!-- 159번. 짧은 손잡이 둘은 한 줄에. 한 줄씩 쌓으면 창만 길어진다 -->
   <!-- 160 → 161번. **영문 병기는 공통이 맞다.** 메뉴 줄만의 일인 줄 알고 [메뉴 장]으로 옮겼는데,
        **분류 제목의 영문**은 와인 장에도 붙는다. 걸리는 곳이 두 장이면 공통이다 -->
-  <label class="chk"><input type="checkbox" class="m3sw" id="f-bi"> 영문 병기 <small>(분류 · 메뉴 이름 아래)</small></label>
+  <!-- 306번. 영문 병기 스위치 → **함께 적을 언어 고르기**(없음 · English · 中文 · 日本語 — 사용자와 정함). 한국어 아래 작게 한 언어.
+       [빈 칸 번역]은 그 언어의 **빈 칸만** AI 로 채운다 — 사람이 고친 값(176번)을 덮지 않는다. 언어마다 한 번, 누를 때만 부른다 -->
+  <span class="grp two">
+    <span class="fld"><label for="f-lang" title="분류 · 메뉴 이름 아래에 작게">함께 적을 언어</label>
+      <select id="f-lang"><option value="">없음</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select></span>
+    <span class="fld"><label for="f-tr">AI 번역</label>
+      <button id="f-tr" type="button" title="분류 · 메뉴 이름 · 메뉴 설명 중 비어 있는 칸만 구글 제미나이(무료)로 번역해 채웁니다. 이미 적힌 칸은 그대로 둡니다">빈 칸 번역</button></span>
+  </span>
 
   <span class="grp two">
     <span class="fld"><label for="f-mark">추천 표시</label>
@@ -4041,8 +4058,9 @@ function drawSection(sec, path){
      줄마다 1.4px 씩 쌓여 편집 화면과 어긋났다 — 빈 줄을 안 그리는 다른 곳(23 · 40번)과 같은 규칙이다.
      162번. **영문은 `.titlewrap` 안에 넣는다.** 도구(◀▶ · [분류 형식])가 `left:100%` 로 그 상자 뒤에 서므로,
      밖에 두면 영문 병기를 켰을 때 도구가 **영문 위에 겹친다**(74번이 정한 "✕ 는 지우려는 글자 바로 뒤"의 자리가 어긋난다) */
-  if (SETTINGS.bilingual && (sec.en || editing)){
-    const se = el("span","en"); se.textContent = sec.en || ""; se.dataset.path = path+".en";
+  const L = L2();   // 306번. 영어만이던 자리에 고른 언어 — 칸 이름은 그 언어 코드(en · zh · ja). 모양 클래스는 `.en` 그대로
+  if (L && (sec[L] || editing)){
+    const se = el("span","en"); se.textContent = sec[L] || ""; se.dataset.path = path+"."+L; trMark(se, L);
     tw.appendChild(se);
   }
   // 값이 없어도 편집 중에는 빈 칸을 보여준다. 분류마다 쓰고 지울 수 있어야 하는데
@@ -4146,9 +4164,10 @@ function drawSection(sec, path){
       line.append(name, el("span","dots")); if (tag) line.append(tag); line.append(price, tools);
     }
     row.appendChild(line);
-    if (SETTINGS.bilingual && (it.en || editing)){
-      const en = el("div","en"); en.textContent = it.en || "";
-      en.dataset.path = path+".items."+i+".en";
+    const L = L2();   // 306번
+    if (L && (it[L] || editing)){
+      const en = el("div","en"); en.textContent = it[L] || "";
+      en.dataset.path = path+".items."+i+"."+L; trMark(en, L);
       row.appendChild(en);
     }
     /* 125번. 영문 **다음**이다. 영문은 이름을 옮긴 것이라 이름에 붙고, 설명은 그 품목에
@@ -4158,6 +4177,13 @@ function drawSection(sec, path){
       const ds = el("div","desc"); ds.textContent = it.desc || "";
       ds.dataset.path = path+".items."+i+".desc";
       row.appendChild(ds);
+      /* 306번. 설명의 번역은 한국어 설명 바로 아래 한 줄(`desc_en` · `desc_zh` · `desc_ja`). 한국어 설명이 있을 때만 —
+         빈 번역 칸은 이름의 번역 칸(161번)처럼 마우스를 올린 줄에서만 펼친다 */
+      const dk = L ? "desc_" + L : "";
+      if (dk && String(it.desc || "").trim() && (it[dk] || editing)){
+        const dt = el("div","desc tr"); dt.textContent = it[dk] || ""; dt.dataset.path = path+".items."+i+"."+dk; trMark(dt, L);
+        row.appendChild(dt);
+      }
     }
     wrap.appendChild(row);
   });
@@ -5109,7 +5135,7 @@ function setDeep(path, value){
     // 비워 둔 선택 항목까지 저장하면 파일에 빈 값이 쌓인다.
     // 125번. `desc` 는 여기 없다 — 빈 문자열이 **칸이 열려 있다**는 뜻이라
     // 지우면 다 지운 순간 설명 줄이 사라져 이어 쓸 수가 없다. 정리는 저장할 때 한다
-    if (v === "" && (last === "vol" || last === "meta" || last === "en")) delete node[last];
+    if (v === "" && (last === "vol" || last === "meta" || TR_KEYS.includes(last))) delete node[last];   // 306번. 번역 칸(en · zh · ja · desc_*)도
     else node[last] = v;
   }
 }
@@ -5277,10 +5303,11 @@ function applyLook(){
   /* 223번. **글꼴 주소가 실제로 바뀔 때만** 다시 건다. `applyLook()` 은 색을 한 번 바꿀 때마다
      불리므로(색 막대를 끌면 프레임마다), 그때마다 `afterFonts()` 를 걸면 **`applyScale()` 이
      그만큼 따라붙는다**(실측: 색 20번 → 20번). 같은 주소를 다시 넣는 것도 막는다 */
-  const href = "https://fonts.googleapis.com/css2?" + f.url + "&display=swap";
+  const zh = L2() === "zh", zhSerif = /(^|,)\s*serif\s*$/.test(f.kr);   // 306번. 중국어(간체) 줄 글꼴 — 고를 때만 받는다. 일본어는 글꼴마다 이미 받는 `--jp`
+  const href = "https://fonts.googleapis.com/css2?" + f.url + (zh ? (zhSerif ? "&family=Noto+Serif+SC:wght@400;500" : "&family=Noto+Sans+SC:wght@400;500") : "") + "&display=swap";
   if (href !== fontHref){ fontHref = href; const fl = $("#font-link"); fl.onload = afterFonts; fl.href = href; afterFonts(); }   // 246번. CSS 가 다 온 뒤에도
   const r = document.documentElement.style;
-  r.setProperty("--kr", f.kr); r.setProperty("--jp", f.jp);
+  r.setProperty("--kr", f.kr); r.setProperty("--jp", f.jp); r.setProperty("--zh", zhSerif ? "'Noto Serif SC'" : "'Noto Sans SC'");
   // 152번. 배율 · 상단 크기 · 로고 색은 장마다 — drawSheet 가 종이에 직접 넣는다. 여기서는 표시 값만
   $("#nsz-val").textContent = Math.round((P(panelPage).norenScale ?? NSCALE_DEFAULT) * 100) + "%";
   r.setProperty("--w-name", SETTINGS.bold ? 700 : 400);
@@ -6144,7 +6171,8 @@ $("#c-logo").oninput    = e => {
   P(panelPage).logoColor = "custom"; $("#f-logo").value = "custom";
   applyLook(); touchLater();   // 239번
 };
-$("#f-bi").onchange     = e => { SETTINGS.bilingual = e.target.checked; render(); touch(); };
+$("#f-lang").onchange   = e => { SETTINGS.lang2 = e.target.value; delete SETTINGS.bilingual; syncTr(); applyLook(); render(); touch(); };   // 306번. 옛 bilingual 은 여기서 걷는다
+$("#f-tr").onclick      = () => translateEmpty();
 /* 124번. 끄면 점만 안 그린다 — 상자는 그대로 있어 가격이 오른쪽에 붙고 줄 폭도 안 변한다.
    켜져 있을 때는 키를 지워 저장본에 안 남긴다(showNotes 와 같은 규칙) */
 $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음은 전처럼 showDots=false(옛 저장본과 같은 키), 줄표 · 실선은 leader
@@ -6785,7 +6813,7 @@ $("#st-go").onclick = () => {
   const pg = Object.assign(pageDefaults(0), { arts:[], seal:"none", showTitle:false });   // 302번
   Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
   /* 기본 글꼴은 본고딕 — 궁서는 알프스 사장님이 고른 것이다(규칙 A). 글자 도장은 "알프스"가 박혀 있어 끈다 */
-  const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", bilingual:false, pageno:"none", bold:false, pages:[pg] };
+  const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", lang2:"", pageno:"none", bold:false, pages:[pg] };
   applyPresetTo(settings, menu, stPreset);   // 273번. 추천 조합을 새 설정에 직접 건다
   if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages[0].autofit = true; }   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
@@ -6974,6 +7002,55 @@ const READ_API = "https://menupan-jin.vercel.app/api/read";   // 279번. 배포 
    못 물으면(인터넷 · 서버 문제) 켜진 것으로 두고 누를 때 오류로 안내한다 */
 const READ_OFF_MSG = "지금은 여기서 바로 읽기를 쉬고 있습니다. 아래 [다른 AI 앱에서]를 써 주세요.";   // 288번. 그 단추가 바로 아래에 나온다
 let readOn = true;
+/* 306번. 번역 병기 — 함께 적을 언어 하나(SETTINGS.lang2). 옛 저장본의 `bilingual:true` 는 영어로 읽는다(고르면 걷는다) */
+const LANGS = { en:{ name:"English", lang:"en" }, zh:{ name:"中文", lang:"zh-Hans" }, ja:{ name:"日本語", lang:"ja" } };
+const TR_KEYS = ["en","zh","ja","desc_en","desc_zh","desc_ja"];
+const L2 = () => SETTINGS.lang2 !== undefined ? (LANGS[SETTINGS.lang2] ? SETTINGS.lang2 : "") : (SETTINGS.bilingual ? "en" : "");
+const trMark = (e, L) => { e.lang = LANGS[L].lang; e.dataset.ph = LANGS[L].name; };   // 글꼴 고르기(:lang) · 빈 칸 안내 글자
+const TR_API = READ_API.replace(/\/api\/read$/, "/api/translate");
+const TR_MAX = 150, TR_LEN = 120;   // api/translate.js 의 상한과 같게
+function syncTr(){ const b = $("#f-tr"); if (b && !b.dataset.busy) b.disabled = !L2(); }
+/* 번역할 칸 — 그 언어 칸이 비어 있고 한국어가 있는 것만. 와인 카드(와인 장의 메뉴)는 이번에 뺀다 — 영문 칸이 없고 이름이 이미 음차다 */
+function trTargets(L){
+  const jobs = [], t = v => String(v == null ? "" : v).trim();
+  MENU.sheets.forEach(sh => sh.forEach(col => col.forEach(sec => {
+    if (t(sec.name) && !t(sec[L])) jobs.push({ node:sec, key:L, ko:t(sec.name) });
+    if (sec.wine) return;
+    (sec.items || []).forEach(it => {
+      if (t(it.name) && !t(it[L])) jobs.push({ node:it, key:L, ko:t(it.name) });
+      if (t(it.desc) && !t(it["desc_"+L])) jobs.push({ node:it, key:"desc_"+L, ko:t(it.desc) });
+    });
+  })));
+  return jobs.filter(j => j.ko.length <= TR_LEN);
+}
+async function trCall(L, texts){
+  const url = /^https?:$/.test(location.protocol) ? "/api/translate" : TR_API;
+  let r;
+  try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ lang:L, texts }) }); }
+  catch(e){ throw new Error("번역하는 곳에 닿지 못했습니다. 인터넷 연결을 확인해 주세요."); }
+  const j = await r.json().catch(() => ({}));
+  if (r.ok && Array.isArray(j.texts) && j.texts.length === texts.length) return j.texts;
+  if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 눌러 주세요.");
+  if (r.status === 503 && j.code === "off") throw new Error("지금은 번역을 쉬고 있습니다. 칸을 눌러 직접 적어 주세요.");
+  if (r.status === 403) throw new Error("이 메뉴판에서는 번역을 쓸 수 없습니다. 칸을 눌러 직접 적어 주세요.");
+  console.warn("번역 실패", r.status, j);   // 까닭 글자는 화면이 아니라 여기에(295번과 같게)
+  throw new Error("번역하는 곳(구글)이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요.");
+}
+async function translateEmpty(){
+  const L = L2(), b = $("#f-tr"); if (!L || b.dataset.busy) return;
+  const jobs = trTargets(L);
+  if (!jobs.length){ toast(LANGS[L].name + " 칸이 다 차 있습니다. 고칠 칸은 눌러서 고쳐 주세요", null); return; }
+  const uniq = [...new Set(jobs.map(j => j.ko))].slice(0, TR_MAX);   // 같은 글은 한 번만(소주가 두 장에 있어도)
+  b.dataset.busy = "1"; b.disabled = true; const was = b.textContent; b.textContent = "번역 중…";
+  try {
+    const out = await trCall(L, uniq), map = new Map(uniq.map((k, i) => [k, out[i]]));
+    let n = 0;
+    jobs.forEach(j => { const v = String(map.get(j.ko) || "").trim(); if (v && !String(j.node[j.key] || "").trim()){ j.node[j.key] = v; n++; } });
+    if (n){ touch(); render(); }   // touch 가 되돌리기 한 칸 — Ctrl+Z 로 번역 전체를 되돌린다
+    toast(n ? n + "칸을 채웠습니다. 어색한 곳은 눌러서 고쳐 주세요" : "채운 칸이 없습니다", null);
+  } catch(e){ toast(e.message, null); }
+  finally { delete b.dataset.busy; b.textContent = was; syncTr(); }
+}
 async function readStatus(){
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 3000);
   try { const r = await fetch(url, { signal:ac.signal }); const j = await r.json(); readOn = j.enabled !== false; }
@@ -7278,7 +7355,7 @@ function syncControls(){
   { const known = !!$("#f-mark").querySelector('option[value="' + CSS.escape(SETTINGS.mark) + '"]');   // 274번. 목록에 없는 글자면 "직접 쓰기" + 칸
     $("#f-mark").value = known ? SETTINGS.mark : "__own"; const c = $("#f-markc"); c.hidden = known; if (!known) c.value = SETTINGS.mark; }
   syncPageTabs(); syncPage();
-  $("#f-bi").checked   = !!SETTINGS.bilingual;
+  $("#f-lang").value   = L2(); syncTr();   // 306번
   $("#f-paper").value = SETTINGS.paper || "grain"; $("#f-secstyle").value = SETTINGS.secStyle || "line";   // 273번
   $("#f-leader").value = SETTINGS.showDots === false ? "none" : (SETTINGS.leader || "dots");   // 273번   // 켜져 있으면 키 자체가 없다(showNotes 와 같은 규칙)
   $("#f-pageno").value = SETTINGS.pageno;

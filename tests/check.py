@@ -558,10 +558,11 @@ def t28(b, f):
     SEL = "([id,v])=>{const e=document.getElementById(id); e.value=v; e.dispatchEvent(new Event('change',{bubbles:true}));}"
     CHK = "([id,v])=>{const e=document.getElementById(id); e.checked=v; e.dispatchEvent(new Event('change',{bubbles:true}));}"
     CLK = "(id)=>document.getElementById(id).click()"
+    BI = "(v)=>{const l=document.getElementById('f-lang'); if(l){l.value=v?'en':''; l.dispatchEvent(new Event('change',{bubbles:true}));} else {const e=document.getElementById('f-bi'); e.checked=v; e.dispatchEvent(new Event('change',{bubbles:true}));}}"   # 306번
     chk('start')
     c.js(SEL, ['f-layout', 'landscape']); chk('landscape')
     c.js(SEL, ['f-layout', 'portrait']); chk('portrait')
-    c.js(CHK, ['f-bi', True]); chk('bilingual')
+    c.js(BI, True); chk('bilingual')
     c.js("()=>{panelTab='page'; syncPageTabs(); syncPage();}")
     for k in range(3): c.js(CLK, 'b-plus'); pg.wait_for_timeout(60)
     chk('plus')
@@ -570,7 +571,7 @@ def t28(b, f):
     c.js("()=>{const r=document.querySelector('#sz-range'); r.value=120; r.dispatchEvent(new Event('input')); r.dispatchEvent(new Event('change'));}"); chk('slider120')
     c.js(CLK, 'b-fit'); chk('fit')
     c.js("()=>{panelPage=1; syncPageTabs(); syncPage();}"); c.js(CLK, 'b-plus'); c.js(CLK, 'b-plus'); chk('wine plus')
-    c.js(CHK, ['f-bi', False]); chk('bi off')
+    c.js(BI, False); chk('bi off')
     c.js("()=>{const s=MENU.sheets[0]; MENU.sheets[0]=s.flat().slice(0,6).map(x=>[x]); render();}"); chk('6cols')
     c.js(CLK, 'b-fit'); chk('fit wide')
     r = {'steps': out, 'allOk': all(all(x[1]) for x in out), 'err': c.errs}; c.close(); return r
@@ -1283,6 +1284,76 @@ def t56(b, f):
     out['err'] += c.errs; c.close()
     return out
 
+# ───────────────────────── 57. 번역(306번) — 가짜 서버로: 언어 고르기 · 빈 칸만 채움 · 고친 칸 안 덮음 · 와인 카드 뺌 · 되돌리기 · 옛 영문 병기 · 저장 왕복 · 서버 함수
+NODE57 = r"""
+const h = require(process.argv[2]); let next = null; global.fetch = async (u, o) => next(JSON.parse(o.body));
+const ok = a => ({ status:200, ok:true, json:async()=>({ candidates:[{content:{parts:[{text:JSON.stringify(a)}]}}] }), text:async()=>'' });
+const run = req => new Promise(d => { const res = { c:0, setHeader(){}, status(x){this.c=x; return this}, json(j){d([this.c,j])}, end(){d([this.c])} }; h(req,res); });
+const P = (b, o='null') => ({ method:'POST', headers:{origin:o}, body:b });
+console.log = (l => (...a) => { if (!String(a[0]).startsWith('{"route"')) l(...a); })(console.log);
+(async () => { process.env.GEMINI_API_KEY='k'; const R = {};
+  next = () => ok(['Kimchi stew']); R.ok = (await run(P({lang:'en', texts:['김치찌개']})))[0];
+  R.origin = (await run(P({lang:'en', texts:['a']}, 'https://x.example')))[0];
+  R.lang = (await run(P({lang:'fr', texts:['a']})))[0];
+  R.many = (await run(P({lang:'en', texts:Array(151).fill('a')})))[0];
+  R.long = (await run(P({lang:'en', texts:['가'.repeat(121)]})))[0];
+  next = () => ok(['a']); R.count = (await run(P({lang:'zh', texts:['a','b']})))[0];
+  next = () => ok(['x'.repeat(9000)]); R.clip = (await run(P({lang:'ja', texts:['소주']})))[1].texts[0].length;
+  process.env.READ_ENABLED = 'off'; R.off = (await run(P({lang:'en', texts:['a']})))[0];
+  process.stdout.write(JSON.stringify(R));
+})();"""
+def t57(b, f):
+    out = {'err': []}
+    sent = []
+    def fake(route):
+        if route.request.method == 'GET': route.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
+        bd = json.loads(route.request.post_data); sent.append(bd)
+        route.fulfill(status=200, content_type='application/json', body=json.dumps({'texts': [bd['lang'].upper() + ':' + t for t in bd['texts']]}))
+    c = Ctx(b, f, dl=True); pg = c.pg; pg.route('**/api/translate', fake)
+    try:
+        has = c.js("()=>!!document.querySelector('#f-lang')"); out['control'] = has
+        if not has: raise RuntimeError('언어 고르기 없음')
+        EN = "()=>JSON.stringify(MENU.sheets.map(s=>s.map(c=>c.map(x=>[x.en,(x.items||[]).map(i=>i.en)]))))"
+        en0 = c.js(EN)
+        pg.click('#b-edit'); pg.wait_for_timeout(200)
+        out['start'] = c.js("()=>[L2(), document.querySelector('#f-tr').disabled]")
+        pg.select_option('#f-lang', 'zh'); pg.wait_for_timeout(200)
+        out['zh'] = c.js("()=>[SETTINGS.lang2, 'bilingual' in SETTINGS, document.querySelector('#f-tr').disabled, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0, document.querySelector('#font-link').href.includes('SC')]")
+        pg.click('#f-tr'); pg.wait_for_timeout(500)
+        out['sent'] = [len(sent), sent[0]['lang'] if sent else None, len(sent[0]['texts']) == len(set(sent[0]['texts'])) if sent else None]
+        out['filled'] = c.js("""()=>{let miss=0,wine=0,ds=0; MENU.sheets.forEach(s=>s.forEach(c=>c.forEach(x=>{ if(String(x.name||'').trim() && !x.zh) miss++;
+            (x.items||[]).forEach(i=>{ if(x.wine){ if(i.zh) wine++; return; } if(String(i.name||'').trim() && !i.zh) miss++; if(String(i.desc||'').trim() && !i.desc_zh) miss++; if(i.desc_zh) ds++; }); }))); return [miss, wine, ds > 0]}""")
+        out['en_same'] = c.js(EN) == en0
+        n = len(sent); pg.click('#f-tr'); pg.wait_for_timeout(300); out['full_no_call'] = len(sent) == n
+        c.js("()=>{const s=MENU.sheets[0][0][0]; s.items[0].zh='사람이 고침'; delete s.items[1].zh; render(); touch();}")
+        pg.click('#f-tr'); pg.wait_for_timeout(400)
+        out['keep'] = [len(sent[-1]['texts']), c.js("()=>[MENU.sheets[0][0][0].items[0].zh, !!MENU.sheets[0][0][0].items[1].zh]")]
+        pg.click('#b-undo'); pg.wait_for_timeout(300); out['undo'] = c.js("()=>!MENU.sheets[0][0][0].items[1].zh")
+        pg.click('#b-redo'); pg.wait_for_timeout(300)
+        out['final_lines'] = c.js("()=>{toggleEdit(); return [document.querySelectorAll('.sheet .en[lang=zh-Hans]:empty').length, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0]}")
+        with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
+        p = D + 'res/tr_' + f; d.value.save_as(p)
+        out['err'] += c.errs; c.close()
+        c = Ctx(b, 'res/tr_' + f)
+        out['reopen'] = c.js("()=>[L2(), document.querySelector('#f-lang').value, !!MENU.sheets[0][0][0].items[1].zh, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0]")
+        out['err'] += c.errs; c.close()
+        c = Ctx(b, f)   # 옛 저장본 — bilingual:true 는 영어
+        out['legacy'] = c.js("()=>{delete SETTINGS.lang2; SETTINGS.bilingual=true; syncControls(); render(); return [L2(), document.querySelector('#f-lang').value, document.querySelectorAll('.sheet .en[lang=en]').length > 0]}")
+        out['err'] += c.errs; c.close()
+    except Exception as e:
+        out['fail'] = str(e)[:300]
+        try: c.close()
+        except Exception: pass
+    here = os.path.dirname(os.path.abspath(__file__))
+    fn = next((p for p in [os.path.join(here, 'api', 'translate.js'), os.path.join(here, '..', 'api', 'translate.js')] if os.path.exists(p)), None)
+    out['server'] = None
+    if fn:
+        open(D + 'res/t57.js', 'w').write(NODE57)
+        r = subprocess.run(['node', D + 'res/t57.js', os.path.abspath(fn)], capture_output=True, text=True, timeout=60)
+        try: out['server'] = json.loads(r.stdout)
+        except Exception: out['server'] = {'stderr': r.stderr[-300:]}
+    return out
+
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
 def t55(b, f):
     import threading, http.server, socketserver, functools
@@ -1389,6 +1460,13 @@ def judge(t, r):
                 and all(all(x[2] == H for x in o['edit']) and all(x[2] == W for x in o['idle'] + o['preview'] + o['editPrint']) for o in sh.values())
             mins = {k: v[0] for k, v in w.items()}
             return not bad and okv and not (r['err_portrait'] or r['err_landscape']), f"가장자리 최소 {mins} {bad or ''} · 흰 테두리 4mm · 편집만 반투명 {okv}"
+        if t == 't57':
+            sv = r.get('server') or {}
+            ok = (not r.get('fail') and r['start'] == ['', True] and r['zh'] == ['zh', False, False, True, True] and r['sent'][0] == 1 and r['sent'][2]
+                  and r['filled'] == [0, 0, True] and r['en_same'] and r['full_no_call'] and r['keep'] == [1, ['사람이 고침', True]] and r['undo']
+                  and r['final_lines'] == [0, True] and r['reopen'] == ['zh', 'zh', True, True] and r['legacy'] == ['en', 'en', True] and not r['err']
+                  and sv == {'ok': 200, 'origin': 403, 'lang': 400, 'many': 400, 'long': 400, 'count': 422, 'clip': 60, 'off': 503})
+            return ok, (f"실패: {r['fail']}" if r.get('fail') else f"고르기 {r['zh']} · 보냄 {r['sent']} · 빈 칸 [남음, 와인 카드, 설명] {r['filled']} · 영문 그대로 {r['en_same']} · 다 차면 안 부름 {r['full_no_call']} · 고친 칸 {r['keep']} · 되돌리기 {r['undo']} · 완성본 빈 줄 없음 {r['final_lines']} · 저장 왕복 {r['reopen']} · 옛 영문 병기 {r['legacy']}") + f" · 서버 {sv}"
         if t == 't56':
             ok = r['top_px_landscape'] == r['top_px_portrait'] and all(r[k] <= 0.5 for k in r if k.startswith('pill_')) and r['tools_out_4col'] == 0 and r['empty_hours_border'] and r['hours_parse'] == [{'label': '점심', 'time': '11:00 - 15:00'}, {'label': '저녁', 'time': '17:00 - 23:00'}] and not r['err']
             return ok, f"맨 위 글자 세로 · 가로 {r['top_px_portrait']} · {r['top_px_landscape']}px · 알약이 여백선 밖 {[r[k] for k in r if k.startswith('pill_')]}px · 가로 4단 분류 도구 칸 밖 {r['tools_out_4col']}px · 빈 영업시간 선 없음 {r['empty_hours_border']} · 영업 줄 읽기 {bool(r['hours_parse'])}"
@@ -1443,10 +1521,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
