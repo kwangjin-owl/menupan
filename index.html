@@ -1418,7 +1418,9 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .pgpick .pill.on{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 .panel .pgrp.pgtitle{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .panel .pgrp.pgtitle button{font-size:10.5px;padding:4px 8px;letter-spacing:0;font-weight:400}
-.panel .pgrp.pgtitle button#b-copypage{white-space:nowrap;flex:0 0 auto}   /* 290번. 두 줄로 접혀 둥근 단추 안이 답답했다 */
+.panel .pgrp.pgtitle button#b-copypage{white-space:nowrap;flex:0 0 auto}
+.panel .chk:has(input:disabled){opacity:.45;cursor:default}   /* 309번. 막힌 스위치도 흐리게(284번) — 스위치는 비활성 모양이 없어 켤 수 있는 것처럼 보였다 */
+.panel .chk input:disabled{cursor:default}   /* 290번. 두 줄로 접혀 둥근 단추 안이 답답했다 */
 /* 191번. 세 단추를 **같은 폭**으로. 전에는 `auto auto 1fr` 이라 [한 장에 맞춤]만 남는 자리를 다 먹었다 */
 .panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:5px}
 .panel .grp.typo3 button{padding:5px 4px;white-space:nowrap}
@@ -2733,6 +2735,12 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
     <button id="b-fit" type="button">한 장에 맞춤</button>
   </span>
 
+  <!-- 309번. 분류 줄 맞추기 — 장별 스위치, 기본 꺼짐(규칙 G). 단이 하나면 흐리게(맞출 것이 없다 — 284번) -->
+  <div class="pgrp">분류 줄</div>
+  <span class="chkrow">
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-align"> 단끼리 분류 제목 높이 맞추기</label>
+  </span>
+  <div class="pnote">같은 순서의 분류 제목이 단마다 같은 높이에 섭니다. 짧은 단은 아래가 빌 수 있고, 그만큼 글자가 작아질 수 있습니다</div>
   <div class="pgrp">바닥</div>
 
   <!-- 94번. 바닥의 두 구역은 **통째로 껐다 켤 수 있어야 한다.** 줄마다 ✕ 로 다 지우는 것과
@@ -3777,7 +3785,7 @@ MENU.sheets.forEach((sh,i) => { if (!sh.length) MENU.sheets[i] = [[]]; });
    옛 저장본의 맨 위 키(noren · scale · art · seal …)는 1쪽 값으로 옮기고 지운다(15번). 89 · 92번의 옛 변환(low · norenTall ·
    scalePort)도 여기서 장마다 한다 */
 const PAGE_KEYS = ["noren","norenScale","norenTall","showTitle","showSub","logoColor","scale","scalePort","scaleLand","autofit",
-                   "showNotes","showOrigin","arts","seal","sealCells","sealColor"];   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) → 303번. 도장 자리도 칸마다 여럿(sealCells)
+                   "showNotes","showOrigin","arts","seal","sealCells","sealColor","alignRows"];   /* 309번. 분류 줄 맞추기(켜면 true · 끄면 키 없음) */   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) → 303번. 도장 자리도 칸마다 여럿(sealCells)
 /* 198 · 200번. 상단 크기 기본값. **출처는 하나다**(24 · 55번) —
    211번에서 `pageDefaults` · 122번 방어 · `drawSheet()` 대체값 · 창 표시 · ± · 막대가
    0.8 / 0.9 / 1 로 **셋으로 갈라져 있던 것**을 이 상수 하나로 모았다.
@@ -3887,6 +3895,7 @@ MENU.sheets.forEach((_, i) => {
   if (typeof pg.scale !== "number" || !(pg.scale > 0)) pg.scale = SCALE_DEFAULT;   // 212번
   if (!(pg.norenScale > 0)) pg.norenScale = NSCALE_DEFAULT;
   if (typeof pg.autofit !== "boolean") pg.autofit = false;
+  if (pg.alignRows !== true) delete pg.alignRows;   // 309번. 켜짐은 true 하나 — 그 밖의 값은 꺼짐(키 없음)
   if (typeof pg.scalePort !== "number" && SETTINGS.orient !== "landscape") pg.scalePort = pg.scale;
   if (typeof pg.scaleLand !== "number" && SETTINGS.orient === "landscape") pg.scaleLand = pg.scale;
   if (pg.showOrigin === undefined) pg.showOrigin = !!String(F(i).origin || "").trim();
@@ -4910,6 +4919,7 @@ function sheetEl(i){ return document.querySelector('.sheet[data-pi="' + i + '"]'
 function scaleTo(i, s){
   const sh = sheetEl(i); if (!sh) return;
   sh.style.setProperty("--scale", s); wineFit(i); priceWidths(i);
+  alignRows(sh);   // 309번. 배율마다 다시 맞춘다 — 맞춤 · 넘침 판정이 맞춘 모양으로 재야 한다
 }
 /* 160번. **와인 단은 카드 수에 맞춰 높이와 틈을 스스로 잡는다.** 전에는 둘 다 고정값이라
    카드가 셋이면 아래가 휑하고 넷은 아예 안 들어갔다("한 단에 최대 넷은 들어가게").
@@ -5412,6 +5422,32 @@ function bodyRoom(sh){
    2쪽은 345px 이 비어 있었다(종이 794px). 글자를 키워 채우려고 fit() 상한을 올려 봤지만
    1.2 를 넘으면 상단도 같이 커져 더는 채워지지 않았고, space-between 으로 끝까지 벌리면
    분류 둘이 위아래 끝에 붙어 흉하다. 기본 간격의 두 배까지만 늘린다 */
+/* 309번. **분류 줄 맞추기**(장별 스위치 · 기본 꺼짐 — 규칙 G「저절로 바뀌는 것은 켰을 때만」). 사용자와 정함: "k번째 분류 제목끼리, 그 줄에 분류가 있는 단만".
+   표의 행처럼 — 단마다 k번째 분류 제목의 위끝을 그 줄에서 가장 아래인 제목에 맞춘다. 분류가 모자란 단은 그 줄이 없다(2 · 2 · 1 이면 둘째 줄은 앞 두 단만).
+   맞추는 방법은 그 분류 상자의 **위 안쪽 여백**(padding — 68 · 87 · 100번: 띄우는 것은 margin 이 아니라 padding)을 늘리는 것. 칸 사이 틈(row-gap · spread)은 그대로 한 값이다.
+   **꺼져 있으면 아무것도 안 한다** — 우리가 단 여백(data-al)만 걷고 끝난다. 그래서 끈 장은 308번과 0px 로 같다.
+   재는 것은 늘 완성본 모양(128번 — 편집 = 미리보기 = 완성본). 부르는 곳은 셋 — `scaleTo()`(맞춤 · 넘침 판정이 맞춘 모양으로 재도록), `spread()`(틈을 바꾼 뒤), `bodyOver()`(틈을 되돌린 뒤) */
+function alignRows(sh){
+  if (!sh) return;
+  sh.querySelectorAll("section[data-al]").forEach(n => { n.style.paddingTop = ""; delete n.dataset.al; });
+  const pi = +sh.dataset.pi, cols = [...sh.querySelectorAll(".body > .col")];
+  if (!(pi >= 0) || P(pi).alignRows !== true || cols.length < 2) return;
+  const b = document.body, addP = editing && !b.classList.contains("preview"), addM = !b.classList.contains("measuring");
+  if (addP) b.classList.add("preview");
+  if (addM) b.classList.add("measuring");
+  const lists = cols.map(c => [...c.children].filter(n => n.tagName === "SECTION" && n.offsetHeight > 0));   // 107번. 자리를 차지하는 것만
+  const K = Math.max(0, ...lists.map(l => l.length));
+  const headTop = n => (n.querySelector(":scope > .sec-head") || n).getBoundingClientRect().top;
+  for (let k = 0; k < K; k++){   // 위 줄부터 — 위 줄을 맞추면 아래 줄 자리가 바뀌므로 줄마다 다시 잰다
+    const row = lists.map(l => l[k]).filter(Boolean);
+    if (row.length < 2) continue;
+    const tops = row.map(headTop), T = Math.max(...tops);
+    row.forEach((n, j) => { const d = T - tops[j]; if (d > 0.05){
+      n.style.paddingTop = (parseFloat(getComputedStyle(n).paddingTop) + d).toFixed(2) + "px"; n.dataset.al = "1"; } });
+  }
+  if (addM) b.classList.remove("measuring");
+  if (addP) b.classList.remove("preview");
+}
 function spread(){
   /* 97번. ~~편집 중에는 돌지 않는다.~~ 이유는 "편집 중 종이가 늘어나 있어 남는 자리가
      실제보다 크게 잡힌다"였는데, **66번에서 종이를 A4 그대로 되돌리면서 그 전제가
@@ -5436,6 +5472,7 @@ function spread(){
        98번에 "종이에서 형제를 빼서" 구해 봤지만 **세로 세 구성이 되레 어긋나고
        넘침까지 생겨** 되돌렸다. 이 값이 맞다 */
     const room = bodyRoom(sh) - parseFloat(bs.paddingTop) - parseFloat(bs.paddingBottom);   // 192번
+    alignRows(sh);   // 309번. 기본 틈에서 맞춘 모양으로 남는 자리를 잰다(맞춘 여백도 쓰는 자리다)
     /* 180번. **남는 자리는 분류 사이에만, 그리고 장 기준 한 값으로.** 179번은 줄 틈까지 나누고
        칸마다 값을 정해 아래 구멍을 없앴는데, 요청은 그게 아니었다 — 아래 여백은 남겨 두고
        **장 안에서 간격이 고르기만** 하면 된다. 칸마다 값을 정하면 그 조건이 깨진다(64번) */
@@ -5461,6 +5498,7 @@ function spread(){
     if (cand.length){
       const g = Math.min(...cand).toFixed(1) + "px";
       sh.querySelectorAll(".col").forEach(c => c.style.rowGap = g);
+      alignRows(sh);   // 309번. 틈이 바뀌었으니 다시 맞춘다
     }
     /* 재는 값이 어긋나 넘치면 벌린 것을 전부 되돌린다. 넘치는 것보다 비는 편이 낫다.
        여기서는 fit() 과 달리 +1 을 두지 않는다 — 되돌리는 비용이 "빈틈이 조금 남는다"
@@ -5474,8 +5512,10 @@ function spread(){
        `overflow` 에 기대지 말고 **칸이 자리를 넘는지 직접 잰다** */
     const over = [...sh.querySelectorAll(".col")]
       .some(c => c.getBoundingClientRect().height > room + 1);
-    if (over || sh.scrollHeight > sh.clientHeight)
+    if (over || sh.scrollHeight > sh.clientHeight){
       sh.querySelectorAll(".col").forEach(c => c.style.rowGap = "");
+      alignRows(sh);   // 309번
+    }
   });
   b.classList.remove("measuring"); if (tmp) b.classList.remove("preview");
 }
@@ -5547,8 +5587,10 @@ function bodyOver(sh){
   /* 248번. 우리가 벌린 틈 때문에 넘친 것은 되돌려 다시 잰다 */
   const kept = cols.map(c => c.style.rowGap);
   cols.forEach(c => c.style.rowGap = "");
+  alignRows(sh);   // 309번. 틈을 되돌렸으면 다시 맞춘 모양으로 잰다
   if (!over()) return false;
   cols.forEach((c, i) => c.style.rowGap = kept[i]);
+  alignRows(sh);
   return true;
 }
 /* 247번. **띠에 "무엇이 · 얼마나" 넘쳤는지 적는다.** "궁서체 빼고 다 뜬다 · 안 사라진다" — 검사 환경(대체 글꼴)에서는 글꼴 8 × 크기 16 을
@@ -6324,6 +6366,8 @@ function syncPage(){
   $("#f-notes").checked  = pg.showNotes !== false;
   $("#f-title").checked  = pg.showTitle !== false;
   $("#f-sub").checked    = pg.showSub   !== false;
+  { const one = (MENU.sheets[panelPage] || []).length < 2, a = $("#f-align");   // 309번
+    a.checked = pg.alignRows === true; a.disabled = one; const l = a.closest("label"); if (one) l.title = "이 장은 단이 하나라 맞출 것이 없습니다"; else l.removeAttribute("title"); }   // 빈 title="" 을 저장본에 남기지 않는다(t24 — 9바이트)
   $("#nsz-val").textContent = Math.round((pg.norenScale ?? NSCALE_DEFAULT) * 100) + "%";
   syncSize();
 }
@@ -6355,7 +6399,7 @@ $("#b-copypage").onclick = () => {
     PAGE_KEYS.forEach(k => { if (k in copy) dst[k] = copy[k]; else delete dst[k]; });
   });
   applyLook(); render(); touch();
-  toast((panelPage+1) + "쪽의 상단 · 글자 크기 · 바닥 켜고 끄기 · 그림 · 도장을 다른 장에도 맞췄습니다 (바닥에 쓴 글은 그대로입니다)", null);
+  toast((panelPage+1) + "쪽의 상단 · 글자 크기 · 분류 줄 · 바닥 켜고 끄기 · 그림 · 도장을 다른 장에도 맞췄습니다 (바닥에 쓴 글은 그대로입니다)", null);   // 309번. 분류 줄도 옮긴다
 };
 /* 151 → 157번. [병] — **알약으로 병 하나를 고르고 그 병만 손본다**(152번의 쪽 고르기와 같은 꼴).
    종류 다섯은 늘 있고, 이름 붙인 병은 만들고 지운다. 기본값과 같으면 키를 지운다(15번) */
@@ -6653,6 +6697,10 @@ const brandToggle = (key, field, focusSel) => e => {
 };
 $("#f-title").onchange = brandToggle("showTitle", "title", ".noren .jp .bv");
 $("#f-sub").onchange   = brandToggle("showSub",   "sub",   ".noren .ko .bv");
+$("#f-align").onchange = e => {   // 309번. 켜면 true · 끄면 키를 지운다(15번 — 기본값은 저장본에 남기지 않는다)
+  const pg = P(panelPage); if (e.target.checked) pg.alignRows = true; else delete pg.alignRows;
+  touch(); render();
+};
 $("#f-origin").onchange = e => {
   const pg = P(panelPage); pg.showOrigin = e.target.checked;
   touch();

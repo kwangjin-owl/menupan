@@ -184,9 +184,9 @@ def t05(b, f):
     out = {}
     for W in (1600, 1200, 1024, 901, 900, 640, 430):
         for o in ('portrait', 'landscape'):
-            for bi in (False, True):
+            for bi in ((False, True, 'al') if W in (1600, 900, 430) else (False, True)):   # 309번. 'al' = 분류 줄 맞추기를 켠 구성(영문 병기 끔)
                 c = Ctx(b, f, W, 900)
-                c.js("([o,bi])=>{SETTINGS.orient=o; SETTINGS.bilingual=bi; const s=MENU.sheets[0][0][0]; s.items[0].out=true; s.items[0].pick=true; s.items[1].name='아주 아주 긴 메뉴 이름을 넣어 두 줄로 접히는지 보는 줄입니다'; syncControls(); applyLook(); render(); applyScale();}", [o, bi])
+                c.js("([o,bi])=>{SETTINGS.orient=o; SETTINGS.bilingual=bi===true; if (bi==='al') MENU.sheets.forEach((_,i)=>P(i).alignRows=true); const s=MENU.sheets[0][0][0]; s.items[0].out=true; s.items[0].pick=true; s.items[1].name='아주 아주 긴 메뉴 이름을 넣어 두 줄로 접히는지 보는 줄입니다'; syncControls(); applyLook(); render(); applyScale();}", [o, bi])
                 c.pg.wait_for_timeout(100)
                 fin = c.js(POS, '.row, h2, .note, .price, .dots, .wprice, .wname, .seal')
                 dots_mask = c.js("()=>[...document.querySelectorAll('.sheet')].map(sh=>[...sh.querySelectorAll('.row, h2, .note, .price, .dots, .wprice, .wname, .seal')].filter(e=>e.offsetHeight>0).map(e=>!e.classList.contains('dots')))")
@@ -301,7 +301,7 @@ SPECIAL = '</script><b>&amp; <!-- x --> "q" \\\\ 🍷'
 def t14(b, f):
     out = {}
     c = Ctx(b, f, dl=True)
-    c.js("(s)=>{const it=MENU.sheets[0][0][0].items[0]; it.name=s; it.desc=s; F(0).notes.push(s); MENU.brand.sub=s; render(); touch();}", SPECIAL)
+    c.js("(s)=>{const it=MENU.sheets[0][0][0].items[0]; it.name=s; it.desc=s; F(0).notes.push(s); MENU.brand.sub=s; P(0).alignRows=true; render(); touch();}", SPECIAL)   # 309번. 분류 줄 맞추기 키도 왕복
     before = c.js("()=>JSON.stringify([MENU,SETTINGS])")
     fin = c.js(POS, '.row, h2, .note')
     with c.pg.expect_download() as d: c.pg.click('#b-file'); c.pg.click('#b-save')
@@ -572,6 +572,7 @@ def t28(b, f):
     c.js(CLK, 'b-fit'); chk('fit')
     c.js("()=>{panelPage=1; syncPageTabs(); syncPage();}"); c.js(CLK, 'b-plus'); c.js(CLK, 'b-plus'); chk('wine plus')
     c.js(BI, False); chk('bi off')
+    c.js("()=>{panelPage=0; syncPageTabs(); syncPage(); const a=document.getElementById('f-align'); if(a){a.checked=true; a.dispatchEvent(new Event('change',{bubbles:true}));}}"); chk('align on')   # 309번. 분류 줄 맞추기 — 판정과 표시가 같은 답인지
     c.js("()=>{const s=MENU.sheets[0]; MENU.sheets[0]=s.flat().slice(0,6).map(x=>[x]); render();}"); chk('6cols')
     c.js(CLK, 'b-fit'); chk('fit wide')
     r = {'steps': out, 'allOk': all(all(x[1]) for x in out), 'err': c.errs}; c.close(); return r
@@ -717,7 +718,7 @@ def t39(b, f):
     for k, pg in enumerate(S.get('pages', [])):
         if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'sealCells': [9, 2, 2, 'x', 1.5, -1]})   # 303번. 도장 칸 목록
         pg.update({'noren': 'bogus', 'seal': 7, **({} if new else {'art': 'dragon'}),
-                   'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4]})
+                   'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4], 'alignRows': ['yes', 1, False, None][k % 4]})   # 309번. 켜짐은 true 하나
     bad = src[:m.start(2)] + json.dumps(S, ensure_ascii=False, indent=2).replace('<', '\\u003C') + src[m.end(2):]
     open(D + 'res/bad_' + f, 'w', encoding='utf-8').write(bad)
     c = Ctx(b, 'res/bad_' + f)
@@ -725,6 +726,7 @@ def t39(b, f):
     out = c.js("""()=>{const r={}; r.S={font:SETTINGS.font, theme:SETTINGS.theme, mark:SETTINGS.mark, pageno:SETTINGS.pageno, sec:SETTINGS.secAlign, wine:SETTINGS.wineAlign};
       r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).arts ? P(i).arts.map(x=>x.art).join(',') : P(i).art, P(i).seal, P(i).scale, P(i).norenScale]);
       r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+JSON.stringify(P(i).sealCells ?? null) : null);   // 302 · 303번
+      r.align=MENU.sheets.map((_,i)=>'alignRows' in P(i));   // 309번. 망가진 값은 키가 없어야(꺼짐)
       r.ui={font:document.querySelector('#f-font').value, theme:document.querySelector('#f-theme').value, mark:document.querySelector('#f-mark').value, pageno:document.querySelector('#f-pageno').value,
             sec:document.querySelector('#f-secalign').value, wine:document.querySelector('#f-winealign').value};
       r.pageui=[]; for (const i of [0,1]){ panelPage=i; panelTab='page'; syncPageTabs(); syncPage(); r.pageui.push([document.querySelector('#f-noren').value, document.querySelector('#f-art').value, document.querySelector('#f-seal').value, document.querySelector('#sz-val').textContent, document.querySelector('#nsz-val').textContent]); }
@@ -772,7 +774,29 @@ def t41(b, f):
         for(let k=1;k<secs.length;k++) sg.add(+(secs[k].getBoundingClientRect().top-secs[k-1].getBoundingClientRect().bottom).toFixed(1));
         secs.forEach(s=>{const rows=[...s.querySelectorAll(':scope .row')].filter(r=>r.offsetHeight); for(let k=1;k<rows.length;k++) rg.add(+(rows[k].getBoundingClientRect().top-rows[k-1].getBoundingClientRect().bottom).toFixed(1));});});
       return {holes:cols, secGaps:[...sg], rowGaps:[...rg]}})""")
-    out = {'sheets': out, 'err': c.errs}; c.close(); return out
+    out = {'sheets': out, 'err': c.errs}; c.close()
+    # 309번. 분류 줄 맞추기를 켠 구성 — 줄마다 k번째 분류 제목의 위끝이 같은가(그 줄에 분류가 있는 단만) · 분류 틈은 그대로 한 값 · 맞춤이 넘치지 않는가
+    #        켜기 전(같은 구성 · 끔)과 나란히 잰다 — 끔은 어긋나 있어야 시험이 뜻이 있다. 기능이 없는 파일(308번)은 어긋난 채라 실패한다
+    it = lambda n, k: [{'name': f'{n}{i}', 'price': 10000 + i * 1000} for i in range(k)]
+    BADA = [[{'name': '회', 'items': it('회', 5)}, {'name': '식사', 'items': it('밥', 3)}], [{'name': '구이', 'items': it('구', 4)}, {'name': '안주', 'items': it('안', 3)}]]
+    CASES = [('알프스 1쪽 세로 2단', None, False, 'portrait'),
+             ('가로 3단 2·2·1', BADA + [[{'name': '주류', 'items': it('술', 9)}]], True, 'landscape'),
+             ('가로 4단 2·2·3·1', [[{'name': 'A', 'items': it('a', 6)}, {'name': 'B', 'items': it('b', 2)}], [{'name': 'C', 'items': it('c', 3)}, {'name': 'D', 'items': it('d', 5)}],
+                                  [{'name': 'E', 'items': it('e', 2)}, {'name': 'F', 'items': it('f', 2)}, {'name': 'G', 'items': it('g', 2)}], [{'name': 'H', 'items': it('h', 4)}]], True, 'landscape')]
+    ROWS = """()=>{const sh=document.querySelector('.sheet[data-pi="0"]'); const L=[...sh.querySelectorAll('.body > .col')].map(c=>[...c.children].filter(n=>n.tagName==='SECTION'&&n.offsetHeight>0).map(n=>(n.querySelector(':scope > .sec-head')||n).getBoundingClientRect().top));
+      const K=Math.max(...L.map(l=>l.length)); let d=0; for(let k=0;k<K;k++){const t=L.map(l=>l[k]).filter(v=>v!==undefined); if(t.length>1) d=Math.max(d, Math.max(...t)-Math.min(...t));}
+      const sg=new Set(); sh.querySelectorAll('.col').forEach(col=>{const secs=[...col.querySelectorAll(':scope > section')]; for(let k=1;k<secs.length;k++) sg.add(+(secs[k].getBoundingClientRect().top-secs[k-1].getBoundingClientRect().bottom).toFixed(1));});
+      return [+d.toFixed(2), sg.size, overWhy(0), P(0).scale]}"""
+    out['align309'] = []
+    for name, sheet, fit, o in CASES:
+        row = [name]
+        for on in (False, True):
+            c = Ctx(b, f)
+            c.js("""([sheet,fit,o,on])=>{ if (sheet){ MENU.sheets=[sheet]; SETTINGS.pages=[SETTINGS.pages[0]]; MENU.feet=[MENU.feet[0]]; }
+              SETTINGS.orient=o; const pg=P(0); pg.autofit=fit; if(on) pg.alignRows=true; else delete pg.alignRows; syncControls(); applyLook(); render(); applyScale(); }""", [sheet, fit, o, on])
+            c.pg.wait_for_timeout(150); row.append(c.js(ROWS)); out['err'] += c.errs; c.close()
+        out['align309'].append(row)
+    return out
 
 # ───────────────────────── 42. 정렬 셋
 def t42(b, f):
@@ -951,8 +975,15 @@ def t44(b, f):
     out['copy'] = c.js("""()=>{ panelPage=0; delete P(0).showNotes; delete P(0).showTitle; delete P(0).showSub;
       P(1).showNotes=false; P(1).showTitle=false; P(1).showSub=false;
       P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).seal='tri'; P(0).sealCells=[1,2]; delete P(1).sealCells;   /* 302번. 그림 칸 · 도장 자리도 옮겨 가는지 */
+      P(0).alignRows=true; delete P(1).alignRows;   /* 309번. 분류 줄 맞추기도 옮겨 가는지 */
       syncPage(); document.querySelector('#b-copypage').click();
-      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).sealCells)==='[1,2]' }""")
+      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).sealCells)==='[1,2]' && P(1).alignRows===true }""")
+    # 309번. 분류 줄 스위치 — 켜면 그 장만 true · 맞춘 여백이 생김 · 끄면 키가 없어지고 여백도 / 단이 하나인 장에서는 흐림
+    out['align309'] = c.js("""()=>{ const a=document.querySelector('#f-align'); if(!a) return null; delete P(0).alignRows; delete P(1).alignRows; panelPage=0; panelTab='page'; syncPageTabs(); syncPage(); render();
+      a.checked=true; a.dispatchEvent(new Event('change',{bubbles:true})); const on=[P(0).alignRows===true, !('alignRows' in P(1)), document.querySelectorAll('.sheet[data-pi="0"] section[data-al]').length>0];
+      a.checked=false; a.dispatchEvent(new Event('change',{bubbles:true})); const off=[!('alignRows' in P(0)), document.querySelectorAll('section[data-al]').length===0];
+      const keep=MENU.sheets[0]; MENU.sheets[0]=[keep.flat()]; render(); syncPage(); const one=[a.disabled, getComputedStyle(a.closest('label')).opacity!=='1']; MENU.sheets[0]=keep; render(); syncPage();
+      return [...on, ...off, ...one] }""")
     # 302번. [모든 그림에 같게] — 고른 칸의 색 · 진하기가 이 장의 다른 그림 전부에. 없으면(기준 파일) 실패
     out['artsame'] = c.js("""()=>{ const b=document.querySelector('#b-artsame'); if (!b) return null; panelPage=0;
       P(0).arts=[{cell:0, art:'horse', color:'#aa0000', op:'strong'}, {cell:1, art:'zebra'}, {cell:5, art:'fir', op:'mid'}]; panelCell=0; render(); syncPage(); b.click();
@@ -1465,16 +1496,21 @@ def judge(t, r):
         if t == 't36': return None, '그림 코드 해시 — 기준과 같으면 그림을 안 건드린 것(참고 사진 대조는 사진이 있어야 한다)'
         if t == 't37': return r['nbad'] == 0, f"병 잉크 바닥 {r['n'] - r['nbad']}/{r['n']} 1px 이내 · 최대 {r['worst']}"
         if t == 't38': vals = {k: v for k, v in r.items() if k != '_sec'}; ok = all(v[0] == 190 and v[1] <= 1 for v in vals.values()); return ok, f"잉크 바닥 · 호일 {vals}"
-        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|[2]' for a in r.get('arts', [])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')}"
+        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|[2]' for a in r.get('arts', [])) and not any(r.get('align', [True])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')} · 309번 분류 줄 키 남음 {r.get('align')}"
         if t == 't40': return r['allSame'] and r.get('posOk'), f"도장 9가지 동작 고정 {r['allSame']} · 도장(여럿) · 그림이 상단 아래 고른 칸에 섬 {r.get('posOk')} {[x for x in r.get('pos', []) if not x[1] == x[2] == x[3]][:4]} · 302번 sealPos → {r.get('sealPosMove')}"
-        if t == 't41': ok = all(len(x['secGaps']) <= 1 for x in r['sheets']); return ok, f"칸 아래 구멍 {[x['holes'] for x in r['sheets']]} · 분류 틈 {[x['secGaps'] for x in r['sheets']]}"
+        if t == 't41':
+            al = r.get('align309') or []
+            # 309번 — 켬: 줄마다 제목 위끝 차이 0.5px 이하 · 분류 틈 한 값 · 넘침 없음 / 끔: 어긋나 있음(시험이 뜻이 있는지) / 맞춤 켠 구성은 켬이 끔보다 크지 않음
+            aok = bool(al) and all(x[2][0] <= 0.5 and x[2][1] <= 1 and x[2][2] is None and x[1][0] > 0.5 for x in al) and all(x[2][3] <= x[1][3] for x in al)
+            ok = all(len(x['secGaps']) <= 1 for x in r['sheets']) and aok and not r['err']
+            return ok, f"칸 아래 구멍 {[x['holes'] for x in r['sheets']]} · 분류 틈 {[x['secGaps'] for x in r['sheets']]} · 309번 분류 줄 맞추기 [구성, 끔(줄 차 · 틈 수 · 넘침 · 배율), 켬] {al}"
         if t == 't42': ok = all(v['edit'] == 0 and v['prev'] == 0 for k, v in r.items() if k != '_sec') and all(x == 0 for x in r['center']['centerMarginDiff']); return ok, '정렬 셋 · 세 모드 0.0px'
         if t == 't43': ok = all(r[k]['newlines'] == 4 for k in ('sec', 'wine', 'label')) and all(x.count('\n') == 4 for x in r['saved']); return ok, '두 줄 쓰기 · 제한 없음 · 저장 보존'
         if t == 't44':
             dark = lambda h: sum(int(h[i:i+2], 16) for i in (1, 3, 5)) < 60
             sw = r['swatch']; ok = (r['copy'] and r.get('artsame') == '[["#aa0000","strong"],["#aa0000","strong"],["#aa0000","strong"]]' and all(v[0] == v[1] and not dark(v[0]) for v in sw.values()) and r['drag'][0] and r['drag'][1] == 0
-                  and r['drag'][2] == '#203079' and r['drag'][3] == 0 and r['live'] == [0, 4, True, False] and r['wineprice'] == '' and r['nstep'] == 0.84 and r['saveadd'] == [1, True] and not r['err'])
-            return ok, f"복사 {r['copy']} · 모든 그림에 같게 {r.get('artsame')} · 병 색 상자 {sw} · 끄는 중 {r['drag']} · 끄는 중 다시 그리기 · 레드 병 카드 · 바뀜 · 다른 병도 바뀜 {r['live']} · 빈 와인 카드 가격 '{r['wineprice']}' · 상단 걸음 {r['nstep']} · 저장 뒤 병 추가 {r['saveadd']}"
+                  and r['drag'][2] == '#203079' and r['drag'][3] == 0 and r['live'] == [0, 4, True, False] and r['wineprice'] == '' and r['nstep'] == 0.84 and r['saveadd'] == [1, True] and r.get('align309') == [True] * 7 and not r['err'])
+            return ok, f"복사 {r['copy']} · 모든 그림에 같게 {r.get('artsame')} · 병 색 상자 {sw} · 끄는 중 {r['drag']} · 끄는 중 다시 그리기 · 레드 병 카드 · 바뀜 · 다른 병도 바뀜 {r['live']} · 빈 와인 카드 가격 '{r['wineprice']}' · 상단 걸음 {r['nstep']} · 저장 뒤 병 추가 {r['saveadd']} · 309번 분류 줄 스위치 [켬 · 다른 장 그대로 · 여백, 끔 · 여백 없음, 한 단 흐림 · 모양] {r.get('align309')}"
         if t == 't45':
             w = r['worst']; bad = {k: v for k, v in w.items() if v[0] < 5.0}
             sh = r['show']; W = 'rgb(255, 255, 255)'; H = 'rgba(255, 255, 255, 0.35)'   # 243번
