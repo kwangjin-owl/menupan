@@ -1414,10 +1414,10 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
   background:color-mix(in srgb, var(--accent) 78%, transparent);padding:0}
 .editing .sheet.over .guide::after{content:none}
 .panel .pgpick{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
-.panel .pgpick .pill{border-radius:999px;padding:4px 11px;font-size:11px}
+.panel .pgpick .pill{border-radius:999px;padding:4px 11px;font-size:12px}   /* 318번. 11 → 12 */
 .panel .pgpick .pill.on{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 .panel .pgrp.pgtitle{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.panel .pgrp.pgtitle button{font-size:10.5px;padding:4px 8px;letter-spacing:0;font-weight:400}
+.panel .pgrp.pgtitle button{font-size:13px;padding:4px 10px;letter-spacing:0;font-weight:400}   /* 318번. 10.5 → 13 */
 .panel .pgrp.pgtitle button#b-copypage{white-space:nowrap;flex:0 0 auto}
 .panel .chk:has(input:disabled){opacity:.45;cursor:default}
 .panel button.busy{cursor:progress;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:10px;padding-right:10px}   /* 310번. 로딩 — 흐리지 않는다(비활성과 가른다) */
@@ -1467,7 +1467,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .btpick .bpick .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panel .btpick .bpick.on{background:rgba(200,60,45,.22);border-color:var(--ui-accent);color:#f3e9d2;
   box-shadow:0 0 0 1px var(--ui-accent) inset}
-.panel .btpick .addb{border-style:dashed;justify-content:center;margin-top:0;font-size:10.5px}
+.panel .btpick .addb{border-style:dashed;justify-content:center;margin-top:0;font-size:12px}   /* 318번. 카드 이름 12 */
 /* 157번. 병 그림은 **종이색 바탕 위에** 놓는다 — 먹색 · 짙은 초록 병은 어두운 창 바탕에서 안 보인다.
    그리고 `--gold`(148번)는 `.sheet` 에만 있으므로 창에도 같은 값을 준다. 안 그러면 금빛 호일이 사라진다 */
 .panel{--gold:#b3923f}
@@ -1485,19 +1485,19 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .btview{display:flex;align-items:center;gap:7px;margin-top:8px}
 .panel .btview .nm{flex:1;min-width:0}
 .panel .btview .nm.kind{font-size:11px;color:rgba(240,230,205,.7)}
-.panel .btview .del{flex:0 0 auto;padding:4px 8px;font-size:10.5px}
+.panel .btview .del{flex:0 0 auto;padding:4px 10px;font-size:13px}   /* 318번. 10.5 → 13(꾸미기 창 단추 글자) */
 .panel .btview .del:disabled{opacity:.35;pointer-events:none}
 /* 접기(details)는 쓰지 않는다. 남겨 두면 다음 사람이 다시 손댄다 */
 .panel select{width:100%}
 /* 147번. 장마다 그림 한 줄 — "1쪽" 이름표 + select */
 /* 151 → 157번. 병 줄 — 이름표 + (select · 색 상자). 한 번에 병 하나만 보여 주므로 줄이 다섯이면 끝난다 */
-.panel .btrow{display:grid;grid-template-columns:5.4em minmax(0,1fr);gap:5px;align-items:center;margin-top:6px}
+.panel .btrow{display:grid;grid-template-columns:4.4em minmax(0,1fr);gap:5px;align-items:center;margin-top:6px}
 .panel .btcell{display:flex;gap:5px;align-items:center;min-width:0}
 .panel .btcell select{flex:1;min-width:0}
 .panel .btcell input[type=color]{flex:0 0 auto;width:30px;height:26px}
-.panel .addb{margin-top:6px;font-size:10.5px;padding:4px 8px}
+.panel .addb{margin-top:6px;font-size:13px;padding:4px 10px}   /* 318번. 10.5 → 13 */
 .panel .btrow > span{font-size:11px;opacity:.7}
-.panel .btrow select{font-size:11px;padding:3px 20px 3px 7px;width:100%;min-width:0}
+.panel .btrow select{font-size:13px;padding:3px 20px 3px 7px;width:100%;min-width:0}   /* 318번. 11 → 13(꾸미기 창의 다른 고르기 칸과 같게). 처음엔 이름표 칸이 86px(16px 글자 기준 5.4em)이라 「프로방스 로제 (코르셋)」이 잘렸다(t35) → 이름표 칸을 가장 긴 「상표 글자 색」(62px)에 맞춰 70px */
 /* 148번. [와인 장] 카드 항목 줄 — 체크 · 이름 · ▲▼ */
 .panel .wfrow{gap:4px}
 .panel .wfrow span{flex:1}
@@ -2367,7 +2367,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .editing .row .namewrap > .rowtools:not(.rowmove){padding-left:2px}
 .editing .row .namewrap > .rowtools:not(.rowmove) button{font-size:9px;padding:1px 6px;border:1px dashed rgb(201,183,149);border-radius:99px;background:rgb(239,227,201);color:rgb(111,96,71);line-height:1.45;letter-spacing:0}
 .panel .chips i,.panel .chips .chip-own input[type=color]{width:30px;height:26px;border-radius:8px}
-.panel .chips button,.panel .chips .chip-own{font-size:10.5px;color:rgba(240,230,205,.55)}
+.panel .chips button,.panel .chips .chip-own{font-size:12px;color:rgba(240,230,205,.55)}   /* 318번. 카드 이름 10.5 → 12 */
 .panel .chips .on{color:#efe3c9}
 
 /* 301번. 그림 · 도장 색 상자는 이름표 바로 옆(왼쪽 맞춤) */
@@ -2542,6 +2542,21 @@ dialog#start.wide{margin:72px auto 16px;max-height:calc(100vh - 88px)}
 .st-cpaper{height:min(calc(100vh - 376px), 860px);min-height:min(440px, calc(100vh - 376px))}   /* 옛 최소 440px 가 768px 높이 화면에서 창 자체를 45px 넘치게 했다 */
 .st-cphoto img{max-height:min(calc(100vh - 376px), 860px)}
 .st-cpaper.land{height:auto;width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 376px) * 1.414))}
+/* 318번. 단추 규칙(규칙 I) 다시 맞춤 — 312 ~ 317번에 만든 단추를 규칙에 대 보지 않았다(사용자 — "버튼 모양이나 규칙이 일관되지 않은 것 같아").
+   · 확인 화면 [세로 | 가로] · [1단 ~ 4단] — 28px · 각진 모서리 · 켜진 칸 검은 채움이었다 → [글자 | 로고]와 같은 부품(.st-seg — 40 · 테두리 알약 · 켜진 칸은 옅은 색 + ✓)
+   · 돌리기 — 크림 바탕 + 테두리(← · ✕ 와도, [사진 바꾸기]와도 다른 셋째 동그란 모양)였다 → 테두리 단추(bt-out)를 동그랗게
+   · 확인 화면 [＋ 메뉴] 18 · ★ 21 → 칸 높이(26)에 맞춤 — 안내창 안이지 종이 위 도구가 아니다
+   · 꾸미기 창 카드 이름 10 ~ 11.5 → 12, 단추 · 고르기 칸 10.5 ~ 11 → 13(같은 창 다른 단추와 같게) */
+dialog p.st-ccount .st-seg{margin:0}
+dialog .st-rot button.bt-out{width:40px;height:40px;min-width:0;padding:0;border-radius:50%;background:transparent}
+dialog .st-cpaper .st-chead button.st-cadd{height:26px;padding:0 10px;font-size:12px;border-radius:13px}
+dialog .st-crow button.st-cpk{height:26px}
+.panel .btpick .bpick{font-size:12px}
+.panel button.pl-tile{font-size:12px}
+/* 318번. [세로 | 가로] · [1단 ~ 4단]이 40 이 되며 「읽은 메뉴」 줄이 58px 로 커져 창 자체가 9px 넘쳤다(스크롤 둘 — 313번에 사용자가 짚은 것, 재 보고 잡음) → 종이 · 사진 높이 여유 376 → 386 */
+.st-cpaper{height:min(calc(100vh - 386px), 860px);min-height:min(440px, calc(100vh - 386px))}
+.st-cphoto img{max-height:min(calc(100vh - 386px), 860px)}
+.st-cpaper.land{width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 386px) * 1.414))}
 </style>
 </head>
 <body>
@@ -3022,7 +3037,7 @@ dialog#start.wide{margin:72px auto 16px;max-height:calc(100vh - 88px)}
     <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
     <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><span class="st-picwrap"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden><span class="st-busy" id="st-busy" role="status" aria-live="polite" hidden><i class="st-spin" aria-hidden="true"></i><b id="st-busytx"></b></span></span>   <!-- 316번. 읽는 동안 사진 위에 막 · 돌아가는 표시 · 단계 글(사용자 — 갑자기 사진만 돌아 어색했다) -->
-    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><small>방향은 [읽기] 때 자동으로 맞춥니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
+    <span class="st-rot" id="st-rot"><button type="button" class="bt-out" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" class="bt-out" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><small>방향은 [읽기] 때 자동으로 맞춥니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
     </div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 · 314번에 사진 옆으로 옮겼다 -->
     <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
@@ -7320,8 +7335,8 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
   $("#st-ccount").innerHTML = "<span>읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b>" + (stHours.length ? " · 영업시간 <b>" + stHours.length + "</b>줄" : "") + "</span>"
     + (stShopRead ? "" : '<span class="st-warn">가게 이름을 찾지 못했습니다</span>')
-    + '<span class="st-cform"><span class="st-cseg" role="group" aria-label="종이 방향"><button type="button" data-o="portrait">세로</button><button type="button" data-o="landscape">가로</button></span>'
-    + '<span class="st-cseg" role="group" aria-label="단 수">' + [1, 2, 3, 4].map(n => '<button type="button" data-c="' + n + '">' + n + '단</button>').join("") + "</span></span>";   /* 313번. AI 가 방향 · 단을 잘못 읽으면 여기서 고친다(원래 사진을 세로로 읽었다) · 못 찾은 가게 이름은 붉은 경고 */
+    + '<span class="st-cform"><span class="st-seg" role="group" aria-label="종이 방향"><button type="button" data-o="portrait">세로</button><button type="button" data-o="landscape">가로</button></span>'
+    + '<span class="st-seg" role="group" aria-label="단 수">' + [1, 2, 3, 4].map(n => '<button type="button" data-c="' + n + '">' + n + '단</button>').join("") + "</span></span>";   /* 313번. AI 가 방향 · 단을 잘못 읽으면 여기서 고친다(원래 사진을 세로로 읽었다) · 못 찾은 가게 이름은 붉은 경고 */
   $("#st-ccount").querySelectorAll("button").forEach(bt => { const on = bt.dataset.o ? bt.dataset.o === (land ? "landscape" : "portrait") : +bt.dataset.c === nc;
     bt.classList.toggle("on", on); bt.setAttribute("aria-pressed", on ? "true" : "false");
     bt.onclick = () => { syncCheck(); if (bt.dataset.o) stLook.orient = bt.dataset.o; else { stLook.cols = +bt.dataset.c; stParsed.forEach(x => delete x.col); } drawCheck(); }; });   /* 단 수를 바꾸면 사진의 칸 번호는 버리고 고르게 */
