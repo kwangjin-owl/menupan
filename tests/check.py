@@ -1289,7 +1289,7 @@ def t54(b, f):
     fc.value.set_files(png); pg.wait_for_timeout(500)
     out['no_key_box'] = c.js("()=>!document.querySelector('#st-key')")
     pg.click('#st-gemgo'); pg.wait_for_timeout(700)
-    q = reqs[0] if reqs else {'url': '', 'body': '', 'hdr': {}}
+    q = next((x for x in reqs if '"mode"' not in x['body']), {'url': '', 'body': '', 'hdr': {}})   # 315번. 앞에 방향 묻기(mode:orient)가 먼저 간다 — 읽기 요청을 골라 본다
     bd = json.loads(q['body'] or '{}')
     out['gem'] = [q['url'].endswith('/api/read'), (bd.get('image') or '').startswith('data:image/jpeg;base64,'), set(bd) == {'image'}, not any(k.lower() == 'x-goog-api-key' for k in q['hdr']), c.js("()=>!document.querySelector('#st-check').hidden"), c.js("()=>document.querySelector('#st-cshop').value") == '솔밭식당']   # 290번 — 읽은 가게 이름이 확인 화면에
     pg.unroute('**/api/read')
@@ -1307,9 +1307,11 @@ def t54(b, f):
     #         [다음] 뒤 「사진처럼」이 골라져 있고 미리보기가 읽은 종이색 · 시작 뒤 메뉴판에 고친 값이 그대로 · 많은 메뉴가 확인 화면 종이에 스크롤 없이
     ANSB = ("영업: 점심 12:00 - 14:00 · 저녁 17:00 - 24:00? (가끔 변동)\n방향: 가로\n단: 2\n글꼴: 궁서\n색: 종이 #f3ecd9 · 글자 #222222 · 띠 없음\n"
             "[] 1\n알프스 카레파스타 | 11000 | 추천\n깻잎새우 파스타 | 11000\n※ *곱빼기 가능?\n[하이볼(280ml)] 2\n블론드 하이볼 | 8000\n버번 하이볼 | 가격문의\n바닥: 모든 메뉴 포장 가능합니다")
+    orients = []
     def route_b(text):
         def h(r):
             if r.request.method == 'GET': r.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
+            if '"mode"' in (r.request.post_data or ''): orients.append(1)
             r.fulfill(status=200, content_type='application/json', body=json.dumps({'text': text, 'model': 'test'}))
         return h
     c = Ctx(b, 'p_' + f, 1600, 1000); pg = c.pg; pg.route('**/api/read', route_b(ANSB))
@@ -1323,6 +1325,7 @@ def t54(b, f):
         stay314 = c.js(BP) == bp0   # 314번. 돌려도 단추가 제자리(180° 는 같은 단추를 두 번)
         rot = c.js("async()=>{ const i=new Image(); i.src=stPic; await i.decode(); return [i.naturalWidth, i.naturalHeight] }")
         q313 = [len(nfc) == 0, rot == [800, 600]]
+        col315 = c.js("()=>{ const a=document.querySelector('#st-rot').getBoundingClientRect(), b=document.querySelector('#st-pic').getBoundingClientRect(); return Math.abs(a.left-b.left) <= 2 && b.top >= a.bottom - 1 }")   # 315번. 사진 바꾸기도 돌리기와 같은 열(밑)
         q314 = [stay314] + c.js("""()=>{ const im=document.querySelector('#st-picimg').getBoundingClientRect(), r=document.querySelector('#st-rot').getBoundingClientRect(), t=document.querySelector('#st-rot').textContent;
           return [ r.left >= im.right - 1 && r.top < im.bottom && r.bottom > im.top, /왼쪽으로 돌리기/.test(t) && /오른쪽으로 돌리기/.test(t) && !/[↺↻]/.test(t), !!document.querySelector('#st-rotl svg') ] }""")   # 314번. 돌리기는 사진 바로 옆 · 그린 그림 + 글자
         pg.click('#st-rotl'); pg.wait_for_timeout(200)
@@ -1341,6 +1344,8 @@ def t54(b, f):
                    F ? [...F.querySelectorAll('input')].map(x=>x.value).join('|')==='모든 메뉴 포장 가능합니다' : false ] }""")
         c.js("""()=>{ const t=document.querySelectorAll('#st-chours input')[3]; t.value='17:00 - 24:00 (가끔 변동)'; const s=document.querySelector('#st-ctab input.st-csec'); s.value='식사'; }""")
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
+        q315 = [col315, len(orients) == 0]   # 315번. 직접 돌렸으면 방향을 묻지 않는다
+        q315 += c.js("()=>{ const r=parseMenuText('[a]\\nx | 1\\n※ 가\\\\n나\\n바닥: 다\\\\n라'); return [ JSON.stringify(r[0].notes)==='[\"가\",\"나\"]' && JSON.stringify(r.foot)==='[\"다\",\"라\"]' ] }")
         q313 += c.js("()=>{ const t=document.querySelector('#st-topfrom'); return [ t.classList.contains('warn') && getComputedStyle(t).color==='rgb(163, 50, 31)' ] }")
         q += c.js("""()=>[ !!document.querySelector('#st-sw .st-swb[data-p="photo"].on'), /찾지 못했/.test(document.querySelector('#st-topfrom').textContent) && !document.querySelector('#st-topfrom').hidden,
                        getComputedStyle(document.querySelector('#st-prev')).backgroundColor==='rgb(243, 236, 217)' ]""")
@@ -1348,9 +1353,28 @@ def t54(b, f):
         q += c.js("""()=>{ const all=MENU.sheets[0].flat(), s0=all.find(x=>x.name==='식사')||{}, it=(s0.items||[])[0]||{};
           return [ MENU.hours.length===2 && MENU.hours[1].time==='17:00 - 24:00 (가끔 변동)' && !('un' in MENU.hours[1]), it.pick===true && !('un' in it),
                    JSON.stringify(s0.notes||null)==='["곱빼기 가능"]', F(0).notes.includes('모든 메뉴 포장 가능합니다'), SETTINGS.font==='gungseo' ] }""")
-        out['p312'] = q; out['p313'] = q313; out['p314'] = q314
+        out['p312'] = q; out['p313'] = q313; out['p314'] = q314; out['p315'] = q315
     except Exception as e:
         out['p312'] = 'fail: ' + str(e)[:200]
+    out['err'] += c.errs; c.close()
+    # 315번. 돌리지 않은 사진 → 먼저 방향 묻기(작은 사진) → 답 90 → 돌린 사진(800 × 600)으로 읽기 · 확인 화면 사진도 · 알림
+    sent = []
+    def route_o(r):
+        if r.request.method == 'GET': r.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
+        bd = json.loads(r.request.post_data or '{}'); sent.append(bd)
+        r.fulfill(status=200, content_type='application/json', body=json.dumps({'rot': 90} if bd.get('mode') == 'orient' else {'text': ANS54}))
+    c = Ctx(b, 'p_' + f, 1600, 1000); pg = c.pg; pg.route('**/api/read', route_o)
+    try:
+        pg.click('#st-photo'); pg.wait_for_timeout(300)
+        with pg.expect_file_chooser() as fc: pg.click('#st-pic')
+        fc.value.set_files(png); pg.wait_for_timeout(500); pg.click('#st-gemgo'); pg.wait_for_timeout(1200)
+        SZ = "async(u)=>{ const i=new Image(); i.src=u; await i.decode(); return [i.naturalWidth, i.naturalHeight] }"
+        o = [b2 for b2 in sent if b2.get('mode') == 'orient']; rd = [b2 for b2 in sent if not b2.get('mode')]
+        out['orient315'] = [len(o) == 1, bool(o) and max(c.js(SZ, o[0]['image'])) <= 512, bool(rd) and c.js(SZ, rd[0]['image']) == [800, 600],
+                            c.js("async()=>{ const i=document.querySelector('#st-cimg'); await i.decode(); return [i.naturalWidth, i.naturalHeight] }") == [800, 600],
+                            '돌려서 읽었습니다' in c.js("()=>document.querySelector('#undo .t').textContent")]
+    except Exception as e:
+        out['orient315'] = 'fail: ' + str(e)[:200]
     out['err'] += c.errs; c.close()
     big = "방향: 가로\n단: 2\n" + "".join(f"[분류{k}] {1 + (k >= 2)}\n" + "".join(f"메뉴 이름 {k}-{i} | {9000 + i * 1000}\n" for i in range(9)) for k in range(4))
     c = Ctx(b, 'p_' + f, 1600, 1000); pg = c.pg; pg.route('**/api/read', route_b(big))
@@ -1632,8 +1656,8 @@ def judge(t, r):
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
-            ok = r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
-            return ok, f"314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            ok = r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
+            return ok, f"315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"

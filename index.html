@@ -2512,6 +2512,13 @@ dialog .st-rot button:hover{background:#fff}
 .st-rot svg{width:20px;height:20px;flex:none;display:block}
 .st-rot .mir{display:inline-flex;transform:scaleX(-1)}
 .st-rot small{flex-basis:auto;text-align:left;max-width:13em;font-size:12px;color:#5c4f3c;line-height:1.45}
+/* 315번. 사진에 하는 일 셋(돌리기 둘 · 사진 바꾸기)을 사진 오른쪽 한 열에 — 314번은 사진 바꾸기만 사진 아래 가운데라 제각각이었다(사용자) */
+dialog .st-picrow.has{display:grid;grid-template-columns:240px auto;grid-template-rows:auto auto;column-gap:16px;row-gap:14px;align-items:center;justify-content:center}
+.st-picrow.has .st-picbox{display:contents}
+.st-picrow.has .st-picimg{grid-column:1;grid-row:1 / span 2}
+.st-picrow.has .st-rot{grid-column:2;grid-row:1;align-self:end}
+dialog .st-picrow.has button.st-drop{grid-column:2;grid-row:2;align-self:start;justify-self:stretch;width:auto;margin:0;height:40px;border:1px solid #9c8a68;border-radius:20px;font-size:14px;font-weight:500}
+@media (max-width:560px){ dialog .st-picrow.has{grid-template-columns:auto;grid-template-rows:auto} .st-picrow.has .st-picimg,.st-picrow.has .st-rot,dialog .st-picrow.has button.st-drop{grid-column:1;grid-row:auto} }
 </style>
 </head>
 <body>
@@ -2992,7 +2999,7 @@ dialog .st-rot button:hover{background:#fff}
     <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
     <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
-    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로 돌리기</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로 돌리기</span></button><small>글자가 바로 서게 돌리면 더 잘 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
+    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로 돌리기</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로 돌리기</span></button><small>[읽기]를 누르면 방향을 알아서 맞춥니다. 직접 돌려 두면 그대로 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
     </div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 · 314번에 사진 옆으로 옮겼다 -->
     <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
@@ -7085,13 +7092,15 @@ const READ_PROMPT = [
 function parseMenuText(txt){
   const secs = []; let cur = null; const foot = [];
   const unq = v => { v = String(v || "").trim(); const Q = /\s*[?？](?=\s*(?:[(（]|$))/g; const u = Q.test(v); return [v.replace(Q, "").replace(/\s{2,}/g, " ").trim(), u]; };   /* 314번. AI 가 붙인 「?」는 값 끝만이 아니라 괄호 앞에서도 뗀다 — 「24:00? (가끔변동)」이 그대로 남았다(사용자 화면) */
-  const footUn = [], addFoot = t => { const [v, u] = unq(t); foot.push(v); footUn.push(u); };   /* 314번. 바닥 글도 ? 면 노랗게 */
+  const footUn = [], addFoot = t => { const [v, u] = unq(t); foot.push(v); footUn.push(u); };
+  const addNote = t => { const [v, u] = unq(t.replace(/^[*※•·]+\s*/, "")); (cur.notes = cur.notes || []).push(v); if (u) (cur.nun = cur.nun || [])[cur.notes.length - 1] = true; };   // 315번   /* 314번. 바닥 글도 ? 면 노랗게 */
   String(txt || "").replace(/\r/g, "").split("\n").forEach(raw => {
     let l = raw.trim(); if (!l || /^```/.test(l)) return;
-    const nt = l.match(/^※\s*(.+)$/); if (nt){ if (!cur){ addFoot(nt[1]); return; }   /* 314번. 분류 안내 앞의 * · ※ 는 뗀다 — 메뉴판이 ※ 를 붙여 「※ *가끔 …」으로 겹쳤다. ? 면 노랗게 */
+    const nt = l.match(/^※\s*(.+)$/); if (nt && /\\n/.test(nt[1])){ nt[1].split(/\\n/).map(x => x.trim()).filter(Boolean).forEach(x => cur ? addNote(x) : addFoot(x)); return; }   /* 315번. AI 가 줄바꿈을 글자 「\n」로 써 보냈다(한글 글꼴에서 ₩n) */
+    if (nt){ if (!cur){ addFoot(nt[1]); return; }   /* 314번. 분류 안내 앞의 * · ※ 는 뗀다 — 메뉴판이 ※ 를 붙여 「※ *가끔 …」으로 겹쳤다. ? 면 노랗게 */
       const [v, u] = unq(nt[1].replace(/^[*※•·]+\s*/, "")); (cur.notes = cur.notes || []).push(v); if (u) (cur.nun = cur.nun || [])[cur.notes.length - 1] = true; return; }   /* 312번. 분류 안내(※) — 분류가 아직 없으면 바닥 글로 */
     l = l.replace(/^[-*•·]\s+/, "");
-    const ft = l.match(/^바닥\s*[:：]\s*(.+)$/); if (ft){ addFoot(ft[1]); return; }   /* 312번. 어느 분류에도 딸리지 않은 안내 → 바닥 글 */
+    const ft = l.match(/^바닥\s*[:：]\s*(.+)$/); if (ft){ ft[1].split(/\\n/).map(x => x.trim()).filter(Boolean).forEach(addFoot); return; }   // 315번. 글자 「\n」도 줄바꿈   /* 312번. 어느 분류에도 딸리지 않은 안내 → 바닥 글 */
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
     const hr = l.match(/^영업(?:\s*시간)?\s*[:：]\s*(.+)$/);   // 304번. 영업시간 — "점심 11:00 - 15:00 · 저녁 17:00 - 23:00"
     if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x0 => { const [x, u] = unq(x0), m = x.match(/^(\D*?)\s*(\d.*)$/); const o = m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; if (u) o.un = true; return o; }); return; }   /* 312번. 영업시간도 ? 면 노란 칸(확실하면 키 없음 — 304번 모양 그대로) */
@@ -7130,18 +7139,18 @@ function readLook(lk){
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
 let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [], stFoot = [], stFootUn = [], stBlankWarned = false;   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
-function picToJpeg(img, rot = 0){   // 313번. rot — 90 · 180 · 270(시계 방향). 돌린 사진을 보내고 확인 화면에도 그것을 쓴다
-  const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
+function picToJpeg(img, rot = 0, max = 1600, q = .85){   // 313번. rot — 90 · 180 · 270(시계 방향). 돌린 사진을 보내고 확인 화면에도 그것을 쓴다
+  const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
   const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k), side = rot % 180 !== 0;
   c.width = side ? h : w; c.height = side ? w : h;
   const g = c.getContext("2d"); g.translate(c.width / 2, c.height / 2); g.rotate(rot * Math.PI / 180); g.drawImage(img, -w / 2, -h / 2, w, h);
-  return c.toDataURL("image/jpeg", .85);
+  return c.toDataURL("image/jpeg", q);
 }
-let stPicImg = null, stRot = 0;   // 313번. 원본(메모리에만)과 돌린 각도
-function rotPic(d){ if (!stPicImg) return; stRot = (stRot + d + 360) % 360; stPic = picToJpeg(stPicImg, stRot); $("#st-picimg").src = stPic; }
+let stPicImg = null, stRot = 0, stRotDone = false;   // 315번. stRotDone — 사장님이 직접 돌렸거나 이미 방향을 물었으면 다시 묻지 않는다   // 313번. 원본(메모리에만)과 돌린 각도
+function rotPic(d){ if (!stPicImg) return; stRotDone = true; stRot = (stRot + d + 360) % 360; stPic = picToJpeg(stPicImg, stRot); $("#st-picimg").src = stPic; }
 function takePic(file){
   const fr = new FileReader();
-  fr.onload = () => loadImg(fr.result).then(img => { stPicImg = img; stRot = 0; stPic = picToJpeg(img); const im = $("#st-picimg"); im.src = stPic; im.hidden = false; stReadSync(); },
+  fr.onload = () => loadImg(fr.result).then(img => { stPicImg = img; stRot = 0; stRotDone = false; stPic = picToJpeg(img); const im = $("#st-picimg"); im.src = stPic; im.hidden = false; stReadSync(); },
     () => toast("사진을 열지 못했습니다", null));
   fr.readAsDataURL(file);
 }
@@ -7247,6 +7256,12 @@ async function readStatus(){
   finally { clearTimeout(tm); }
   if (!readOn && stWay === "gem") stWay = "app";
   stReadSync();
+}
+async function geminiOrient(dataUrl){   // 315번. 「몇 도 돌려야 글자가 바로 서나」 — 작게 줄인 사진으로 짧게. 무슨 일이 있어도 읽기를 막지 않는다(실패 · 늦음 · 옛 서버 → 0)
+  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 12000);
+  try { const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ image:dataUrl, mode:"orient" }), signal:ac.signal });
+    const j = await r.json().catch(() => ({})); return r.ok && [0, 90, 180, 270].includes(j.rot) ? j.rot : 0; }
+  catch(e){ return 0; } finally { clearTimeout(tm); }
 }
 async function geminiRead(dataUrl){
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
@@ -7361,7 +7376,7 @@ function splitCols(secs, n = 2){   // 분류를 n 단에 나눈다 — 줄 수�
   return C.map(c => c.length ? c : [{ name:"", items:[{ name:"", price:"" }] }]);
 }
 $("#st-photo").onclick = () => {
-  stPic = null; stPicImg = null; stRot = 0; stParsed = null; stWay = "gem"; stOther = false;   // 288번   // 276번. 키가 필요 없어 제미나이가 기본
+  stPic = null; stPicImg = null; stRot = 0; stRotDone = false; stParsed = null; stWay = "gem"; stOther = false;   // 288번   // 276번. 키가 필요 없어 제미나이가 기본
   $("#st-ans").value = ""; $("#st-appmsg").textContent = "";
   const im = $("#st-picimg"); im.removeAttribute("src"); im.hidden = true;
   $("#st-choose").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; footShade($("#start"));
@@ -7382,9 +7397,20 @@ $("#st-gemgo").onclick = async () => {
   const msg = $("#st-gemmsg");
   if (!stPic){ msg.textContent = "먼저 메뉴판 사진을 올려 주세요."; return; }
   const b = $("#st-gemgo"); b.disabled = true; msg.classList.remove("err");
-  const t0 = Date.now(), tick = () => { msg.textContent = "읽는 중입니다… " + Math.floor((Date.now() - t0) / 1000) + "초"; }; tick(); const tm = setInterval(tick, 1000);   // 291번. "10초쯤"은 잰 값이 아니었다 — 지난 시간을 센다(남은 시간은 서버가 알려 주지 않는다)
-  try { const t = await geminiRead(stPic); msg.textContent = ""; toCheck(t, msg); }
-  catch(e){ msg.textContent = e.message; stOther = true; msg.classList.add("err"); }   // 288번. 한 번 실패하면 다른 앱 길을 꺼내 준다
+  let stage = "읽는 중입니다… ";
+  const t0 = Date.now(), tick = () => { msg.textContent = stage + Math.floor((Date.now() - t0) / 1000) + "초"; }; tick(); const tm = setInterval(tick, 1000);
+  try {
+    let turned = 0;
+    if (stPicImg && !stRotDone){   /* 315번. 돌리지 않은 사진이면 먼저 방향을 묻고 바로 세워서 읽는다 — 누운 원래 사진을 그대로 읽으면 세로 · 지어낸 영업시간 · 냉수육 → 탕수육(사용자 화면, 돌린 사진은 맞았다) */
+      stage = "사진 방향을 보는 중… "; tick();
+      turned = await geminiOrient(picToJpeg(stPicImg, stRot, 512, .7)); stRotDone = true;
+      if (turned){ stRot = (stRot + turned) % 360; stPic = picToJpeg(stPicImg, stRot); $("#st-picimg").src = stPic; }
+      stage = "읽는 중입니다… "; tick();
+    }
+    const t = await geminiRead(stPic); msg.textContent = ""; toCheck(t, msg);
+    if (turned && !$("#st-check").hidden) toast("사진을 글자가 바로 서게 " + (turned === 180 ? "거꾸로" : turned === 90 ? "오른쪽으로" : "왼쪽으로") + " 돌려서 읽었습니다. 틀렸으면 [←]로 돌아가 돌려 주세요", null);
+  }
+  catch(e){ msg.textContent = e.message; stOther = true; msg.classList.add("err"); }
   finally { clearInterval(tm); b.disabled = false; stReadSync(); }
 };
 $("#st-copy").onclick = async () => {
