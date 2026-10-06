@@ -60,7 +60,7 @@ def t02(b, f):
         for fo in font_list(c):
             for se in SEALS:
                 c.pg.goto(url(f))
-                fs.append([fo, se, c.js("([o,fo,se])=>{SETTINGS.orient=o; SETTINGS.font=fo; MENU.sheets.forEach((_,i)=>{P(i).seal=se; P(i).autofit=true;}); syncControls(); applyLook(); render(); fitNow(); applyScale(); return [...MENU.sheets.keys()].map(i=>overA4(i))}", [o, fo, se])])
+                fs.append([fo, se, c.js("([o,fo,se])=>{SETTINGS.orient=o; SETTINGS.font=fo; MENU.sheets.forEach((_,i)=>{P(i).seals = se==='none' ? [] : [{cell:5, seal:se}]; P(i).autofit=true;   /* 323번. 도장은 칸마다 */}); syncControls(); applyLook(); render(); fitNow(); applyScale(); return [...MENU.sheets.keys()].map(i=>overA4(i))}", [o, fo, se])])
         out['font_seal_' + o] = [x for x in fs if any(x[2])]
         out['font_seal_n_' + o] = len(fs)
         arts = []
@@ -716,7 +716,7 @@ def t39(b, f):
     S.update({'font': 'nope', 'theme': 42, 'mark': 'toolongmark', 'pageno': 'zzz', 'secAlign': 'diag', 'wineAlign': 5})   # 274번. 'X' 는 이제 올바른 글자 표시(영문 1자) — 7자 넘는 글자로 시험
     new = 'function normArts' in src   # 302번. 새 형식 파일은 칸 목록을 망가뜨린다(옛 키 art 가 있으면 그쪽이 먼저 옮겨지므로 넣지 않는다)
     for k, pg in enumerate(S.get('pages', [])):
-        if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'sealCells': [9, 2, 2, 'x', 1.5, -1]})   # 303번. 도장 칸 목록
+        if new: pg.pop('art', None); pg.update({'arts': [{'cell': 9, 'art': 'dragon'}, {'cell': 2, 'art': 'horse', 'color': 'nope', 'op': 'x'}, {'cell': 2, 'art': 'zebra'}, 'junk', {'cell': 1.5, 'art': 'fir'}], 'seals': [{'cell': 9, 'seal': 'tri'}, {'cell': 2, 'seal': 'star', 'color': 'nope'}, {'cell': 2, 'seal': 'tri'}, 'junk', {'cell': 1.5, 'seal': 'tri'}, {'cell': 3, 'seal': 'bogus'}]})   # 303 → 323번. 칸마다 도장 목록(망가진 것 섞음)
         pg.update({'noren': 'bogus', 'seal': 7, **({} if new else {'art': 'dragon'}),
                    'norenScale': ['abc', None, 0, -1][k % 4], 'scale': ['big', -2, 0, None][k % 4], 'alignRows': ['yes', 1, False, None][k % 4]})   # 309번. 켜짐은 true 하나
     bad = src[:m.start(2)] + json.dumps(S, ensure_ascii=False, indent=2).replace('<', '\\u003C') + src[m.end(2):]
@@ -724,8 +724,8 @@ def t39(b, f):
     c = Ctx(b, 'res/bad_' + f)
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200)
     out = c.js("""()=>{const r={}; r.S={font:SETTINGS.font, theme:SETTINGS.theme, mark:SETTINGS.mark, pageno:SETTINGS.pageno, sec:SETTINGS.secAlign, wine:SETTINGS.wineAlign};
-      r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).arts ? P(i).arts.map(x=>x.art).join(',') : P(i).art, P(i).seal, P(i).scale, P(i).norenScale]);
-      r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+JSON.stringify(P(i).sealCells ?? null) : null);   // 302 · 303번
+      r.pages=MENU.sheets.map((_,i)=>[P(i).noren, P(i).arts ? P(i).arts.map(x=>x.art).join(',') : P(i).art, JSON.stringify(P(i).seals), P(i).scale, P(i).norenScale]);
+      r.arts=MENU.sheets.map((_,i)=>P(i).arts ? JSON.stringify(P(i).arts)+'|'+JSON.stringify(P(i).seals ?? null)+(['seal','sealCells','sealColor','sealPos'].some(k=>k in P(i)) ? '|옛 키 남음' : '') : null);   // 302 · 303 · 323번
       r.align=MENU.sheets.map((_,i)=>'alignRows' in P(i));   // 309번. 망가진 값은 키가 없어야(꺼짐)
       r.ui={font:document.querySelector('#f-font').value, theme:document.querySelector('#f-theme').value, mark:document.querySelector('#f-mark').value, pageno:document.querySelector('#f-pageno').value,
             sec:document.querySelector('#f-secalign').value, wine:document.querySelector('#f-winealign').value};
@@ -754,13 +754,13 @@ def t40(b, f):
     out = {'base': base, 'steps': steps, 'allSame': all(s[1] for s in steps), 'err': c.errs}
     # 302 · 303번. 고른 칸에 선다 — 가운데점이 **상단 아래부터** 종이를 2 × 3 으로 나눈 그 칸에 있는지(두 방향 · 칸 여섯). 도장은 여러 칸을 한꺼번에 켜 본다
     out['pos'] = c.js("""()=>{ const o=[]; for (const or of ['portrait','landscape']){ SETTINGS.orient=or;
-        for (let k=0;k<6;k++){ P(0).seal='tri'; P(0).sealCells=[k, (k+3)%6].sort((a,b)=>a-b); P(0).arts=[{cell:k, art:'horse'}]; render(); applyScale();
+        for (let k=0;k<6;k++){ P(0).seals=[k, (k+3)%6].sort((a,b)=>a-b).map(x=>({cell:x, seal:'tri'}));   /* 323번 */ P(0).arts=[{cell:k, art:'horse'}]; render(); applyScale();
           const sh=document.querySelector('.sheet'), S=sh.getBoundingClientRect(), tb=sh.querySelector('.noren').getBoundingClientRect().bottom-S.top;
           const at=e=>{ const q=e.getBoundingClientRect(); const cx=(q.left+q.right)/2-S.left, cy=(q.top+q.bottom)/2-S.top; return Math.floor(cx/(S.width/2)) + 2*Math.floor((cy-tb)/((S.height-tb)/3)); };
           const seals=[...sh.querySelectorAll('.seal:not(.blank)')].map(at).sort((a,b)=>a-b);
-          o.push([or, k, JSON.stringify(seals)===JSON.stringify(P(0).sealCells) ? k : 'seal '+JSON.stringify(seals), at(sh.querySelector('.art'))]); } } return o; }""")
-    out['sealPosMove'] = c.js("()=>{ if (typeof normArts!=='function') return null; const p={seal:'tri', sealPos:0}; normArts(p, []); return JSON.stringify(p.sealCells) + (('sealPos' in p) ? ' 남음' : '') }")   # 302번 파일의 sealPos → [0]
-    out['posOk'] = all(x[1] == x[2] == x[3] for x in out['pos']) and out['sealPosMove'] == '[0]'; c.close(); return out
+          o.push([or, k, JSON.stringify(seals)===JSON.stringify(P(0).seals.map(x=>x.cell)) ? k : 'seal '+JSON.stringify(seals), at(sh.querySelector('.art'))]); } } return o; }""")
+    out['sealPosMove'] = c.js("()=>{ if (typeof normSeals!=='function') return null; const p={seal:'tri', sealPos:0, sealColor:'band'}, q={seal:'none', sealCells:[1,2]}; normSeals(p, []); normSeals(q, []); return JSON.stringify(p.seals) + '|' + JSON.stringify(q.seals) + ((['seal','sealPos','sealColor'].some(k=>k in p)) ? ' 남음' : '') }")   # 302번 파일의 sealPos · 296번 색 → 323번 칸마다 · 없음 → 빈 목록
+    out['posOk'] = all(x[1] == x[2] == x[3] for x in out['pos']) and out['sealPosMove'] == '[{"cell":0,"seal":"tri","color":"band"}]|[]'; c.close(); return out
 
 # ───────────────────────── 41. 칸 아래 구멍 · 틈
 def t41(b, f):
@@ -983,10 +983,10 @@ def t44(b, f):
     # (a) [다른 장에도 똑같이] — 켜짐(키 없음)도 옮겨 가는지. 2쪽을 끄고 1쪽은 켠 채 복사
     out['copy'] = c.js("""()=>{ panelPage=0; delete P(0).showNotes; delete P(0).showTitle; delete P(0).showSub;
       P(1).showNotes=false; P(1).showTitle=false; P(1).showSub=false;
-      P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).seal='tri'; P(0).sealCells=[1,2]; delete P(1).sealCells;   /* 302번. 그림 칸 · 도장 자리도 옮겨 가는지 */
+      P(0).arts=[{cell:0, art:'horse', color:'#112233'}, {cell:3, art:'fir', op:'mid'}]; P(0).seals=[{cell:1, seal:'tri'}, {cell:2, seal:'star', color:'#123456'}]; P(1).seals=[];   /* 302 · 323번. 그림 칸 · 칸마다 도장(모양 · 색)도 옮겨 가는지 */
       P(0).alignRows=true; delete P(1).alignRows;   /* 309번. 분류 줄 맞추기도 옮겨 가는지 */
       syncPage(); document.querySelector('#b-copypage').click();
-      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).sealCells)==='[1,2]' && P(1).alignRows===true }""")
+      return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).seals)==='[{"cell":1,"seal":"tri"},{"cell":2,"seal":"star","color":"#123456"}]' && P(1).alignRows===true }""")
     # 309번. 분류 줄 스위치 — 켜면 그 장만 true · 맞춘 여백이 생김 · 끄면 키가 없어지고 여백도 / 단이 하나인 장에서는 흐림
     out['align309'] = c.js("""()=>{ const a=document.querySelector('#f-align'); if(!a) return null; delete P(0).alignRows; delete P(1).alignRows; panelPage=0; panelTab='page'; syncPageTabs(); syncPage(); render();
       a.checked=true; a.dispatchEvent(new Event('change',{bubbles:true})); const on=[P(0).alignRows===true, !('alignRows' in P(1)), document.querySelectorAll('.sheet[data-pi="0"] section[data-al]').length>0];
@@ -1086,7 +1086,7 @@ def t46(b, f):
         c = Ctx(b, f); out[f'sec_pad_{n}'] = c.js(T46_SEC, n); out['err'] += c.errs; c.close()
     for seal in ('on', 'off'):                                                # 254 · 255 — 빈 분류의 밑줄이 도장 윗변을 20px 지나면: 도장 켬 = 넘침, 끔 = 아님
         c = Ctx(b, f)
-        out['254_line_' + seal] = c.js("""(off)=>{ if(off){ P(0).seal='none'; }
+        out['254_line_' + seal] = c.js("""(off)=>{ if(off){ P(0).seals=[]; }
           MENU.sheets[0][1].push({name:'', items:[]}); render();
           const s=document.querySelectorAll('.sheet')[0]; const seal=s.querySelector('.seal'); const col=s.querySelectorAll('.body .col')[1]; const sec=[...col.children].pop();
           const sealTop = off ? (s.getBoundingClientRect().bottom - 40 - 52) : seal.getBoundingClientRect().top;
@@ -1133,7 +1133,7 @@ def t47(b, f):
     out['logo_mask_invert'] = [m1 > 0, m1 != m2, t_clear == 0, t_amb == 2]
     pg.click('#st-go'); pg.wait_for_timeout(700)
     out['guide_up'] = c.js("()=>!!document.querySelector('.gd-tip')"); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)   # 269번부터 시작하면 가이드가 뜬다 — 닫고 간다
-    out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:P(0).seal, art:(P(0).arts ? (P(0).arts.map(x=>x.art).join(',')||'none') : P(0).art), logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
+    out['started'] = c.js("()=>({open:document.querySelector('#start').open, editing:document.body.classList.contains('editing'), sheets:document.querySelectorAll('.sheet').length, title:document.title, flag:SETTINGS.startScreen===undefined, undo:undoStack.length, font:SETTINGS.font, seal:((P(0).seals||[]).map(x=>x.seal).join(',')||'none'), art:(P(0).arts ? (P(0).arts.map(x=>x.art).join(',')||'none') : P(0).art), logo:!!SETTINGS.logoImg, focus:document.activeElement?.dataset?.path||''})")
     with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     out['save_name'] = d.value.suggested_filename; d.value.save_as(D + 'res/start_saved_' + f)
     out['err'] = list(c.errs); c.close()
@@ -1238,9 +1238,9 @@ def t52(b, f):
     before = c.js(snap); st = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})"); out = {'apply': {}}
     keys = c.js("()=>Object.keys(PRESETS).filter(k=>!PRESETS[k].hidden)")   # 285번. 숨긴 조합(basic = 내 조합의 시작 모양)은 타일이 없다
     for k in keys:
-        c.js("()=>{ P(0).sealCells=[1,3]; P(0).arts=[{cell:0, art:'horse', color:'#123456'}]; P(0).art='horse'; document.querySelector('#f-presets').scrollIntoView(); }")   # 302번. 조합을 누르면 그림 칸 · 도장 자리가 처음 값으로
+        c.js("()=>{ P(0).seals=[{cell:1, seal:'tri'}, {cell:3, seal:'star', color:'#123456'}]; P(0).arts=[{cell:0, art:'horse', color:'#123456'}]; P(0).art='horse'; document.querySelector('#f-presets').scrollIntoView(); }")   # 302번. 조합을 누르면 그림 칸 · 도장 자리가 처음 값으로
         pg.click(f'#f-presets [data-p="{k}"]'); pg.wait_for_timeout(200)   # 284번. 목록 → 타일
-        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, P(0).seal!=='word' && P(0).seal!=='rword', P(0).sealCells===undefined && (!q.art || JSON.stringify(P(0).arts)===JSON.stringify(q.art==='none'?[]:[{cell:5, art:q.art}])), (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
+        out['apply'][k] = c.js("(k)=>{const q=PRESETS[k]; return [SETTINGS.font===q.font, SETTINGS.theme===q.theme, (SETTINGS.paper||'grain')===q.paper, (SETTINGS.secStyle||'line')===q.sec, SETTINGS.mark===q.mark, P(0).noren===q.noren, (P(0).seals||[]).every(x=>x.seal!=='word' && x.seal!=='rword' && !('color' in x)), JSON.stringify((P(0).seals||[]).map(x=>[x.cell,x.seal]))===JSON.stringify(q.seal && q.seal!=='none' ? [[5, q.seal]] : []) && (!q.art || JSON.stringify(P(0).arts)===JSON.stringify(q.art==='none'?[]:[{cell:5, art:q.art}])), (document.querySelector('#f-presets .pl-tile.on')||{}).dataset?.p===k]}", k)
     out['same_size_content'] = c.js(snap) == before
     for _ in keys: pg.keyboard.press('Control+z'); pg.wait_for_timeout(120)
     out['undo_back'] = c.js("()=>JSON.stringify({f:SETTINGS.font,t:SETTINGS.theme,m:SETTINGS.mark})") == st
@@ -1336,8 +1336,10 @@ def t54(b, f):
         rot = c.js("async()=>{ const i=new Image(); i.src=stPic; await i.decode(); return [i.naturalWidth, i.naturalHeight] }")
         q313 = [len(nfc) == 0, rot == [800, 600]]
         col315 = c.js("()=>{ const a=document.querySelector('#st-rot').getBoundingClientRect(), b=document.querySelector('#st-pic').getBoundingClientRect(); return Math.abs((a.left+a.right)/2-(b.left+b.right)/2) <= 3 && b.top >= a.bottom - 1 }")   # 315 → 316번. 사진 바꾸기는 돌리기 밑에 혼자 가운데
+        POS325 = "(q)=>{ const R=s=>{const e=document.querySelector(s); if(!e||!e.offsetParent) return null; const r=e.getBoundingClientRect(); return [Math.round(r.left),Math.round(r.top),Math.round(r.right),Math.round(r.bottom)]}; return [R(q[0]), R(q[1]), R(q[2])] }"   # 325번. [←, 제목, 주 단추]
         q317 = c.js("""()=>{ const a=document.querySelector('#st-rotl').getBoundingClientRect(), b=document.querySelector('#st-rotr').getBoundingClientRect(), i=document.querySelector('.st-picwrap').getBoundingClientRect();
           return [ Math.abs(a.top-b.top) < 1 && a.width <= 44 && a.height <= 44, b.right - a.left <= i.width, Math.abs((a.left+b.right)/2 - (i.left+i.right)/2) <= 2 ] }""")   # 317번. 동그란 아이콘 단추 한 쌍 · 사진 폭 안 · 사진 가운데
+        pos325 = [c.js(POS325, ['#st-read-back', '#st-read .st-head h3', '#st-gemgo'])]   # 325번. ① 사진
         top317 = c.js("()=>Math.round(document.querySelector('#start').getBoundingClientRect().top)")
         q314 = [stay314] + c.js("""()=>{ const im=document.querySelector('#st-picimg').getBoundingClientRect(), r=document.querySelector('#st-rot').getBoundingClientRect(), t=document.querySelector('#st-rot').textContent;
           return [ r.top >= im.bottom - 1 && Math.abs((r.left + r.right) / 2 - (im.left + im.right) / 2) <= 3, !/[↺↻]/.test(t) && document.querySelector('#st-rotl').getAttribute('aria-label')==='왼쪽으로 돌리기' && document.querySelector('#st-rotr').getAttribute('aria-label')==='오른쪽으로 돌리기' && !!document.querySelector('#st-rotl').title, !!document.querySelector('#st-rotl svg') ] }""")   # 314번 → 316번. 돌리기는 사진 바로 밑 가운데 · 그린 그림 + 글자(읽어 주는 이름은 「왼쪽으로 돌리기」)
@@ -1348,6 +1350,7 @@ def t54(b, f):
         q314 += c.js("()=>{ const r=parseMenuText('[a]\\nx | 1\\n바닥: *포장 가능?'); return [ r.foot[0]==='*포장 가능' && r.footUn[0]===true ] }")
         r318['확인'] = c.js(RULE318, '#start')
         q317 += [c.js("()=>Math.round(document.querySelector('#start').getBoundingClientRect().top)") == top317]
+        pos325.append(c.js(POS325, ['#st-check-back', '#st-check .st-head h3', '#st-check-go']))   # 325번. ② 확인
         seg319 = c.js("()=>[...document.querySelectorAll('#st-ccount .st-seg button')].every(b=>{ const r=b.getBoundingClientRect(); return r.width <= 84 && Math.abs(r.height-40) < 1 })")   # 319번. 고르기는 높이 40 · 폭은 글자만큼   # 317번. 확인 화면도 사진 창과 같은 높이에서 연다
         q313 += c.js("""()=>{ const w=document.querySelector('#st-ccount .st-warn'), u=document.querySelector('#st-chours input.un');
           return [ !!w && /찾지 못했/.test(w.textContent) && getComputedStyle(w).color==='rgb(163, 50, 31)', !!u && getComputedStyle(u).backgroundColor==='rgb(255, 225, 122)' ] }""")
@@ -1363,6 +1366,9 @@ def t54(b, f):
         q315 = [col315, len(orients) == 0]   # 315번. 직접 돌렸으면 방향을 묻지 않는다
         q315 += c.js("()=>{ const r=parseMenuText('[a]\\nx | 1\\n※ 가\\\\n나\\n바닥: 다\\\\n라'); return [ JSON.stringify(r[0].notes)==='[\"가\",\"나\"]' && JSON.stringify(r.foot)==='[\"다\",\"라\"]' ] }")
         r318['정하기'] = c.js(RULE318, '#start')
+        pos325.append(c.js(POS325, ['#st-back', '#st-setup .st-head h3', '#st-go']))   # 325번. ③ 정하기
+        same = lambda k, f: len({tuple(f(x[k])) for x in pos325 if x[k]}) == 1 and all(x[k] for x in pos325)
+        out['p325'] = [same(0, lambda v: v), same(1, lambda v: v[:2]), same(2, lambda v: [v[1], v[2], v[3]]), c.js("()=>[...document.querySelectorAll('#st-setup input[type=file]')].every(e=>!e.offsetParent)")]   # ← 같은 자리 · 제목 같은 자리 · 주 단추 위 · 오른쪽 · 아래 같음 · 숨긴 파일 칸 안 보임
         q313 += c.js("()=>{ const t=document.querySelector('#st-topfrom'); return [ t.classList.contains('warn') && getComputedStyle(t).color==='rgb(163, 50, 31)' ] }")
         q += c.js("""()=>[ !!document.querySelector('#st-sw .st-swb[data-p="photo"].on'), /찾지 못했/.test(document.querySelector('#st-topfrom').textContent) && !document.querySelector('#st-topfrom').hidden,
                        getComputedStyle(document.querySelector('#st-prev')).backgroundColor==='rgb(243, 236, 217)' ]""")
@@ -1372,19 +1378,23 @@ def t54(b, f):
                    JSON.stringify(s0.notes||null)==='["곱빼기 가능"]', F(0).notes.includes('모든 메뉴 포장 가능합니다'), SETTINGS.font==='gungseo' ] }""")
         r318['꾸미기 창'] = c.js(RULE318, '.panel'); out['rule318'] = r318
         pg.click('.ptab-btn >> nth=1'); pg.wait_for_timeout(300)   # 319번. 그림 · 도장 격자 — 빈 칸에 ＋ · 흐린 [모든 그림에 같게]에 까닭
-        out['p319'] = c.js("()=>{ const bs=[...document.querySelectorAll('#g-art .pcells > button')]; const ss=[...document.querySelectorAll('#g-seal .pcells > button')]; return [ bs.every(b=>!getComputedStyle(b,'::before').content.includes('＋')) && ss.filter(b=>!b.innerHTML).every(b=>getComputedStyle(b,'::before').content.includes('＋')) && ss.some(b=>!b.innerHTML),   /* 319 → 321번. ＋ 는 정말 찍히는 도장 격자에만 */ document.querySelector('#b-artsame').disabled ? /두 칸/.test(document.querySelector('#b-artsame').title) : true ] }")
-        out['p320'] = c.js("""()=>{ const gs=[...document.querySelectorAll('#g-seal .pcells > button')], fit=document.querySelector('#b-fit'), cp=document.querySelector('#b-copypage'), seal=document.querySelector('#g-seal');
-          if (!sealCellsOf(P(panelPage)).length) gs[5].click(); const shape0=P(panelPage).seal; [...sealCellsOf(P(panelPage))].forEach(k=>gs[k].click());   /* 도장이 없는 메뉴판이면 먼저 하나 찍고 잰다 */ const gone=P(panelPage).seal==='none' && document.querySelector('#f-seal').value==='none' && document.querySelector('#c-seal').disabled;   /* 322번. 접지 않고 흐리게 */ gs[0].click(); const back=P(panelPage).seal===shape0 && JSON.stringify(sealCellsOf(P(panelPage)))==='[0]';
-          return [ !!fit && fit.type==='checkbox' && fit.classList.contains('m3sw'), gs.length===6, !document.querySelector('#g-art .psl'), !!cp && !!seal && cp.getBoundingClientRect().top > seal.getBoundingClientRect().bottom,
-                   gone && back,   /* 321번. 다 빼면 모양 없음 · 다시 찍으면 쓰던 모양 */ !document.querySelector('#f-sealhere') ] }""")   # 320번. [한 장에 맞춤] 스위치 · 도장 자리 격자 여섯 · 그림 격자에 도장 없음 · [다른 장에도 똑같이]가 도장 밑 · (321번) 다 빼면 없음 · 다시 찍으면 쓰던 모양 · 옛 칸 스위치 없음
-        out['p322'] = c.js("""()=>{ const P0=P(panelPage), H=()=>document.querySelector('.panel').scrollHeight, cells=[...document.querySelectorAll('#g-art .pcells > button')], gs=[...document.querySelectorAll('#g-seal .pcells > button')];
-          if (!(P0.arts||[]).length){ cells[0].click(); const fa=document.querySelector('#f-art'); fa.value='horse'; fa.dispatchEvent(new Event('change')); }   /* 그림이 없는 메뉴판이면 하나 놓고 잰다 */
+        out['p319'] = c.js("()=>{ const bs=[...document.querySelectorAll('#g-art .pcells > button')]; return [ bs.length===6 && bs.every(b=>!getComputedStyle(b,'::before').content.includes('＋')), document.querySelector('#b-artsame').disabled ? /두 칸/.test(document.querySelector('#b-artsame').title) : true ] }")   # 319 → 321 → 323번. 격자에 ＋ 없음(누르면 칸을 고를 뿐) · 흐린 [모든 칸에 같게]에 까닭
+        out['p320'] = c.js("""()=>{ const fit=document.querySelector('#b-fit'), cp=document.querySelector('#b-copypage'), g=document.querySelector('#g-art');
+          return [ !!fit && fit.type==='checkbox' && fit.classList.contains('m3sw'), !document.querySelector('#g-seal') && !document.querySelector('#f-sealhere'), !!cp && cp.getBoundingClientRect().top > g.getBoundingClientRect().bottom ] }""")   # 320 → 323번. [한 장에 맞춤] 스위치 · 격자 하나(도장 격자 · 칸 스위치 없음) · [다른 장에도 똑같이]가 격자 밑
+        out['p323'] = c.js("""()=>{ const P0=P(panelPage), cells=[...document.querySelectorAll('#g-art .pcells > button')], fs=document.querySelector('#f-seal'), set=v=>{ fs.value=v; fs.dispatchEvent(new Event('change')); };
+          P0.seals=[]; render(); syncPage(); cells[0].click(); set('tri'); cells[5].click(); set('star'); const two=JSON.stringify(P0.seals.map(x=>[x.cell,x.seal]))==='[[0,"tri"],[5,"star"]]';
+          const gridShows=!!cells[0].querySelector('.psl') && !!cells[5].querySelector('.psl') && !cells[2].querySelector('.psl');
+          const paper=[...document.querySelectorAll('.sheet[data-pi="'+panelPage+'"] .seal:not(.blank)')].map(d=>+d.dataset.cell).join(',')==='0,5';
+          cells[0].click(); const cs=document.querySelector('#c-seal'); cs.value='#1155cc'; cs.dispatchEvent(new Event('input')); cs.dispatchEvent(new Event('change'));
+          const col=P0.seals.find(x=>x.cell===0).color==='#1155cc' && !('color' in P0.seals.find(x=>x.cell===5));
+          set('none'); const one=JSON.stringify(P0.seals.map(x=>x.cell))==='[5]' && fs.value==='none' && document.querySelector('#c-seal').disabled;
+          const H=()=>document.querySelector('.panel').scrollHeight; cells[5].click(); const h1=H(); cells[1].click(); const h2=H();
+          return [ two, gridShows, paper, col, one, h1===h2, document.querySelector('#art-cellname').textContent===CELL_NAMES[1]+' 칸' ] }""")   # 323번. 도장도 칸마다 — 두 칸에 다른 모양 · 격자에 보임 · 종이에 그 칸만 · 색은 그 칸만 · 없음이면 그 칸만 빠지고 색 흐림 · 칸을 바꿔도 창 길이 같음 · 칸 이름
+        out['p322'] = c.js("""()=>{ const P0=P(panelPage), H=()=>document.querySelector('.panel').scrollHeight, cells=[...document.querySelectorAll('#g-art .pcells > button')];
+          if (!(P0.arts||[]).length){ cells[0].click(); const fa=document.querySelector('#f-art'); fa.value='horse'; fa.dispatchEvent(new Event('change')); }
           const withArt=cells.findIndex((b,k)=>artAt(P0,k)), empty=cells.findIndex((b,k)=>!artAt(P0,k)); if (withArt<0||empty<0) return ['no cells'];
           cells[withArt].click(); const h1=H(); cells[empty].click(); const h2=H(); const dis=document.querySelector('#c-art').disabled && document.querySelector('#f-artop').disabled && !document.querySelector('#art-opts').hidden;
-          if (!sealCellsOf(P0).length) gs[5].click(); const h3=H(); [...sealCellsOf(P0)].forEach(k=>gs[k].click()); const h4=H(); const sdis=document.querySelector('#c-seal').disabled && !document.querySelector('#seal-opts').hidden; gs[5].click();
-          return [ h1===h2, dis, h3===h4, sdis ] }""")   # 322번. 그림 있는 칸 ↔ 빈 칸, 도장 있음 ↔ 없음에서 꾸미기 창 길이가 같다 · 딸린 손잡이는 접지 않고 흐리게
-        out['p321'] = c.js("""()=>{ const a=document.querySelector('#g-art').getBoundingClientRect(), g=document.querySelector('#g-seal').getBoundingClientRect(), f=document.querySelector('#f-seal').getBoundingClientRect(), n=document.querySelector('#art-cellname');
-          return [ Math.abs(a.width-g.width) < 1, g.bottom < f.top, !!n && n.textContent === CELL_NAMES[panelCell] + ' 칸' ] }""")   # 321번. 두 격자 같은 크기 · 도장도 격자 먼저 · 그림 손잡이 위 칸 이름
+          return [ h1===h2, dis ] }""")   # 322번. 그림 있는 칸 ↔ 빈 칸에서 꾸미기 창 길이가 같다 · 딸린 손잡이는 접지 않고 흐리게
         out['p312'] = q; out['p313'] = q313; out['p314'] = q314; out['p315'] = q315; out['p317'] = q317; out['seg319'] = seg319
     except Exception as e:
         out['p312'] = 'fail: ' + str(e)[:200]
@@ -1655,7 +1665,7 @@ def judge(t, r):
         if t == 't36': return None, '그림 코드 해시 — 기준과 같으면 그림을 안 건드린 것(참고 사진 대조는 사진이 있어야 한다)'
         if t == 't37': return r['nbad'] == 0, f"병 잉크 바닥 {r['n'] - r['nbad']}/{r['n']} 1px 이내 · 최대 {r['worst']}"
         if t == 't38': vals = {k: v for k, v in r.items() if k != '_sec'}; ok = all(v[0] == 190 and v[1] <= 1 for v in vals.values()); return ok, f"잉크 바닥 · 호일 {vals}"
-        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|[2]' for a in r.get('arts', [])) and not any(r.get('align', [True])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')} · 309번 분류 줄 키 남음 {r.get('align')}"
+        if t == 't39': p = r['pages']; ok = not r['err'] and r['S'] == {'font': 'gungseo', 'theme': 'night', 'mark': '★', 'pageno': 'of', 'sec': 'left', 'wine': 'left'} and all(x[3] == 1 and x[4] == 0.8 for x in p) and r['ui']['font'] == 'gungseo' and all(a is None or a == '[{"cell":2,"art":"horse"}]|[{"cell":2,"seal":"star"}]' for a in r.get('arts', [])) and not any(r.get('align', [True])); return ok, f"복구 {r['S']} · 장 {p} · 그림 칸 · 도장 자리 {r.get('arts')} · 309번 분류 줄 키 남음 {r.get('align')}"
         if t == 't40': return r['allSame'] and r.get('posOk'), f"도장 9가지 동작 고정 {r['allSame']} · 도장(여럿) · 그림이 상단 아래 고른 칸에 섬 {r.get('posOk')} {[x for x in r.get('pos', []) if not x[1] == x[2] == x[3]][:4]} · 302번 sealPos → {r.get('sealPosMove')}"
         if t == 't41':
             al = r.get('align309') or []
@@ -1693,8 +1703,8 @@ def judge(t, r):
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
-            ok = r.get('p322') == [True] * 4 and r.get('p321') == [True] * 3 and r.get('p320') == [True] * 6 and r.get('p319') == [True, True] and r.get('seg319') is True and isinstance(r.get('rule318'), dict) and len(r['rule318']) == 4 and not any(r['rule318'].values()) and r.get('p317') == [True] * 4 and r.get('busy316') == [True, True] and r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
-            return ok, f"322번 [그림 칸 바꿔도 길이 같음, 그림 손잡이 흐림, 도장 빼도 길이 같음, 도장 색 흐림] {r.get('p322')} · 321번 [격자 같은 크기, 도장도 격자 먼저, 칸 이름] {r.get('p321')} · 320번 [맞춤 스위치, 도장 격자 여섯, 그림 격자에 도장 없음, 다른 장에 맨 아래, 다 빼면 없음 · 다시 찍으면 쓰던 모양, 옛 칸 스위치 없음] {r.get('p320')} · 319번 [격자 빈 칸 ＋, 흐린 까닭] {r.get('p319')} · 고르기 폭 {r.get('seg319')} · 318번 단추 규칙 어긋남(사진 · 확인 · 정하기 · 꾸미기 창) {r.get('rule318')} · 317번 [아이콘 한 쌍, 사진 폭 안, 사진 가운데, 확인 화면 같은 높이] {r.get('p317')} · 316번 진행 막 [방향 → 돌렸습니다 → 읽는 중, 끝나면 사라짐] {r.get('busy316')} · 315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            ok = r.get('p325') == [True] * 4 and r.get('p323') == [True] * 7 and r.get('p322') == [True] * 2 and r.get('p320') == [True] * 3 and r.get('p319') == [True, True] and r.get('seg319') is True and isinstance(r.get('rule318'), dict) and len(r['rule318']) == 4 and not any(r['rule318'].values()) and r.get('p317') == [True] * 4 and r.get('busy316') == [True, True] and r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
+            return ok, f"325번 [← 같은 자리, 제목 같은 자리, 주 단추 같은 자리, 숨긴 파일 칸 안 보임] {r.get('p325')} · 323번 [두 칸 다른 모양, 격자에 보임, 종이에 그 칸만, 색 그 칸만, 없음이면 그 칸만 · 색 흐림, 칸 바꿔도 길이 같음, 칸 이름] {r.get('p323')} · 322번 [그림 칸 바꿔도 길이 같음, 그림 손잡이 흐림] {r.get('p322')} · 320번 [맞춤 스위치, 격자 하나, 다른 장에 격자 밑] {r.get('p320')} · 319번 [격자 빈 칸 ＋, 흐린 까닭] {r.get('p319')} · 고르기 폭 {r.get('seg319')} · 318번 단추 규칙 어긋남(사진 · 확인 · 정하기 · 꾸미기 창) {r.get('rule318')} · 317번 [아이콘 한 쌍, 사진 폭 안, 사진 가운데, 확인 화면 같은 높이] {r.get('p317')} · 316번 진행 막 [방향 → 돌렸습니다 → 읽는 중, 끝나면 사라짐] {r.get('busy316')} · 315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"

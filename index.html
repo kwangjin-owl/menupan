@@ -43,13 +43,10 @@ body{
      종이 왼쪽 202px(좌 여백과 첫 단 일부)이 보이지도 스크롤되지도 않았다.
      `safe` 는 **넘칠 때만** 가운데 정렬을 포기하고 왼쪽부터 놓는다 — 안 넘치면 지금과 똑같다.
      217번이 종이를 늘 A4 로 되돌리며 넘침이 커져 드러났지만, 좁은 화면에서는 **전부터 있던 것**이다 */
-  display:flex; flex-direction:column;
-  /* `safe` 를 모르는 브라우저는 **선언 전체를 버린다** — 그러면 `normal`(= 왼쪽 붙음)이 되어
-     넓은 화면에서도 종이가 가운데로 안 온다(실측 1600px 에서 왼쪽 14px). 두 줄로 써서 물러설 곳을 둔다 */
-  align-items:center; align-items:safe center;
+  display:flex; flex-direction:column; align-items:safe center;
   padding:30px 14px 150px; -webkit-font-smoothing:antialiased;
 }
-#pages{display:flex; flex-direction:column; align-items:center; align-items:safe center; gap:26px}   /* 218번 */
+#pages{display:flex; flex-direction:column; align-items:safe center; gap:26px}   /* 218번 */
 /* 116번. 꾸미기 창이 열릴 때 종이가 옮겨 가는 것이 보이도록. 건너뛰면 놓친다 */
 body{transition:padding-right .18s ease}
 @media (prefers-reduced-motion:reduce){ body{transition:none} }
@@ -529,7 +526,7 @@ body{transition:padding-right .18s ease}
 .editing section{position:relative}
 /* 대상 박스와 사이를 띄우면 그 틈에서 :hover 가 끊겨 버튼을 누를 수 없다(68번).
    틈은 0 이어야 한다 — 5px 도 죽은 틈이다 */
-.editing .addrow{display:flex;gap:6px;flex-wrap:wrap;visibility:hidden;
+.editing .addrow{display:flex;flex-wrap:wrap;visibility:hidden;
   /* 84번. 넣고 빼는 묶음은 줄 도구(`.rowtools`, z-index 5)보다 **위**여야 한다. 4 로 두었더니
      넣고 빼는 묶음이 덮고 있는 아랫줄의 ★품✕ 가 위에 떠서, 넣고 빼는 묶음 버튼을 눌러도 그쪽이
      먹었다(＋ 안내가 안 눌렸다). 지금 보고 있는 것은 넣고 빼는 묶음이므로 넣고 빼는 묶음이 이긴다 */
@@ -557,7 +554,7 @@ body{transition:padding-right .18s ease}
 .editing .addrow .addbtn.pg{opacity:.72}
 /* 84번. 짝이 하나뿐이어도(지울 수 없는 마지막 단·장) 왼쪽 칸 자리를 그대로 지킨다.
    그 줄만 전폭으로 늘렸더니 격자가 다시 깨졌다 — 오른쪽이 비는 편이 낫다 */
-.editing .addrow .addgap{flex-basis:calc(50% - 3px)}
+
 /* 137번. 마지막 하나의 ✕ 는 흐리게. pointer-events 를 끊어야 아래 "지울 범위 칠하기"(:hover) 가 안 걸린다 */
 .editing .addbtn:disabled{opacity:.35;cursor:default;pointer-events:none;box-shadow:none}
 /* 86·87번. 장 막대는 종이 바깥 위쪽에 늘 떠 있다(인쇄에는 안 나온다). 다만 **띄워 두면
@@ -918,17 +915,16 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    빼면 바닥이 그만큼 얇아져 spread() 가 남는 자리를 분류 사이로 나눠 위 내용이 통째로 움직인다(155번).
    13mm 은 기본 배율(94%)에서 지금 보이던 크기(49.6px)와 같은 값이다 — 위치만 고치고 크기는 안 바꾼다 */
 .sheet{--sealw:13mm}
-.seal{position:absolute;right:var(--mg);bottom:11mm;width:var(--sealw);height:var(--sealw);
-  color:var(--accent);transform:rotate(-4deg);opacity:.92;z-index:1}
+.seal{position:absolute;right:var(--mg);bottom:11mm;width:var(--sealw);height:var(--sealw);transform:rotate(-4deg);opacity:.92}
 .seal svg{width:100%;height:100%;display:block}
 .sealgap{width:3.3em;height:3.3em;flex:none}
 /* 오른쪽은 종이 끝까지(right:0). 2% 를 띄웠을 때는 전나무 · 달밤 · 산장의 뒷산처럼 옆으로
    이어지는 그림이 종이 끝 16px 앞에서 **세로 직선으로 잘려** 보였다(130번과 같은 인상, 136번).
    종이 끝에서 잘리면 프린터 여백과 겹쳐 자연스럽다 */
-.art{position:absolute;right:0;bottom:2%;width:50%;color:var(--ink);opacity:.07;   /* 198번. 더 연하게(.11 → .07) */
+.art{position:absolute;right:0;bottom:2%;   /* 198번. 더 연하게(.11 → .07) */
   z-index:0;pointer-events:none}
 .art svg{width:100%;height:auto;display:block}
-.sheet.land .art{width:36%;bottom:4%}
+.sheet.land .art{bottom:4%}
 .noren,.hours,.body,.foot{position:relative;z-index:1}
 /* 책은 제본된 쪽을 피해 바깥 모서리에 쪽 번호를 넣지만, 메뉴판은 낱장이라
    바깥이라는 것이 없다. 두 장 다 오른쪽에 찍히므로 좌우 교대의 이점도 없다.
@@ -1006,7 +1002,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    (margin 으로 띄우면 죽은 틈이 된다 · 68 · 87 · 100번) */
 .editing .row .rowtools{position:absolute;left:100%;top:50%;transform:translateY(-50%);z-index:5;
   margin:0;padding:4px 4px 4px 14px;border-radius:8px;background:var(--ed-bg);
-  background-clip:content-box;gap:3px;
+  background-clip:content-box;
   /* `box-shadow` 는 **테두리 상자** 기준이라 바탕 없는 왼쪽 여백까지 회색으로 그려진다.
      `drop-shadow` 는 실제로 그려진 모양을 따라간다(104번) */
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.16))}
@@ -1291,13 +1287,13 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .barwrap{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;
   display:flex;flex-direction:column;align-items:center;gap:8px;
   max-width:calc(100vw - 24px)}
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
-  max-width:100%;padding:9px 12px;
-  background:rgba(22,17,10,.94);border:1px solid rgba(240,230,205,.18);border-radius:16px;
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  max-width:100%;
+  background:rgba(22,17,10,.94);border:1px solid rgba(240,230,205,.18);
   backdrop-filter:blur(8px);font-family:var(--ui-font)}
 .bar .grp{display:flex;align-items:center;gap:5px}
 .bar label{font-size:11.5px;color:rgba(240,230,205,.55)}
-.panel{position:fixed;right:18px;top:6vh;z-index:29;width:292px;   /* 152번. 위쪽 기준 — 탭을 바꿔 높이가 변해도 안 뛴다(세로 가운데였다) */
+.panel{position:fixed;right:18px;z-index:29;width:292px;   /* 152번. 위쪽 기준 — 탭을 바꿔 높이가 변해도 안 뛴다(세로 가운데였다) */
   display:grid;grid-template-columns:1fr;gap:2px 0;align-items:stretch;
   /* 157번. **스크롤 막대 자리를 늘 비워 둔다.** overflow-y:auto 는 막대가 생길 때만 안쪽 폭을
      빼앗으므로, 긴 탭과 짧은 탭의 손잡이 폭이 달라졌다("스크롤이 있는 탭은 영역이 좁아진다").
@@ -1305,7 +1301,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
      159번. 막대 자체를 **가는 줄(6px)** 로 바꿨으므로 비워 두는 자리도 6px 이고, 오른쪽 안쪽 여백은
      그만큼만 덜어 낸다 — 글자에서 창 끝까지가 좌우 같아 보인다 */
   padding:13px 12px 13px 18px;max-height:88vh;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;
-  background:rgba(22,17,10,.96);border:1px solid rgba(240,230,205,.18);border-radius:16px;
+  background:rgba(22,17,10,.96);border:1px solid rgba(240,230,205,.18);
   backdrop-filter:blur(8px);font-family:var(--ui-font)}
 .panel[hidden]{display:none}
 /* 159번. **`scrollbar-width` · `scrollbar-color` 를 함께 쓰면 크롬이 `::-webkit-scrollbar` 를 통째로 무시한다.**
@@ -1317,7 +1313,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel::-webkit-scrollbar-button{display:none;height:0;width:0}
 .panel::-webkit-scrollbar-thumb{background:rgba(240,230,205,.28);border-radius:99px}
 .panel::-webkit-scrollbar-thumb:hover{background:rgba(240,230,205,.45)}
-.panel label{display:block;font-size:11px;color:rgba(240,230,205,.46);margin:10px 0 4px}   /* 159 → 161번. **이름표와 그 아래 손잡이 사이**가 0 이었다. 위 10px · 아래 4px */
+.panel label{display:block;margin:10px 0 4px}   /* 159 → 161번. **이름표와 그 아래 손잡이 사이**가 0 이었다. 위 10px · 아래 4px */
 .panel label b{color:rgba(240,230,205,.8);font-weight:600;margin-left:.45em;
   font-variant-numeric:tabular-nums}
 .panel .phead{display:flex;align-items:center;justify-content:space-between;
@@ -1329,10 +1325,9 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    항목 12.5px·55%) 묶음으로 안 읽히고 그냥 긴 목록이 되어 "구분이 안 되고 난잡하다"고
    지적받았다. 위 여백도 넉넉히 주어 눈으로 덩어리가 끊기게 한다 */
 /* 150번. 탭 */
-.panel .ptabs{display:flex;gap:4px;margin:8px 0 2px;border-bottom:1px solid rgba(255,255,255,.12)}
-.panel .ptab-btn{flex:1;min-width:0;background:none;border:0;border-bottom:2px solid transparent;color:rgba(240,230,205,.55);
-  font:600 12px/1 var(--ui-font);padding:7px 4px;cursor:pointer;letter-spacing:.06em;border-radius:0}
-.panel .ptab-btn.on{color:#f3e9d2;border-bottom-color:var(--ui-accent)}
+.panel .ptabs{display:flex;margin:8px 0 2px;border-bottom:1px solid rgba(255,255,255,.12)}
+.panel .ptab-btn{flex:1;min-width:0;background:none;border:0;border-bottom:2px solid transparent;color:rgba(240,230,205,.55);padding:7px 4px;cursor:pointer;border-radius:0}
+.panel .ptab-btn.on{border-bottom-color:var(--ui-accent)}
 .panel .ptab{display:none}
 .panel .ptab.on{display:block}
 .seal.blank{visibility:hidden}
@@ -1391,7 +1386,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    아래 여백 띠(6 ~ 11mm)의 오른쪽 끝, 쪽 번호(가운데)와 겹치지 않는 자리 */
 .editing:not(.preview) .guide::after{content:"갈색 점선 = 여백선 · 메뉴 글자는 이 선 안쪽에";   /* 252번 */position:absolute;right:0;top:100%;
   height:calc(11mm - var(--nogo));display:flex;align-items:center;font:10px/1 system-ui,sans-serif;color:rgba(95,68,32,.85);white-space:nowrap}
-.editing .sheet.over .guide{border-color:color-mix(in srgb, var(--accent) 75%, transparent)}
+
 /* 190번. **넘친 장 표시.** 크기를 저절로 줄이지 않으므로, 안 들어간다는 사실이 화면에 보여야 한다.
    191번. ~~`.sheet.over::after`~~ — **`::after` 는 이미 `inset:0` 으로 종이 전체를 덮는 그림자 층이었다**(104줄).
    거기에 배경을 얹으니 종이가 통째로 시뻘게졌다. 비어 있는 `::before` 로 옮기고 **반투명**으로 둔다 —
@@ -1414,7 +1409,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
   background:color-mix(in srgb, var(--accent) 78%, transparent);padding:0}
 .editing .sheet.over .guide::after{content:none}
 .panel .pgpick{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
-.panel .pgpick .pill{border-radius:999px;padding:4px 11px;font-size:12px}   /* 318번. 11 → 12 */
+
 .panel .pgpick .pill.on{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 .panel .pgrp.pgtitle{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .panel .pgrp.pgtitle button{font-size:13px;padding:4px 10px;letter-spacing:0;font-weight:400}   /* 318번. 10.5 → 13 */
@@ -1425,19 +1420,18 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 @keyframes spin310{to{transform:rotate(360deg)}}   /* 309번. 막힌 스위치도 흐리게(284번) — 스위치는 비활성 모양이 없어 켤 수 있는 것처럼 보였다 */
 .panel .chk input:disabled{cursor:default}   /* 290번. 두 줄로 접혀 둥근 단추 안이 답답했다 */
 /* 191번. 세 단추를 **같은 폭**으로. 전에는 `auto auto 1fr` 이라 [한 장에 맞춤]만 남는 자리를 다 먹었다 */
-.panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:5px}
+.panel .grp.typo3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr))}
 .panel .grp.typo3 button{padding:5px 4px;white-space:nowrap}
 /* 191 · 200번. 크기 막대 — 끌어서 1% 단위. 컴맹 기준이라 손잡이를 크게 잡는다(83번: 만질 것은 크게) */
 .panel #sz-range,.panel #nsz-range{width:100%;margin:2px 0 6px;accent-color:var(--ui-accent);height:22px;cursor:pointer}   /* 263번. 종이의 포인트색(--accent)을 쓰고 있었다 — 규칙 I(26번) 위반. 도구 화면 색으로 */
 /* 200번. **창 안의 단추 · 고르기 칸은 높이가 하나여야 한다.** 줄마다 padding 이 달라
    같은 일을 하는 단추가 제각각 커 보였다("크기도 제각각이고 엉망") */
 .panel button,.panel select{min-height:34px;box-sizing:border-box}
-.panel .grp.typo3 button{min-height:34px}
+
 .panel .wfrow button,.panel .rowtools button,.panel .pk input[type=color]{min-height:0}   /* 목록 안 작은 단추는 예외 */
-.panel .pgrp small{font-weight:400;letter-spacing:0;font-size:11px;opacity:.62;display:block;margin-top:3px}   /* 203번 */
+.panel .pgrp small{display:block;margin-top:3px}   /* 203번 */
 .panel .pgrp{margin:13px 0 2px;padding-top:9px;
-  border-top:1px solid rgba(240,230,205,.16);
-  font-size:11.5px;font-weight:700;letter-spacing:.14em;color:rgba(240,230,205,.88)}
+  border-top:1px solid rgba(240,230,205,.16);font-weight:700;letter-spacing:.14em;color:rgba(240,230,205,.88)}
 /* 157번. **갈래 머리는 그 설정이 어디에 걸리는지 말한다.** 메뉴 장에만 걸리는 것과 와인 장에만
    걸리는 것이 한 창에 섞여 있는데 이름표가 없어 "구분이 안 간다"는 지적을 받았다(96번의 연장) */
 .panel .pgrp small{font-weight:400;font-size:10px;letter-spacing:.02em;opacity:.62;margin-left:.5em}
@@ -1453,8 +1447,8 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .pblock[data-kind="wine"] .pbadge{background:var(--ui-accent);color:#fff}
 .panel .pblock > .pgrp:first-of-type{margin-top:6px;padding-top:0;border-top:0}
 .panel .pgrp+label{margin-top:6px}
-.panel label.copynote{margin-top:6px;line-height:1.55;color:rgba(240,230,205,.42)}
-.panel label.copynote b{color:rgba(240,230,205,.7);margin-left:0;font-weight:600}
+
+
 /* 157 → 159번. 병 고르기 — **그림이 붙은 카드**를 눌러 고친다. 고른 카드의 그림이 한 단계 커지므로
    아래에 같은 병을 또 확대해 보여 줄 이유가 없다(159번에서 그 미리보기를 없앴다).
    152번의 쪽 고르기와 같은 꼴이되, 고르는 대상이 그림인 자리에서는 그림이 이름보다 빠르다 */
@@ -1463,7 +1457,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    혼자 다른 크기가 됐다("박스 크기가 왜 저래"). 고른 것은 **테두리와 바탕**으로만 말하고,
    그림은 여섯이 다 같은 크기로 크게 그린다 — 그래야 호일과 상표 색이 보인다 */
 .panel .btpick .bpick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  padding:6px 3px 5px;font-size:10px;border-radius:9px;min-width:0}
+  padding:6px 3px 5px;border-radius:9px;min-width:0}
 .panel .btpick .bpick .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panel .btpick .bpick.on{background:rgba(200,60,45,.22);border-color:var(--ui-accent);color:#f3e9d2;
   box-shadow:0 0 0 1px var(--ui-accent) inset}
@@ -1505,12 +1499,11 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .panel .wfrow button .gi > svg{width:1em;height:1em;display:block}
 .panel .wfrow button:disabled{opacity:.3;pointer-events:none}
 /* 111번. 켜고 끄기는 체크 한 줄. 라벨 글자색은 항목 이름과 같지만 눌리는 것이라 조금 밝게 */
-.panel label.chk{display:flex;align-items:center;gap:6px;cursor:pointer;color:rgba(240,230,205,.7);
-  font-size:12px;margin-top:6px;padding:2px 0}
+.panel label.chk{display:flex;align-items:center;cursor:pointer;padding:2px 0}
 .panel label.chk input{width:14px;height:14px;margin:0;accent-color:var(--ui-accent);cursor:pointer}
 /* 159번. 짧은 체크 둘 · 셋은 한 줄에 세운다 — 한 줄씩 쌓으면 창만 길어진다 */
-.panel .chkrow{display:flex;flex-wrap:wrap;gap:0 14px}
-.panel .chkrow label.chk{margin-top:6px}
+.panel .chkrow{display:flex}
+
 /* 159번. 짧은 손잡이 둘을 한 줄에(추천 표시 + 쪽 번호, 그림 + 도장) */
 .panel .grp.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:end}
 .panel .grp.two .fld{min-width:0}
@@ -1549,7 +1542,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .bar button.on{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 .bar .sep{width:1px;height:22px;background:rgba(240,230,205,.16)}
 .bar input[type=color]{padding:2px;width:34px;height:30px}
-.bar .primary{background:rgba(240,230,205,.14)}
+
 /* 고쳤는데 아직 저장 안 한 상태. 글자는 "저장" 그대로 두고 색만 바꾼다
    (글자를 바꾸면 막대가 가운데 정렬이라 옆 버튼이 밀린다 — 위 #b-edit 주석 참고) */
 /* 굵게는 쓰지 않는다. 글꼴에 따라 글자 폭이 늘어 버튼이 넓어지고 옆이 밀린다 */
@@ -1557,15 +1550,14 @@ body.unsaved #b-save{background:#efe3c9;border-color:#efe3c9;color:#1a140c;
   box-shadow:0 0 0 3px rgba(239,227,201,.18)}
 body.unsaved #b-save:hover{background:#fff6e2;border-color:#fff6e2}
 /* 198번. 알림이 화면 폭만큼 옆으로 늘어졌다 — 폭을 묶고 줄을 접는다 */
-.undo{position:fixed;left:50%;transform:translateX(-50%);bottom:88px;z-index:40;
+.undo{position:fixed;left:50%;transform:translateX(-50%);z-index:40;
   max-width:min(560px, 92vw);
-  display:flex;align-items:center;gap:14px;padding:11px 14px 11px 16px;border-radius:13px;
+  display:flex;align-items:center;gap:14px;padding:11px 14px 11px 16px;
   background:rgba(22,17,10,.97);border:1px solid rgba(240,230,205,.2);color:#efe3c9;
-  font-family:var(--ui-font);font-size:13.5px;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+  font-family:var(--ui-font);font-size:13.5px}
 .undo[hidden]{display:none}
 .undo .t{flex:1;min-width:0;line-height:1.6}
-.undo button{flex:none;font:inherit;font-size:13.5px;color:#efe3c9;background:transparent;
-  border:1px solid rgba(240,230,205,.38);border-radius:9px;padding:7px 13px;cursor:pointer}
+.undo button{flex:none;font:inherit;font-size:13.5px;background:transparent;cursor:pointer}
 .undo button:hover{border-color:rgba(240,230,205,.75)}
 /* 206번. 세 마디가 한 줄로 길게 이어져 읽기 어려웠다. 폭을 묶고 **줄바꿈 글자를 그대로** 그린다 */
 /* 213 → 216번. 높이를 `min-height` 로 못 박아 봤지만 **하한일 뿐 상한이 아니라** 좁은 화면에서
@@ -1577,20 +1569,18 @@ body.unsaved #b-save:hover{background:#fff6e2;border-color:#fff6e2}
 .hint>[data-hint]{grid-area:1/1;visibility:hidden}
 .hint>[data-hint].on{visibility:visible}
 
-dialog{border:none;border-radius:14px;padding:0;color:#241c12;background:#f4ecdb;
-  /* *{margin:0} 리셋이 브라우저 기본 margin:auto 를 지워서 좌상단에 붙는다 */
-  margin:auto; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 32px); overflow:auto}
-dialog::backdrop{background:rgba(10,8,5,.6)}
-dialog .in{padding:22px 24px 18px;font-size:14px;line-height:1.75}
-dialog h3{font-size:16px;margin-bottom:10px}
+dialog{border:none;padding:0;color:#241c12;background:#f4ecdb; overflow:auto}
+
+
+
 dialog ol{margin:0 0 6px 18px}
 dialog li{margin-bottom:6px}
-dialog button{font:inherit;padding:8px 16px;border-radius:9px;border:1px solid #b9a887;
+dialog button{font:inherit;border:1px solid #b9a887;
   background:transparent;cursor:pointer}
 dialog #help-close{display:block;margin:0 0 0 auto}   /* 234번. 바닥 줄 안으로 들어갔다 */
 dialog p{margin-bottom:8px}
 /* 129번. 인쇄 안내의 보충 한 줄. 항목을 늘리지 않고 아래에 작게 붙인다(88번) */
-dialog p.sub{margin:10px 0 0;font-size:12.5px;line-height:1.55;color:#5c4f3c}
+dialog p.sub{margin:10px 0 0;color:#5c4f3c}
 /* 196번. 인쇄 결과를 미리 보여 주는 그림 — 종이를 위에서 본 세 겹 */
 dialog .pgdiag{margin:12px 0 2px;text-align:center}
 dialog .pgdiag svg{max-width:300px}
@@ -1645,13 +1635,11 @@ dialog p.sub.no::before{content:"✕";position:absolute;left:0;color:#a33c2f;fon
    · 체크 상자를 같은 줄로 옮겨 **바닥에 붙는 것이 한 덩어리**가 되게 했다. 따로 두면 스크롤에 밀려
      "다시 보지 않기" 를 못 보고 지나친다
    · `background` 를 깔아야 뒤 글자가 비쳐 보이지 않는다 */
-dialog .row2.foot2{position:sticky;bottom:0;background:#f4ecdb;
-  margin:14px -24px -18px;padding:10px 24px 18px}
+dialog .row2.foot2{position:sticky;bottom:0;background:#f4ecdb}
 /* 234번. 그림자는 **아래에 가려진 글이 있을 때만.** 늘 그리면 스크롤할 것이 없어도 "더 있다"로 읽힌다 */
 dialog.hasmore .row2.foot2{box-shadow:0 -8px 12px -8px rgba(36,28,18,.25)}
 dialog .row2.foot2 .chk{margin-right:auto}
-dialog input[type=number]{font:inherit;width:6.5em;padding:7px 9px;border:1px solid #b9a887;
-  border-radius:8px;background:#fffdf6;color:inherit}
+dialog input[type=number]{font:inherit;width:6.5em;padding:7px 9px;border:1px solid #b9a887;background:#fffdf6;color:inherit}
 dialog label.chk{display:flex;gap:7px;align-items:center;font-size:13px;color:#5b4c36;cursor:pointer}
 
 /* "편집"↔"편집 끝"로 글자가 바뀌어도 폭이 변하지 않게 긴 쪽 기준으로 잡아둔다.
@@ -1660,8 +1648,8 @@ dialog label.chk{display:flex;gap:7px;align-items:center;font-size:13px;color:#5
 /* 252번. **편집 도구 막대는 보조로 보이게.** 두 막대가 색 · 모양이 같아 같은 위계로 읽혔다("같은 위계처럼 보인다").
    주 막대(편집 끝 · 저장 · 인쇄 · ?)는 어두운 그대로, 편집 도구는 밝은 종이색 · 작은 단추 · 얇은 모양으로 주 막대 위에 얹는다 */
 /* 253번. 밝은 종이색은 종이와 같은 색이라 "헷갈린다" → 주 막대보다 **밝은 회갈색 · 작게**. 종이와도 주 막대와도 다른 색 */
-.bar.editbar{background:rgba(74,66,56,.95);border-color:rgba(240,230,205,.22);padding:5px 8px;border-radius:12px;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
-.bar.editbar button{font-size:12px;padding:4px 10px}
+.bar.editbar{background:rgba(74,66,56,.95);border-color:rgba(240,230,205,.22);gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+
 .editbar{display:none}
 body.editing .editbar{display:flex}
 
@@ -1761,22 +1749,22 @@ dialog button{height:40px;border-radius:20px;padding:0 20px;border-color:#9c8a68
 /* 280번. 글자 단추(bt-text)는 걷었다 — 설명 글과 구분되지 않았다. 덜 중요한 단추는 테두리 단추(bt-out) */
 dialog button.bt-fill{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}
 dialog button.bt-fill:hover{background:#8f2c21;border-color:#8f2c21}
-dialog button.bt-tonal{background:#e7dac0;border-color:#e7dac0;color:#241c12}
-dialog button.bt-tonal:hover{background:#dccca9;border-color:#dccca9}
+
+
 dialog input[type=number]{height:40px;box-sizing:border-box;border-radius:4px;border-color:#9c8a68}
 .panel{border-radius:16px}
 .panel .ptabs{gap:0}
-.panel .ptab-btn{height:44px;font:500 14px/1 var(--ui-font);letter-spacing:0;border-bottom-width:3px}
+.panel .ptab-btn{font:500 14px/1 var(--ui-font);letter-spacing:0;border-bottom-width:3px}
 .panel .ptab-btn.on{background:none;color:#efe3c9}
 .panel label{font-size:12px;color:rgba(240,230,205,.66)}
 .panel select,.panel button{min-height:40px;font-size:13px}
 .panel select{border-radius:4px;border-color:rgba(240,230,205,.34);padding-left:12px}
 .panel button{border-radius:20px;padding:0 14px;border-color:rgba(240,230,205,.34)}
 .panel .grp.typo3{gap:2px}
-.panel .grp.typo3 button{border-radius:4px;min-height:40px}
-.panel .grp.typo3 button:first-child{border-radius:20px 4px 4px 20px}
-.panel .grp.typo3 button:last-child{border-radius:4px 20px 20px 4px}
-.panel .pgpick .pill{border-radius:8px;height:32px;min-height:32px;padding:0 12px;font-size:13px}
+.panel .grp.typo3 button{border-radius:4px}
+
+
+.panel .pgpick .pill{border-radius:8px;padding:0 12px;font-size:13px}
 input.m3sw{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:44px;height:26px;margin:0;border-radius:13px;
   border:2px solid rgba(240,230,205,.34);background:transparent;position:relative;cursor:pointer;transition:background .15s}
 input.m3sw::after{content:"";position:absolute;left:4px;top:50%;width:14px;height:14px;border-radius:50%;
@@ -1789,8 +1777,8 @@ dialog input.m3sw{border-color:#9c8a68}
 dialog input.m3sw::after{background:#5c4f3c}
 dialog input.m3sw:checked::after{background:#fff}
 dialog input.m3sw:focus-visible{outline-color:#241c12}
-.panel label.chk{min-height:40px;margin-top:0;font-size:13px;gap:10px;color:#efe3c9}
-.panel .chkrow{flex-direction:column;gap:0}
+.panel label.chk{margin-top:0;font-size:13px;gap:10px;color:#efe3c9}
+.panel .chkrow{gap:0}
 .panel .chkrow label.chk{margin-top:0}
 .undo{border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .undo button{border:0;color:#f0a898;font-weight:700;height:36px;border-radius:18px;padding:0 12px}
@@ -1801,9 +1789,9 @@ dialog input.m3sw:focus-visible{outline-color:#241c12}
   color:var(--logo);font-family:var(--kr);font-size:4em;font-weight:500;line-height:1.2;letter-spacing:.06em;text-align:center;
   margin:0 auto .3em;overflow-wrap:anywhere}
 .editing .noren .logo.txt .bv:empty::before{content:"가게 이름";opacity:.5}
-dialog#start{width:min(560px, calc(100vw - 32px))}
+
 dialog#start .sub{margin:0 0 16px}
-#st-closerow[hidden]{display:none}
+
 dialog button.st-opt{display:flex;align-items:center;gap:16px;width:100%;height:auto;min-height:88px;padding:12px 16px;margin:0 0 8px;
   text-align:left;background:#fffdf6;border:1px solid #9c8a68;border-radius:12px;font-weight:400}
 dialog button.st-opt:hover{background:#fff}
@@ -1828,9 +1816,9 @@ dialog .st-seg button{height:40px;border:0;border-radius:0;padding:0 20px;font-w
 dialog .st-seg button + button{border-left:1px solid #9c8a68}
 dialog .st-seg button.on{background:#e7dac0;font-weight:500}
 .st-seg button.on::before,.st-pseg button.on::before{content:"✓ "}
-.st-imgbtns{display:flex;gap:8px;flex-wrap:wrap}
-.st-sw{display:flex;gap:8px;flex-wrap:wrap}
-dialog button.st-swb{display:flex;flex-direction:column;align-items:center;gap:4px;width:76px;height:auto;padding:6px 0;border:1px solid transparent;
+
+.st-sw{display:flex}
+dialog button.st-swb{display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;padding:6px 0;border:1px solid transparent;
   border-radius:12px;font-size:12px;font-weight:400}
 dialog button.st-swb.on{border-color:#241c12;background:#fffdf6}
 .st-swb .c{width:44px;height:44px;border-radius:8px;border:1px solid #c9bda6;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
@@ -1839,10 +1827,10 @@ dialog button.st-swb.on{border-color:#241c12;background:#fffdf6}
 .panel .st-pseg button{border:0;border-radius:0}
 .panel .st-pseg button + button{border-left:1px solid rgba(240,230,205,.34)}
 .panel .st-pseg button.on{background:rgba(240,230,205,.16)}
-.panel .st-plogo{margin-top:6px}
-.panel .st-plogo[hidden]{display:none}
-.panel .st-again{margin-top:18px;padding-top:12px;border-top:1px solid rgba(240,230,205,.16)}
-.panel .st-again label{line-height:1.5}
+
+
+
+
 /* ── 267번. 꾸미기 창은 M3 밀도 −2 — 긴 설정 목록(form)이라 밀도를 올려도 되는 자리다(M3 density: 한 단계에 4px).
    안내창 · 막대는 기본 밀도 그대로(M3 — 과업 · 알림에는 올리지 않는다). 263번이 기본 크기를 그대로 씌워 창이 길고 지저분해졌다 */
 .panel select{min-height:32px;height:32px}
@@ -1864,9 +1852,9 @@ dialog button.st-swb.on{border-color:#241c12;background:#fffdf6}
 .panel .st-pseg button{height:28px;min-height:28px;padding:0 14px}
 .panel .st-plogo{margin-top:8px}
 .panel .st-plogo[hidden]{display:none}
-.panel .st-again{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
-.panel .st-again label{margin:0;font-size:11.5px}
-dialog .st-imgbtns{align-items:center}
+
+
+
 dialog .st-toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 8px}
 dialog .st-toprow .st-lbl{margin:0}
 dialog .st-toprow .st-seg{margin:0}
@@ -1887,9 +1875,9 @@ dialog button.st-drop{height:auto;min-height:64px;border-radius:12px;border:1.5p
 .st-tcap{flex:1 0 100%;margin:0;font-size:12px}
 dialog .st-tcap{color:#5c4f3c}
 .panel .st-tcap{color:rgba(240,230,205,.66)}
-.panel .st-again{display:block;margin-top:18px;padding-top:12px;border-top:1px solid rgba(240,230,205,.16)}
-.panel .st-again button{display:block;width:100%;height:36px;min-height:0;border-radius:18px;border:1px solid rgba(240,230,205,.34);background:none;color:#efe3c9}
-.panel .st-again label{display:block;margin:6px 0 0;font-size:11.5px;line-height:1.5}
+
+
+
 .st-exb{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 1 0;min-width:120px;padding:10px 8px;box-sizing:border-box;cursor:pointer;
   border:1px solid #9c8a68;border-radius:12px;background:#fffdf6;font:inherit;color:#241c12}
 dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius:12px;padding:10px 8px;font-weight:400}
@@ -1902,19 +1890,19 @@ dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius
 /* ── 269번. 가이드 — 짚는 곳만 밝히고 나머지는 어둡게(0.6 — 안내창과 같게). 말풍선은 M3 설명 풍선 모양, 안내창 색 ── */
 .gd-block{position:fixed;inset:0;z-index:300}
 .gd-hole{position:fixed;z-index:301;border-radius:10px;box-shadow:0 0 0 3px var(--ui-accent),0 0 0 9999px rgba(10,8,5,.6);pointer-events:none;transition:all .2s}
-.gd-tip{position:fixed;z-index:302;width:min(328px, calc(100vw - 24px));box-sizing:border-box;padding:16px 20px 10px;border-radius:12px;background:#f4ecdb;color:#241c12;
+.gd-tip{position:fixed;z-index:302;width:min(328px, calc(100vw - 24px));box-sizing:border-box;border-radius:12px;background:#f4ecdb;color:#241c12;
   font-family:var(--ui-font);box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .gd-tip .n{font-size:12px;color:#5c4f3c}
-.gd-tip h4{margin:4px 0 6px;font-size:16px;font-weight:500}
-.gd-tip p{margin:0;font-size:14px;line-height:1.6}
-.gd-tip .r{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}   /* 310번. 단추 사이 8 — 안내창(.row2)과 같게 */
+
+
+.gd-tip .r{display:flex;gap:8px;align-items:center;justify-content:flex-end}   /* 310번. 단추 사이 8 — 안내창(.row2)과 같게 */
 .gd-tip button{height:40px;border-radius:20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;padding:0 16px;border:1px solid #9c8a68;background:transparent;color:#241c12}   /* 280번. 글자만 있던 [건너뛰기] · [이전] → 테두리 단추 */
 .gd-tip button:hover{background:rgba(36,28,18,.06)}
 .gd-tip button.skip{margin-right:auto}
 .gd-tip button.gd-x{position:absolute;top:12px;right:12px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center}   /* 310번. 안내창 ✕(.dlg-x)와 같은 그림 */
 .gd-tip button.gd-x svg{width:22px;height:22px}
 .gd-tip .n, .gd-tip h4{padding-right:44px}
-.gd-tip button.tonal{background:#e7dac0;border-color:#e7dac0;color:#241c12;padding:0 20px}
+
 .gd-tip button.fill{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff;padding:0 20px}
 @media print{.gd-block,.gd-hole,.gd-tip{display:none !important}}
 /* 270번. 말풍선의 위계 — 단계(점) · 제목(굵고 진하게) · 설명(옅게) · 화면의 이름(표지) · 동작(단추)을 모양으로 가른다 */
@@ -1947,8 +1935,8 @@ dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius
 .sheet.sh-band section > .sec-head .ko,.sheet.sh-band section > .sec-head .ml,.sheet.sh-band section > .sec-head .en{color:var(--paper);opacity:.8}
 .sheet.sh-band section > .sec-rule,.sheet.sh-pill section > .sec-rule{visibility:hidden}
 .sheet.sh-pill section > .sec-head h2 .hv{background:var(--accent);color:var(--paper);border-radius:999px;box-shadow:0 0 0 .22em var(--accent),.5em 0 0 .22em var(--accent),-.5em 0 0 .22em var(--accent)}
-.panel .pair2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.panel .pair2 > span{display:flex;flex-direction:column;min-width:0}
+
+
 /* 273번. 종이 무늬 넷 · 점선 모양 — 바탕 · 선 모양만(자리 · 크기는 그대로). 무늬는 아주 옅게(잉크) */
 .sheet[class*=" pp-"]::after{display:none}
 .sheet.pp-hanji{background-image:radial-gradient(ellipse 14px 1.2px at 30% 40%,rgba(120,95,55,.10),transparent 70%),radial-gradient(ellipse 1.2px 11px at 70% 60%,rgba(120,95,55,.08),transparent 70%),radial-gradient(ellipse 22px 1px at 55% 25%,rgba(120,95,55,.07),transparent 70%),radial-gradient(ellipse 9px 1px at 15% 80%,rgba(255,255,255,.5),transparent 70%);
@@ -1965,18 +1953,18 @@ dialog button.st-exb,.panel button.st-exb{height:auto;min-height:0;border-radius
 .panel #f-markc[hidden]{display:none}
 /* 273번. 정하기 창 추천 조합 타일 — 포인트 색 점 하나 */
 .st-swb .c em{display:block;width:10px;height:10px;border-radius:50%;margin:6px auto 0}
-dialog button.st-swb{width:84px}
+
 /* 275번. 사진으로 시작 · 읽은 값 확인 */
 .st-picimg{display:block;max-width:100%;max-height:220px;margin:10px auto 0;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .st-picimg[hidden]{display:none}
 dialog .st-ans{height:auto;min-height:120px;padding:10px 12px;font:13px/1.5 var(--ui-font);resize:vertical}
 dialog .st-msg{color:#9c3a20;min-height:1em}
-.st-ctab{display:flex;flex-direction:column;gap:4px;margin-top:12px;max-height:46vh;overflow:auto;padding-right:4px}
-.st-crow{display:grid;grid-template-columns:1fr 96px;gap:6px}
-.st-cin{height:32px;box-sizing:border-box;border:1px solid #c9bda6;border-radius:4px;padding:0 8px;font:14px var(--ui-font);background:#fffdf6;color:#241c12;min-width:0}
-.st-cin.st-csec{margin-top:10px;font-weight:700;border-color:#9c8a68}
+.st-ctab{flex-direction:column;margin-top:12px;padding-right:4px}
+
+.st-cin{box-sizing:border-box;color:#241c12;min-width:0}
+.st-cin.st-csec{margin-top:10px}
 .st-cin.st-cp{text-align:right}
-.st-cin.un{background:#fff1b8;border-color:#d9b43a}   /* 자신 없는 값 — 노랗게(9장 3번에 맡겨 둔 색) */
+
 #st-read .row2,#st-check .row2{margin-top:10px}
 #st-gem[hidden],#st-app[hidden]{display:none}
 /* ── 280번. 첫 화면 · 사진으로 시작 · 읽은 메뉴 확인 다시 짜기(사용자: "첫 화면에 분류 없이 넷이 일렬 · 처음 화면으로 · 직접 입력할게요는
@@ -1984,9 +1972,9 @@ dialog .st-msg{color:#9c3a20;min-height:1em}
    · 뒤 메뉴판이 휠에 움직이지 않게 — 첫 화면이 열린 동안 문서 스크롤을 잠근다. 스크롤 막대 자리는 남겨(gutter) 종이가 옆으로 안 튄다(규칙 I · 224번)
    · 덜 중요한 단추는 글자 단추(bt-text) 대신 테두리 단추(bt-out) — 글자 단추는 설명 글과 구분되지 않았다. 되돌아가는 단추는 바닥 줄 왼쪽 */
 html:has(dialog[open]){overflow:hidden;scrollbar-gutter:stable}   /* 285번. 모든 창 — 첫 화면에만 걸려 있어 창 위치가 7px 달랐다 */
-dialog#start{width:min(640px, calc(100vw - 32px))}
+
 dialog#start h3:focus{outline:none}
-dialog#start.wide{width:min(1080px, calc(100vw - 32px))}
+
 dialog button.bt-out{background:transparent;border:1px solid #9c8a68;color:#241c12}
 dialog button.bt-out:hover{background:rgba(36,28,18,.06)}
 @media (max-width:480px){ dialog .row2.foot2 .chk{flex-basis:100%;margin-right:0} dialog .row2.foot2 .chk ~ button:first-of-type{margin-left:auto} }   /* 280번. 좁으면 [취소]가 혼자 윗줄에 남고 확인 단추가 아래로 떨어졌다(테두리 단추가 글자 단추보다 넓다) — 체크는 한 줄, 단추 둘은 다음 줄에 나란히 */
@@ -2000,10 +1988,9 @@ dialog .st-big .st-th i{height:20px}
 .st-th.cam{background:#fffdf6;border-style:dashed;position:relative}
 .st-th.cam::after{content:"";position:absolute;left:14px;right:14px;top:24px;bottom:24px;border:1.5px solid #9c8a68;border-radius:6px;
   background:radial-gradient(circle at 50% 55%, transparent 7px, #9c8a68 7px 8.5px, transparent 8.5px)}
-.st-step{display:flex;align-items:center;gap:10px;margin:20px 0 10px;font-size:15px;font-weight:700}
-dialog#start .sub + .st-step{margin-top:6px}
-.st-step em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;
-  background:#241c12;color:#f4ecdb;font-size:13px;font-weight:700}
+
+
+
 .st-picrow{display:flex;gap:12px;align-items:stretch}
 .st-picrow .st-picimg{flex:0 0 auto;width:auto;height:96px;max-width:120px;margin:0;object-fit:cover}
 .st-picrow .st-picimg[hidden]{display:none}
@@ -2029,13 +2016,13 @@ dialog#start p.st-msg.err{color:#a3321f}
 .st-cphoto{position:sticky;top:0}
 .st-cphoto img[hidden]{display:none}
 .st-cbody.nopic{grid-template-columns:1fr}
-.st-ccol{display:flex;flex-direction:column;gap:18px;min-width:0}
+.st-ccol{display:flex;flex-direction:column;min-width:0}
 .st-csecbox{display:flex;flex-direction:column;gap:2px}
-.st-crow{display:grid;grid-template-columns:minmax(0,1fr) 6.2em;gap:6px}
-.st-cin{height:30px;border:1px solid transparent;border-radius:4px;background:rgba(255,253,246,.55);font:15px var(--ui-font);padding:0 6px}
+.st-crow{display:grid}
+.st-cin{border:1px solid transparent;border-radius:4px;background:rgba(255,253,246,.55);font:15px var(--ui-font)}
 .st-cin:hover{border-color:#c9bda6}
 .st-cin:focus{outline:none;border-color:#241c12;background:#fffdf6}
-.st-cin.st-csec{margin:0 0 4px;height:34px;font-size:17px;font-weight:700;border-radius:4px 4px 0 0;border-color:transparent transparent #241c12;border-bottom-width:1.5px;background:transparent}
+.st-cin.st-csec{margin:0 0 4px;font-weight:700;border-radius:4px 4px 0 0;border-color:transparent transparent #241c12;border-bottom-width:1.5px;background:transparent}
 .st-cin.st-csec:hover{border-color:#c9bda6 #c9bda6 #241c12}
 .st-cin.st-csec.un{background:#fff1b8;border-color:#d9b43a #d9b43a #241c12}
 .st-cin.st-csec:focus{background:#fffdf6}
@@ -2061,15 +2048,15 @@ dialog .st-list button.st-row:hover{background:#f7f0e1}
 .st-row .st-tx > span{font-size:12.5px}
 .st-row::after{content:"›";font-size:26px;line-height:1;color:#7a6a50}
 /* 사진을 올린 뒤 — 올린 사진이 주인공, 바꾸기는 작은 단추로 */
-.st-picrow.has{align-items:center}
-.st-picrow.has .st-picimg{height:150px;max-width:none}
-dialog .st-picrow.has button.st-drop{flex:0 0 auto;width:auto;min-height:0;height:40px;padding:0 18px;border:1px solid #9c8a68;border-radius:20px;background:transparent}
+
+.st-picrow.has .st-picimg{max-width:none}
+dialog .st-picrow.has button.st-drop{flex:0 0 auto;min-height:0;background:transparent}
 .st-picrow.has .st-drop small{display:none}
 .st-picrow.has .st-dtx::before{content:""}
 /* 읽은 메뉴 확인 — 종이는 A4 세로 비율 그대로(시작하면 세로 A4 메뉴판이 된다). 창 높이에 맞춰 크기만 줄고, 메뉴가 넘치면 종이 안에서 스크롤 */
 .st-cbody{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;margin-top:14px;align-items:start;justify-items:center}
-.st-cphoto img{display:block;max-width:100%;max-height:min(calc(100vh - 290px), 860px);object-fit:contain;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2);background:#fff}
-.st-cpaper{height:min(calc(100vh - 290px), 860px);min-height:440px;aspect-ratio:210/297;box-sizing:border-box;overflow:auto;background:#efe3c9;
+.st-cphoto img{display:block;max-width:100%;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2);background:#fff}
+.st-cpaper{aspect-ratio:210/297;box-sizing:border-box;overflow:auto;background:#efe3c9;
   border:1px solid #c9bda6;box-shadow:0 1px 4px rgba(0,0,0,.18);display:flex;flex-direction:column;
   background-image:repeating-linear-gradient(0deg, rgba(120,96,60,.035) 0 1px, transparent 1px 3px)}
 .st-cband{flex:0 0 auto;height:13%;min-height:52px;display:flex;align-items:center;justify-content:center;background:#ddd2bb;color:#3b3022;font:500 18px/1 var(--ui-font);letter-spacing:.08em}   /* 290번. 색은 다음 창에서 고른다 — 여기서는 색 없이 */
@@ -2078,10 +2065,10 @@ dialog .st-picrow.has button.st-drop{flex:0 0 auto;width:auto;min-height:0;heigh
 .st-legend[hidden]{display:none}
 .st-ctab{display:grid;grid-template-columns:1fr 1fr;gap:0 5%;padding:5% 6% 6%;max-height:none;overflow:visible;margin:0}
 .st-ccol{gap:14px}
-.st-crow{grid-template-columns:minmax(0,1fr) 5em;gap:4px}
+.st-crow{gap:4px}
 .st-cin{height:28px;font-size:13.5px;padding:0 5px}
 .st-cin.st-csec{height:30px;font-size:15px}
-p.st-cnote{margin:10px 0 0;font-size:12px;color:#5c4f3c;text-align:left}
+
 @media (max-width:820px){
   .st-cbody{grid-template-columns:1fr}
   .st-cphoto img{max-height:220px;margin:0 auto}
@@ -2107,9 +2094,9 @@ dialog .st-head{padding-right:48px}
 dialog button:disabled,.bar button:disabled,.panel button:disabled{opacity:.38;cursor:default}
 dialog button.bt-fill:disabled:hover{background:var(--ui-accent);border-color:var(--ui-accent)}
 dialog button.bt-out:disabled:hover{background:transparent}
-.pl-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pl-presets{display:grid;gap:6px}
 .panel button.pl-tile{display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;min-height:0;padding:6px 2px;border:1px solid transparent;border-radius:10px;
-  background:transparent;color:#efe3c9;font-size:11.5px;line-height:1.25;text-align:center;word-break:keep-all}
+  background:transparent;color:#efe3c9;line-height:1.25;text-align:center;word-break:keep-all}
 .panel button.pl-tile:hover{background:rgba(240,230,205,.08)}
 .panel button.pl-tile.on{border-color:rgba(240,230,205,.7);background:rgba(240,230,205,.1)}
 .pl-tile .c{width:34px;height:34px;border-radius:7px;border:1px solid rgba(240,230,205,.25);box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
@@ -2135,19 +2122,19 @@ header.topbar input.tb-name::placeholder{color:rgba(240,230,205,.45)}
 header.topbar .bar.tb-edit{height:38px;margin-top:4px;padding:2px 6px}   /* 뒤의 285번 규칙보다 구체적으로 */
 header.topbar .tb-edit button{height:32px;border-radius:16px}
 header.topbar .tb-edit button.ib{width:32px}
-.topbar .tb-name{flex:0 0 auto;min-width:0;max-width:14em;text-align:left}   /* 290번. 폭 고정(286번)을 걷었다 — 짧은 이름 뒤가 비어 글자가 허공에 뜬 것처럼 보였다(사용자). 폭은 fitName() 이 글자 길이로 */
-.topbar .autost{transition:color .5s, opacity .3s}
+.topbar .tb-name{text-align:left}   /* 290번. 폭 고정(286번)을 걷었다 — 짧은 이름 뒤가 비어 글자가 허공에 뜬 것처럼 보였다(사용자). 폭은 fitName() 이 글자 길이로 */
+
 .topbar .autost.saving{opacity:.5}
 .topbar .autost.just{color:#c4f2b8;background:rgba(120,200,110,.22)}   /* 288번. 저장된 순간을 더 또렷하게(사용자) — 색에 옅은 바탕까지. 자리는 안 바뀐다(padding 은 늘 같다) */
 .topbar .autost{border-radius:12px;transition:color .4s, background-color .4s, opacity .3s}
 .st-seg,.st-pseg{display:inline-grid !important;grid-auto-flow:column;grid-auto-columns:1fr}
 .st-seg button::before,.st-pseg button::before{content:"✓ ";visibility:hidden}
 .st-seg button.on::before,.st-pseg button.on::before{visibility:visible}
-dialog .st-picrow.has{flex-direction:row;align-items:center;gap:14px;padding:10px 14px;border:1.5px dashed #9c8a68;border-radius:14px;background:#fffdf6}   /* 285번 규칙보다 구체적으로 */
-dialog .st-picrow.has .st-picimg{height:120px}
-dialog .st-picrow.has button.st-drop{margin-left:auto;border-style:solid}
+dialog .st-picrow.has{border:1.5px dashed #9c8a68;border-radius:14px;background:#fffdf6}   /* 285번 규칙보다 구체적으로 */
+
+dialog .st-picrow.has button.st-drop{border-style:solid}
 dialog p.st-note{margin:6px 0 0;font-size:12.5px;color:#6b5d48}
-dialog p.st-cnote{margin:6px 0 0}
+
 dialog h3:focus{outline:none}
 dialog:focus-visible{outline:none}
 .pl-mine{margin-bottom:4px}
@@ -2158,7 +2145,7 @@ dialog:focus-visible{outline:none}
    · 모든 창 폭 560 하나 · 위 끝은 고정(가운데 정렬이면 단계마다 위 끝이 오르내렸다) · 읽은 메뉴 확인만 화면 가득 찬 창 */
 dialog{width:min(560px, calc(100vw - 32px));margin:72px auto 16px;max-height:calc(100vh - 88px)}
 dialog#start{width:min(560px, calc(100vw - 32px))}
-dialog#start.wide{width:calc(100vw - 32px);max-width:1440px;margin:16px auto;max-height:calc(100vh - 32px)}
+dialog#start.wide{width:calc(100vw - 32px);max-width:1440px}
 dialog h4{margin:18px 0 6px;font-size:15px;font-weight:700}
 dialog h3 + h4{margin-top:4px}
 dialog ul{margin:0 0 4px 18px;padding:0}
@@ -2172,8 +2159,8 @@ dialog button.st-swb{width:76px}
 .panel label small{font-size:11px;color:rgba(240,230,205,.46);margin-left:4px}
 /* ── 283번. 위쪽 고정 막대 — 280번대까지 아래에 떠 있던 막대 둘(조작 · 편집)을 한 줄로. 종이는 그 아래에서 시작한다.
    높이 56 고정 — 좁으면 줄을 바꾸지 않고 막대 안에서 옆으로 민다(줄을 바꾸면 높이가 변해 종이를 가린다) */
-.barwrap.topbar{position:fixed;left:0;right:0;top:0;bottom:auto;transform:none;max-width:none;display:block;z-index:30}
-.topbar .bar{flex-wrap:nowrap;justify-content:flex-start;height:56px;box-sizing:border-box;padding:8px 16px;gap:8px;border-radius:0;border-width:0 0 1px;
+.barwrap.topbar{position:fixed;left:0;right:0;top:0;bottom:auto;transform:none;max-width:none;z-index:30}
+.topbar .bar{flex-wrap:nowrap;height:56px;box-sizing:border-box;padding:8px 16px;gap:8px;border-radius:0;border-width:0 0 1px;
   overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
 .topbar .tb-name{flex:0 1 auto;min-width:3em;max-width:14em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:600;color:#efe3c9}
 .topbar .autost{flex:0 0 auto;padding:3px 9px}
@@ -2182,11 +2169,11 @@ body.editing .topbar .editbar{display:flex}
 .topbar .editbar button{height:36px;border-radius:18px;padding:0 14px;font-size:13px}
 .topbar .editbar button.ib{width:36px;padding:0;font-size:17px;line-height:1}
 .topbar .editbar button.ib:disabled{opacity:.35;cursor:default}
-.topbar .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.topbar .tb-right{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .topbar .bar > button,.topbar .tb-right button{flex:0 0 auto}
 .topbar #b-edit{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff}   /* 오른쪽 묶음의 주된 동작 하나 */
 .topbar #b-edit:hover{background:#8f2c21}
-.topbar #b-style.on,.topbar #b-preview.on{background:rgba(240,230,205,.16);border-color:rgba(240,230,205,.34);color:#efe3c9}   /* 289번. [미리보기 끝]도 — [편집 끝]과 빨간 단추 둘이 됐다(규칙 I) */   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
+.topbar #b-style.on,.topbar #b-preview.on{color:#efe3c9}   /* 289번. [미리보기 끝]도 — [편집 끝]과 빨간 단추 둘이 됐다(규칙 I) */   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
 .tb-menu{position:fixed;z-index:31;min-width:240px;padding:6px;display:flex;flex-direction:column;gap:2px;
   background:#2a2218;border:1px solid rgba(240,230,205,.22);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:var(--ui-font)}
 .tb-menu[hidden]{display:none}
@@ -2195,8 +2182,8 @@ body.editing .topbar .editbar{display:flex}
 .tb-menu button:hover,.tb-menu button:focus-visible{background:rgba(240,230,205,.07);outline:none}   /* 302번 */
 .tb-menu small{font-size:12px;color:rgba(240,230,205,.6)}
 @media screen{ body{padding-top:86px;padding-bottom:48px} }   /* 아래 막대가 없어져 아래 여백(150 · 190px)도 줄였다. 285번. 화면에만 — 인쇄에 걸려 빈 쪽이 생겼다(t30) */
-html{scroll-padding-top:72px}   /* 가린 줄로 스크롤할 때 막대 아래로 */
-.panel{top:72px}
+
+
 .undo{bottom:24px}
 @media screen and (max-width:900px){ body{padding-top:68px;padding-bottom:48px} }
 @media screen and (max-width:1119px){ .panel{top:auto;bottom:16px} }
@@ -2245,7 +2232,7 @@ dialog#help h4,.gd-tip h4{font-size:16px;font-weight:700;line-height:1.4}
 .stepdots i{width:6px;height:6px;border-radius:50%;background:#d4c6a8}
 .stepdots i.past{background:#b09a74}
 .stepdots i.on{width:18px;border-radius:3px;background:var(--ui-accent)}
-.panel .phead button#p-close{width:36px;height:36px;min-height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:rgba(240,230,205,.75)}
+.panel .phead button#p-close{padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:rgba(240,230,205,.75)}
 .panel .phead button#p-close:hover{background:rgba(240,230,205,.12);color:#efe3c9}
 .panel .phead button#p-close svg{width:20px;height:20px}
 dialog .st-in:focus,dialog textarea.st-in:focus,dialog input#bulk-amt:focus,dialog .st-cin:focus,.st-cband input.st-cshopin:focus{outline:none;border-color:#6b5438;box-shadow:inset 0 0 0 1px #6b5438}
@@ -2260,7 +2247,7 @@ dialog .st-picrow.has button.st-drop{margin-left:0}
 .panel .grp.st-pseg button,.panel .pgpick button,.panel .pgpick button.pill{height:32px;min-height:32px}
 .panel .phead button#p-close{width:32px;height:32px;min-height:32px}
 .panel .pgpick button.pill.on{background:rgba(240,230,205,.16);border-color:rgba(240,230,205,.5);color:#efe3c9}   /* 292번. 고른 쪽은 켜진 상태 — 채운 빨강은 앞으로 가기 · 확정에만(291번 단추 규칙). [1쪽 · 메뉴]가 빨갛게 채워져 있었다 */
-dialog label,.panel label,.gd-tip dt,.panel .copynote{text-wrap:pretty}
+dialog label,.panel label,.gd-tip dt{text-wrap:pretty}
 dialog button:not(:disabled):active,.gd-tip button:active,.rowtools button:not(:disabled):active,.addrow button:not(:disabled):active,.pagebar button:not(:disabled):active{box-shadow:inset 0 0 0 100px rgba(36,28,18,.10)}
 .panel button:not(:disabled):active,.topbar button:not(:disabled):active,.tb-menu button:active,.undo button:active{box-shadow:inset 0 0 0 100px rgba(240,230,205,.14)}
 
@@ -2282,9 +2269,9 @@ dialog .st-picrow.has:hover,dialog .st-picrow.has.over{border-color:#6b5438;back
 .editing [contenteditable="true"]:empty{outline-color:color-mix(in srgb, var(--ink) 48%, transparent)}
 .editing:not(.preview) .row:not(.wine) .vol:empty::before{outline-color:color-mix(in srgb, var(--ink) 48%, transparent)}
 /* ④ 사진을 올린 뒤 — 사진을 크게 가운데, [사진 바꾸기]는 바로 아래 가운데(사진과 한 세로선). 293번은 단추가 어느 선에도 안 맞고 사진이 가장 작았다 */
-dialog .st-picrow.has{flex-direction:column;align-items:center;gap:10px;padding:14px}
+dialog .st-picrow.has{padding:14px}
 dialog .st-picrow.has .st-picimg{height:220px;max-width:100%}
-dialog .st-picrow.has button.st-drop{margin:0}
+
 /* ⑤ 알약 제목은 그림자로 양옆 .72em 을 더 칠한다 — 도구의 틈(.45em)보다 넓어 ◀ 가 알약에 겹쳤다(재 봤다) */
 .editing .sheet.sh-pill:not(.sa-center):not(.sa-right) .sec-head .rowtools{padding-left:.95em}
 /* ⑥ 오른쪽 정렬에서는 제목도 분류 메모(오른쪽 아래, 179번)도 오른쪽이라 겹쳤다 — 메모를 왼쪽으로 */
@@ -2299,10 +2286,10 @@ dialog .st-picrow.has button.st-drop{margin:0}
 .seal{color:var(--seal-col, var(--accent));z-index:0}   /* 296번. 그림처럼 글자 뒤 — 겹쳐도 글자가 읽히고, 완성본 인쇄(도장이 위)와 편집 중 인쇄(글자가 위)가 달랐다(t07) */
 .art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
 /* 299번 — 296번의 그림 키우기는 글자 단추로 바뀌어 걷었다 */   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
-.panel .colrow{display:flex;gap:6px;align-items:center}
-.panel .colrow select{flex:1 1 auto;min-width:0}
-.panel .colrow input[type=color]{flex:0 0 32px;width:32px;height:32px;padding:2px}
-.st-cpaper.land{aspect-ratio:297/210;height:auto;width:min(46vw, 900px)}
+
+
+
+.st-cpaper.land{aspect-ratio:297/210}
 dialog .st-cadd{align-self:flex-start;margin-top:4px;height:28px;padding:0 12px;border:1px solid #9c8a68;border-radius:14px;background:transparent;font-size:12px}
 .st-cphoto img{cursor:zoom-in}
 dialog p.st-czoomhint{margin:6px 0 0;text-align:center}
@@ -2313,11 +2300,11 @@ dialog p.st-czoomhint{margin:6px 0 0;text-align:center}
 /* ══ 297번. 장 사이 틈 26 → 50(편집 중 다음 장의 탭 30px 가 앞 장 아래 끝을 2px 덮었다 — 재 봤다. 편집을 켜고 끌 때 종이가 안 움직이게 두 모드 같게 — t25) ·
    그림 · 도장 손잡이 묶음 · 확인 화면 읽은 개수 · 칸 촘촘히(A4 비율은 지킨다 — 사용자. 칸 30 → 26px, 칸 사이 · 분류 사이를 줄여 스크롤이 덜 생기게) */
 @media screen{ #pages{gap:50px} }
-.panel .fld.sub{margin:6px 0 8px 4px;padding-left:12px;border-left:2px solid rgba(240,230,205,.22);display:flex;flex-direction:column;gap:6px}
+.panel .fld.sub{margin:6px 0 8px 4px;border-left:2px solid rgba(240,230,205,.22);display:flex;flex-direction:column;gap:6px}
 .panel .fld.sub[hidden]{display:none}
-.panel .subrow{display:grid;grid-template-columns:3.4em minmax(0,1fr) 32px;gap:6px;align-items:center}
-.panel .subrow.nosw{grid-template-columns:3.4em minmax(0,1fr)}
-.panel .subrow label{margin:0;font-size:12px}
+.panel .subrow{display:grid;align-items:center}
+
+.panel .subrow label{margin:0}
 .panel .subrow input[type=color]{width:32px;height:32px;padding:2px}
 dialog p.st-ccount{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:#e8dcc2;color:#241c12;font-size:14px;line-height:1.5}
 dialog p.st-ccount b{font-weight:700;color:var(--ui-accent)}
@@ -2340,25 +2327,25 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .editing .guide{border-width:1.5px;border-color:rgba(95,68,32,.75);box-shadow:0 0 0 1px rgba(255,253,246,.35)}
 .editing .sheet.over .guide{border-color:color-mix(in srgb, var(--accent) 85%, transparent)}
 @media screen{ .editing:not(.preview) .nogo{outline:1.5px dashed rgba(95,68,32,.6);outline-offset:-4mm} }   /* 화면에만 — 편집 중 인쇄에 찍히면 안 된다 */
-.panel .chips{display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch}   /* 넷이 한 줄에 */
-.panel .chips button,.panel .chips .chip-own{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;flex:1 1 0;height:auto;min-height:0;padding:4px 2px;font-size:11px;line-height:1.2;border-radius:8px;border:1px solid rgba(240,230,205,.22);background:none;color:rgba(240,230,205,.85);cursor:pointer}
-.panel .chips i{display:block;width:26px;height:16px;border-radius:4px;border:1px solid rgba(240,230,205,.35)}
-.panel .chips .on{border-color:#efe3c9;background:rgba(240,230,205,.16);color:#efe3c9}
-.panel .chips .chip-own input[type=color]{width:26px;height:16px;padding:0;border:1px solid rgba(240,230,205,.35);border-radius:4px;background:none}
+
+
+
+
+
 
 /* ══ 299번. 줄 도구 두 줄 · 그림 · 도장 색을 「색」 상자와 같은 모양으로(사용자: "같은 방식으로 하라고 한 색(종이 · 글자 · 띠 · 포인트)을 잘 봐. 뭔가 다르잖아").
    색 상자는 **상자 자체가 칸이고 이름은 밑** — 테두리 친 단추 안에 조각 · 이름을 넣지 않는다. 고른 것에만 테 */
 .editing .row .namewrap > .rowtools:not(.rowmove){display:grid;grid-template-columns:max-content max-content;gap:2px;white-space:nowrap;width:max-content}
-.editing .row .namewrap > .rowtools:not(.rowmove) button{font-size:calc(var(--ed-fs) * 1.1);min-width:0;width:auto;height:auto;padding:.1em .2em;line-height:1.35;letter-spacing:-.03em}
-.panel .chips{gap:6px;flex-wrap:nowrap}
-.panel .chips button,.panel .chips .chip-own{flex:0 0 auto;border:0;background:none;padding:0;gap:3px;color:rgba(240,230,205,.7)}
-.panel .chips i,.panel .chips .chip-own input[type=color]{width:38px;height:30px;border-radius:8px;border:1px solid rgba(240,230,205,.3);box-sizing:border-box}
-.panel .chips .chip-own input[type=color]{padding:0;background:none;-webkit-appearance:none;appearance:none;overflow:hidden}
-.panel .chips .chip-own input[type=color]::-webkit-color-swatch-wrapper{padding:0}
-.panel .chips .chip-own input[type=color]::-webkit-color-swatch{border:0;border-radius:7px}
-.panel .chips .chip-own input[type=color]::-moz-color-swatch{border:0;border-radius:7px}
-.panel .chips .on{background:none;color:#efe3c9}
-.panel .chips .on i,.panel .chips .chip-own.on input[type=color]{outline:2px solid #efe3c9;outline-offset:2px}
+.editing .row .namewrap > .rowtools:not(.rowmove) button{min-width:0;width:auto;height:auto}
+
+
+
+
+
+
+
+
+
 
 /* ══ 300번. 사용자 점검 다섯(299번 기록): ① 줄 도구를 가격에 딱 붙임(틀 안 여백 14 → 2px, 재 보니 18px 떨어져 있었다)
    ② 줄 도구 단추 = ＋ 묶음 단추 모양(둘 다 종이 위 글자 단추 — 9px · 점선 테 · 알약 · 같은 바탕 · 글자색. 쟀던 값 그대로)
@@ -2366,9 +2353,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
    ⑤ 순서를 두 곳 모두 글자색 · 띠색 · 포인트색 · 직접으로 고정(기본값을 앞에 두느라 그림 · 도장이 달랐다) — 기본값은 테로만 */
 .editing .row .namewrap > .rowtools:not(.rowmove){padding-left:2px}
 .editing .row .namewrap > .rowtools:not(.rowmove) button{font-size:9px;padding:1px 6px;border:1px dashed rgb(201,183,149);border-radius:99px;background:rgb(239,227,201);color:rgb(111,96,71);line-height:1.45;letter-spacing:0}
-.panel .chips i,.panel .chips .chip-own input[type=color]{width:30px;height:26px;border-radius:8px}
-.panel .chips button,.panel .chips .chip-own{font-size:12px;color:rgba(240,230,205,.55)}   /* 318번. 카드 이름 10.5 → 12 */
-.panel .chips .on{color:#efe3c9}
+
+
+
 
 /* 301번. 그림 · 도장 색 상자는 이름표 바로 옆(왼쪽 맞춤) */
 .panel .subrow .pk{justify-self:start;margin:0}
@@ -2458,8 +2445,8 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .grp.two .fld select, .panel .grp.two .fld button{width:100%}
 /* 312번. 확인 화면 — 종이를 넓게(사진은 비교용이라 좁게), 영업시간 · 바닥 글 · 분류 안내 칸, 추천 ★ 칸 */
 @media screen and (min-width:821px){ .st-cbody:not(.nopic):has(.st-cpaper.land) .st-cphoto{max-width:min(22vw, 360px)} }
-.st-cpaper{height:min(calc(100vh - 320px), 860px)}   /* 312번. 290 은 위 안내 · 바닥 단추 줄을 덜 셌다 — 종이 아래가 [다음] 줄에 가려졌다(찍어 보고 잼) */
-.st-cpaper.land{height:auto;width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 320px) * 1.414))}
+
+
 .st-chours:not([hidden]) + .st-ctab{padding-top:3%}
 .st-cpaper .st-cband{height:9%;min-height:46px}   /* 312번. 자리를 먹는 것은 칸이 아니라 고정 여백이었다 — 가게 이름 띠 13 → 9%, 메뉴 아래 여백 6 → 2%(폭 기준이라 가로 A4 에서 58px), 바닥 글 아래 5 → 3% */
 .st-cpaper .st-ctab{padding-bottom:2%}
@@ -2475,11 +2462,11 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .st-cpaper .st-cin.st-cnl{margin-top:2px}
 .st-cpaper .st-cin.st-cfl,.st-cpaper .st-cin.st-cnl{height:22px}
 .st-crow{grid-template-columns:1.5em minmax(0,1fr) 5em}
-dialog .st-crow button.st-cpk{height:26px;width:1.5em;min-width:0;padding:0;border:0;border-radius:4px;background:none;color:#c9bda6;font-size:14px;font-weight:400}
+dialog .st-crow button.st-cpk{width:1.5em;min-width:0;padding:0;border:0;border-radius:4px;background:none;color:#c9bda6;font-size:14px;font-weight:400}
 dialog .st-crow button.st-cpk:hover{background:rgba(36,28,18,.06)}
 dialog .st-crow button.st-cpk.on{color:var(--ui-accent)}
 /* 313번. 사진 칸 높이 여유를 종이와 같게(312번이 종이만 320 으로 바꿔 사진이 22px 길어지고 창에 스크롤이 하나 더 생겼다) · 진한 노랑 · 경고 줄 · 방향 · 단 손잡이 · 돌리기 */
-.st-cphoto img{max-height:min(calc(100vh - 320px), 860px)}
+
 dialog .st-cpaper .st-cin.un,dialog .st-cin.un{background:#ffe17a;border-color:#c99a1a;box-shadow:inset 0 0 0 1px #c99a1a}
 dialog .st-cpaper .st-cin.st-csec.un{background:#ffe17a;border-color:#c99a1a #c99a1a #241c12}
 dialog .st-legend i{background:#ffe17a;border-color:#c99a1a}
@@ -2487,16 +2474,16 @@ dialog p.st-ccount{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px}
 .st-warn{color:#a3321f;font-weight:700}
 .st-warn::before{content:"! ";}
 .st-cform{margin-left:auto;display:inline-flex;gap:10px;flex-wrap:wrap}
-.st-cseg{display:inline-flex;border:1px solid #9c8a68;border-radius:14px;overflow:hidden}
-dialog .st-cseg button{height:28px;min-width:0;padding:0 10px;border:0;border-radius:0;background:transparent;font-size:13px;font-weight:400}
-dialog .st-cseg button + button{border-left:1px solid #9c8a68}
-dialog .st-cseg button.on{background:#241c12;color:#f4ecdb}
+
+
+
+
 dialog p.st-help .warn{display:block;color:#a3321f;font-weight:700}
 dialog p.st-help .warn::before{content:"! ";}
-.st-rot{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+
 .st-rot[hidden]{display:none}
-dialog .st-rot button{height:36px;width:44px;padding:0;font-size:18px;border:1px solid #9c8a68;background:#fffdf6}
-.st-rot small{font-size:12px;color:#5c4f3c;flex-basis:100%;text-align:center}
+
+
 /* 314번. 사진 칸은 방향과 상관없이 같은 폭(313번은 가로 종이일 때만 좁혀 [세로]를 누르면 사진이 커졌다) · 단이 많으면 가격 칸을 좁게 · 돌리기 단추를 사진 옆에 */
 @media screen and (min-width:821px){ .st-cbody:not(.nopic) .st-cphoto{width:min(22vw, 360px);max-width:none} }
 .st-cphoto img{width:100%;height:auto;object-fit:contain}
@@ -2506,25 +2493,25 @@ dialog .st-rot button{height:36px;width:44px;padding:0;font-size:18px;border:1px
 dialog .st-picrow.has .st-picbox .st-picimg{width:240px;height:240px;max-width:none;max-height:none;object-fit:contain;flex:none;box-shadow:none}   /* 314번. 돌려도 자리가 그대로인 정사각 틀 — 누운 사진을 돌리면 넓어져 단추가 사진 밑으로 내려가, 180° 를 위해 두 번째로 누를 단추가 움직였다(찍어 보고 잡음) */
 @media (max-width:560px){ .st-picbox{flex-wrap:wrap} dialog .st-picrow.has .st-picbox .st-picimg{width:200px;height:200px} }
 .st-picbox[hidden]{display:none}
-.st-rot{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex-wrap:nowrap;justify-content:center}
-dialog .st-rot button{height:40px;width:auto;padding:0 16px 0 12px;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;border:1px solid #9c8a68;background:#fffdf6;color:#241c12;border-radius:20px}
+
+dialog .st-rot button{font-size:14px;font-weight:500;border:1px solid #9c8a68;background:#fffdf6;color:#241c12}
 dialog .st-rot button:hover{background:#fff}
 .st-rot svg{width:20px;height:20px;flex:none;display:block}
 .st-rot .mir{display:inline-flex;transform:scaleX(-1)}
-.st-rot small{flex-basis:auto;text-align:left;max-width:13em;font-size:12px;color:#5c4f3c;line-height:1.45}
+.st-rot small{font-size:12px;color:#5c4f3c;line-height:1.45}
 /* 315번. 사진에 하는 일 셋(돌리기 둘 · 사진 바꾸기)을 사진 오른쪽 한 열에 — 314번은 사진 바꾸기만 사진 아래 가운데라 제각각이었다(사용자) */
-dialog .st-picrow.has{display:grid;grid-template-columns:240px auto;grid-template-rows:auto auto;column-gap:16px;row-gap:14px;align-items:center;justify-content:center}
-.st-picrow.has .st-picbox{display:contents}
+dialog .st-picrow.has{grid-template-columns:240px auto;grid-template-rows:auto auto;column-gap:16px;row-gap:14px;justify-content:center}
+
 .st-picrow.has .st-picimg{grid-column:1;grid-row:1 / span 2}
 .st-picrow.has .st-rot{grid-column:2;grid-row:1;align-self:end}
-dialog .st-picrow.has button.st-drop{grid-column:2;grid-row:2;align-self:start;justify-self:stretch;width:auto;margin:0;height:40px;border:1px solid #9c8a68;border-radius:20px;font-size:14px;font-weight:500}
+dialog .st-picrow.has button.st-drop{grid-column:2;grid-row:2;justify-self:stretch;margin:0;height:40px;border:1px solid #9c8a68;border-radius:20px;font-size:14px;font-weight:500}
 @media (max-width:560px){ dialog .st-picrow.has{grid-template-columns:auto;grid-template-rows:auto} .st-picrow.has .st-picimg,.st-picrow.has .st-rot,dialog .st-picrow.has button.st-drop{grid-column:1;grid-row:auto} }
 /* 316번. 사진 아래로 — 돌리기 둘(한 쌍 · 가운데) · 안내 한 줄 · 그 밑에 [사진 바꾸기] 혼자 가운데(사용자 — 오른쪽 열은 작은 창에서 흔한 배치가 아니고, 한 줄에 셋이면 사진 바꾸기가 혼자 붙어 어색) · 사진 위 진행 막 */
 dialog .st-picrow.has{display:flex;flex-direction:column;align-items:center;gap:12px}
 .st-picrow.has .st-picbox{display:flex;flex-direction:column;align-items:center;gap:10px}
 .st-picwrap{position:relative;display:inline-block;line-height:0}
-.st-rot{display:grid;grid-template-columns:auto auto;gap:8px;justify-content:center;align-self:center}
-.st-rot small{grid-column:1 / -1;text-align:center;max-width:none}
+.st-rot{grid-template-columns:auto auto}
+.st-rot small{grid-column:1 / -1;max-width:none}
 dialog .st-picrow.has button.st-drop{align-self:center;width:auto;padding:0 22px}
 .st-busy{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;background:rgba(36,28,18,.66);color:#fff;border-radius:6px;font-size:14px;line-height:1.45;text-align:center}
 .st-busy[hidden]{display:none}
@@ -2539,9 +2526,9 @@ dialog .st-rot button{width:40px;height:40px;min-width:0;padding:0;gap:0;border-
 .st-rot small{flex-basis:100%;text-align:center}
 /* 317번. 확인 화면도 다른 창과 같은 자리(상단 막대 아래 72px)에서 연다 — 넓은 창만 위 16px 로 올라가 상단 막대를 가렸고 단계마다 시작 높이가 달랐다(사용자). 종이 · 사진 높이 여유 320 → 376(56px 줄어든 만큼) */
 dialog#start.wide{margin:72px auto 16px;max-height:calc(100vh - 88px)}
-.st-cpaper{height:min(calc(100vh - 376px), 860px);min-height:min(440px, calc(100vh - 376px))}   /* 옛 최소 440px 가 768px 높이 화면에서 창 자체를 45px 넘치게 했다 */
-.st-cphoto img{max-height:min(calc(100vh - 376px), 860px)}
-.st-cpaper.land{height:auto;width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 376px) * 1.414))}
+
+
+.st-cpaper.land{height:auto}
 /* 318번. 단추 규칙(규칙 I) 다시 맞춤 — 312 ~ 317번에 만든 단추를 규칙에 대 보지 않았다(사용자 — "버튼 모양이나 규칙이 일관되지 않은 것 같아").
    · 확인 화면 [세로 | 가로] · [1단 ~ 4단] — 28px · 각진 모서리 · 켜진 칸 검은 채움이었다 → [글자 | 로고]와 같은 부품(.st-seg — 40 · 테두리 알약 · 켜진 칸은 옅은 색 + ✓)
    · 돌리기 — 크림 바탕 + 테두리(← · ✕ 와도, [사진 바꾸기]와도 다른 셋째 동그란 모양)였다 → 테두리 단추(bt-out)를 동그랗게
@@ -2569,14 +2556,14 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
 .panel .grp.typo2 button{min-height:32px;border-radius:4px;white-space:nowrap}
 .panel .grp.typo2 button:first-child{border-radius:16px 4px 4px 16px}
 .panel .grp.typo2 button:last-child{border-radius:4px 16px 16px 4px}
-.panel .sealat{display:flex;align-items:flex-start;gap:10px}
-.panel .sealat small{font-size:12px;color:rgba(240,230,205,.55);line-height:1.45}
-.panel .pgrid.mini{width:76px;flex:none}
-.panel .pgrid.mini.land{width:106px}
-.panel .pgrid.mini .pband{font-size:9px}
-.panel #g-seal .pcells > button{padding:3px;color:#e0b0a8}
-.panel #g-seal .pcells > button > svg{width:70%;height:70%;display:block}
-.panel #g-seal .pcells > button.has{background:rgba(224,176,168,.14)}
+
+
+
+
+
+
+
+
 .panel .copyrow{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .panel .copyrow button#b-copypage{height:32px;min-height:32px;font-size:13px;padding:0 14px;border-radius:16px;white-space:nowrap}
 .panel label.fitsw > span{display:flex;flex-direction:column;line-height:1.3}
@@ -2590,6 +2577,16 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
 .panel #art-opts.off .subrow label,.panel #seal-opts.off label{opacity:.4}
 .panel #art-opts .pk input:disabled,.panel #seal-opts .pk input:disabled{opacity:.35;cursor:default}
 .panel #art-opts select:disabled{opacity:.45}
+/* 325번. 사진 흐름의 넓은 틀 — ① 사진 · ③ 정하기는 머리 · 바닥 줄만 틀 폭으로, 내용은 가운데 560 기둥(늘어지지 않게). ② 확인 화면은 그대로 넓게 */
+dialog#start.wide #st-read > :not(.st-head):not(.foot2),
+dialog#start.wide #st-setup > :not(.st-head):not(.foot2){max-width:512px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+dialog#start.wide #st-setup > input.st-in{display:block}   /* 상호명 칸만 — 처음엔 input 전부라 숨긴 파일 고르기 둘(「Choose File」)이 드러났다(찍어 보고 잡음) */
+dialog#start.wide #st-read > :not(.st-head):not(.foot2),dialog#start.wide #st-setup > :not(.st-head):not(.foot2){width:100%}
+/* 325번. 주 단추도 단계마다 같은 높이 — 넓은 틀은 높이를 고정하고 바닥 줄을 늘 바닥에(전에는 창 길이가 내용 따라 달라 673 / 923 / 736px 로 오르내렸다) */
+dialog#start.wide{height:calc(100vh - 88px)}
+dialog#start.wide > .in{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column}
+dialog#start.wide > .in > div:not([hidden]){flex:1 0 auto;display:flex;flex-direction:column}
+dialog#start.wide .row2.foot2{margin-top:auto}
 </style>
 </head>
 <body>
@@ -2898,12 +2895,14 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
   <!-- 320번. 꾸밈을 「그림」 · 「도장」 둘로 나눴다(사용 점검 — 사용자: 꾸밈이 직관적이지 않다). 303번은 격자 하나에 칸마다 그림과 도장을 두고,
        도장 켬은 고른 칸 묶음 안 · 도장 모양 · 색(장에 하나)은 묶음 밖이라 도장이 어디에 속하는지 안 보였고, 마지막 칸을 끄면 모양이 「없음」이 되는 연결이 숨어 있었다.
        저장 형식은 그대로(arts · seal · sealCells · sealColor) — 창의 짜임만 -->
-  <div class="pgrp">그림</div>
+  <!-- 323번. 꾸밈은 격자 하나 — 칸을 고르면 그 칸의 그림과 도장(사용자: 도장도 여섯 군데에 다른 걸 하고 싶을 수 있다 · 그림과 같은 방식이면 된다).
+       321번은 그림 격자(칸 고르기) · 도장 격자(찍고 빼기) 둘이라 같은 칸을 두 번 골랐고, 도장 모양 · 색은 장에 하나였다 -->
+  <div class="pgrp">꾸밈</div>
   <span class="grp two artseal">
     <span class="fld artpick"><label id="l-gart">자리 <small>칸을 눌러 고릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
-    <span class="cellname" id="art-cellname"></span>   <!-- 321번. 아래 손잡이가 어느 칸 것인지(격자의 테두리 칸과 이어 준다) -->
+    <span class="cellname" id="art-cellname"></span>
     <span class="subrow nosw"><label for="f-art">그림</label>
     <select id="f-art">
     <option value="none">없음</option>
@@ -2925,20 +2924,11 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
     <option value="edelweiss">에델바이스</option>
     <option value="vine">포도나무</option>
     </select></span>
-    <span id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
-      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span>
-      <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span>
-      <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span></span>
-  </span>
-  <!-- 321번. 도장도 그림과 같은 짜임 — 격자 먼저(같은 크기), 손잡이 나중. 320번은 「모양 → 자리(작은 격자)」로 그림과 순서가 거꾸로였고 격자 크기도 달라 다른 물건처럼 보였다(사용자 — 아직도 꾸밈이 어색하다) -->
-  <div class="pgrp">도장</div>
-  <span class="grp two artseal sealgrp">
-    <span class="fld artpick"><label id="l-gseal">자리 <small>눌러서 찍고 뺍니다 · 여러 곳에 찍을 수 있습니다</small></label>
-    <span class="pgrid" id="g-seal" role="group" aria-labelledby="l-gseal"></span></span>
-    <span class="fld sub" id="seal-sub">
-      <span class="cellname">이 장의 도장 전부</span>
-      <span class="subrow nosw"><label for="f-seal">모양</label>
-      <select id="f-seal">
+    <span id="art-opts">
+      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
+      <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
+    <span class="subrow nosw sealrow"><label for="f-seal">도장</label>
+    <select id="f-seal">
       <option value="none">없음</option>
       <option value="tri">네모 · 삼각</option>
       <option value="mtn">네모 · 산</option>
@@ -2950,8 +2940,9 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-      <span class="subrow nosw" id="seal-opts"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span>
-    </span>
+    <span id="seal-opts">
+      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span>
+    <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
   </span>
   <div class="pgrp">다른 장에</div>
   <span class="copyrow"><button id="b-copypage" type="button" title="이 탭의 설정을 다른 모든 장에 그대로 복사합니다">다른 장에도 똑같이</button>
@@ -3940,7 +3931,7 @@ MENU.sheets.forEach((sh,i) => { if (!sh.length) MENU.sheets[i] = [[]]; });
    옛 저장본의 맨 위 키(noren · scale · art · seal …)는 1쪽 값으로 옮기고 지운다(15번). 89 · 92번의 옛 변환(low · norenTall ·
    scalePort)도 여기서 장마다 한다 */
 const PAGE_KEYS = ["noren","norenScale","norenTall","showTitle","showSub","logoColor","scale","scalePort","scaleLand","autofit",
-                   "showNotes","showOrigin","arts","seal","sealCells","sealColor","alignRows"];   /* 309번. 분류 줄 맞추기(켜면 true · 끄면 키 없음) */   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) → 303번. 도장 자리도 칸마다 여럿(sealCells)
+                   "showNotes","showOrigin","arts","seals","alignRows"];   /* 323번. 도장도 칸마다(seals — 모양 · 색). 옛 seal · sealCells · sealColor 는 normSeals 가 옮긴다 */   /* 309번. 분류 줄 맞추기(켜면 true · 끄면 키 없음) */   // 296번. 그림 색 · 진하기 · 도장 색 → 302번. 그림은 칸 여섯(arts — 색 · 진하기는 칸마다) → 303번. 도장 자리도 칸마다 여럿(sealCells)
 /* 198 · 200번. 상단 크기 기본값. **출처는 하나다**(24 · 55번) —
    211번에서 `pageDefaults` · 122번 방어 · `drawSheet()` 대체값 · 창 표시 · ± · 막대가
    0.8 / 0.9 / 1 로 **셋으로 갈라져 있던 것**을 이 상수 하나로 모았다.
@@ -3955,7 +3946,7 @@ const NSCALE_DEFAULT = 0.8;
 const SCALE_DEFAULT = 1.0;
 function pageDefaults(i){
   // 198번. 기본값: 상단 크기 **80%** · 글자 크기 **100%**
-  return { noren:"flat", norenScale:NSCALE_DEFAULT, scale:SCALE_DEFAULT, autofit:false, arts:[{ cell:ART_CELL_OLD, art: i ? "vine" : "beerpasta" }], seal:"word",   // 302번
+  return { noren:"flat", norenScale:NSCALE_DEFAULT, scale:SCALE_DEFAULT, autofit:false, arts:[{ cell:ART_CELL_OLD, art: i ? "vine" : "beerpasta" }], seals:[{ cell:SEAL_POS_DEF, seal:"word" }],   // 302번
            showNotes: i ? false : undefined, showOrigin:false };
 }
 /* 302번. **그림은 칸 여섯(2단 × 3줄 — 두 방향 모두)** — `pg.arts = [{cell, art, color?, op?}]`(칸 차례 · 빈 칸은 목록에 없음 · 색 · 진하기는 칸마다, 기본이면 키 없음).
@@ -3963,6 +3954,21 @@ function pageDefaults(i){
    도장 모양 `seal` 이 "none" 이면 칸 목록과 상관없이 안 찍힌다. 칸은 **상단 아래부터** 종이 끝까지를 셋으로 나눈 것이다(303번).
    옛 파일의 그림 하나(`art` · `artColor` · `artOp`)는 오른쪽 아래 칸으로 옮긴다 — 옛 그림이 그려지던 자리(재서 정함). 망가진 값은 기본으로(122번 방어와 같은 자리에서 부른다) */
 const CELL_NAMES = ["왼쪽 위","오른쪽 위","왼쪽 가운데","오른쪽 가운데","왼쪽 아래","오른쪽 아래"], NCELL = 6, ART_CELL_OLD = 5, SEAL_POS_DEF = 5;
+function normSeals(pg, dflt){   /* 323번. 도장을 그림처럼 칸마다 — [{ cell, seal(모양), color? }]. 옛 키(303번 sealCells · 302번 sealPos · 296번 sealColor · seal)는 찍혀 있던 칸마다 같은 모양 · 색으로 옮긴다 */
+  const okSeal = k => typeof k === "string" && k !== "none" && Object.keys(SEALS).includes(k);
+  const okCol = v => ["ink","band"].includes(v) || /^#[0-9a-f]{6}$/i.test(v);
+  if (!Array.isArray(pg.seals) && ["seal","sealCells","sealPos","sealColor"].some(k => k in pg)){
+    const shape = pg.seal === "none" ? null : okSeal(pg.seal) ? pg.seal : "word";   // 키가 없거나 망가졌으면 기본(네모 · 알프스)
+    let cells = Array.isArray(pg.sealCells) ? pg.sealCells : Number.isInteger(pg.sealPos) ? [pg.sealPos] : [SEAL_POS_DEF];
+    pg.seals = shape ? cells.map(c => Object.assign({ cell:c, seal:shape }, okCol(pg.sealColor) ? { color:pg.sealColor } : {})) : [];
+  }
+  delete pg.seal; delete pg.sealCells; delete pg.sealPos; delete pg.sealColor;
+  if (!Array.isArray(pg.seals)) pg.seals = JSON.parse(JSON.stringify(dflt));
+  const seen = new Set();
+  pg.seals = pg.seals.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && x.cell >= 0 && x.cell < NCELL && okSeal(x.seal) && !seen.has(x.cell) && seen.add(x.cell))
+    .map(x => { const q = { cell:x.cell, seal:x.seal }; if (okCol(x.color)) q.color = x.color; return q; })
+    .sort((a, b) => a.cell - b.cell);
+}
 function normArts(pg, dflt){
   const okArt = k => typeof k === "string" && k !== "none" && Object.keys(ART).includes(k);
   const okCol = v => ["accent","band"].includes(v) || /^#[0-9a-f]{6}$/i.test(v);
@@ -3976,22 +3982,19 @@ function normArts(pg, dflt){
   pg.arts = pg.arts.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && x.cell >= 0 && x.cell < NCELL && okArt(x.art) && !seen.has(x.cell) && seen.add(x.cell))
     .map(x => { const q = { cell:x.cell, art:x.art }; if (okCol(x.color)) q.color = x.color; if (["mid","strong"].includes(x.op)) q.op = x.op; return q; })
     .sort((a, b) => a.cell - b.cell);
-  /* 303번. 도장 자리 — 여럿. 302번 파일의 sealPos(하나)는 목록으로 */
-  if (pg.sealPos !== undefined){ if (!Array.isArray(pg.sealCells) && Number.isInteger(pg.sealPos) && pg.sealPos >= 0 && pg.sealPos < NCELL) pg.sealCells = [pg.sealPos]; delete pg.sealPos; }
-  if (pg.sealCells !== undefined){
-    const c = Array.isArray(pg.sealCells) ? [...new Set(pg.sealCells.filter(x => Number.isInteger(x) && x >= 0 && x < NCELL))].sort((a, b) => a - b) : [SEAL_POS_DEF];
-    if (c.length === 1 && c[0] === SEAL_POS_DEF) delete pg.sealCells; else if (!c.length){ delete pg.sealCells; if (pg.seal !== undefined) pg.seal = "none"; } else pg.sealCells = c; }
+  /* 303번 → 323번. 도장 자리 · 모양 · 색은 normSeals() 가 칸마다 맞춘다 */
   return pg;
 }
 /* 303번. 그 장에서 도장이 찍히는 칸 — 모양이 없음이면 빈 목록 */
-const sealCellsOf = p => p && p.seal && p.seal !== "none" ? (Array.isArray(p.sealCells) ? p.sealCells : [SEAL_POS_DEF]) : [];
+const sealCellsOf = p => (p && p.seals || []).map(x => x.cell);   // 323번. 도장이 찍힌 칸(칸마다 모양 · 색은 p.seals)
 function P(i){
   const ps = SETTINGS.pages = Array.isArray(SETTINGS.pages) ? SETTINGS.pages : [];
   if (!ps[i]) ps[i] = pageDefaults(i);
   return ps[i];
 }
 if (!Array.isArray(SETTINGS.pages)){
-  const legacy = {}; PAGE_KEYS.concat("art").forEach(k => { if (k in SETTINGS) legacy[k] = SETTINGS[k]; });   // 302번. 맨 위의 옛 키 art 도
+  const legacy = {}; PAGE_KEYS.concat("art", "seal", "sealCells", "sealPos", "sealColor").forEach(k => {   // 323번. 맨 위의 옛 도장 키도
+   if (k in SETTINGS) legacy[k] = SETTINGS[k]; });   // 302번. 맨 위의 옛 키 art 도
   const arts = Array.isArray(SETTINGS.sheetArt) ? SETTINGS.sheetArt : [];
   SETTINGS.pages = MENU.sheets.map((_, i) => {
     // 바닥 셋은 옛 파일에서 1쪽에만 있었다. 나머지 장은 상단 · 글자 · 도장만 물려받는다
@@ -4004,7 +4007,7 @@ if (!Array.isArray(SETTINGS.pages)){
     Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
     return pg;
   });
-  PAGE_KEYS.concat("art").forEach(k => delete SETTINGS[k]); delete SETTINGS.sheetArt;   // 302번
+  PAGE_KEYS.concat("art", "seal", "sealCells", "sealPos", "sealColor").forEach(k => delete SETTINGS[k]); delete SETTINGS.sheetArt;   // 302번 · 323번. 옮긴 옛 도장 키도 맨 위에서 지운다(t14 가 잡음 — PAGE_KEYS 에서 빠져 저장본 맨 위에 seal 이 남았다)
 }
 /* 152번. 바닥(안내 문구 · 한 줄 항목 · 원산지)도 장마다 — `MENU.feet[장] = {notes, line, origin}` */
 if (!Array.isArray(MENU.feet)){
@@ -4042,11 +4045,10 @@ MENU.sheets.forEach((_, i) => {
   if (pg.norenScale === undefined){ pg.norenScale = (pg.noren === "low" || pg.norenTall === false) ? 0.9 : 1.05; }
   if (pg.noren === "low") pg.noren = "full"; delete pg.norenTall;
   normArts(pg, pageDefaults(i).arts);   // 302번. 옛 그림 하나 → 칸 여섯 · 망가진 값은 기본으로
-  pg.seal  = pickIn(pg.seal,  Object.keys(SEALS), "word");
+  normSeals(pg, pageDefaults(i).seals);   // 323번. 옛 장 단위 도장 → 칸마다
   pg.noren = pickIn(pg.noren, NOREN_KINDS, "flat");   // 180번. 기본은 곧은 띠
   pg.logoColor = pickIn(pg.logoColor, ["paper","white","ink","accent","custom"], "paper");
-  { const ok = (v, l) => v === undefined || l.includes(v) || /^#[0-9a-f]{6}$/i.test(v);   // 296번. 망가진 값은 기본으로(키를 지운다)
-    if (!ok(pg.sealColor, ["ink","band"])) delete pg.sealColor; }   // 302번. 그림 색 · 진하기는 normArts() 가 칸마다 본다
+  /* 296번의 도장 색 검사는 323번에 normSeals() 로(칸마다) */   // 302번. 그림 색 · 진하기는 normArts() 가 칸마다 본다
   if (typeof pg.scale !== "number" || !(pg.scale > 0)) pg.scale = SCALE_DEFAULT;   // 212번
   if (!(pg.norenScale > 0)) pg.norenScale = NSCALE_DEFAULT;
   if (typeof pg.autofit !== "boolean") pg.autofit = false;
@@ -4934,8 +4936,8 @@ function drawSheet(spec){
   /* 179번. 도장은 종이 기준 absolute 다(위 `.seal`). 그려도 흐름에는 영향이 없다 */
   /* 302번 → 303번. 도장은 고른 칸마다(여럿). 없음이면 전처럼 안 보이는 도장 하나를 오른쪽 아래에 둔다(255번 — 판정은 보이는 것만 센다) */
   const sc = sealCellsOf(PS), sealOn = sc.length > 0;
-  (sealOn ? sc : [SEAL_POS_DEF]).forEach(sp => { const seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
-    seal.innerHTML = SEALS[sealOn ? PS.seal : "word"]; sheet.appendChild(seal); });
+  (sealOn ? PS.seals : [{ cell:SEAL_POS_DEF, seal:"word" }]).forEach(x => { const sp = x.cell, seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
+    seal.dataset.cell = sp; seal.innerHTML = SEALS[x.seal]; sheet.appendChild(seal); });   // 323번. 칸마다 모양
   sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
@@ -4999,21 +5001,6 @@ function drawSheet(spec){
    (2) ※ 안내도 센다. 하이볼에만 세 줄이 있는데 안 세어서 칸 높이 추정이 크게 어긋났다.
    분류 수가 적어 경우의 수가 작다(넷을 셋으로 = 15가지). 다 해 보고 고르는 편이
    추정식을 다듬는 것보다 정확하다 */
-function split(secs, n){
-  const w = s => s.sec.items.length + (s.sec.notes || []).length * 0.8 + 2;
-  let best = null;
-  const walk = (rest, k, acc) => {
-    if (k === 1){
-      const c = [...acc, rest];
-      const m = Math.max(...c.map(g => g.reduce((a,s) => a + w(s), 0)));
-      if (!best || m < best.m) best = {m, c};
-      return;
-    }
-    for (let i = 0; i <= rest.length; i++) walk(rest.slice(i), k - 1, [...acc, rest.slice(0, i)]);
-  };
-  walk(secs, n, []);
-  return best.c;
-}
 
 /* ── 구성별 페이지 ─────────────────────────────────────────────────── */
 /* 80번. 장은 이제 자료에 그대로 있다. 나눌 일이 없다 — `MENU.sheets` 가 곧 종이다.
@@ -5492,7 +5479,7 @@ let curTheme = null, curLC = null, panelPage = 0;   // 152번. 지금 색 세트
 /* 296번. 도장 · 그림 색(사용자: "다른 추천 조합에서는 잘 안 보인다"). 도장 — 포인트색(기본) · 글자색 · 띠색 · 직접. 그림 — 글자색(기본) · 포인트색 · 띠색 · 직접, 진하기 셋 */
 const COLVAR = { ink:"var(--ink)", accent:"var(--accent)", band:"var(--band)" }, ART_OP = { mid:.14, strong:.24 };
 function pageColVars(sh, pg){ const v = (k, d) => !k ? d : COLVAR[k] || k;
-  sh.style.setProperty("--seal-col", v(pg.sealColor, "var(--accent)"));
+  sh.querySelectorAll(".seal[data-cell]").forEach(d => { const x = (pg.seals || []).find(y => y.cell === +d.dataset.cell); d.style.setProperty("--seal-col", v(x && x.color, "var(--accent)")); });   // 323번. 도장 색도 칸마다
   sh.querySelectorAll(".art[data-cell]").forEach(a => artVars(a, (pg.arts || []).find(x => x.cell === +a.dataset.cell))); }   // 302번. 그림 색 · 진하기는 칸마다 — 그 그림에 얹는다
 function artVars(a, x){ a.style.setProperty("--art-col", x && x.color ? (COLVAR[x.color] || x.color) : "var(--ink)"); a.style.setProperty("--art-op", ART_OP[x && x.op] || .07); }
 function cssHex(c){ const m = String(c).match(/\d+(\.\d+)?/g); if (!m) return "#000000"; return "#" + m.slice(0, 3).map(x => Math.round(+x).toString(16).padStart(2, "0")).join(""); }
@@ -5859,7 +5846,7 @@ if (document.fonts && document.fonts.addEventListener)
 function topBands(){
   document.querySelectorAll(".sheet").forEach(sh => { const n = sh.querySelector(".noren");
     const t = n ? Math.max(0, n.getBoundingClientRect().bottom - sh.getBoundingClientRect().top) : 0; sh.style.setProperty("--topband", t.toFixed(1) + "px"); });
-  document.querySelectorAll("#g-art .pband, #g-seal .pband").forEach(b => b.style.height = bandPct(panelPage) + "%");   // 320번. 도장 격자도
+  document.querySelectorAll("#g-art .pband").forEach(b => b.style.height = bandPct(panelPage) + "%");
 }
 function bandPct(i){ const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 15;
   const t = parseFloat(sh.style.getPropertyValue("--topband")), h = sh.getBoundingClientRect().height; return h > 0 && t >= 0 ? +(t / h * 100).toFixed(2) : 15; }
@@ -5975,7 +5962,7 @@ function fitNow(i){
   const full = list.filter(k => fitOne(k)).map(k => k+1);
   spread(); syncSize();
   if (full.length) toast(full.join(" · ") + "쪽 메뉴가 한 장에 다 안 들어갑니다. " + addPageLabel(full) + "로 나누거나 메뉴를 줄여 주세요", null);   // 234번
-}
+}   // 324번. 화면에서는 안 부르지만 검사(check.py)가 모든 장을 맞추는 손잡이로 쓴다 — 지우지 말 것
 /* 86번. 옛 `fit()` 은 `fitNow()` 가 대신한다. `fit(from)` 으로 "여기서부터 내려가며 찾기"를
    하던 곳은 [＋] 하나뿐이었고, 거기서는 넘치면 그냥 되돌리면 된다 */
 
@@ -6416,32 +6403,25 @@ $("#f-tr").onclick      = () => translateEmpty();
 $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음은 전처럼 showDots=false(옛 저장본과 같은 키), 줄표 · 실선은 leader
   if (v === "none"){ SETTINGS.showDots = false; delete SETTINGS.leader; } else { delete SETTINGS.showDots; if (v === "dots") delete SETTINGS.leader; else SETTINGS.leader = v; }
   render(); touch(); };
-$("#f-seal").onchange   = e => { const p = P(panelPage); if (e.target.value === "none" && p.seal && p.seal !== "none") lastSeal = p.seal; p.seal = e.target.value; render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
+$("#f-seal").onchange   = e => { const pg = P(panelPage), old = sealAt(pg, panelCell), v = e.target.value;   // 323번. 고른 칸의 도장 — 모양을 바꿔도 그 칸의 색은 남긴다
+  pg.seals = (pg.seals || []).filter(x => x.cell !== panelCell);
+  if (v !== "none") pg.seals.push(Object.assign({}, old, { cell:panelCell, seal:v }));
+  pg.seals.sort((a, b) => a.cell - b.cell); render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
-let lastSeal = "tri";   // 321번. 도장을 다 뺐다가 다시 찍으면 쓰던 모양으로(처음은 네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번)
-function toggleSeal(c){   // 320 · 321번. 도장 자리 격자에서 찍고 빼기. 다 빼면 모양 「없음」 — 격자가 늘 맨 위에 보이니 숨은 연결이 아니다(320번은 마지막 하나를 막았다)
-  const p = P(panelPage); let cs = sealCellsOf(p);
-  if (cs.includes(c)) cs = cs.filter(x => x !== c);
-  else { if (!cs.length) p.seal = lastSeal; cs = [...new Set([...cs, c])].sort((a, b) => a - b); }
-  if (!cs.length){ if (p.seal && p.seal !== "none") lastSeal = p.seal; p.seal = "none"; delete p.sealCells; }
-  else if (cs.length === 1 && cs[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = cs;
-  render(); touch(); syncPage(); }
+const sealAt = (pg, c) => (pg.seals || []).find(x => x.cell === c);   // 323번. 칸의 도장
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
-function colPick(key, def, sel, box){
-  /* 298번. 목록 → 색 칩(전체 탭의 종이 · 글자 · 띠 · 포인트 상자처럼 무슨 색인지 바로 보이게 — 사용자). 칩 셋 + 직접 */
-  $(box).addEventListener("input", e => { P(panelPage)[key] = e.target.value; applyLook(); touchLater(); });
-  $(box).addEventListener("change", () => syncPage());
-}
-colPick("sealColor", "accent", "#f-sealcol", "#c-seal");
+$("#c-seal").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x) return; x.color = e.target.value; applyLook(); touchLater(); });   // 323번. 도장 색도 칸마다
+$("#c-seal").addEventListener("change", () => syncPage());
 /* 302번. 그림 격자 — 고른 칸(panelCell)만 고친다. 색 상자는 끄는 동안 변수만(240번) */
 let panelCell = ART_CELL_OLD, panelCellPage = -1;
 const artAt = (pg, c) => (pg.arts || []).find(x => x.cell === c);
 $("#c-art").addEventListener("input", e => { const x = artAt(P(panelPage), panelCell); if (!x) return; x.color = e.target.value; applyLook(); touchLater(); });
 $("#c-art").addEventListener("change", () => syncPage());
 $("#f-artop").onchange = e => { const x = artAt(P(panelPage), panelCell); if (!x) return; if (e.target.value === "light") delete x.op; else x.op = e.target.value; applyLook(); touch(); };
-$("#b-artsame").onclick = () => { const pg = P(panelPage), x = artAt(pg, panelCell); if (!x) return;
-  pg.arts.forEach(y => { if (y === x) return; if (x.color === undefined) delete y.color; else y.color = x.color; if (x.op === undefined) delete y.op; else y.op = x.op; });
-  applyLook(); touch(); syncPage(); toast("그림 " + pg.arts.length + "개를 같은 색 · 진하기로 맞췄습니다", null); };
+$("#b-artsame").onclick = () => { const pg = P(panelPage), x = artAt(pg, panelCell), d = sealAt(pg, panelCell); if (!x && !d) return;   // 323번. 그림 색 · 진하기와 도장 모양 · 색을 다른 칸에도
+  if (x) pg.arts.forEach(y => { if (y === x) return; if (x.color === undefined) delete y.color; else y.color = x.color; if (x.op === undefined) delete y.op; else y.op = x.op; });
+  if (d) pg.seals.forEach(y => { if (y === d) return; y.seal = d.seal; if (d.color === undefined) delete y.color; else y.color = d.color; });
+  render(); touch(); syncPage(); toast("다른 칸을 이 칸과 같게 맞췄습니다(그림은 색 · 진하기, 도장은 모양 · 색)", null); };
 /* 179번. 기본값(왼쪽)이면 키를 안 남긴다(15번) */
 const setAlign = (k, v) => { if (v === "left") delete SETTINGS[k]; else SETTINGS[k] = v; render(); touch(); };
 $("#f-secalign").onchange  = e => setAlign("secAlign",  e.target.value);
@@ -6507,7 +6487,6 @@ function syncPage(){
   $("#pg-title").textContent = (panelPage+1) + "쪽 · " + sheetKindName(panelPage) + " 장";
   $("#f-logo").value   = pg.logoColor || "paper";
   $("#f-noren").value  = pg.noren || "flat";   // 234번. 기본은 곧은 띠(180번)
-  $("#f-seal").value   = pg.seal || "word";
   { const hx = /^#/, sh = document.querySelector('.sheet[data-pi="' + panelPage + '"]');   // 296번
     /* 301번. 따라가기 칩(글자색 · 띠색 · 포인트색)을 걷었다 — 색 상자는 지금 칠해진 색을 보여 준다 */
     /* 302번. 죽은 함수 chipOld(301번에 남김)를 걷었다 */
@@ -6515,15 +6494,16 @@ function syncPage(){
     const x = artAt(pg, panelCell);
     $("#art-cellname").textContent = CELL_NAMES[panelCell] + " 칸";   // 321번
     $("#f-artop").value = (x && x.op) || "light";
-    { const noArt = !x, noSeal = (pg.seal || "word") === "none";   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
+    const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none";   // 323번
+    { const noArt = !x, noSeal = !dz;   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
       $("#art-opts").classList.toggle("off", noArt); $("#c-art").disabled = noArt; $("#f-artop").disabled = noArt;
       $("#art-opts").title = noArt ? "그림을 고르면 쓸 수 있습니다" : "";
       $("#seal-opts").classList.toggle("off", noSeal); $("#c-seal").disabled = noSeal;
-      $("#seal-opts").title = noSeal ? "도장을 찍으면 쓸 수 있습니다" : ""; }
-    $("#b-artsame").disabled = !x || (pg.arts || []).length < 2;   // 302번. 맞출 다른 그림이 없으면 흐리게(284번)
-    $("#b-artsame").title = $("#b-artsame").disabled ? "그림이 두 칸 이상일 때 씁니다" : "고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다";   // 319번. 흐린 까닭을 알 수 없었다(사용자 — 꾸밈이 직관적이지 않다)
+      $("#seal-opts").title = noSeal ? "도장을 고르면 쓸 수 있습니다" : ""; }
+    $("#b-artsame").disabled = !((x && (pg.arts || []).length > 1) || (dz && (pg.seals || []).length > 1));   // 302 · 323번. 맞출 다른 그림 · 도장이 없으면 흐리게(284번)
+    $("#b-artsame").title = $("#b-artsame").disabled ? "그림이나 도장이 두 칸 이상일 때 씁니다" : "고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다";   // 319번. 흐린 까닭을 알 수 없었다(사용자 — 꾸밈이 직관적이지 않다)
     drawGrids(pg);
-    if (sh){ const a = sh.querySelector('.art[data-cell="' + panelCell + '"]'), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
+    if (sh){ const a = sh.querySelector('.art[data-cell="' + panelCell + '"]'), d = sh.querySelector('.seal[data-cell="' + panelCell + '"]:not(.blank)'); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
   $("#f-art").value    = (artAt(pg, panelCell) || {}).art || "none";
   $("#f-origin").checked = !!pg.showOrigin;
   $("#f-notes").checked  = pg.showNotes !== false;
@@ -6537,25 +6517,17 @@ function syncPage(){
 /* 302번 → 303번. 격자 하나 — 맨 위 상단(고를 수 없다 · 실제 비율), 그 아래 칸 여섯. 칸마다 그 칸의 그림과 도장을 그린다.
    단추 여섯은 한 번만 만들고 채움만 바꾼다(누른 단추가 다시 만들어지면 초점을 잃는다) */
 function drawGrids(pg){
-  const box = $("#g-art"), sc = sealCellsOf(pg), sk = pg.seal && pg.seal !== "none" ? pg.seal : "word";
+  const box = $("#g-art"), sc = sealCellsOf(pg);
   const artNm = k => { const o = [...$("#f-art").options].find(o => o.value === k); return o ? o.textContent : k; };
   box.classList.toggle("land", SETTINGS.orient === "landscape");
   if (!box.querySelector(".pcells")){ box.innerHTML = '<i class="pband" aria-hidden="true">상단</i><span class="pcells"></span>';
     const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
   box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
   [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
-    const h = x ? ART[x.art] : "";   /* 320번. 그림 격자는 그림만 — 도장은 아래 도장 격자에 */
+    const d = sealAt(pg, c), h = (x ? ART[x.art] : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + SEALS[d.seal] + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
     if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
-    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음");
+    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (d ? " · 도장" : "");
     b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
-  const gs = $("#g-seal");   // 320번. 도장 자리 — 같은 종이 모양 격자, 누르면 찍고 뺀다
-  gs.classList.toggle("land", SETTINGS.orient === "landscape");
-  if (!gs.querySelector(".pcells")){ gs.innerHTML = '<i class="pband" aria-hidden="true">상단</i><span class="pcells"></span>';
-    const pc = gs.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => toggleSeal(c); pc.appendChild(b); } }
-  gs.querySelector(".pband").style.height = bandPct(panelPage) + "%";
-  [...gs.querySelectorAll(".pcells > button")].forEach((b, c) => { const on = sc.includes(c), h = on ? SEALS[sk] : "";
-    if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
-    const nm = CELL_NAMES[c] + " 칸 — " + (on ? "도장 있음" : "도장 없음"); b.classList.toggle("has", on); b.setAttribute("aria-pressed", String(on)); b.title = nm; b.setAttribute("aria-label", nm); });
 }
 /* [다른 장에도 똑같이] — 이 장의 **모양 설정**을 모든 장에 복사한다.
    157번. 바닥 글(안내 문구 · 한 줄 항목 · 원산지)은 **내용**이라 안 옮긴다 — 장마다 다른 말이 들어가는 자리다.
@@ -6975,7 +6947,6 @@ function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장
 }
 /* 266번. 바깥(어두운 영역)을 눌러도 안 닫히는 때 — 처음 열 때(고르기 전에는 나갈 곳이 없다)와 정하기 창(적던 상호명 · 올린 로고가
    실수 한 번에 날아간다). 264번이 Esc 만 막고 이 길을 빠뜨렸다 — 모든 안내창을 바깥 누르기로 닫는 한 줄이 따로 있었다 */
-function stKeepOpen(d){ return d.id === "start"; }   // 281번. 첫 화면 창은 어느 단계든 바깥 누르기로 닫지 않는다 — 다시 연 첫 화면도 ✕ 로(사용자)
 function openStart(){
   stReset();
   $("#st-closerow").hidden = SETTINGS.startScreen === true;   // 처음 열 때는 닫기 없이 고른다
@@ -7070,7 +7041,7 @@ $("#st-go").onclick = () => {
   const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
   const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours: stParsed ? stHours.map(h => ({ label:h.label, time:h.time })) : [], sheets:[ stParsed ? splitCols(stParsed, stLook.cols || 2) : [[sec()], [sec()]] ], feet:[{ notes: stParsed ? stFoot.slice(0, NOTES_MAX) : [], origin:"" }] };   /* 312번. 사진의 바닥 안내 */   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로 · 304번. 읽은 영업시간도
   if (shop) menu.brand.shop = shop;
-  const pg = Object.assign(pageDefaults(0), { arts:[], seal:"none", showTitle:false });   // 302번
+  const pg = Object.assign(pageDefaults(0), { arts:[], seals:[], showTitle:false });   // 323번   // 302번
   Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
   /* 기본 글꼴은 본고딕 — 궁서는 알프스 사장님이 고른 것이다(규칙 A). 글자 도장은 "알프스"가 박혀 있어 끈다 */
   const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", lang2:"", pageno:"none", bold:false, pages:[pg] };
@@ -7476,6 +7447,7 @@ function splitCols(secs, n = 2){   // 분류를 n 단에 나눈다 — 줄 수�
   return C.map(c => c.length ? c : [{ name:"", items:[{ name:"", price:"" }] }]);
 }
 $("#st-photo").onclick = () => {
+  $("#start").classList.add("wide");   /* 325번. 사진 흐름(① 사진 · ② 확인 · ③ 정하기)은 처음부터 끝까지 같은 넓은 틀 — 머리(← · 제목 · 점)와 주 단추가 단계마다 같은 자리. 전에는 560 → 1440 → 560 으로 바뀌어 ← 가 옆으로 440px 갔다 왔다 */
   stPic = null; stPicImg = null; stRot = 0; stRotDone = false; stParsed = null; stWay = "gem"; stOther = false;   // 288번   // 276번. 키가 필요 없어 제미나이가 기본
   $("#st-ans").value = ""; $("#st-appmsg").textContent = "";
   const im = $("#st-picimg"); im.removeAttribute("src"); im.hidden = true;
@@ -7525,10 +7497,11 @@ $("#st-copy").onclick = async () => {
   toast("요청 글을 복사했습니다. AI 앱에 사진과 함께 붙여 넣으세요", null);
 };
 $("#st-appgo").onclick = () => toCheck($("#st-ans").value, $("#st-appmsg"));
-$("#st-read-back").onclick = () => { $("#st-read").hidden = true; $("#st-choose").hidden = false; $("#start").scrollTop = 0; };
+$("#st-read-back").onclick = () => { $("#start").classList.remove("wide"); $("#st-read").hidden = true; $("#st-choose").hidden = false; $("#start").scrollTop = 0; };   // 325번. 첫 화면(고르기)은 좁은 틀
 /* 281번. [사진 없이 직접 적기]는 걷었다 — 첫 화면의 [빈 메뉴판으로 시작]과 같은 길이고, [읽기] 옆에 붙어 무엇을 누르는지 헷갈렸다. ← 로 돌아가 고른다 */
 $("#st-ans").addEventListener("input", () => { $("#st-appgo").disabled = !$("#st-ans").value.trim(); });   // 284번
-$("#st-check-back").onclick = () => { $("#start").classList.remove("wide"); $("#st-check").hidden = true; $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; };
+$("#st-check-back").onclick = () => { $("#st-check").hidden = true;   // 325번. ① 사진으로 돌아가도 같은 넓은 틀
+  $("#st-read").hidden = false; stReadSync(); $("#start").scrollTop = 0; };
 $("#st-cimg").onclick = () => { const z = $("#st-zoom"); z.querySelector("img").src = stPic; z.hidden = false; };   // 296번
 $("#st-zoom").onclick = () => { $("#st-zoom").hidden = true; };
 $("#st-check-go").onclick = () => {
@@ -7538,7 +7511,7 @@ $("#st-check-go").onclick = () => {
       $("#st-ctab").querySelector("input.st-csec.un, input.st-csec[value='']")?.focus(); return; } }
   readExtra();   // 312번
   stParsed = secs; const keep = stParsed;
-  $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep;
+  $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep; $("#start").classList.add("wide");   // 325번. ③ 정하기도 사진 흐름이면 같은 넓은 틀(빈 메뉴판 길은 좁은 틀 그대로)
   stFromPhoto = true; $("#st-pg3").hidden = false;
   if (stLook.font || stLook.colors){   // 296번. 사진에서 읽은 글꼴 · 색을 「사진처럼」 조합으로 — 처음 골라져 있다. 고르지 않으면 다른 조합
     const B = PRESETS.basic; PRESETS.photo = Object.assign({}, B, { name:"사진처럼", hidden:true, font: stLook.font || B.font, custom: stLook.colors || null, noren: stLook.band ? "flat" : "plain" });
@@ -7567,7 +7540,7 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
   if (q.leader === "none"){ S.showDots = false; delete S.leader; } else { delete S.showDots; if (q.leader === "dots") delete S.leader; else S.leader = q.leader; }
   const ex = ALPS_EXAMPLE.settings.pages || []; S.pages = S.pages || [];
   (M.sheets || []).forEach((_, i) => { const pp = S.pages[i] || (S.pages[i] = pageDefaults(i)), e = ex[i] || ex[0] || {};
-    pp.noren = q.noren; pp.seal = q.seal ?? (e.seal || "none"); pp.logoColor = "paper"; delete pp.sealColor; delete pp.sealPos; delete pp.sealCells;   // 296번. 조합은 색도 처음으로 · 303번. 도장 칸도
+    pp.noren = q.noren; { const sk = q.seal ?? (e.seal || "none"); pp.seals = sk && sk !== "none" ? [{ cell:SEAL_POS_DEF, seal:sk }] : []; } pp.logoColor = "paper";   /* 323번. 조합의 도장은 오른쪽 아래 하나(칸마다 형식) */   // 296번. 조합은 색도 처음으로 · 303번. 도장 칸도
     pp.arts = q.art ? (q.art === "none" ? [] : [{ cell:ART_CELL_OLD, art:q.art }]) : JSON.parse(JSON.stringify(e.arts || [])); delete pp.art; delete pp.artColor; delete pp.artOp; });   // 302번. 그림 칸 · 도장 자리도 처음으로
   const old = S.mark; S.mark = q.mark;
   if (old && old !== q.mark && markIsSym(old) && markIsSym(q.mark)){ const sw = a => a.map(t => t.split(old).join(q.mark)); (M.feet || []).forEach(f => { f.line = sw(f.line || []); f.notes = sw(f.notes || []); }); }
@@ -7576,11 +7549,11 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
    · 조합이 바꾸는 값(LOOK_KEYS · 장마다 PAGE_LOOK)이 곧 「모양 한 벌」이다. 지금 모양이 어느 추천 조합과 같으면 그 타일이 켜지고, 아니면 「내 조합」이 켜진다
    · 지금 모양이 어느 조합과도 다르면 그것이 내 조합이다 — 고칠 때마다(touch) SETTINGS.myLook 에 그대로 적어 둔다. 그래서 다른 조합을 눌러 봐도 내 조합은 남는다
    · 글자 크기 · 내용 · 맨 위는 조합이 안 건드린다(273번 그대로) */
-const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","arts","seal","logoColor","sealCells","sealColor"];   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
+const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark"], PAGE_LOOK = ["noren","arts","seals","logoColor"];   // 323번   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
 function lookOf(S){ const o = {}; LOOK_KEYS.forEach(k => { if (S[k] !== undefined) o[k] = JSON.parse(JSON.stringify(S[k])); });
   o.pages = (S.pages || []).map(p => { const q = {}; PAGE_LOOK.forEach(k => { if (p && p[k] !== undefined) q[k] = JSON.parse(JSON.stringify(p[k])); }); return q; }); return o; }   // 302번. 목록(arts)은 떼어서 담는다 — 같은 목록을 가리키면 종이를 고칠 때 담아 둔 조합까지 바뀐다
 function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)); if (c.theme !== "custom") delete c.custom;   /* applyLook() 이 프리셋 색도 custom 에 늘 채운다(239번) — 직접 고른 색일 때만 비교 */ if (c.secAlign === "left") delete c.secAlign; if (!c.bold) delete c.bold; return JSON.stringify(c, Object.keys(c).sort()); };
-  const pl = p => [p.noren, (p.arts || []).map(x => [x.cell, x.art, x.color || null, x.op || null]), p.seal, p.logoColor || "paper", sealCellsOf(p), p.sealColor];   // 302번 · 303번. 도장 칸 목록
+  const pl = p => [p.noren, (p.arts || []).map(x => [x.cell, x.art, x.color || null, x.op || null]), (p.seals || []).map(x => [x.cell, x.seal, x.color || null]), p.logoColor || "paper"];   // 323번   // 302번 · 303번. 도장 칸 목록
   const pa = JSON.stringify((a.pages||[]).map(pl)), pb = JSON.stringify((b.pages||[]).map(pl));
   const x = Object.assign({}, a), y = Object.assign({}, b); delete x.pages; delete y.pages; return n(x) === n(y) && pa === pb; }
 function presetLook(k){ const S = JSON.parse(JSON.stringify(SETTINGS)), M = JSON.parse(JSON.stringify(MENU)); applyPresetTo(S, M, k); return lookOf(S); }
