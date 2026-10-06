@@ -2532,6 +2532,16 @@ dialog .st-picrow.has button.st-drop{align-self:center;width:auto;padding:0 22px
 .st-spin{width:28px;height:28px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:stspin 1s linear infinite}
 @keyframes stspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){ .st-spin{animation:none} }
+/* 317번. 돌리기는 사진 밑 가운데 아이콘만 있는 동그란 단추 둘(사진 올리기 · 자르기 창에서 흔한 모양 — 사용자: 통상적인 형태로) — 이름은 title(마우스) · aria-label(읽어 주기).
+   316번은 단추 밑 안내 글이 같은 격자 칸에 들어 칸이 안내 길이만큼 늘어나, 단추 하나가 235px(사진 240px 만큼)으로 퍼지고 아이콘 · 글자가 왼쪽에 몰렸다 */
+.st-rot{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;align-self:center;gap:8px}   /* 314번의 세로 쌓기(flex-direction:column)가 남아 둘이 위아래로 섰다(재 보고 잡음) */
+dialog .st-rot button{width:40px;height:40px;min-width:0;padding:0;gap:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.st-rot small{flex-basis:100%;text-align:center}
+/* 317번. 확인 화면도 다른 창과 같은 자리(상단 막대 아래 72px)에서 연다 — 넓은 창만 위 16px 로 올라가 상단 막대를 가렸고 단계마다 시작 높이가 달랐다(사용자). 종이 · 사진 높이 여유 320 → 376(56px 줄어든 만큼) */
+dialog#start.wide{margin:72px auto 16px;max-height:calc(100vh - 88px)}
+.st-cpaper{height:min(calc(100vh - 376px), 860px);min-height:min(440px, calc(100vh - 376px))}   /* 옛 최소 440px 가 768px 높이 화면에서 창 자체를 45px 넘치게 했다 */
+.st-cphoto img{max-height:min(calc(100vh - 376px), 860px)}
+.st-cpaper.land{height:auto;width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 376px) * 1.414))}
 </style>
 </head>
 <body>
@@ -3012,7 +3022,7 @@ dialog .st-picrow.has button.st-drop{align-self:center;width:auto;padding:0 22px
     <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
     <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><span class="st-picwrap"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden><span class="st-busy" id="st-busy" role="status" aria-live="polite" hidden><i class="st-spin" aria-hidden="true"></i><b id="st-busytx"></b></span></span>   <!-- 316번. 읽는 동안 사진 위에 막 · 돌아가는 표시 · 단계 글(사용자 — 갑자기 사진만 돌아 어색했다) -->
-    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로</span></button><small>방향은 [읽기] 때 자동으로 맞춥니다. 직접 돌려 두면 그대로 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
+    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><small>방향은 [읽기] 때 자동으로 맞춥니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
     </div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 · 314번에 사진 옆으로 옮겼다 -->
     <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
