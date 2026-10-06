@@ -2557,6 +2557,13 @@ dialog .st-crow button.st-cpk{height:26px}
 .st-cpaper{height:min(calc(100vh - 386px), 860px);min-height:min(440px, calc(100vh - 386px))}
 .st-cphoto img{max-height:min(calc(100vh - 386px), 860px)}
 .st-cpaper.land{width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 386px) * 1.414))}
+/* 319번. 사용 점검(사용자 — 꾸밈이 직관적이지 않다)에서 확실한 것만.
+   · 그림 · 도장 격자의 빈 칸에 아무 표시가 없어 누르는 곳으로 안 보였다 → 흐린 ＋ · 이름표에 「칸을 눌러 고릅니다」
+   · 확인 화면 [세로 | 가로] · [1단 ~ 4단] — 318번에 높이 40 으로 맞추며 칸이 글자보다 훨씬 넓어(한 칸 100px 가까이) 「읽은 메뉴」 줄보다 무거웠다 → 높이는 두고 폭만 글자에 */
+.panel .grp .pgrid .pcells > button:empty::before{content:"＋";color:rgba(240,230,205,.32);font-size:15px;line-height:1}
+.panel .grp .pgrid .pcells > button.on:empty::before{color:rgba(240,230,205,.6)}
+dialog p.st-ccount .st-seg{grid-auto-columns:auto}
+dialog p.st-ccount .st-seg button{padding:0 14px}
 </style>
 </head>
 <body>
@@ -2867,7 +2874,7 @@ dialog .st-crow button.st-cpk{height:26px}
   <div class="pgrp">꾸밈</div>
   <span class="grp two artseal">   <!-- 290번. 그림 이름이 잘렸다('생맥주와 파스') — 한 줄에 하나 -->
     <!-- 302번. 그림은 종이 모양의 6칸 격자(2 × 3) — 칸을 누르면 그 칸이 골라지고, 밑의 손잡이 한 벌(그림 · 색 · 진하기)이 고른 칸만 고친다(칸마다 늘어놓으면 창이 끝없이 길어진다) -->
-    <span class="fld artpick"><label id="l-gart">그림 · 도장</label>   <!-- 303번. 격자 하나 — 칸마다 그림과 도장 -->
+    <span class="fld artpick"><label id="l-gart">그림 · 도장 <small>칸을 눌러 고릅니다</small></label>   <!-- 303번. 격자 하나 — 칸마다 그림과 도장 -->
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="subrow nosw"><label for="f-art">그림</label>
@@ -6469,6 +6476,7 @@ function syncPage(){
     $("#art-opts").hidden = !x; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
     $("#f-sealhere").checked = sealCellsOf(pg).includes(panelCell);   // 303번
     $("#b-artsame").disabled = !x || (pg.arts || []).length < 2;   // 302번. 맞출 다른 그림이 없으면 흐리게(284번)
+    $("#b-artsame").title = $("#b-artsame").disabled ? "그림이 두 칸 이상일 때 씁니다" : "고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다";   // 319번. 흐린 까닭을 알 수 없었다(사용자 — 꾸밈이 직관적이지 않다)
     drawGrids(pg);
     if (sh){ const a = sh.querySelector('.art[data-cell="' + panelCell + '"]'), d = sh.querySelector(".seal"); if (a) $("#c-art").value = cssHex(getComputedStyle(a).color); if (d) $("#c-seal").value = cssHex(getComputedStyle(d).color); } }
   $("#f-art").value    = (artAt(pg, panelCell) || {}).art || "none";
