@@ -2519,6 +2519,19 @@ dialog .st-picrow.has{display:grid;grid-template-columns:240px auto;grid-templat
 .st-picrow.has .st-rot{grid-column:2;grid-row:1;align-self:end}
 dialog .st-picrow.has button.st-drop{grid-column:2;grid-row:2;align-self:start;justify-self:stretch;width:auto;margin:0;height:40px;border:1px solid #9c8a68;border-radius:20px;font-size:14px;font-weight:500}
 @media (max-width:560px){ dialog .st-picrow.has{grid-template-columns:auto;grid-template-rows:auto} .st-picrow.has .st-picimg,.st-picrow.has .st-rot,dialog .st-picrow.has button.st-drop{grid-column:1;grid-row:auto} }
+/* 316번. 사진 아래로 — 돌리기 둘(한 쌍 · 가운데) · 안내 한 줄 · 그 밑에 [사진 바꾸기] 혼자 가운데(사용자 — 오른쪽 열은 작은 창에서 흔한 배치가 아니고, 한 줄에 셋이면 사진 바꾸기가 혼자 붙어 어색) · 사진 위 진행 막 */
+dialog .st-picrow.has{display:flex;flex-direction:column;align-items:center;gap:12px}
+.st-picrow.has .st-picbox{display:flex;flex-direction:column;align-items:center;gap:10px}
+.st-picwrap{position:relative;display:inline-block;line-height:0}
+.st-rot{display:grid;grid-template-columns:auto auto;gap:8px;justify-content:center;align-self:center}
+.st-rot small{grid-column:1 / -1;text-align:center;max-width:none}
+dialog .st-picrow.has button.st-drop{align-self:center;width:auto;padding:0 22px}
+.st-busy{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;background:rgba(36,28,18,.66);color:#fff;border-radius:6px;font-size:14px;line-height:1.45;text-align:center}
+.st-busy[hidden]{display:none}
+.st-busy b{font-weight:600}
+.st-spin{width:28px;height:28px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:stspin 1s linear infinite}
+@keyframes stspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){ .st-spin{animation:none} }
 </style>
 </head>
 <body>
@@ -2998,8 +3011,8 @@ dialog .st-picrow.has button.st-drop{grid-column:2;grid-row:2;align-self:start;j
     <div class="st-head"><button type="button" class="st-icon" id="st-read-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">사진으로 시작</h3><span class="st-pg stepdots" role="img" aria-label="3단계 중 1단계" title="3단계 중 1단계"><i class="on"></i><i></i><i></i></span></div>   <!-- 288번. 몇 단계 남았는지 -->   <!-- 281번. 뒤로는 머리 왼쪽 ← -->
     <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
-    <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
-    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로 돌리기</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로 돌리기</span></button><small>[읽기]를 누르면 방향을 알아서 맞춥니다. 직접 돌려 두면 그대로 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
+    <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><span class="st-picwrap"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden><span class="st-busy" id="st-busy" role="status" aria-live="polite" hidden><i class="st-spin" aria-hidden="true"></i><b id="st-busytx"></b></span></span>   <!-- 316번. 읽는 동안 사진 위에 막 · 돌아가는 표시 · 단계 글(사용자 — 갑자기 사진만 돌아 어색했다) -->
+    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로</span></button><small>방향은 [읽기] 때 자동으로 맞춥니다. 직접 돌려 두면 그대로 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
     </div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 · 314번에 사진 옆으로 옮겼다 -->
     <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
@@ -7257,9 +7270,10 @@ async function readStatus(){
   if (!readOn && stWay === "gem") stWay = "app";
   stReadSync();
 }
-async function geminiOrient(dataUrl){   // 315번. 「몇 도 돌려야 글자가 바로 서나」 — 작게 줄인 사진으로 짧게. 무슨 일이 있어도 읽기를 막지 않는다(실패 · 늦음 · 옛 서버 → 0)
-  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 12000);
-  try { const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ image:dataUrl, mode:"orient" }), signal:ac.signal });
+async function geminiOrient(){   // 315 · 316번. 같은 사진을 0 · 90 · 180 · 270° 로 돌린 작은 넷을 주고 「글자가 바로 선 것」을 고르게 한다 — 한 장에 「몇 도?」로 물으면 거꾸로(180°)를 90° 로 답했다(사용자 네 각도 시험 · 넷 중 하나 실패). 무슨 일이 있어도 읽기를 막지 않는다(실패 · 늦음 → 0)
+  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API, ac = new AbortController(), tm = setTimeout(() => ac.abort(), 15000);
+  const images = [0, 90, 180, 270].map(d => picToJpeg(stPicImg, (stRot + d) % 360, 384, .7));
+  try { const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ images, mode:"orient" }), signal:ac.signal });
     const j = await r.json().catch(() => ({})); return r.ok && [0, 90, 180, 270].includes(j.rot) ? j.rot : 0; }
   catch(e){ return 0; } finally { clearTimeout(tm); }
 }
@@ -7385,7 +7399,7 @@ $("#st-photo").onclick = () => {
 dropTarget($("#st-pic"), null);
 /* 293번. 올린 뒤 [사진 바꾸기]가 작은 단추로 줄면 점선 상자의 나머지는 눌러도 · 끌어다 놓아도 아무 일이 없었다(점선은 "여기에 놓으세요"라는 모양) — 상자 전체가 받는다 */
 { const row = $(".st-picrow");
-  row.addEventListener("click", e => { if (row.classList.contains("has") && !e.target.closest("#st-pic, #st-rot")) $("#st-pic").click(); });   /* 313번. 돌리기 단추는 사진 고르기를 안 연다 */
+  row.addEventListener("click", e => { if (row.classList.contains("has") && $("#st-busy").hidden && !e.target.closest("#st-pic, #st-rot")) $("#st-pic").click(); });   /* 316번. 읽는 중에는 사진을 눌러도 고르기를 안 연다 */   /* 313번. 돌리기 단추는 사진 고르기를 안 연다 */
   $("#st-rotl").onclick = () => rotPic(-90); $("#st-rotr").onclick = () => rotPic(90);
   row.addEventListener("dragover", e => { if (!row.classList.contains("has")) return; e.preventDefault(); row.classList.add("over"); });
   row.addEventListener("dragleave", () => row.classList.remove("over"));
@@ -7396,22 +7410,28 @@ addEventListener("online", () => { if (!$("#st-read").hidden) stReadSync(); }); 
 $("#st-gemgo").onclick = async () => {
   const msg = $("#st-gemmsg");
   if (!stPic){ msg.textContent = "먼저 메뉴판 사진을 올려 주세요."; return; }
-  const b = $("#st-gemgo"); b.disabled = true; msg.classList.remove("err");
-  let stage = "읽는 중입니다… ";
-  const t0 = Date.now(), tick = () => { msg.textContent = stage + Math.floor((Date.now() - t0) / 1000) + "초"; }; tick(); const tm = setInterval(tick, 1000);
+  const b = $("#st-gemgo"), ctl = ["#st-gemgo", "#st-rotl", "#st-rotr", "#st-pic"].map(q => $(q)); ctl.forEach(x => x.disabled = true); msg.classList.remove("err"); msg.textContent = "";
+  const im = $("#st-picimg"), still = matchMedia("(prefers-reduced-motion: reduce)").matches, wait = ms => new Promise(ok => setTimeout(ok, ms));
+  let stage = "메뉴를 읽는 중…", timed = true;   /* 316번. 단계 글은 사진 위 막에 — 아래 작은 글 하나로는 안 보였다 */
+  const t0 = Date.now(), tick = () => { $("#st-busy").hidden = false; $("#st-busytx").textContent = stage + (timed ? " " + Math.floor((Date.now() - t0) / 1000) + "초" : ""); }; tick(); const tm = setInterval(tick, 1000);
   try {
     let turned = 0;
-    if (stPicImg && !stRotDone){   /* 315번. 돌리지 않은 사진이면 먼저 방향을 묻고 바로 세워서 읽는다 — 누운 원래 사진을 그대로 읽으면 세로 · 지어낸 영업시간 · 냉수육 → 탕수육(사용자 화면, 돌린 사진은 맞았다) */
-      stage = "사진 방향을 보는 중… "; tick();
-      turned = await geminiOrient(picToJpeg(stPicImg, stRot, 512, .7)); stRotDone = true;
-      if (turned){ stRot = (stRot + turned) % 360; stPic = picToJpeg(stPicImg, stRot); $("#st-picimg").src = stPic; }
-      stage = "읽는 중입니다… "; tick();
+    if (stPicImg && !stRotDone){   /* 315번. 돌리지 않은 사진이면 먼저 방향을 보고 바로 세워서 읽는다 */
+      stage = "사진 방향을 보는 중…"; tick();
+      turned = await geminiOrient(); stRotDone = true;
+      if (turned){   /* 316번. 실제로 돌아가는 움직임을 보이고(0.6초) 무엇을 했는지 적는다 — 움직임 줄이기를 켰으면 바로 바꾼다 */
+        stage = turned === 180 ? "거꾸로 돌렸습니다" : turned === 90 ? "오른쪽으로 90° 돌렸습니다" : "왼쪽으로 90° 돌렸습니다"; timed = false; tick();
+        if (!still){ im.style.transition = "transform .6s ease"; im.style.transform = "rotate(" + (turned === 270 ? -90 : turned) + "deg)"; await wait(650); }
+        stRot = (stRot + turned) % 360; stPic = picToJpeg(stPicImg, stRot);
+        im.style.transition = "none"; im.style.transform = ""; im.src = stPic; await wait(700);
+      }
+      stage = "메뉴를 읽는 중…"; timed = true; tick();
     }
-    const t = await geminiRead(stPic); msg.textContent = ""; toCheck(t, msg);
+    const t = await geminiRead(stPic); toCheck(t, msg);
     if (turned && !$("#st-check").hidden) toast("사진을 글자가 바로 서게 " + (turned === 180 ? "거꾸로" : turned === 90 ? "오른쪽으로" : "왼쪽으로") + " 돌려서 읽었습니다. 틀렸으면 [←]로 돌아가 돌려 주세요", null);
   }
   catch(e){ msg.textContent = e.message; stOther = true; msg.classList.add("err"); }
-  finally { clearInterval(tm); b.disabled = false; stReadSync(); }
+  finally { clearInterval(tm); $("#st-busy").hidden = true; im.style.transition = ""; im.style.transform = ""; ctl.forEach(x => x.disabled = false); stReadSync(); }
 };
 $("#st-copy").onclick = async () => {
   try { await navigator.clipboard.writeText(READ_PROMPT); }

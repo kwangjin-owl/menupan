@@ -7,8 +7,8 @@
 // 이 함수가 하는 일은 "메뉴판 사진 읽기" 하나뿐이다
 //   요청 글(PROMPT)은 여기 고정이다 — 받는 것은 사진뿐. 주소가 알려져도 공짜 제미나이 창구로 못 쓴다.
 //   PROMPT 는 index.html 의 READ_PROMPT 와 같아야 한다(다른 AI 앱 길이 같은 글을 쓴다). 고치면 둘 다
-//   315번. mode:"orient" 면 고정된 짧은 요청 글(ORIENT)로 「몇 도 돌려야 글자가 바로 서나」만 묻고 { rot } 를 돌려준다 —
-//   메뉴판이 [읽기] 전에 작게 줄인 사진으로 부른다. 받는 것은 여전히 사진뿐(mode 는 둘 중 하나)
+//   315 · 316번. mode:"orient" 면 같은 사진을 0 · 90 · 180 · 270° 로 돌린 작은 사진 넷(images)을 받아, 고정된 짧은 요청 글(ORIENT)로
+//   「글자가 바로 선 것은 몇 번」만 묻고 { rot } 를 돌려준다(316번 — 한 장에 「몇 도?」는 거꾸로를 90° 로 답했다). 받는 것은 여전히 사진뿐
 //
 // 비용
 //   GEMINI_API_KEY 는 결제 등록 없는 무료 키로 둔다 — 한도를 넘으면 멈출 뿐 청구되지 않는다.
@@ -44,7 +44,8 @@ const PROMPT = [
   "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
 ].join("\n");   // 313번(방향 = 종이 기준 · 바닥 = 맨 아래 단 전체 폭). 312번(분류 제목 · 이름 없는 묶음 · 추천 · 안내 · 바닥 · 영업시간 ? · 짐작 금지 · 궁서 · 조명 뺀 색). index.html 의 READ_PROMPT 와 같게
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
-const ORIENT = "이 사진은 가게 메뉴판입니다. 사진 속 글자가 바로 서서 읽히려면 사진을 시계 방향으로 몇 도 돌려야 하는지 0, 90, 180, 270 중 숫자 하나만 답하세요. 다른 말은 쓰지 마세요.";   // 315번
+const ORIENT = "아래 네 사진은 같은 가게 메뉴판 사진을 서로 다르게 돌린 것입니다(1번 ~ 4번). 글자가 바로 서서 위에서 아래로 자연스럽게 읽히는 사진의 번호 하나만 1, 2, 3, 4 중 숫자로 답하세요. 다른 말은 쓰지 마세요.";   // 316번
+const ROTS = [0, 90, 180, 270];   // 1 ~ 4번 사진이 돌린 각도(시계 방향) — 메뉴판(index.html)의 geminiOrient 와 같은 순서
 const MAX_B64 = 4000000;   // 사진(base64) 약 3MB. 메뉴판은 긴 쪽 1600px JPEG 로 줄여 보낸다(보통 0.5MB 안)
 
 function allowed(origin){
@@ -72,13 +73,21 @@ module.exports = async function handler(req, res){
 
   let body = req.body;
   if (typeof body === "string"){ try { body = JSON.parse(body); } catch(e){ body = {}; } }
-  const img = body && typeof body.image === "string" ? body.image : "";
-  const m = img.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
-  if (!m){ res.status(400).json({ error:"사진(data:image/…;base64)이 필요합니다", code:"image" }); return; }
-  if (m[2].length > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
-  const orient = body.mode === "orient";   // 315번
-  const payload = JSON.stringify({ contents:[{ parts:[{ text: orient ? ORIENT : PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }] }],
-                                   generationConfig:{ temperature:0, maxOutputTokens: orient ? 16 : 2048 } });
+  const RE = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
+  const orient = !!body && body.mode === "orient";   // 315 · 316번
+  let parts;
+  if (orient){
+    const arr = Array.isArray(body.images) ? body.images : [], ms = arr.map(x => typeof x === "string" ? x.match(RE) : null);
+    if (arr.length !== 4 || ms.some(x => !x)){ res.status(400).json({ error:"사진 넷(data:image/…;base64)이 필요합니다", code:"image" }); return; }
+    if (ms.reduce((a, x) => a + x[2].length, 0) > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
+    parts = [{ text:ORIENT }]; ms.forEach((x, i) => parts.push({ text:(i + 1) + "번" }, { inline_data:{ mime_type:x[1], data:x[2] } }));
+  } else {
+    const img = body && typeof body.image === "string" ? body.image : "", m = img.match(RE);
+    if (!m){ res.status(400).json({ error:"사진(data:image/…;base64)이 필요합니다", code:"image" }); return; }
+    if (m[2].length > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
+    parts = [{ text:PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }];
+  }
+  const payload = JSON.stringify({ contents:[{ parts }], generationConfig:{ temperature:0, maxOutputTokens: orient ? 8 : 2048 } });
 
   const first = process.env.GEMINI_MODEL || DEFAULT_MODEL;
   const models = [...new Set([first, DEFAULT_MODEL, "gemini-2.5-flash-lite", "gemini-2.5-flash"])];
@@ -106,7 +115,7 @@ module.exports = async function handler(req, res){
     const data = await r.json();
     const text = ((((data.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || "").join("");
     if (!text.trim()){ log({ result:"empty" }); res.status(422).json({ error:"빈 답", code:"empty", model }); return; }
-    if (orient){ const k = (String(text).match(/\b(0|90|180|270)\b/) || [])[1]; log({ result: k ? "ok" : "bad", model }); res.status(200).json({ rot: k ? +k : 0, model, ms:Date.now() - t0 }); return; }   // 315번. 숫자를 못 찾으면 0(안 돌림)
+    if (orient){ const k = (String(text).match(/[1-4]/) || [])[0]; log({ result: k ? "ok" : "bad", model, pick: k || null }); res.status(200).json({ rot: k ? ROTS[k - 1] : 0, pick: k ? +k : 0, model, ms:Date.now() - t0 }); return; }   // 316번. 번호를 못 찾으면 0(안 돌림)
     log({ result:"ok", model }); res.status(200).json({ text:text.slice(0, 20000), model, ms:Date.now() - t0, tries:tries.length });
     return;
   }
