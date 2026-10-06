@@ -2564,6 +2564,24 @@ dialog .st-crow button.st-cpk{height:26px}
 .panel .grp .pgrid .pcells > button.on:empty::before{color:rgba(240,230,205,.6)}
 dialog p.st-ccount .st-seg{grid-auto-columns:auto}
 dialog p.st-ccount .st-seg button{padding:0 14px}
+/* 320번. 사용 점검 1 ~ 3 — [한 장에 맞춤] 스위치 · [—][+] 둘 · 그림 / 도장 두 묶음 · 도장 자리 작은 격자 · [다른 장에도 똑같이]는 탭 맨 아래 */
+.panel .grp.typo2{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:2px}
+.panel .grp.typo2 button{min-height:32px;border-radius:4px;white-space:nowrap}
+.panel .grp.typo2 button:first-child{border-radius:16px 4px 4px 16px}
+.panel .grp.typo2 button:last-child{border-radius:4px 16px 16px 4px}
+.panel .sealat{display:flex;align-items:flex-start;gap:10px}
+.panel .sealat small{font-size:12px;color:rgba(240,230,205,.55);line-height:1.45}
+.panel .pgrid.mini{width:76px;flex:none}
+.panel .pgrid.mini.land{width:106px}
+.panel .pgrid.mini .pband{font-size:9px}
+.panel #g-seal .pcells > button{padding:3px;color:#e0b0a8}
+.panel #g-seal .pcells > button > svg{width:70%;height:70%;display:block}
+.panel #g-seal .pcells > button.has{background:rgba(224,176,168,.14)}
+.panel .copyrow{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.panel .copyrow button#b-copypage{height:32px;min-height:32px;font-size:13px;padding:0 14px;border-radius:16px;white-space:nowrap}
+.panel label.fitsw > span{display:flex;flex-direction:column;line-height:1.3}
+.panel label.fitsw small{font-size:12px;color:rgba(240,230,205,.55);margin-top:2px}
+.panel .copyrow small{font-size:12px;color:rgba(240,230,205,.55);line-height:1.45}
 </style>
 </head>
 <body>
@@ -2777,9 +2795,7 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
   <div class="pgpick" id="pgpick"></div>
   <!-- 157번. "다른 장에도 똑같이를 누르면 어디까지 똑같아지냐"는 물음. 옮기는 것을 **화면에 적어 둔다** —
        버튼 하나가 무엇을 바꾸는지는 눌러 보기 전에 알 수 있어야 한다(13번) -->
-  <div class="pgrp pgtitle"><span id="pg-title">1쪽 설정</span><button id="b-copypage" type="button" title="아래 [옮기는 것]에 적힌 설정을 다른 모든 장에 그대로 복사합니다">다른 장에도 똑같이</button></div>
-  <label class="copynote"><small><b>이 탭에 있는 것 전부</b>를 다른 장에 그대로 옮깁니다.
-    바닥에 <b>쓴 글</b>은 안 옮깁니다(장마다 따로).</small></label>
+  <div class="pgrp pgtitle"><span id="pg-title">1쪽 설정</span></div>   <!-- 320번. [다른 장에도 똑같이]는 탭 맨 아래로(자주 쓰는 것이 아닌데 맨 위를 차지했다 — 사용 점검) -->
   <div class="pgrp">상단</div>
   <label for="f-noren">상단 모양</label>
   <select id="f-noren">
@@ -2843,11 +2859,11 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
   <!-- 191번. **끌어서 1% 단위로.** ＋ㅡ 는 4% 단위라 원하는 크기에 못 앉는다는 지적.
        ＋ㅡ 는 미세 조정으로 남기고, 세 단추는 같은 크기로 둔다(맞춤만 대문짝만하다는 지적) -->
   <input type="range" id="sz-range" min="56" max="140" step="1" title="글자 크기">   <!-- 308번. 끝은 SCALE_MIN · SCALE_MAX 를 따른다(JS 가 다시 맞춘다) — 304번이 상한을 140% 로 올리며 이 막대만 120 에 남아, 140% 에서 막대를 건드리면 120% 로 떨어졌다 -->
-  <span class="grp typo3">
+  <span class="grp typo2">
     <button id="b-minus" type="button" title="작게">ㅡ</button>
     <button id="b-plus" type="button" title="크게">＋</button>
-    <button id="b-fit" type="button">한 장에 맞춤</button>
   </span>
+  <span class="chkrow"><label class="chk fitsw"><input type="checkbox" class="m3sw" id="b-fit"><span>한 장에 맞춤<small>넘치지 않는 가장 큰 크기로 저절로</small></span></label></span>   <!-- 320번. 켜고 끄는 모드라 스위치(규칙 I — 설정 하나를 켜고 끄는 것은 스위치, 263). [—][+]와 같은 단추 줄에 있어 한 번 누르는 단추로 읽혔다 -->
 
   <!-- 309번. 분류 줄 맞추기 — 장별 스위치, 기본 꺼짐(규칙 G). 단이 하나면 흐리게(맞출 것이 없다 — 284번) -->
   <div class="pgrp">분류 줄</div>
@@ -2871,10 +2887,12 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
        다만 15번의 "별도 형태"는 데이터 이야기였지 버튼이어야 한다는 뜻은 아니었다.
        바로 위 영문 병기가 같은 성격의 켜고 끄기이므로 형태를 맞춘다 -->
 
-  <div class="pgrp">꾸밈</div>
-  <span class="grp two artseal">   <!-- 290번. 그림 이름이 잘렸다('생맥주와 파스') — 한 줄에 하나 -->
-    <!-- 302번. 그림은 종이 모양의 6칸 격자(2 × 3) — 칸을 누르면 그 칸이 골라지고, 밑의 손잡이 한 벌(그림 · 색 · 진하기)이 고른 칸만 고친다(칸마다 늘어놓으면 창이 끝없이 길어진다) -->
-    <span class="fld artpick"><label id="l-gart">그림 · 도장 <small>칸을 눌러 고릅니다</small></label>   <!-- 303번. 격자 하나 — 칸마다 그림과 도장 -->
+  <!-- 320번. 꾸밈을 「그림」 · 「도장」 둘로 나눴다(사용 점검 — 사용자: 꾸밈이 직관적이지 않다). 303번은 격자 하나에 칸마다 그림과 도장을 두고,
+       도장 켬은 고른 칸 묶음 안 · 도장 모양 · 색(장에 하나)은 묶음 밖이라 도장이 어디에 속하는지 안 보였고, 마지막 칸을 끄면 모양이 「없음」이 되는 연결이 숨어 있었다.
+       저장 형식은 그대로(arts · seal · sealCells · sealColor) — 창의 짜임만 -->
+  <div class="pgrp">그림</div>
+  <span class="grp two artseal">
+    <span class="fld artpick"><label id="l-gart">자리 <small>칸을 눌러 고릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="subrow nosw"><label for="f-art">그림</label>
@@ -2901,9 +2919,11 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
     <span id="art-opts">   <!-- 297번. 그림에 딸린 색 · 진하기는 그림 바로 밑에 들여 묶는다(296번은 다섯 칸을 한 줄로 늘어놓아 어느 것이 무엇의 색인지 안 보였다 — 사용자). 그림이 없으면 접는다 -->
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span>
-      <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span>   <!-- 302번. [다른 장에도 똑같이]처럼 한 번 맞추는 단추 -->
-      <span class="subrow nosw"><label for="f-sealhere">도장</label><span><input type="checkbox" class="m3sw" id="f-sealhere" aria-label="이 칸에 도장"></span></span></span>   <!-- 303번. 도장도 칸마다 — 여러 개 찍을 수 있다(사용자). 모양 · 색은 장에 하나(아래) -->
-    <span class="fld"><label for="f-seal">도장 모양</label>
+      <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span></span>
+  </span>
+  <div class="pgrp">도장</div>
+  <span class="grp two artseal sealgrp">
+    <span class="fld"><label for="f-seal">모양</label>
     <select id="f-seal">
       <option value="none">없음</option>
       <option value="tri">네모 · 삼각</option>
@@ -2916,8 +2936,14 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts"><span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span>   <!-- 301번. 「색」 줄처럼 상자 하나 — 누르면 바로 고른다(사용자: 몇 번을 말해. 왜 글자 색이랑 다른 방향으로 가냐) --></span></span>   <!-- 297번 --><!-- 303번. 302번의 도장 자리 격자는 걷었다 — 그림 격자와 똑같이 생겼는데 누르면 다른 일(바로 옮기기)을 했다(301번 교훈). 자리는 위 격자의 칸마다 -->
+    <span class="fld sub" id="seal-opts">
+      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span>
+      <span class="subrow nosw top"><label id="l-gseal">자리</label><span class="sealat"><span class="pgrid mini" id="g-seal" role="group" aria-labelledby="l-gseal"></span><small>눌러서 찍고 뺍니다. 여러 곳에 찍을 수 있습니다</small></span></span>
+    </span>
   </span>
+  <div class="pgrp">다른 장에</div>
+  <span class="copyrow"><button id="b-copypage" type="button" title="이 탭의 설정을 다른 모든 장에 그대로 복사합니다">다른 장에도 똑같이</button>
+  <small>이 탭의 설정을 다른 모든 장에 옮깁니다. 바닥에 쓴 글은 장마다 따로라 안 옮깁니다</small></span>
 
   </div>
 </div>
@@ -5821,7 +5847,7 @@ if (document.fonts && document.fonts.addEventListener)
 function topBands(){
   document.querySelectorAll(".sheet").forEach(sh => { const n = sh.querySelector(".noren");
     const t = n ? Math.max(0, n.getBoundingClientRect().bottom - sh.getBoundingClientRect().top) : 0; sh.style.setProperty("--topband", t.toFixed(1) + "px"); });
-  const b = document.querySelector("#g-art .pband"); if (b) b.style.height = bandPct(panelPage) + "%";
+  document.querySelectorAll("#g-art .pband, #g-seal .pband").forEach(b => b.style.height = bandPct(panelPage) + "%");   // 320번. 도장 격자도
 }
 function bandPct(i){ const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 15;
   const t = parseFloat(sh.style.getPropertyValue("--topband")), h = sh.getBoundingClientRect().height; return h > 0 && t >= 0 ? +(t / h * 100).toFixed(2) : 15; }
@@ -5921,7 +5947,7 @@ function syncSize(){
   $("#sz-range").value = Math.round((shown[panelPage] ?? pg.scale)*100);   // 191번
   $("#sz-range").disabled = auto;
   const nr = $("#nsz-range"); if (nr) nr.value = Math.round((pg.norenScale ?? NSCALE_DEFAULT)*100);   // 200번
-  $("#b-fit").classList.toggle("on", auto);
+  $("#b-fit").checked = auto;   // 320번. 스위치
 }
 /* 한 장에 들어가는 최대치를 찾아 그대로 쓴다. 넘치면 true(하한에서도 안 들어간다) */
 function fitOne(i){
@@ -6213,9 +6239,9 @@ $("#b-plus").onclick    = () => {
 $("#b-minus").onclick   = () => { const i = panelPage, pg = P(i); pg.autofit = false;
   pg.scale = Math.max(SCALE_MIN, Math.round(((shown[i] ?? pg.scale)-0.04)*100)/100);
   resetShown(); applyLook(); applyScale(); keepScale(i); touch(); };
-$("#b-fit").onclick     = () => {
+$("#b-fit").onchange    = e => {   // 320번. 스위치
   const pg = P(panelPage);
-  pg.autofit = pg.autofit !== true;   // 켜고 끄기
+  pg.autofit = e.target.checked;   // 켜고 끄기
   if (!pg.autofit) pg.scale = shown[panelPage] ?? pg.scale;   // 182번. 끌 때는 지금 보이는 값으로 못 박는다
   resetShown(); applyScale(); keepScale(panelPage); touch();
   if (!pg.autofit) toast("크기를 " + Math.round(pg.scale*100) + "% 로 고정했습니다. 이제 저절로 바뀌지 않습니다", null);
@@ -6380,11 +6406,12 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
   render(); touch(); };
 $("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); syncPage(); };   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
-$("#f-sealhere").onchange = e => { const p = P(panelPage); let c = sealCellsOf(p);
-  if (e.target.checked){ if (!c.length){ p.seal = "tri"; c = []; } c = [...new Set([...c, panelCell])].sort((a, b) => a - b); }
-  else c = c.filter(x => x !== panelCell);
-  if (!c.length){ p.seal = "none"; delete p.sealCells; } else if (c.length === 1 && c[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = c;
-  render(); touch(); syncPage(); };
+function toggleSeal(c){   // 320번. 도장 자리 격자에서 켜고 끄기(303번의 「고른 칸에 도장」 스위치를 대신). 마지막 하나는 끄지 않는다 — 모양 「없음」으로 없앤다(숨은 연결을 걷었다)
+  const p = P(panelPage); let cs = sealCellsOf(p);
+  if (cs.includes(c)){ if (cs.length === 1){ toast("도장을 없애려면 모양을 「없음」으로 고르세요", null); return; } cs = cs.filter(x => x !== c); }
+  else { if (!cs.length) p.seal = "tri"; cs = [...new Set([...cs, c])].sort((a, b) => a - b); }
+  if (cs.length === 1 && cs[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = cs;
+  render(); touch(); syncPage(); }
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 function colPick(key, def, sel, box){
   /* 298번. 목록 → 색 칩(전체 탭의 종이 · 글자 · 띠 · 포인트 상자처럼 무슨 색인지 바로 보이게 — 사용자). 칩 셋 + 직접 */
@@ -6474,7 +6501,6 @@ function syncPage(){
     const x = artAt(pg, panelCell);
     $("#f-artop").value = (x && x.op) || "light";
     $("#art-opts").hidden = !x; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
-    $("#f-sealhere").checked = sealCellsOf(pg).includes(panelCell);   // 303번
     $("#b-artsame").disabled = !x || (pg.arts || []).length < 2;   // 302번. 맞출 다른 그림이 없으면 흐리게(284번)
     $("#b-artsame").title = $("#b-artsame").disabled ? "그림이 두 칸 이상일 때 씁니다" : "고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다";   // 319번. 흐린 까닭을 알 수 없었다(사용자 — 꾸밈이 직관적이지 않다)
     drawGrids(pg);
@@ -6499,10 +6525,18 @@ function drawGrids(pg){
     const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
   box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
   [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
-    const h = (x ? ART[x.art] : "") + (on ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + SEALS[sk] + "</span>" : "");
+    const h = x ? ART[x.art] : "";   /* 320번. 그림 격자는 그림만 — 도장은 아래 도장 격자에 */
     if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
-    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (on ? " · 도장" : "");
+    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음");
     b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
+  const gs = $("#g-seal");   // 320번. 도장 자리 — 같은 종이 모양 격자, 누르면 찍고 뺀다
+  gs.classList.toggle("land", SETTINGS.orient === "landscape");
+  if (!gs.querySelector(".pcells")){ gs.innerHTML = '<i class="pband" aria-hidden="true">상단</i><span class="pcells"></span>';
+    const pc = gs.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => toggleSeal(c); pc.appendChild(b); } }
+  gs.querySelector(".pband").style.height = bandPct(panelPage) + "%";
+  [...gs.querySelectorAll(".pcells > button")].forEach((b, c) => { const on = sc.includes(c), h = on ? SEALS[sk] : "";
+    if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
+    const nm = CELL_NAMES[c] + " 칸 — " + (on ? "도장 있음" : "도장 없음"); b.classList.toggle("has", on); b.setAttribute("aria-pressed", String(on)); b.title = nm; b.setAttribute("aria-label", nm); });
 }
 /* [다른 장에도 똑같이] — 이 장의 **모양 설정**을 모든 장에 복사한다.
    157번. 바닥 글(안내 문구 · 한 줄 항목 · 원산지)은 **내용**이라 안 옮긴다 — 장마다 다른 말이 들어가는 자리다.
