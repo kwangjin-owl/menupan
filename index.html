@@ -2582,6 +2582,10 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
 .panel label.fitsw > span{display:flex;flex-direction:column;line-height:1.3}
 .panel label.fitsw small{font-size:12px;color:rgba(240,230,205,.55);margin-top:2px}
 .panel .copyrow small{font-size:12px;color:rgba(240,230,205,.55);line-height:1.45}
+/* 321번. 그림 · 도장을 같은 짜임으로 — 격자 같은 크기 · 그림 격자의 ＋ 는 걷음(누르면 칸이 골라질 뿐 그림이 들어가지 않는다 — 319번의 ＋ 는 거짓 신호였다), 도장 격자에만 ＋(누르면 정말 찍힌다) · 손잡이 위에 칸 이름 */
+.panel #g-art .pcells > button:empty::before{content:none}
+.panel .cellname{font-size:12px;font-weight:600;color:rgba(240,230,205,.75)}
+.panel .subrow[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -2895,6 +2899,7 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
     <span class="fld artpick"><label id="l-gart">자리 <small>칸을 눌러 고릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
+    <span class="cellname" id="art-cellname"></span>   <!-- 321번. 아래 손잡이가 어느 칸 것인지(격자의 테두리 칸과 이어 준다) -->
     <span class="subrow nosw"><label for="f-art">그림</label>
     <select id="f-art">
     <option value="none">없음</option>
@@ -2921,10 +2926,15 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span>
       <button type="button" id="b-artsame" title="고른 칸의 색 · 진하기를 이 장의 다른 그림에도 똑같이 합니다">모든 그림에 같게</button></span></span>
   </span>
+  <!-- 321번. 도장도 그림과 같은 짜임 — 격자 먼저(같은 크기), 손잡이 나중. 320번은 「모양 → 자리(작은 격자)」로 그림과 순서가 거꾸로였고 격자 크기도 달라 다른 물건처럼 보였다(사용자 — 아직도 꾸밈이 어색하다) -->
   <div class="pgrp">도장</div>
   <span class="grp two artseal sealgrp">
-    <span class="fld"><label for="f-seal">모양</label>
-    <select id="f-seal">
+    <span class="fld artpick"><label id="l-gseal">자리 <small>눌러서 찍고 뺍니다 · 여러 곳에 찍을 수 있습니다</small></label>
+    <span class="pgrid" id="g-seal" role="group" aria-labelledby="l-gseal"></span></span>
+    <span class="fld sub" id="seal-sub">
+      <span class="cellname">이 장의 도장 전부</span>
+      <span class="subrow nosw"><label for="f-seal">모양</label>
+      <select id="f-seal">
       <option value="none">없음</option>
       <option value="tri">네모 · 삼각</option>
       <option value="mtn">네모 · 산</option>
@@ -2936,9 +2946,7 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
       <option value="rmtn">동그라미 · 산</option>
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
-    <span class="fld sub" id="seal-opts">
-      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span>
-      <span class="subrow nosw top"><label id="l-gseal">자리</label><span class="sealat"><span class="pgrid mini" id="g-seal" role="group" aria-labelledby="l-gseal"></span><small>눌러서 찍고 뺍니다. 여러 곳에 찍을 수 있습니다</small></span></span>
+      <span class="subrow nosw" id="seal-opts"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span>
     </span>
   </span>
   <div class="pgrp">다른 장에</div>
@@ -6404,13 +6412,15 @@ $("#f-tr").onclick      = () => translateEmpty();
 $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음은 전처럼 showDots=false(옛 저장본과 같은 키), 줄표 · 실선은 leader
   if (v === "none"){ SETTINGS.showDots = false; delete SETTINGS.leader; } else { delete SETTINGS.showDots; if (v === "dots") delete SETTINGS.leader; else SETTINGS.leader = v; }
   render(); touch(); };
-$("#f-seal").onchange   = e => { P(panelPage).seal = e.target.value; render(); touch(); syncPage(); };   // 303번. 모양만 — 자리(칸)는 격자에서
+$("#f-seal").onchange   = e => { const p = P(panelPage); if (e.target.value === "none" && p.seal && p.seal !== "none") lastSeal = p.seal; p.seal = e.target.value; render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
-function toggleSeal(c){   // 320번. 도장 자리 격자에서 켜고 끄기(303번의 「고른 칸에 도장」 스위치를 대신). 마지막 하나는 끄지 않는다 — 모양 「없음」으로 없앤다(숨은 연결을 걷었다)
+let lastSeal = "tri";   // 321번. 도장을 다 뺐다가 다시 찍으면 쓰던 모양으로(처음은 네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번)
+function toggleSeal(c){   // 320 · 321번. 도장 자리 격자에서 찍고 빼기. 다 빼면 모양 「없음」 — 격자가 늘 맨 위에 보이니 숨은 연결이 아니다(320번은 마지막 하나를 막았다)
   const p = P(panelPage); let cs = sealCellsOf(p);
-  if (cs.includes(c)){ if (cs.length === 1){ toast("도장을 없애려면 모양을 「없음」으로 고르세요", null); return; } cs = cs.filter(x => x !== c); }
-  else { if (!cs.length) p.seal = "tri"; cs = [...new Set([...cs, c])].sort((a, b) => a - b); }
-  if (cs.length === 1 && cs[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = cs;
+  if (cs.includes(c)) cs = cs.filter(x => x !== c);
+  else { if (!cs.length) p.seal = lastSeal; cs = [...new Set([...cs, c])].sort((a, b) => a - b); }
+  if (!cs.length){ if (p.seal && p.seal !== "none") lastSeal = p.seal; p.seal = "none"; delete p.sealCells; }
+  else if (cs.length === 1 && cs[0] === SEAL_POS_DEF) delete p.sealCells; else p.sealCells = cs;
   render(); touch(); syncPage(); }
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 function colPick(key, def, sel, box){
@@ -6499,6 +6509,7 @@ function syncPage(){
     /* 302번. 죽은 함수 chipOld(301번에 남김)를 걷었다 */
     if (panelCellPage !== panelPage){ panelCellPage = panelPage; if (!artAt(pg, panelCell) && (pg.arts || []).length) panelCell = pg.arts[0].cell; }   // 302번. 장을 바꾸면 그림이 있는 칸부터
     const x = artAt(pg, panelCell);
+    $("#art-cellname").textContent = CELL_NAMES[panelCell] + " 칸";   // 321번
     $("#f-artop").value = (x && x.op) || "light";
     $("#art-opts").hidden = !x; $("#seal-opts").hidden = (pg.seal || "word") === "none";   // 297번
     $("#b-artsame").disabled = !x || (pg.arts || []).length < 2;   // 302번. 맞출 다른 그림이 없으면 흐리게(284번)
