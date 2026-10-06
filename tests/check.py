@@ -1316,21 +1316,32 @@ def t54(b, f):
     try:
         pg.click('#st-photo'); pg.wait_for_timeout(300)
         with pg.expect_file_chooser() as fc: pg.click('#st-pic')
-        fc.value.set_files(png); pg.wait_for_timeout(500); pg.click('#st-gemgo'); pg.wait_for_timeout(800)
+        fc.value.set_files(png); pg.wait_for_timeout(500)
+        nfc = []; pg.on('filechooser', lambda x: nfc.append(1))   # 313번. 돌리기는 사진 고르기 창을 안 연다 · 돌린 사진이 가로로(600 × 800 → 800 × 600)
+        pg.click('#st-rotr'); pg.wait_for_timeout(300)
+        rot = c.js("async()=>{ const i=new Image(); i.src=stPic; await i.decode(); return [i.naturalWidth, i.naturalHeight] }")
+        q313 = [len(nfc) == 0, rot == [800, 600]]
+        pg.click('#st-rotl'); pg.wait_for_timeout(200)
+        pg.click('#st-gemgo'); pg.wait_for_timeout(800)
+        q313 += c.js("""()=>{ const w=document.querySelector('#st-ccount .st-warn'), u=document.querySelector('#st-chours input.un');
+          return [ !!w && /찾지 못했/.test(w.textContent) && getComputedStyle(w).color==='rgb(163, 50, 31)', !!u && getComputedStyle(u).backgroundColor==='rgb(255, 225, 122)' ] }""")
+        pg.click('#st-check-go'); pg.wait_for_timeout(300)   # 313번. 이름 빈 분류가 남으면 한 번 알리고 머문다
+        q313 += c.js("()=>[ !document.querySelector('#st-check').hidden, /이름이 빈 분류/.test(document.querySelector('#undo .t').textContent) ]")
         q = c.js("""()=>{ const H=document.querySelector('#st-chours'), F=document.querySelector('#st-cfoot'), T=document.querySelector('#st-ctab');
           const sec=T.querySelector('input.st-csec'), k=T.querySelector('button.st-cpk');
-          return [ /찾지 못했/.test(document.querySelector('#st-cshop').placeholder||''), !!H && H.querySelectorAll('input').length === 4, !!H && H.querySelectorAll('input.un').length === 2,
+          return [ document.querySelector('#st-cshop').placeholder==='가게 이름',   /* 313번. 못 찾은 안내는 칸 밖 붉은 줄로 옮겼다 */ !!H && H.querySelectorAll('input').length === 4, !!H && H.querySelectorAll('input.un').length === 4,
                    !!sec && sec.value==='' && sec.classList.contains('un'), !!k && k.classList.contains('on'), [...T.querySelectorAll('input.st-cnl')].map(x=>x.value).join('|')==='곱빼기 가능',
                    F ? [...F.querySelectorAll('input')].map(x=>x.value).join('|')==='모든 메뉴 포장 가능합니다' : false ] }""")
         c.js("""()=>{ const t=document.querySelectorAll('#st-chours input')[3]; t.value='17:00 - 24:00 (가끔 변동)'; const s=document.querySelector('#st-ctab input.st-csec'); s.value='식사'; }""")
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
+        q313 += c.js("()=>{ const t=document.querySelector('#st-topfrom'); return [ t.classList.contains('warn') && getComputedStyle(t).color==='rgb(163, 50, 31)' ] }")
         q += c.js("""()=>[ !!document.querySelector('#st-sw .st-swb[data-p="photo"].on'), /찾지 못했/.test(document.querySelector('#st-topfrom').textContent) && !document.querySelector('#st-topfrom').hidden,
                        getComputedStyle(document.querySelector('#st-prev')).backgroundColor==='rgb(243, 236, 217)' ]""")
         pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
         q += c.js("""()=>{ const all=MENU.sheets[0].flat(), s0=all.find(x=>x.name==='식사')||{}, it=(s0.items||[])[0]||{};
           return [ MENU.hours.length===2 && MENU.hours[1].time==='17:00 - 24:00 (가끔 변동)' && !('un' in MENU.hours[1]), it.pick===true && !('un' in it),
                    JSON.stringify(s0.notes||null)==='["곱빼기 가능"]', F(0).notes.includes('모든 메뉴 포장 가능합니다'), SETTINGS.font==='gungseo' ] }""")
-        out['p312'] = q
+        out['p312'] = q; out['p313'] = q313
     except Exception as e:
         out['p312'] = 'fail: ' + str(e)[:200]
     out['err'] += c.errs; c.close()
@@ -1340,9 +1351,16 @@ def t54(b, f):
         pg.click('#st-photo'); pg.wait_for_timeout(300)
         with pg.expect_file_chooser() as fc: pg.click('#st-pic')
         fc.value.set_files(png); pg.wait_for_timeout(500); pg.click('#st-gemgo'); pg.wait_for_timeout(900)
-        out['fit312'] = c.js("()=>{ const p=document.querySelector('.st-cpaper'), t=document.querySelector('#st-ctab'); return [p.scrollHeight - p.clientHeight <= 1, +(t.style.zoom||1), document.querySelectorAll('#st-ctab input').length] }")
+        fit = c.js("()=>{ const p=document.querySelector('.st-cpaper'), t=document.querySelector('#st-ctab'); return [p.scrollHeight - p.clientHeight <= 1, +(t.style.zoom||1), document.querySelectorAll('#st-ctab input').length] }")
+        out['fit312'] = fit
+        # 313번. 방향 · 단 손잡이 — 세로를 누르면 종이가 세로, 1단을 누르면 한 단 · 그때도 창 자체에는 스크롤 없음(사진 칸 높이 여유)
+        pg.click('.st-cform [data-o="portrait"]'); pg.wait_for_timeout(300)
+        o1 = c.js("()=>[ !document.querySelector('.st-cpaper').classList.contains('land'), document.querySelector('#start').scrollHeight - document.querySelector('#start').clientHeight <= 1, document.querySelector('.st-cform [data-o=\"portrait\"]').classList.contains('on') ]")
+        pg.click('.st-cform [data-c="1"]'); pg.wait_for_timeout(300)
+        o1 += c.js("()=>[ document.querySelector('#st-ctab').style.gridTemplateColumns.startsWith('repeat(1'), document.querySelectorAll('#st-ctab input').length === 76 ]")
+        out['form313'] = o1
     except Exception as e:
-        out['fit312'] = 'fail: ' + str(e)[:200]
+        out['fit312'] = out.get('fit312') or 'fail: ' + str(e)[:200]; out['form313'] = 'fail: ' + str(e)[:200]
     out['err'] += c.errs; c.close()
     # 276번 — 메뉴판의 요청 글(READ_PROMPT)과 서버 함수의 요청 글(PROMPT)이 같은가. 서버 함수 파일을 찾으면 본다
     here = os.path.dirname(os.path.abspath(__file__)); cand = [os.path.join(here, 'api', 'read.js'), os.path.join(here, '..', 'api', 'read.js')]
@@ -1603,8 +1621,8 @@ def judge(t, r):
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
-            ok = r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
-            return ok, f"312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            ok = r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
+            return ok, f"313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"
