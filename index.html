@@ -2497,6 +2497,21 @@ dialog p.st-help .warn::before{content:"! ";}
 .st-rot[hidden]{display:none}
 dialog .st-rot button{height:36px;width:44px;padding:0;font-size:18px;border:1px solid #9c8a68;background:#fffdf6}
 .st-rot small{font-size:12px;color:#5c4f3c;flex-basis:100%;text-align:center}
+/* 314번. 사진 칸은 방향과 상관없이 같은 폭(313번은 가로 종이일 때만 좁혀 [세로]를 누르면 사진이 커졌다) · 단이 많으면 가격 칸을 좁게 · 돌리기 단추를 사진 옆에 */
+@media screen and (min-width:821px){ .st-cbody:not(.nopic) .st-cphoto{width:min(22vw, 360px);max-width:none} }
+.st-cphoto img{width:100%;height:auto;object-fit:contain}
+.st-ctab.tight .st-crow{grid-template-columns:1.2em minmax(0,1fr) 4.3em;gap:3px}
+.st-ctab.tight .st-cin{padding:0 4px}
+.st-picbox{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:nowrap}
+dialog .st-picrow.has .st-picbox .st-picimg{width:240px;height:240px;max-width:none;max-height:none;object-fit:contain;flex:none;box-shadow:none}   /* 314번. 돌려도 자리가 그대로인 정사각 틀 — 누운 사진을 돌리면 넓어져 단추가 사진 밑으로 내려가, 180° 를 위해 두 번째로 누를 단추가 움직였다(찍어 보고 잡음) */
+@media (max-width:560px){ .st-picbox{flex-wrap:wrap} dialog .st-picrow.has .st-picbox .st-picimg{width:200px;height:200px} }
+.st-picbox[hidden]{display:none}
+.st-rot{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex-wrap:nowrap;justify-content:center}
+dialog .st-rot button{height:40px;width:auto;padding:0 16px 0 12px;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;border:1px solid #9c8a68;background:#fffdf6;color:#241c12;border-radius:20px}
+dialog .st-rot button:hover{background:#fff}
+.st-rot svg{width:20px;height:20px;flex:none;display:block}
+.st-rot .mir{display:inline-flex;transform:scaleX(-1)}
+.st-rot small{flex-basis:auto;text-align:left;max-width:13em;font-size:12px;color:#5c4f3c;line-height:1.45}
 </style>
 </head>
 <body>
@@ -2976,9 +2991,10 @@ dialog .st-rot button{height:36px;width:44px;padding:0;font-size:18px;border:1px
     <div class="st-head"><button type="button" class="st-icon" id="st-read-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">사진으로 시작</h3><span class="st-pg stepdots" role="img" aria-label="3단계 중 1단계" title="3단계 중 1단계"><i class="on"></i><i></i><i></i></span></div>   <!-- 288번. 몇 단계 남았는지 -->   <!-- 281번. 뒤로는 머리 왼쪽 ← -->
     <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
-    <div class="st-picrow"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
+    <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden>
+    <span class="st-rot" id="st-rot"><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>왼쪽으로 돌리기</span></button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>오른쪽으로 돌리기</span></button><small>글자가 바로 서게 돌리면 더 잘 읽습니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
     <button type="button" class="st-drop" id="st-pic"><span class="st-dtx">이미지 선택</span><small>메뉴판 사진을 누르거나 끌어다 놓으세요</small></button>
-    <span class="st-rot" id="st-rot" hidden><button type="button" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기">↺</button><button type="button" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기">↻</button><small>글자가 바로 서게 돌리면 더 잘 읽습니다</small></span></div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 -->
+    </div>   <!-- 313번. 사진 돌리기(사용자) — 누운 메뉴판을 세워 보낸다 · 314번에 사진 옆으로 옮겼다 -->
     <p class="sub st-note" id="st-pichint">폰에 있는 사진은 PC 카카오톡의 ‘나와의 채팅’으로 보내 두면 컴퓨터에서 고를 수 있습니다.</p>   <!-- 288번. 사진은 보통 폰에 있다 -->
     <div id="st-gem">   <!-- 276번. 사장님 키 칸을 없앴다 — 버셀 서버 함수(api/read.js)가 읽는다 -->
       <p class="sub st-note">보낸 사진은 구글이 서비스 개선에 쓸 수 있으니 메뉴판만 찍어 주세요.</p>   <!-- 288번. 붐빌 때의 말은 실제로 멈췄을 때 안내 칸에 -->
@@ -6844,7 +6860,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stHours = []; stLook = {}; stFoot = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -7068,12 +7084,14 @@ const READ_PROMPT = [
 ].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이 · 304번. 영업시간 줄
 function parseMenuText(txt){
   const secs = []; let cur = null; const foot = [];
-  const unq = v => { v = String(v || "").trim(); const u = /[?？]\s*$/.test(v); return [v.replace(/[?？]\s*$/, "").trim(), u]; };
+  const unq = v => { v = String(v || "").trim(); const Q = /\s*[?？](?=\s*(?:[(（]|$))/g; const u = Q.test(v); return [v.replace(Q, "").replace(/\s{2,}/g, " ").trim(), u]; };   /* 314번. AI 가 붙인 「?」는 값 끝만이 아니라 괄호 앞에서도 뗀다 — 「24:00? (가끔변동)」이 그대로 남았다(사용자 화면) */
+  const footUn = [], addFoot = t => { const [v, u] = unq(t); foot.push(v); footUn.push(u); };   /* 314번. 바닥 글도 ? 면 노랗게 */
   String(txt || "").replace(/\r/g, "").split("\n").forEach(raw => {
     let l = raw.trim(); if (!l || /^```/.test(l)) return;
-    const nt = l.match(/^※\s*(.+)$/); if (nt){ if (cur) (cur.notes = cur.notes || []).push(nt[1].trim()); else foot.push(nt[1].trim()); return; }   /* 312번. 분류 안내(※) — 분류가 아직 없으면 바닥 글로 */
+    const nt = l.match(/^※\s*(.+)$/); if (nt){ if (!cur){ addFoot(nt[1]); return; }   /* 314번. 분류 안내 앞의 * · ※ 는 뗀다 — 메뉴판이 ※ 를 붙여 「※ *가끔 …」으로 겹쳤다. ? 면 노랗게 */
+      const [v, u] = unq(nt[1].replace(/^[*※•·]+\s*/, "")); (cur.notes = cur.notes || []).push(v); if (u) (cur.nun = cur.nun || [])[cur.notes.length - 1] = true; return; }   /* 312번. 분류 안내(※) — 분류가 아직 없으면 바닥 글로 */
     l = l.replace(/^[-*•·]\s+/, "");
-    const ft = l.match(/^바닥\s*[:：]\s*(.+)$/); if (ft){ foot.push(ft[1].trim()); return; }   /* 312번. 어느 분류에도 딸리지 않은 안내 → 바닥 글 */
+    const ft = l.match(/^바닥\s*[:：]\s*(.+)$/); if (ft){ addFoot(ft[1]); return; }   /* 312번. 어느 분류에도 딸리지 않은 안내 → 바닥 글 */
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
     const hr = l.match(/^영업(?:\s*시간)?\s*[:：]\s*(.+)$/);   // 304번. 영업시간 — "점심 11:00 - 15:00 · 저녁 17:00 - 23:00"
     if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x0 => { const [x, u] = unq(x0), m = x.match(/^(\D*?)\s*(\d.*)$/); const o = m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; if (u) o.un = true; return o; }); return; }   /* 312번. 영업시간도 ? 면 노란 칸(확실하면 키 없음 — 304번 모양 그대로) */
@@ -7091,7 +7109,7 @@ function parseMenuText(txt){
     cur.items.push(Object.assign({ name:n, price:p, un:un1, unp:un2 }, pick ? { pick:true } : {}));
   });
   const out = secs.filter(s => s.items.length); out.forEach(s => { if (s.notes) s.notes = s.notes.slice(0, SECNOTE_MAX); });
-  out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}); return out;
+  out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}); return out;
 }
 /* 296번. 사진의 모양 → 메뉴판(사용자: "AI 를 쓰는 거면 처음 찍은 사진과 가장 비슷한 형태로 — 글자 크기든 구성이든 색깔이든").
    방향 · 단 수 · 분류가 놓인 칸 · 글꼴 · 색(종이 · 글자 · 띠 · 포인트). 못 읽은 것은 비워 두고 지금 기본값을 쓴다.
@@ -7110,7 +7128,7 @@ function readLook(lk){
   return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
-let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [], stFoot = [], stBlankWarned = false;   // 290번. 사진에서 읽은 가게 이름
+let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [], stFoot = [], stFootUn = [], stBlankWarned = false;   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img, rot = 0){   // 313번. rot — 90 · 180 · 270(시계 방향). 돌린 사진을 보내고 확인 화면에도 그것을 쓴다
   const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
@@ -7136,7 +7154,7 @@ function stReadSync(){
   $("#st-appgo").disabled = !$("#st-ans").value.trim();   // 284번. 붙여 넣은 답이 없으면 막는다(막힌 모양은 흐리게)
   $("#st-pic small").textContent = stWay === "app" ? "다음 화면에서 사진과 나란히 비교할 때 씁니다 · 안 올려도 됩니다" : "메뉴판 사진을 누르거나 끌어다 놓으세요";   // 288번. 다른 앱 길에서는 사진이 비교용이다
   $("#st-pic .st-dtx").textContent = stPic ? "사진 바꾸기" : "이미지 선택";   // 281번. 올린 뒤에는 작은 단추로(.has)
-  $(".st-picrow").classList.toggle("has", !!stPic); $("#st-rot").hidden = !stPic;   // 313번
+  $(".st-picrow").classList.toggle("has", !!stPic); $("#st-picbox").hidden = !stPic;   // 313 · 314번
   if (stPic && document.activeElement === $("#st-pic")) $("#st-pic").blur();   // 286번. 파일 창을 닫고 돌아온 초점이 [바꾸기]에 테를 세웠다
   const off = !navigator.onLine;
   $("#st-gemgo").disabled = off || !stPic || !readOn;   // 278번. 꺼져 있으면 흐리게
@@ -7248,7 +7266,7 @@ async function geminiRead(dataUrl){
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stHours = secs.hours || []; stFoot = secs.foot || []; $("#st-cshop").value = stShopRead;
+  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stHours = secs.hours || []; stFoot = secs.foot || []; stFootUn = secs.footUn || []; $("#st-cshop").value = stShopRead;
   $("#st-cshop").placeholder = "가게 이름";   /* 313번. 못 찾은 안내는 칸 안 흐린 글씨가 아니라 「읽은 메뉴」 줄의 붉은 경고로(사용자 — 일반 글과 구분이 안 됐고 칸이 좁으면 잘렸다) */   /* 312번. 비어 있는 까닭을 칸에 적는다(사용자). 「사진에 없다」고 단정하지 않는다 — 작아서 놓친 것과 가를 수 없다 */
   drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
@@ -7259,7 +7277,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   $(".st-cbody").classList.toggle("nopic", !stPic); $("#start").classList.add("wide");
   const money = v => typeof v === "number" ? v.toLocaleString("ko-KR") : String(v);   // 읽을 때 쉼표는 다시 뺀다(readCheck)
   const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
-  $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))";
+  $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))"; box.classList.toggle("tight", nc >= 3);   // 314번. 단이 많으면 가격 칸을 좁혀 이름 칸에 폭을
   const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
   $("#st-ccount").innerHTML = "<span>읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b>" + (stHours.length ? " · 영업시간 <b>" + stHours.length + "</b>줄" : "") + "</span>"
     + (stShopRead ? "" : '<span class="st-warn">가게 이름을 찾지 못했습니다</span>')
@@ -7283,7 +7301,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
         k.onclick = () => { it.pick = !it.pick; k.classList.toggle("on", !!it.pick); k.setAttribute("aria-pressed", it.pick ? "true" : "false"); };
         row.append(k, n, p); sb.append(row);
       });
-      (s.notes || []).forEach((t, ni) => { const x = el("input", "st-cin st-cnl"); x.value = t; x.dataset.s = si; x.dataset.n = ni; x.placeholder = "※ 안내"; x.setAttribute("aria-label", "분류 안내"); sb.append(x); });   /* 312번. 분류 안내도 보고 고친다 */
+      (s.notes || []).forEach((t, ni) => { const x = el("input", "st-cin st-cnl" + (s.nun && s.nun[ni] ? " un" : "")); x.value = t; x.dataset.s = si; x.dataset.n = ni; x.placeholder = "※ 안내"; x.setAttribute("aria-label", "분류 안내"); sb.append(x); });   /* 312번. 분류 안내도 보고 고친다 */
       const add = el("button", "st-cadd"); add.type = "button"; add.textContent = "＋ 메뉴"; add.title = "빠진 메뉴를 이 분류에 넣습니다";   // 296번. 빠진 것을 여기서 채운다(280번에 미뤘던 것)
       add.onclick = () => { syncCheck(); stParsed[si].items.push({ name:"", price:"" }); drawCheck(); const ins = $("#st-ctab").querySelectorAll('input[data-s="' + si + '"][data-k="name"]'); ins[ins.length - 1]?.focus(); };
       hd.append(add);
@@ -7295,7 +7313,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
     stHours.forEach((h, k) => { const r = el("div", "st-chrow");
       [["label", "구분", "st-chl"], ["time", "시간", "st-cht"]].forEach(([key, lab, cls]) => { const x = el("input", "st-cin " + cls + " un");   /* 313번. 영업시간은 늘 노랗게 — 작은 글씨라 두 번 다 지어냈다(「가든 주말 한정」 · 「라스트오더 23:00」), ? 도 안 붙였다 */ x.value = h[key] || ""; x.dataset.h = k; x.dataset.k = key; x.setAttribute("aria-label", "영업시간 " + lab); r.append(x); });
       hb.append(r); });
-    stFoot.forEach((t, k) => { const x = el("input", "st-cin st-cfl"); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", "바닥 글"); fb.append(x); });
+    stFoot.forEach((t, k) => { const x = el("input", "st-cin st-cfl" + (stFootUn[k] ? " un" : "")); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", "바닥 글"); fb.append(x); });
     hb.hidden = !stHours.length; fb.hidden = !stFoot.length; }
   $(".st-cpaper").querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
   $(".st-legend").hidden = !$(".st-cpaper").querySelector(".un");
