@@ -2592,6 +2592,11 @@ dialog#start.wide .row2.foot2{margin-top:auto}
 .panel #art-cell .blkhd{font-size:13px;font-weight:700;color:rgba(240,230,205,.88);letter-spacing:.02em}
 .panel #art-cell .sealblk{border-top:1px solid rgba(240,230,205,.14);padding-top:12px;margin-top:4px}
 .panel #art-cell #b-artsame{margin-top:6px}
+/* 327번. 도장 글자 칸 */
+.panel #f-sealtx{width:100%;box-sizing:border-box;height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(240,230,205,.28);background:rgba(240,230,205,.06);color:#f0e6cd;font:inherit;font-size:14px}
+.panel #f-sealtx::placeholder{color:rgba(240,230,205,.42)}
+.panel #f-sealtx:disabled{opacity:.4}
+.panel #seal-txrow.off label{opacity:.4}
 </style>
 </head>
 <body>
@@ -2937,16 +2942,10 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="subrow nosw sealrow"><label for="f-seal">모양</label>
     <select id="f-seal">
       <option value="none">없음</option>
-      <option value="tri">네모 · 삼각</option>
-      <option value="mtn">네모 · 산</option>
-      <option value="word">네모 · 알프스</option>
-      <option value="rtri">동그라미 · 삼각</option>
-      <option value="star">동그라미 · 별</option>
-      <option value="sstar">네모 · 별</option>
-      <option value="rword">동그라미 · 알프스</option>
-      <option value="rmtn">동그라미 · 산</option>
-      <option value="ring">두 겹 동그라미 · 삼각</option>
+      <optgroup label="글자 도장"><option value="word">네모</option><option value="rword">동그라미</option><option value="rrword">두 겹 동그라미</option></optgroup>   <!-- 327번. 기본은 글자 도장 — 기호는 알프스 같은 콘셉트가 아니면 뜻이 없다(사용자) -->
+      <optgroup label="기호 도장"><option value="tri">네모 · 삼각</option><option value="mtn">네모 · 산</option><option value="sstar">네모 · 별</option><option value="rtri">동그라미 · 삼각</option><option value="star">동그라미 · 별</option><option value="rmtn">동그라미 · 산</option><option value="ring">두 겹 동그라미 · 삼각</option></optgroup>
     </select></span>
+    <span class="subrow nosw" id="seal-txrow"><label for="f-sealtx">글자</label><input type="text" id="f-sealtx" maxlength="4" autocomplete="off" spellcheck="false" title="도장에 새길 글자 1 ~ 4자 — 비우면 상호명"></span>   <!-- 327번 -->
     <span id="seal-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span></span>
     <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
@@ -3812,15 +3811,39 @@ const ART = {
 </g>
 </svg>`
 };
+const SEAL_TEXT = { word:"sq", rword:"rd", rrword:"rr" }, SEAL_TXT_MAX = 4;   /* 327번. 글자 도장 셋의 틀 · 글자는 1 ~ 4자 */
+const sealText = x => {   // 327번. 적은 글자, 없으면 상호명 — 4자면 넷(2 × 2), 그보다 길면 앞 세 글자, 상호명도 없으면 「메뉴」
+  const own = [...String((x && x.text) || "").replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX); if (own.length) return own.join("");
+  const n = [...shopName().replace(/[\s·\-_.()]/g, "")]; return (n.length === 4 ? n : n.slice(0, 3)).join("") || "메뉴"; };
+function sealSvg(frame, text){   /* 327번. 글자 수로 배치 — 1자 크게 · 2 · 3자 세로 한 줄(3자 네모 · 동그라미는 160번 「알프스」 도장과 같은 자리) · 4자는 2 × 2(오른쪽 위부터 세로로 — 도장 읽는 차례) */
+  const esc = c => c.replace(/&/g, "&amp;").replace(/</g, "&lt;"), ch = [...text].slice(0, SEAL_TXT_MAX).map(esc), n = ch.length, rd = frame !== "sq";
+  const bg = frame === "sq" ? '<rect x="1" y="1" width="38" height="38" rx="3" fill="currentColor"/>'
+    : '<circle cx="20" cy="20" r="19" fill="currentColor"/>' + (frame === "rr" ? '<circle cx="20" cy="20" r="15.6" fill="none" stroke="var(--paper)" stroke-width="1.1"/>' : "");
+  const T = (x, y, c) => '<text x="' + x + '" y="' + y + '">' + c + "</text>";
+  let fs, t = "";
+  if (/^[\x20-\x7e]+$/.test(text) && n > 1){   /* 영문 · 숫자는 가로로 읽는다 — 3자까지 한 줄, 4자는 두 줄(CA / FE). 세로로 세우면 「F C / E A」로 깨졌다(찍어 보고 잡음) */
+    if (n < 4){ fs = (rd ? [0, 0, 13, 10.6] : [0, 0, 15, 12])[n]; t = T(20, 20 + fs * .36, ch.join("")); }
+    else { fs = rd ? (frame === "rr" ? 10 : 11.4) : 13; t = T(20, rd ? 18.4 : 17.8, ch[0] + ch[1]) + T(20, rd ? 29.8 : 31.4, ch[2] + ch[3]); }
+    return '<svg viewBox="0 0 40 40">' + bg + '<g fill="var(--paper)" text-anchor="middle" font-size="' + fs + '" font-family="inherit" letter-spacing=".04em">' + t + "</g></svg>"; }
+  if (n === 1){ fs = rd ? 19 : 22; t = T(20, rd ? 26.6 : 27.7, ch[0]); }
+  else if (n === 2){ fs = rd ? 12 : 13.6; t = T(20, rd ? 18.2 : 17.9, ch[0]) + T(20, rd ? 30.6 : 32, ch[1]); }
+  else if (n === 3){ if (frame === "sq"){ fs = 10.8; t = T(20, 13.2, ch[0]) + T(20, 24.6, ch[1]) + T(20, 36, ch[2]); }
+    else if (frame === "rd"){ fs = 10; t = T(20, 13.6, ch[0]) + T(20, 24.4, ch[1]) + T(20, 35.2, ch[2]); }
+    else { fs = 8.8; t = T(20, 14.4, ch[0]) + T(20, 23.6, ch[1]) + T(20, 32.8, ch[2]); } }
+  else { fs = rd ? (frame === "rr" ? 9.4 : 10.6) : 12.4; const xr = rd ? 25.6 : 26.4, xl = rd ? 14.4 : 13.6, y1 = rd ? 18.4 : 17.8, y2 = rd ? 29.6 : 31.4;
+    t = T(xr, y1, ch[0]) + T(xr, y2, ch[1]) + T(xl, y1, ch[2]) + T(xl, y2, ch[3]); }
+  return '<svg viewBox="0 0 40 40">' + bg + '<g fill="var(--paper)" text-anchor="middle" font-size="' + fs + '" font-family="inherit">' + t + "</g></svg>"; }
+const sealHTML = x => SEAL_TEXT[x.seal] ? sealSvg(SEAL_TEXT[x.seal], sealText(x)) : SEALS[x.seal];   // 327번
 const SEALS = {
   none: "",
   tri:  '<svg viewBox="0 0 40 40" fill="none"><rect x="1.4" y="1.4" width="37.2" height="37.2" rx="3" stroke="currentColor" stroke-width="2.4"/><path d="M20 11.5 L29.5 28 H10.5 Z" fill="currentColor"/></svg>',
   mtn:  '<svg viewBox="0 0 40 40" fill="none"><rect x="1.4" y="1.4" width="37.2" height="37.2" rx="3" stroke="currentColor" stroke-width="2.4"/><path d="M6.5 28.5 L15.5 15 L20.5 22 L25 17 L33.5 28.5 Z" fill="currentColor"/></svg>',
-  word: '<svg viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="3" fill="currentColor"/><g fill="var(--paper)" text-anchor="middle" font-size="10.8" font-family="inherit"><text x="20" y="13.2">알</text><text x="20" y="24.6">프</text><text x="20" y="36">스</text></g></svg>',
+  word: "",   /* 327번. 글자 도장(네모) — 글자는 칸마다 직접 적거나 상호명(sealSvg). 전엔 「알프스」가 박혀 다른 가게에도 찍혔다 */
   star: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.3" stroke="currentColor" stroke-width="2.4"/><path d="M20 9 l3.2 6.9 7.5.9-5.5 5.1 1.5 7.4L20 25.7l-6.7 3.6 1.5-7.4-5.5-5.1 7.5-.9Z" fill="currentColor"/></svg>',
   rtri: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.3" stroke="currentColor" stroke-width="2.4"/><path d="M20 11 L29 27.5 H11 Z" fill="currentColor"/></svg>',
   /* 160번. 도장 넷 더. 네모/동그라미 · 채움/윤곽 · 글자/그림의 조합에서 비어 있던 칸을 메운다 */
-  rword: '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="currentColor"/><g fill="var(--paper)" text-anchor="middle" font-size="10" font-family="inherit"><text x="20" y="13.6">알</text><text x="20" y="24.4">프</text><text x="20" y="35.2">스</text></g></svg>',
+  rword: "",   // 327번. 글자 도장(동그라미)
+  rrword: "",   // 327번. 글자 도장(두 겹 동그라미)
   rmtn: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.3" stroke="currentColor" stroke-width="2.4"/><path d="M7.5 27.5 L15.5 15 L20.5 21.5 L25 16.5 L32.5 27.5 Z" fill="currentColor"/></svg>',
   sstar: '<svg viewBox="0 0 40 40" fill="none"><rect x="1.4" y="1.4" width="37.2" height="37.2" rx="3" stroke="currentColor" stroke-width="2.4"/><path d="M20 9 l3.2 6.9 7.5.9-5.5 5.1 1.5 7.4L20 25.7l-6.7 3.6 1.5-7.4-5.5-5.1 7.5-.9Z" fill="currentColor"/></svg>',
   ring: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.3" stroke="currentColor" stroke-width="2.4"/><circle cx="20" cy="20" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M20 13.5 L26 25 H14 Z" fill="currentColor"/></svg>'
@@ -3973,7 +3996,8 @@ function normSeals(pg, dflt){   /* 323번. 도장을 그림처럼 칸마다 — 
   if (!Array.isArray(pg.seals)) pg.seals = JSON.parse(JSON.stringify(dflt));
   const seen = new Set();
   pg.seals = pg.seals.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && x.cell >= 0 && x.cell < NCELL && okSeal(x.seal) && !seen.has(x.cell) && seen.add(x.cell))
-    .map(x => { const q = { cell:x.cell, seal:x.seal }; if (okCol(x.color)) q.color = x.color; return q; })
+    .map(x => { const q = { cell:x.cell, seal:x.seal }; if (okCol(x.color)) q.color = x.color;   /* 327번. 글자 도장의 글자(1 ~ 4자, 빈칸 없이) */
+      const t = typeof x.text === "string" ? [...x.text.replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX).join("") : ""; if (t && SEAL_TEXT[x.seal]) q.text = t; return q; })
     .sort((a, b) => a.cell - b.cell);
 }
 function normArts(pg, dflt){
@@ -4944,7 +4968,7 @@ function drawSheet(spec){
   /* 302번 → 303번. 도장은 고른 칸마다(여럿). 없음이면 전처럼 안 보이는 도장 하나를 오른쪽 아래에 둔다(255번 — 판정은 보이는 것만 센다) */
   const sc = sealCellsOf(PS), sealOn = sc.length > 0;
   (sealOn ? PS.seals : [{ cell:SEAL_POS_DEF, seal:"word" }]).forEach(x => { const sp = x.cell, seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
-    seal.dataset.cell = sp; seal.innerHTML = SEALS[x.seal]; sheet.appendChild(seal); });   // 323번. 칸마다 모양
+    seal.dataset.cell = sp; seal.innerHTML = sealHTML(x); sheet.appendChild(seal); });   // 327번. 글자 도장은 적은 글자 · 상호명   // 323번. 칸마다 모양
   sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
@@ -6412,13 +6436,15 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
   render(); touch(); };
 $("#f-seal").onchange   = e => { const pg = P(panelPage), old = sealAt(pg, panelCell), v = e.target.value;   // 323번. 고른 칸의 도장 — 모양을 바꿔도 그 칸의 색은 남긴다
   pg.seals = (pg.seals || []).filter(x => x.cell !== panelCell);
-  if (v !== "none") pg.seals.push(Object.assign({}, old, { cell:panelCell, seal:v }));
+  if (v !== "none"){ const q = Object.assign({}, old, { cell:panelCell, seal:v }); if (!SEAL_TEXT[v]) delete q.text; pg.seals.push(q); }   // 327번. 기호 도장엔 글자가 없다
   pg.seals.sort((a, b) => a.cell - b.cell); render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
 const sealAt = (pg, c) => (pg.seals || []).find(x => x.cell === c);   // 323번. 칸의 도장
 /* 296번. 도장 · 그림 색 — 기본값이면 키를 지운다(15번). 색 상자를 끄는 동안은 변수만(240번) */
 $("#c-seal").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x) return; x.color = e.target.value; applyLook(); touchLater(); });   // 323번. 도장 색도 칸마다
 $("#c-seal").addEventListener("change", () => syncPage());
+$("#f-sealtx").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x || !SEAL_TEXT[x.seal]) return;   // 327번. 글자 도장의 글자
+  const t = [...e.target.value.replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX).join(""); if (t) x.text = t; else delete x.text; render(); drawGrids(P(panelPage)); touchLater(); });
 /* 302번. 그림 격자 — 고른 칸(panelCell)만 고친다. 색 상자는 끄는 동안 변수만(240번) */
 let panelCell = ART_CELL_OLD, panelCellPage = -1;
 const artAt = (pg, c) => (pg.arts || []).find(x => x.cell === c);
@@ -6427,7 +6453,7 @@ $("#c-art").addEventListener("change", () => syncPage());
 $("#f-artop").onchange = e => { const x = artAt(P(panelPage), panelCell); if (!x) return; if (e.target.value === "light") delete x.op; else x.op = e.target.value; applyLook(); touch(); };
 $("#b-artsame").onclick = () => { const pg = P(panelPage), x = artAt(pg, panelCell), d = sealAt(pg, panelCell); if (!x && !d) return;   // 323번. 그림 색 · 진하기와 도장 모양 · 색을 다른 칸에도
   if (x) pg.arts.forEach(y => { if (y === x) return; if (x.color === undefined) delete y.color; else y.color = x.color; if (x.op === undefined) delete y.op; else y.op = x.op; });
-  if (d) pg.seals.forEach(y => { if (y === d) return; y.seal = d.seal; if (d.color === undefined) delete y.color; else y.color = d.color; });
+  if (d) pg.seals.forEach(y => { if (y === d) return; y.seal = d.seal; if (d.color === undefined) delete y.color; else y.color = d.color; if (d.text === undefined) delete y.text; else y.text = d.text; });   // 327번. 글자도
   render(); touch(); syncPage(); toast("다른 칸을 이 칸과 같게 맞췄습니다(그림은 색 · 진하기, 도장은 모양 · 색)", null); };
 /* 179번. 기본값(왼쪽)이면 키를 안 남긴다(15번) */
 const setAlign = (k, v) => { if (v === "left") delete SETTINGS[k]; else SETTINGS[k] = v; render(); touch(); };
@@ -6502,6 +6528,8 @@ function syncPage(){
     $("#art-cellname").textContent = CELL_NAMES[panelCell] + " 칸";   // 321번
     $("#f-artop").value = (x && x.op) || "light";
     const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none";   // 323번
+    { const tx = $("#f-sealtx"), on = !!dz && !!SEAL_TEXT[dz.seal]; if (document.activeElement !== tx) tx.value = on && dz.text || ""; tx.placeholder = sealText({}) + " (상호명)"; tx.disabled = !on;   /* 327번. 글자 칸 — 글자 도장일 때만, 아니면 흐리게(322번) */
+      $("#seal-txrow").classList.toggle("off", !on); $("#seal-txrow").title = on ? "" : "글자 도장(네모 · 동그라미 · 두 겹)을 고르면 적을 수 있습니다"; }
     { const noArt = !x, noSeal = !dz;   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
       $("#art-opts").classList.toggle("off", noArt); $("#c-art").disabled = noArt; $("#f-artop").disabled = noArt;
       $("#art-opts").title = noArt ? "그림을 고르면 쓸 수 있습니다" : "";
@@ -6531,7 +6559,7 @@ function drawGrids(pg){
     const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
   box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
   [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
-    const d = sealAt(pg, c), h = (x ? ART[x.art] : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + SEALS[d.seal] + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
+    const d = sealAt(pg, c), h = (x ? ART[x.art] : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + sealHTML(d) + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
     if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
     const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (d ? " · 도장" : "");
     b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
@@ -7068,6 +7096,7 @@ $("#st-alps").onclick = () => {
 $("#f-shop").addEventListener("input", e => {
   const v = e.target.value; if (v.trim()) MENU.brand.shop = v; else delete MENU.brand.shop;
   syncTitle(); fitName(); touchLater();
+  if (SETTINGS.pages.some(pg => (pg.seals || []).some(x => SEAL_TEXT[x.seal] && !x.text))) render();   // 327번. 글자를 안 적은 글자 도장은 상호명을 따른다
 });
 $("#f-shop").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === "Escape"){ e.preventDefault(); e.target.blur(); } });   // 287번. 막대의 이름 칸 — Enter 로 마친다
 $("#f-topmode").querySelectorAll("button").forEach(b => b.onclick = () => {
@@ -7532,11 +7561,11 @@ $("#st-check-go").onclick = () => {
    글자 크기 · 내용 · 맨 위(글자 / 로고)는 건드리지 않는다 — 채운 메뉴가 바로 넘치지 않게(크기는 사장님 몫). 값을 늘리면 t52 가 이름 · 값을 본다 */
 const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타일에서는 「내 조합」으로 보인다(hidden: 추천 조합 목록에는 안 나온다)
   basic:  { name:"내 조합",     hidden:true, font:"gothic",   bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"left",   leader:"dots", noren:"plain", art:"none", seal:"none", mark:"★" },   // 빈 메뉴판의 기본 — 본고딕(사용자: 가장 일반적인 글꼴). 289번. 정말 기본 모양 — 흰 종이 · 검은 글자 · 민무늬 · 상단 띠 없음(사용자)
-  hansik: { name:"한식 식당",   font:"serif",    bold:false, theme:"pat",   paper:"hanji",   sec:"band", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"none", mark:"추천" },
+  hansik: { name:"한식 식당",   font:"serif",    bold:false, theme:"pat",   paper:"hanji",   sec:"band", align:"left",   leader:"dots", noren:"flat",  art:"none", seal:"word", mark:"추천" },
   cafe:   { name:"카페",        font:"gothica1", bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"none", seal:"none", mark:"✿" },
   bunsik: { name:"분식",        font:"round",    bold:true,  theme:"chili", paper:"gingham", sec:"pill", align:"left",   leader:"none", noren:"arch",  art:"none", seal:"none", mark:"best" },
-  hof:    { name:"호프 · 치킨", font:"nanum",    bold:true,  theme:"board", paper:"wood",    sec:"band", align:"left",   leader:"dash", noren:"twin",  art:"beer", seal:"star", mark:"hot" },
-  alps:   { name:"요리주점",    font:"gungseo",  bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:null,   seal:"tri",  mark:"★" }   // 282번. 이름 "알프스 모양" → "요리주점"(가게 이름을 조합 이름으로 쓰지 않는다 · 알프스의 업종, 사용자). "기본" → "일반 식당". 그림은 예시의 장별 값. 도장은 모양 도장 — 예시의 "알프스" 글자 도장을 다른 가게에 찍지 않는다
+  hof:    { name:"호프 · 치킨", font:"nanum",    bold:true,  theme:"board", paper:"wood",    sec:"band", align:"left",   leader:"dash", noren:"twin",  art:"beer", seal:"rword", mark:"hot" },
+  alps:   { name:"요리주점",    font:"gungseo",  bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:null,   seal:"word",  mark:"★" }   // 282번. 이름 "알프스 모양" → "요리주점"(가게 이름을 조합 이름으로 쓰지 않는다 · 알프스의 업종, 사용자). "기본" → "일반 식당". 그림은 예시의 장별 값. 도장은 모양 도장 — 예시의 "알프스" 글자 도장을 다른 가게에 찍지 않는다
 };
 function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하기 창은 새로 만들 설정에, 꾸미기 창은 지금 설정에
   const q = PRESETS[k]; if (!q) return;
