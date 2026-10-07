@@ -2587,6 +2587,11 @@ dialog#start.wide{height:calc(100vh - 88px)}
 dialog#start.wide > .in{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column}
 dialog#start.wide > .in > div:not([hidden]){flex:1 0 auto;display:flex;flex-direction:column}
 dialog#start.wide .row2.foot2{margin-top:auto}
+/* 326번. 칸 안의 그림 · 도장 묶음 — 작은 제목 · 도장 위 구분선 */
+.panel #art-cell .cellblk{display:flex;flex-direction:column;gap:8px}
+.panel #art-cell .blkhd{font-size:13px;font-weight:700;color:rgba(240,230,205,.88);letter-spacing:.02em}
+.panel #art-cell .sealblk{border-top:1px solid rgba(240,230,205,.14);padding-top:12px;margin-top:4px}
+.panel #art-cell #b-artsame{margin-top:6px}
 </style>
 </head>
 <body>
@@ -2903,7 +2908,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="cellname" id="art-cellname"></span>
-    <span class="subrow nosw"><label for="f-art">그림</label>
+    <span class="cellblk" role="group" aria-labelledby="h-cart"><span class="blkhd" id="h-cart">그림</span>   <!-- 326번. 칸 안에서 그림 · 도장을 제목 · 구분선으로 나눈다(사용자 — 한 그룹처럼 나열되어 구분이 안 됐다) -->
+    <span class="subrow nosw"><label for="f-art">종류</label>
     <select id="f-art">
     <option value="none">없음</option>
     <option value="horse">야생마</option>
@@ -2926,8 +2932,9 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     </select></span>
     <span id="art-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
-      <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
-    <span class="subrow nosw sealrow"><label for="f-seal">도장</label>
+      <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span></span>
+    <span class="cellblk sealblk" role="group" aria-labelledby="h-cseal"><span class="blkhd" id="h-cseal">도장</span>
+    <span class="subrow nosw sealrow"><label for="f-seal">모양</label>
     <select id="f-seal">
       <option value="none">없음</option>
       <option value="tri">네모 · 삼각</option>
@@ -2941,7 +2948,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       <option value="ring">두 겹 동그라미 · 삼각</option>
     </select></span>
     <span id="seal-opts">
-      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span>
+      <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span></span>
     <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
   </span>
   <div class="pgrp">다른 장에</div>
