@@ -3815,7 +3815,7 @@ const SEAL_TEXT = { word:"sq", rword:"rd", rrword:"rr" }, SEAL_TXT_MAX = 4;   /*
 const sealText = x => {   // 327번. 적은 글자, 없으면 상호명 — 4자면 넷(2 × 2), 그보다 길면 앞 세 글자, 상호명도 없으면 「메뉴」
   const own = [...String((x && x.text) || "").replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX); if (own.length) return own.join("");
   const n = [...shopName().replace(/[\s·\-_.()]/g, "")]; return (n.length === 4 ? n : n.slice(0, 3)).join("") || "메뉴"; };
-function sealSvg(frame, text){   /* 327번. 글자 수로 배치 — 1자 크게 · 2 · 3자 세로 한 줄(3자 네모 · 동그라미는 160번 「알프스」 도장과 같은 자리) · 4자는 2 × 2(오른쪽 위부터 세로로 — 도장 읽는 차례) */
+function sealSvg(frame, text){   /* 327번. 글자 수로 배치 — 1자 크게 · 2 · 3자 세로 한 줄(3자 네모 · 동그라미는 160번 「알프스」 도장과 같은 자리) · 4자는 2 × 2(가로 차례 — 328번) */
   const esc = c => c.replace(/&/g, "&amp;").replace(/</g, "&lt;"), ch = [...text].slice(0, SEAL_TXT_MAX).map(esc), n = ch.length, rd = frame !== "sq";
   const bg = frame === "sq" ? '<rect x="1" y="1" width="38" height="38" rx="3" fill="currentColor"/>'
     : '<circle cx="20" cy="20" r="19" fill="currentColor"/>' + (frame === "rr" ? '<circle cx="20" cy="20" r="15.6" fill="none" stroke="var(--paper)" stroke-width="1.1"/>' : "");
@@ -3831,7 +3831,7 @@ function sealSvg(frame, text){   /* 327번. 글자 수로 배치 — 1자 크게
     else if (frame === "rd"){ fs = 10; t = T(20, 13.6, ch[0]) + T(20, 24.4, ch[1]) + T(20, 35.2, ch[2]); }
     else { fs = 8.8; t = T(20, 14.4, ch[0]) + T(20, 23.6, ch[1]) + T(20, 32.8, ch[2]); } }
   else { fs = rd ? (frame === "rr" ? 9.4 : 10.6) : 12.4; const xr = rd ? 25.6 : 26.4, xl = rd ? 14.4 : 13.6, y1 = rd ? 18.4 : 17.8, y2 = rd ? 29.6 : 31.4;
-    t = T(xr, y1, ch[0]) + T(xr, y2, ch[1]) + T(xl, y1, ch[2]) + T(xl, y2, ch[3]); }
+    t = T(xl, y1, ch[0]) + T(xr, y1, ch[1]) + T(xl, y2, ch[2]) + T(xr, y2, ch[3]); }   /* 328번. 넉 자는 가로 차례(솔밭 / 식당) — 전통 차례(오른쪽 줄부터 세로)는 「식솔 / 당밭」으로 읽혀 어색했다(사용자) */
   return '<svg viewBox="0 0 40 40">' + bg + '<g fill="var(--paper)" text-anchor="middle" font-size="' + fs + '" font-family="inherit">' + t + "</g></svg>"; }
 const sealHTML = x => SEAL_TEXT[x.seal] ? sealSvg(SEAL_TEXT[x.seal], sealText(x)) : SEALS[x.seal];   // 327번
 const SEALS = {
