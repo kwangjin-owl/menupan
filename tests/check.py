@@ -1156,6 +1156,22 @@ def t47(b, f):
     with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
     out['noname'] = [c.js("()=>document.title"), d.value.suggested_filename]
     out['err'] += c.errs; c.close()
+    # 330번 — 폰에서 창이 넓혀진 기준 폭(802px)의 가운데에 서서 오른쪽이 화면 밖으로 나갔다. t08 의 390px 은 PC 창이라 기준 폭이 안 넓어져 못 잡았다
+    #          첫 화면 · 넓은 틀로 바뀐 첫 화면 · 옆으로 밀어 둔 뒤 연 인쇄 안내가 보이는 화면 안에 서는지, 닫으면 인라인 값이 걷히는지
+    VIS = "(sel)=>{const d=document.querySelector(sel); if(!d||!d.open) return 'closed'; const r=d.getBoundingClientRect(), v=visualViewport; return r.left>=v.offsetLeft-0.5 && r.right<=v.offsetLeft+v.width+0.5}"
+    m = {}
+    for W, H in ((390, 844), (430, 932)):
+        ctx = b.new_context(viewport={'width': W, 'height': H}, is_mobile=True, has_touch=True); pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(url('start_' + f)); pg.wait_for_timeout(400)
+        r = {'wide': pg.evaluate("()=>innerWidth - document.documentElement.clientWidth > 40"), 'start': pg.evaluate(VIS, '#start')}
+        pg.evaluate("()=>document.querySelector('#start').classList.add('wide')"); pg.wait_for_timeout(300); r['start_wide'] = pg.evaluate(VIS, '#start')
+        pg.goto(url(f)); pg.wait_for_timeout(400)
+        pg.evaluate("()=>{window.print=()=>{}; MENU.sheets.forEach((_,i)=>P(i).autofit=true); fitNow(); applyScale(); scrollTo(400, 300)}"); pg.wait_for_timeout(200)
+        pg.evaluate("()=>document.querySelector('#b-print').click()"); pg.wait_for_timeout(300); r['print_scrolled'] = pg.evaluate(VIS, '#printhint')
+        pg.evaluate("()=>document.querySelector('#printhint').close()"); pg.wait_for_timeout(100)
+        r['closed_clean'] = pg.evaluate("()=>!(document.querySelector('#printhint').getAttribute('style')||'').trim()")
+        r['err'] = errs; m[str(W)] = r; ctx.close()
+    out['mobile330'] = m
     return out
 
 # ───────────────────────── 48. 글자가 바뀌는 막대 단추의 폭(규칙 I · 267번). 263번이 "편집"↔"편집 끝" 폭을 망가뜨렸는데 t25(종이 튐)는 못 잡았다
@@ -1766,7 +1782,10 @@ def judge(t, r):
                   and s['seal'] == 'none' and s['art'] == 'none' and s['logo'] and s['focus'] == 'sheets.0.0.0.name'
                   and _re.match(r'시험 가게-메뉴-\d{4}-\d\d-\d\d\.html$', r['save_name']) and r['saved_opens_direct'] and r['reopen_close']
                   and r['alps'] == [2, '알프스', True] and r.get('guide_up') and r.get('alps_no_guide') and r['undo_back'] == ['시험 가게', 1] and r['noname'][0] == '메뉴판' and r['noname'][1].startswith('메뉴판-') and not r['err'])
-            return ok, f"첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
+            m330 = r.get('mobile330') or {}   # 330번 — 폰에서 창이 보이는 화면 안에
+            ok330 = bool(m330) and all(v['wide'] and v['start'] is True and v['start_wide'] is True and v['print_scrolled'] is True and v['closed_clean'] and not v['err'] for v in m330.values())
+            ok = ok and ok330
+            return ok, f"330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'

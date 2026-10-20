@@ -6978,12 +6978,31 @@ const footShade = d => d.classList.toggle("hasmore", d.scrollHeight - d.clientHe
 /* 234번. **열 때 맨 위부터.** `showModal()` 은 첫 포커스 대상으로 창을 스크롤한다 — 인쇄 안내는 접힌 요약 줄,
    도움말은 맨 아래 [닫기]라, 창이 작으면 **제목이 가려진 채** 열리고 도움말은 늘 11번부터 보였다(229 · 233번이 놓친 것).
    포커스는 바닥 줄의 마지막 단추(인쇄 창 열기 · 닫기)에 두고 스크롤은 맨 위로 되돌린다 */
+/* 330번. 폰에서 창이 화면 오른쪽 밖으로 나갔다 — 종이가 A4 폭(794px)을 지키므로 폰 브라우저는 기준 폭을 802px 로 넓히고,
+   띄운 창은 그 넓힌 폭의 가운데에 선다(390px 폰에서 창 222 ~ 580px, 보이는 것은 390px 까지). 넓혀졌을 때만(innerWidth 가
+   보이는 폭보다 40px 넘게 크고 손가락 확대가 없을 때 — PC 의 스크롤 막대 몫 15 ~ 17px 은 걸리지 않는다) 창을 **보이는 화면의 가운데**에 놓는다.
+   PC 는 아무것도 안 바뀐다(인라인 값을 안 단다). 위 여백은 CSS 값(72px)을 읽어 보이는 화면 위끝에서 잰다 — 값을 두 곳에 적지 않는다 */
+const fitDlgView = d => {
+  const v = window.visualViewport;
+  ["margin-left", "margin-right", "margin-top"].forEach(k => d.style.removeProperty(k));
+  if (!v || !d.open) return;
+  if (innerWidth - document.documentElement.clientWidth <= 40 || Math.abs(v.scale - 1) > .01) return;
+  const top = parseFloat(getComputedStyle(d).marginTop) || 0;
+  d.style.marginLeft = Math.round(v.offsetLeft + Math.max(16, (v.width - d.offsetWidth) / 2)) + "px";
+  d.style.marginRight = "0";
+  d.style.marginTop = Math.round(v.offsetTop + top) + "px";
+};
 const openDlg = d => {
   d.showModal();
   const h = d.querySelector("h3");   // 286번. 바닥의 단추에 초점을 두면 그 단추에 테가 서 "골라 둔 것"처럼 보였다 — 제목에 둔다(Tab 으로는 첫 단추부터)
   if (h) h.focus({preventScroll:true});   // 제목에는 tabindex="-1" 이 처음부터 적혀 있다 — 열 때 붙이면 저장본이 커졌다(t24)
   d.scrollTop = 0; footShade(d);
+  fitDlgView(d);   // 330번
 };
+/* 330번. 첫 화면 창은 단계마다 폭이 바뀌고(좁은 틀 ↔ 넓은 틀 — 325번) 폰을 돌리면 화면이 바뀐다 — 그때마다 다시 놓는다. 닫으면 걷는다(저장본에 안 남게) */
+if (window.ResizeObserver){ const ro = new ResizeObserver(es => es.forEach(e => fitDlgView(e.target))); document.querySelectorAll("dialog").forEach(d => ro.observe(d)); }
+if (window.visualViewport) visualViewport.addEventListener("resize", () => document.querySelectorAll("dialog[open]").forEach(fitDlgView));
+document.querySelectorAll("dialog").forEach(d => d.addEventListener("close", () => fitDlgView(d)));
 document.querySelectorAll("dialog").forEach(d => d.addEventListener("scroll", () => footShade(d)));
 window.addEventListener("resize", () => document.querySelectorAll("dialog[open]").forEach(footShade));
 /* 234번. 펼친 인쇄소 안내가 바닥 줄 밑에 가려져 "안 열린 것"처럼 보였다 — 가려진 만큼만 올린다(제목은 안 넘긴다) */
