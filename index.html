@@ -1345,6 +1345,23 @@ dialog button:not(.dlg-x):not(.st-icon):not(.st-rot button), .gd-tip button:not(
 .st-seg, .panel .st-pseg, dialog .st-picrow.has button.st-drop{border-radius:8px !important}
 .st-seg, .panel .st-pseg{overflow:hidden}
 html body .st-seg > button:not(.dlg-x):not(.st-icon):not(.st-rot button), html body .panel .st-pseg > button{border-radius:0 !important}   /* 나뉜 단추의 칸 — 바깥만 둥글게(안내창 규칙보다 세게 — 찍어 보고 잡음) */
+
+/* 334번. 탭 이름은 한 줄(333번에 죽은 규칙을 걷다 nowrap 까지 걷어 「메/뉴」로 접혔다 — 사용자) */
+.panel #ptabs .ptab-btn{white-space:nowrap}
+/* 334번. 머리 · 탭 · 고칠 장을 위에 고정. 창 안쪽 여백(12 · 14px)만큼 끌어올려 덮는다 */
+.panel .pstick{position:sticky;top:-12px;z-index:3;margin:-12px -14px 0;padding:12px 14px 0;background:rgb(22,17,10)}
+/* 334번. 고칠 장 — 이름표와 [모든 장에 같게] 한 줄, 칩은 그 아래(이 장 → 모든 장으로 읽히게) */
+.panel #pgbar{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 8px;padding-bottom:10px;border-bottom:1px solid rgba(240,230,205,.12);margin-bottom:4px}
+.panel #pgbar .pglbl{grid-column:1;grid-row:1}
+.panel #pgbar #b-copypage{grid-column:2;grid-row:1;height:32px;min-height:32px;padding:0 12px}
+.panel #pgbar .pgpick{grid-column:1 / -1;grid-row:2;margin:0}
+/* 334번. 꾸미기 창의 [글자 | 로고] — 정하기 창 마크업(.st-seg)을 옮겨 와 안내창 규칙이 안 걸려 칸마다 테두리가 그려졌다. 바깥 테두리 하나 + 칸막이 하나 */
+.panel .st-seg{border:1px solid rgba(240,230,205,.34)}
+html body .panel .st-seg > button{border:0 !important;background:none;height:32px;min-height:32px;padding:0 16px;color:inherit}
+html body .panel .st-seg > button + button{border-left:1px solid rgba(240,230,205,.34) !important}
+html body .panel .st-seg > button.on{background:rgba(240,230,205,.16)}
+/* 334번. 크기 단추 — 아이콘만 있는 단추라 동그라미(333번 규칙), − 와 + 같은 크기 */
+#panel .stepper > button.stp:not(#b-nreset){border-radius:50% !important;width:32px;height:32px;flex:0 0 32px;font-size:18px;line-height:1;padding:0}
 .panel .pgrp small.pgonly{display:inline-block;vertical-align:1px;margin:0 0 0 6px;line-height:1.5;padding:1px 7px;border-radius:8px;background:rgba(240,230,205,.12);color:rgba(240,230,205,.75);font-size:12px;font-weight:400}   /* 332번. 「이 장만」 — 위에서 고른 장에만 걸리는 묶음 */   /* 331번. 와인 분류가 없으면 와인 장 묶음을 감춘다 */
 /* 159번. **`scrollbar-width` · `scrollbar-color` 를 함께 쓰면 크롬이 `::-webkit-scrollbar` 를 통째로 무시한다.**
    게다가 `scrollbar-color` 는 크롬을 옛 방식으로 되돌려 **위아래 화살표 단추까지 붙은** 막대가 나온다 —
@@ -2654,6 +2671,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <!-- 12개가 평평한 목록이면 훑을 수가 없다. 성격별로 묶고 구분선을 둔다.
        "꾸밈"은 한 번 정하면 안 건드리는 것들이라 접어 두어 창 높이를 줄인다 —
        접지 않으면 맨 아래 원산지가 어떤 화면 높이에서도 스크롤 밖으로 밀린다 -->
+  <div class="pstick" id="pstick">   <!-- 334번. 머리 · 탭 · 고칠 장은 위에 고정 — [메뉴] 탭이 길면(와인 가게 약 2,000px) 내려가는 동안 탭과 지금 고치는 장이 사라졌다 -->
   <div class="phead">꾸미기<button id="p-close" type="button" title="닫기" aria-label="꾸미기 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>   <!-- 291번. 안내창의 ✕ 와 같은 그림 --></div>
   <!-- 150번. 갈래를 세 탭으로 — 공통 · 메뉴 장 · 와인 장. 세로로 길게 늘어놓으면 스크롤로만 훑어야 한다는 지적 -->
   <!-- 152번. 탭은 [공통] 하나와 장마다 하나. 장 탭의 손잡이는 한 벌이고 panelPage 가 어느 장인지 정한다 -->
@@ -2664,7 +2682,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
        쪽 고르기(#pgbar)와 [다른 장에도 똑같이](#pgcopy)는 그런 묶음이 있는 탭에서만 보인다. 손잡이의 id 는 하나도 안 바꿨다 — 덩어리만 옮겼다 -->
   <!-- 333번. 탭을 종이를 보며 고치는 순서로 — [색 · 글꼴] · [맨 위] · [메뉴] · [바닥] · [그림 · 도장], 한 줄 밑줄 탭(와인 장 묶음은 [메뉴] 맨 아래, 와인 장이 있을 때만).
        제목과 같은 말을 되풀이하던 이름표 · 쪽 제목 · 「다른 장에」 제목 · 「AI 번역」을 걷고, 묶음 제목 아래 간격을 8px 하나로(재 보니 2 · 6 · 10px 였다) -->
-  <div class="pgbar" id="pgbar"><span class="pglbl">고칠 장</span><div class="pgpick" id="pgpick"></div><div class="pgrp pgtitle"><span id="pg-title">1쪽 설정</span></div></div>
+  <div class="pgbar" id="pgbar"><span class="pglbl">고칠 장</span><button id="b-copypage" type="button" title="고른 장의 「이 장만」 설정(맨 위 · 메뉴 · 바닥 · 그림 · 도장 탭에 걸친 것)을 다른 모든 장에 그대로 씁니다. 바닥에 쓴 글은 장마다 따로라 안 옮깁니다">모든 장에 같게</button><div class="pgpick" id="pgpick"></div><div class="pgrp pgtitle"><span id="pg-title">1쪽 설정</span></div></div>
+  </div>
   <div class="ptab on" data-tab="look">
   <label id="f-mine-l">내 조합 <small>추천 조합을 입힌 뒤 모양을 바꾸면 여기에 남습니다</small></label>   <!-- 289번. 한 칸 -->
     <div class="pl-presets pl-mine" id="f-mine" role="group" aria-label="내 조합"></div>   <!-- 286번. 내 조합 줄과 추천 조합 줄을 나눴다 -->
@@ -2721,7 +2740,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <div class="pgrp">메뉴판 맨 위</div>
   <div class="st-toprow"><span class="grp st-pseg" id="f-topmode"><button type="button" data-m="text">글자</button><button type="button" data-m="img">로고</button></span></div>
   <!-- 268번. "그림"은 파일에 든 장식(꾸밈)의 이름이라 쓰지 않는다 — 맨 위는 [글자 | 로고], 올리기는 점선 상자 "이미지 선택", 모양은 두 미리보기 중 고른다 -->
-  <div class="st-plogo" id="f-logorow"><button type="button" class="st-drop" id="f-logo-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으면 로고가 바뀝니다</small></button>
+  <div class="st-plogo" id="f-logorow"><button type="button" class="st-drop" id="f-logo-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으면 로고가 바뀝니다<br>배경이 투명한 로고(PNG)가 가장 깔끔합니다</small></button>
   <div class="st-tiles" id="f-tiles"></div></div>
   <div class="pgrp">업종 · 한 줄 소개 <small class="pgonly">이 장만</small></div>
   <span class="chkrow">
@@ -2750,7 +2769,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <option value="plain">띠 없음</option>
   </select>
   <label>맨 위 크기 <b id="nsz-val"></b></label>
-  <span class="stepper"><button id="b-nminus" type="button" title="상단을 작게">ㅡ</button><input type="range" id="nsz-range" min="60" max="160" step="1" title="상단 크기"><button id="b-nplus" type="button" title="상단을 크게">＋</button><button id="b-nreset" type="button">기본</button></span>
+  <span class="stepper"><button id="b-nminus" class="stp" type="button" title="맨 위를 작게" aria-label="맨 위를 작게">−</button><input type="range" id="nsz-range" min="60" max="160" step="1" title="상단 크기"><button id="b-nplus" class="stp" type="button" title="맨 위를 크게" aria-label="맨 위를 크게">+</button><button id="b-nreset" type="button">기본</button></span>
   <label for="f-logo">로고 색</label>
   <span class="grp">
     <select id="f-logo">
@@ -2789,7 +2808,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <label>크기 <b id="sz-val"></b></label>
   <!-- 191번. **끌어서 1% 단위로.** ＋ㅡ 는 4% 단위라 원하는 크기에 못 앉는다는 지적.
        ＋ㅡ 는 미세 조정으로 남기고, 세 단추는 같은 크기로 둔다(맞춤만 대문짝만하다는 지적) -->
-  <span class="stepper"><button id="b-minus" type="button" title="작게">ㅡ</button><input type="range" id="sz-range" min="56" max="140" step="1" title="글자 크기">   <!-- 308번. 끝은 SCALE_MIN · SCALE_MAX 를 따른다(JS 가 다시 맞춘다) — 304번이 상한을 140% 로 올리며 이 막대만 120 에 남아, 140% 에서 막대를 건드리면 120% 로 떨어졌다 --><button id="b-plus" type="button" title="크게">＋</button></span>
+  <span class="stepper"><button id="b-minus" class="stp" type="button" title="글자를 작게" aria-label="글자를 작게">−</button><input type="range" id="sz-range" min="56" max="140" step="1" title="글자 크기">   <!-- 308번. 끝은 SCALE_MIN · SCALE_MAX 를 따른다(JS 가 다시 맞춘다) — 304번이 상한을 140% 로 올리며 이 막대만 120 에 남아, 140% 에서 막대를 건드리면 120% 로 떨어졌다 --><button id="b-plus" class="stp" type="button" title="글자를 크게" aria-label="글자를 크게">+</button></span>
   <span class="chkrow"><label class="chk fitsw"><input type="checkbox" class="m3sw" id="b-fit"><span>한 장에 맞춤<small>넘치지 않는 가장 큰 크기로 저절로</small></span></label></span>   <!-- 320번. 켜고 끄는 모드라 스위치(규칙 I — 설정 하나를 켜고 끄는 것은 스위치, 263). [—][+]와 같은 단추 줄에 있어 한 번 누르는 단추로 읽혔다 -->
   <div class="pgrp">분류 제목</div>
   <span class="grp two">
@@ -2833,7 +2852,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   </span>
   <div class="pnote">분류 · 메뉴 이름 아래에 작게 적힙니다. 번역한 칸도 눌러서 고칠 수 있습니다</div>
   <div class="pblock" data-kind="wine">
-  <div class="pgrp">와인 장 <small class="pgonly">와인 장이 있을 때만</small></div>
+  <div class="pgrp">와인 카드 · 병 <small class="pgonly">모든 와인 장</small></div>
   <!-- 203번. "와인 카드"가 **와인판 전체**인지 **한 장**인지 묻는 말이 나왔다.
        갈래 머리에 그 말의 뜻을 그대로 적는다(38번: 보이는 그대로) -->
   <div class="pgrp">와인 카드 <small>와인 한 병 = 카드 한 장 (모든 카드에)</small></div>
@@ -2911,10 +2930,6 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span></span>
     <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
   </span>
-  </div>
-  <div class="pgcopy" id="pgcopy">
-  <span class="copyrow"><button id="b-copypage" type="button" title="「이 장만」 설정을 다른 모든 장에 그대로 씁니다">모든 장에 같게</button>
-  <small>「이 장만」 설정을 다른 장에도 똑같이 씁니다(바닥에 쓴 글은 빼고)</small></span>
   </div>
 </div>
 
@@ -3081,7 +3096,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <div class="st-toprow"><span class="st-lbl">메뉴판 맨 위</span>
     <span class="st-seg" id="st-seg"><button type="button" data-m="text">글자</button><button type="button" data-m="img">로고</button></span></div>   <!-- 268번 [글자 | 로고] · 267번. 꾸미기 창과 같은 이름(규칙 H) · 이름표와 한 줄 -->
     <div id="st-textrow"><input type="text" id="st-top" class="st-in" aria-label="메뉴판 맨 위 글자" autocomplete="off"><p class="sub st-help"><span id="st-topfrom" hidden>사진에서 읽은 가게 이름입니다. </span>종이에 찍히는 글자입니다</p></div>   <!-- 292번. 한 칸에 딸린 안내는 한 덩어리로 -->   <!-- 267번. 상호명을 따라 쓰지 않는다 -->
-    <div id="st-imgrow" hidden><button type="button" class="st-drop" id="st-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으세요 · 로고는 모양만 따서 한 가지 색으로 칠합니다</small></button>   <!-- 268번 -->
+    <div id="st-imgrow" hidden><button type="button" class="st-drop" id="st-up"><span class="st-dtx">이미지 선택</span><small>누르거나 끌어다 놓으세요 · 로고는 모양만 따서 한 가지 색으로 칠합니다<br>배경이 투명한 로고(PNG)가 가장 깔끔합니다</small></button>   <!-- 268번 -->
       <div class="st-tiles" id="st-tiles"></div></div>
     <input type="file" id="st-file" accept="image/*" hidden>
     <input type="file" id="st-hfile" accept=".html,text/html" hidden>   <!-- 277번. 불러올 메뉴판 파일 -->
@@ -3772,227 +3787,99 @@ const ART = {
 </g>
 </svg>`,
   /* 329번. 콘셉트별 그림 16 — 한식 · 카페 · 분식 넷씩, 호프 · 치킨 · 요리주점 둘씩(사용자 — 지금은 알프스 맞춤 그림뿐). 같은 결: 880 × 520 · 글자색 실루엣 + 종이색 무늬 */
-  ttuk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round">
-  <path d="M440 150 c-26 -30 26 -48 0 -80"/><path d="M500 140 c-26 -30 26 -48 0 -84"/><path d="M560 150 c-26 -30 26 -48 0 -80"/>
-</g>
-<g fill="currentColor">
-  <path d="M330 222 H670 C 670 352, 616 452, 500 452 C 384 452, 330 352, 330 222 Z"/>
-  <rect x="314" y="204" width="372" height="30" rx="15"/>
-  <path d="M300 470 H700 c0 12 -10 22 -22 22 H322 c-12 0 -22 -10 -22 -22 Z"/>
-  <rect x="286" y="452" width="428" height="24" rx="12"/>
-</g>
-<g fill="var(--paper)">
-  <path d="M352 248 H648 c-6 36 -18 58 -36 70 H388 c-18 -12 -30 -34 -36 -70 Z" opacity=".55"/>
-  <rect x="398" y="240" width="54" height="40" rx="8"/><rect x="520" y="238" width="60" height="44" rx="8"/>
-  <circle cx="474" cy="262" r="10"/><circle cx="610" cy="256" r="8"/>
-  <path d="M352 330 C 420 346, 580 346, 648 330" fill="none" stroke="var(--paper)" stroke-width="8" opacity=".5"/>
-</g>
-</svg>`,
+  /* 334번. 329번의 열여섯을 다시 그렸다(사용자 — 「뭔지 모르겠어」 · 「밥은 옆에서 보는데 수저는 왜 세워져 있어?」 · 「접시 위에 음식이 공중에 떠 있거나 구도나 각도가 안 맞아」).
+     규칙 셋: ① 보는 방향은 옆에서 하나(위를 보이는 타원을 안 쓴다 — 알프스 그림과 같다) ② 바닥선 하나 — 음식 밑면 = 접시 윗면, 접시 밑면 = 상 윗면을 숫자로 맞춘다
+     ③ 그릇에 담긴 것을 먼저, 그릇 앞면을 나중에 그린다(앞에 붙어 떠 보이지 않게). 수저는 상 위에 눕혀 받침에 걸친다. 크고 꽉 찬 실루엣(132번) */
+  ttuk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><path d="M370 180 c-30 -28 30 -60 0 -120"/><path d="M440 180 c-30 -28 30 -60 0 -120"/><path d="M510 180 c-30 -28 30 -60 0 -120"/></g>
+<g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><rect x="378" y="206" width="60" height="44" rx="6"/><rect x="452" y="214" width="52" height="40" rx="6"/></g>
+<g fill="currentColor"><circle cx="330" cy="236" r="16"/><circle cx="548" cy="232" r="18"/></g>
+<g fill="currentColor"><rect x="210" y="470" width="460" height="24" rx="8"/>
+  <path d="M276 252 H604 L590 428 C 587 454, 566 470, 540 470 H340 C 314 470, 293 454, 290 428 Z"/>
+  <rect x="256" y="232" width="368" height="30" rx="10"/></g>
+<g stroke="var(--paper)" stroke-width="10" opacity=".38"><path d="M286 310 H594 M292 396 H588"/></g></svg>`,
   bapsujeo: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <path d="M330 300 C 330 236, 410 196, 470 196 C 530 196, 610 236, 610 300 Z"/>
-  <path d="M310 300 H630 C 630 392, 566 452, 470 452 C 374 452, 310 392, 310 300 Z"/>
-  <rect x="400" y="448" width="140" height="30" rx="8"/><rect x="380" y="474" width="180" height="18" rx="9"/>
-  <path d="M690 160 c22 0 30 16 30 40 c0 30 -14 52 -20 62 L692 492 h-12 L672 262 c-6 -10 -20 -32 -20 -62 c0 -24 8 -40 30 -40 Z"/>
-  <rect x="742" y="140" width="12" height="352" rx="6"/><rect x="766" y="140" width="12" height="352" rx="6"/>
-</g>
-<g fill="var(--paper)" opacity=".6">
-  <circle cx="420" cy="252" r="7"/><circle cx="462" cy="232" r="7"/><circle cx="506" cy="250" r="7"/><circle cx="548" cy="270" r="7"/><circle cx="384" cy="280" r="7"/><circle cx="480" cy="276" r="7"/>
-</g>
-<path d="M326 330 C 400 350, 540 350, 614 330" fill="none" stroke="var(--paper)" stroke-width="10" opacity=".55"/>
-</svg>`,
-  bibim: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <path d="M300 250 H700 C 700 380, 620 452, 500 452 C 380 452, 300 380, 300 250 Z"/>
-  <rect x="284" y="232" width="432" height="30" rx="15"/>
-  <path d="M310 236 C 330 186, 420 160, 500 160 C 580 160, 670 186, 690 236 Z"/>
-  <rect x="420" y="448" width="160" height="26" rx="8"/><rect x="396" y="470" width="208" height="22" rx="11"/>
-</g>
-<g fill="var(--paper)">
-  <ellipse cx="500" cy="196" rx="54" ry="28"/>
-  <circle cx="500" cy="196" r="16" fill="currentColor"/>
-  <path d="M340 230 C 352 204, 380 188, 414 182 L 430 230 Z" opacity=".55"/>
-  <path d="M586 182 C 620 188, 648 204, 660 230 L 570 230 Z" opacity=".55"/>
-  <g fill="none" stroke="var(--paper)" stroke-width="7" stroke-linecap="round" opacity=".8">
-    <path d="M442 222 l20 -26 M456 226 l22 -24"/><path d="M528 224 l22 -26 M546 228 l22 -24"/>
-  </g>
-</g>
-<path d="M318 286 C 400 306, 600 306, 682 286" fill="none" stroke="var(--paper)" stroke-width="9" opacity=".5"/>
-</svg>`,
-  jeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<ellipse cx="450" cy="452" rx="270" ry="40" fill="currentColor"/>
-<ellipse cx="450" cy="446" rx="244" ry="28" fill="none" stroke="var(--paper)" stroke-width="8" opacity=".4"/>
-<ellipse cx="450" cy="392" rx="222" ry="74" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/>
-<g fill="none" stroke="var(--paper)" stroke-width="11" stroke-linecap="round">
-  <path d="M290 398 L 400 352"/><path d="M330 424 L 470 362"/><path d="M410 438 L 560 372"/><path d="M500 432 L 610 388"/>
-</g>
-<g fill="var(--paper)" opacity=".7"><circle cx="372" cy="374" r="10"/><circle cx="546" cy="420" r="10"/><circle cx="470" cy="336" r="8"/><circle cx="600" cy="352" r="7"/></g>
-<g fill="currentColor"><path d="M710 420 H820 c0 40 -22 66 -55 66 s-55 -26 -55 -66 Z"/><rect x="700" y="408" width="130" height="18" rx="9"/></g>
-<path d="M716 432 C 744 444, 786 444, 814 432" fill="none" stroke="var(--paper)" stroke-width="7" opacity=".5"/>
-</svg>`,
-  coffee: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round">
-  <path d="M440 200 c-24 -28 24 -44 0 -74"/><path d="M500 190 c-24 -28 24 -48 0 -80"/>
-</g>
-<g fill="currentColor">
-  <path d="M360 236 H620 V330 C 620 404, 566 448, 490 448 C 414 448, 360 404, 360 330 Z"/>
-  <path d="M612 262 C 690 252, 708 300, 690 336 C 674 368, 634 376, 600 366" fill="none" stroke="currentColor" stroke-width="30"/>
-  <ellipse cx="490" cy="462" rx="210" ry="26"/>
-  <ellipse cx="490" cy="448" rx="120" ry="12"/>
-</g>
-<ellipse cx="490" cy="240" rx="128" ry="16" fill="var(--paper)" opacity=".55"/>
-<path d="M392 300 C 400 368, 440 408, 490 414" fill="none" stroke="var(--paper)" stroke-width="10" stroke-linecap="round" opacity=".5"/>
-</svg>`,
-  croissant: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<ellipse cx="500" cy="478" rx="280" ry="16" fill="currentColor"/>
+<g fill="currentColor"><rect x="130" y="470" width="640" height="24" rx="8"/>
+  <path d="M246 300 C 246 214, 330 168, 420 168 C 510 168, 594 214, 594 300 Z"/>
+  <path d="M232 302 H608 C 608 400, 540 452, 420 452 C 300 452, 232 400, 232 302 Z"/><rect x="358" y="448" width="124" height="22" rx="6"/>
+  <rect x="716" y="448" width="44" height="22" rx="6"/></g>
+<path d="M234 302 H606" stroke="var(--paper)" stroke-width="10"/>
+<g fill="var(--paper)" opacity=".6"><ellipse cx="320" cy="262" rx="9" ry="6"/><ellipse cx="380" cy="212" rx="9" ry="6"/><ellipse cx="470" cy="226" rx="9" ry="6"/><ellipse cx="540" cy="270" rx="9" ry="6"/><ellipse cx="420" cy="276" rx="9" ry="6"/></g>
+<path d="M262 350 C 350 372, 490 372, 578 350" fill="none" stroke="var(--paper)" stroke-width="10" opacity=".4"/>
 <g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke">
-  <ellipse cx="282" cy="420" rx="56" ry="34" transform="rotate(-38 282 420)"/>
-  <ellipse cx="718" cy="420" rx="56" ry="34" transform="rotate(38 718 420)"/>
-  <ellipse cx="364" cy="372" rx="70" ry="54" transform="rotate(-24 364 372)"/>
-  <ellipse cx="636" cy="372" rx="70" ry="54" transform="rotate(24 636 372)"/>
-  <ellipse cx="500" cy="352" rx="88" ry="74"/>
-</g>
-<g fill="none" stroke="var(--paper)" stroke-width="8" stroke-linecap="round" opacity=".45">
-  <path d="M452 312 C 470 300, 530 300, 548 312"/><path d="M340 350 C 352 340, 378 338, 392 344"/><path d="M608 344 C 622 338, 648 340, 660 350"/>
-</g>
-</svg>`,
-  cake: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+  <path d="M500 470 L764 446 L766 456 L506 470 Z" transform="translate(0 -2)"/>
+  <path d="M520 470 L760 440 L762 450 L526 470 Z" transform="translate(0 -20)"/>
+  <ellipse cx="520" cy="458" rx="44" ry="12" transform="rotate(-4 520 458)"/></g></svg>`,
+  bibim: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+<path d="M600 210 L712 74" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>
+<g fill="currentColor"><path d="M262 252 C 274 188, 350 152, 440 152 C 530 152, 606 188, 618 252 Z"/></g>
+<g stroke="var(--paper)" stroke-width="12" stroke-linecap="round" opacity=".8"><path d="M290 228 l30 -30 M316 240 l34 -32 M342 244 l30 -26 M538 214 l34 28 M556 236 l32 22 M520 236 l30 18"/></g>
+<g fill="var(--paper)"><path d="M332 170 C 346 136, 534 136, 548 170 C 516 184, 364 184, 332 170 Z"/></g>
+<path d="M404 162 C 406 120, 476 120, 478 162 Z" fill="currentColor"/>
+<g fill="currentColor"><rect x="190" y="470" width="500" height="24" rx="8"/>
+  <path d="M248 262 H632 L618 428 C 614 454, 592 470, 564 470 H316 C 288 470, 266 454, 262 428 Z"/>
+  <rect x="230" y="242" width="420" height="30" rx="10"/></g>
+<path d="M258 330 H622" stroke="var(--paper)" stroke-width="10" opacity=".35"/></svg>`,
+  jeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(450 494) scale(1.32) translate(-450 -494)">
+<g fill="currentColor"><rect x="90" y="470" width="720" height="24" rx="8"/></g>
+<g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><rect x="150" y="412" width="150" height="40" rx="18"/><rect x="300" y="412" width="160" height="40" rx="18"/><rect x="220" y="374" width="160" height="40" rx="18"/></g>
+<g fill="var(--paper)" opacity=".55"><circle cx="190" cy="430" r="6"/><circle cx="250" cy="424" r="5"/><circle cx="340" cy="432" r="6"/><circle cx="410" cy="424" r="5"/><circle cx="270" cy="392" r="6"/><circle cx="330" cy="388" r="5"/></g>
+<g fill="currentColor"><path d="M120 452 H500 L484 470 H136 Z"/>
+  <path d="M532 404 H672 C 672 448, 646 470, 602 470 C 558 470, 532 448, 532 404 Z"/>
+  <path d="M706 470 C 690 446, 688 350, 762 342 C 836 350, 834 446, 818 470 Z"/>
+  <path d="M722 344 C 726 318, 798 318, 802 344 Z"/><circle cx="762" cy="314" r="13"/>
+  <path d="M720 336 C 720 280, 804 280, 804 336" fill="none" stroke="currentColor" stroke-width="13"/>
+  <path d="M712 414 L664 362 L676 352 L722 398 Z"/></g>
+<path d="M536 416 H668" stroke="var(--paper)" stroke-width="8" opacity=".6"/></g></svg>`,
+  /* 334번. 다시 그림(위 ttuk 앞의 규칙 셋) */
+  coffee: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><path d="M390 160 c-30 -28 30 -55 0 -110"/><path d="M450 160 c-30 -28 30 -55 0 -110"/><path d="M510 160 c-30 -28 30 -55 0 -110"/></g>
 <g fill="currentColor">
-  <path d="M330 300 L 640 220 V 440 H 330 Z"/>
-  <path d="M322 296 L 640 214 c8 -2 14 4 14 12 V236 L 322 318 c-8 2 -14 -4 -14 -12 c0 -4 6 -8 14 -10 Z"/>
-  <circle cx="560" cy="200" r="34"/><path d="M552 166 c-4 -18 6 -30 22 -34 c-2 14 -8 26 -22 34 Z"/>
-  <ellipse cx="490" cy="468" rx="240" ry="24"/>
-</g>
-<g fill="var(--paper)">
-  <path d="M330 352 L 640 300 V 316 L 330 368 Z" opacity=".85"/>
-  <path d="M330 404 L 640 368 V 384 L 330 420 Z" opacity=".85"/>
-  <circle cx="548" cy="196" r="5"/><circle cx="572" cy="188" r="5"/><circle cx="566" cy="212" r="5"/>
-</g>
-</svg>`,
+  <path d="M232 452 H648 C 636 468, 610 474, 584 474 H296 C 270 474, 244 468, 232 452 Z"/>
+  <path d="M300 246 H580 C 580 364, 546 440, 440 440 C 334 440, 300 364, 300 246 Z"/><rect x="386" y="432" width="108" height="20" rx="6"/>
+  <rect x="288" y="232" width="304" height="22" rx="10"/>
+  <path d="M576 284 C 660 272, 668 386, 560 394" fill="none" stroke="currentColor" stroke-width="28" stroke-linecap="round"/></g>
+<path d="M312 300 C 360 320, 520 320, 568 300" fill="none" stroke="var(--paper)" stroke-width="10" opacity=".35"/></svg>`,
+  croissant: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><ellipse cx="245.0" cy="404.7" rx="52.8" ry="77.2" transform="rotate(288.0 245.0 404.7)"/><ellipse cx="635.0" cy="404.7" rx="52.8" ry="77.2" transform="rotate(432.0 635.0 404.7)"/><ellipse cx="274.2" cy="347.5" rx="64.8" ry="95.2" transform="rotate(306.0 274.2 347.5)"/><ellipse cx="605.8" cy="347.5" rx="64.8" ry="95.2" transform="rotate(414.0 605.8 347.5)"/><ellipse cx="325.4" cy="298.0" rx="76.8" ry="113.2" transform="rotate(326.0 325.4 298.0)"/><ellipse cx="554.6" cy="298.0" rx="76.8" ry="113.2" transform="rotate(394.0 554.6 298.0)"/><ellipse cx="397.4" cy="267.5" rx="84.0" ry="124.0" transform="rotate(348.0 397.4 267.5)"/><ellipse cx="482.6" cy="267.5" rx="84.0" ry="124.0" transform="rotate(372.0 482.6 267.5)"/></g><rect x="140" y="456" width="600" height="28" rx="10" fill="currentColor"/></svg>`,
+  cake: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+<g fill="currentColor"><rect x="432" y="170" width="16" height="100" rx="4"/><path d="M440 118 C 460 144, 456 164, 440 168 C 424 164, 420 144, 440 118 Z"/><path d="M286 270 C 284 246, 300 230, 310 224 C 320 230, 336 246, 334 270 Z"/><path d="M356 270 C 354 246, 370 230, 380 224 C 390 230, 406 246, 404 270 Z"/><path d="M476 270 C 474 246, 490 230, 500 224 C 510 230, 526 246, 524 270 Z"/><path d="M546 270 C 544 246, 560 230, 570 224 C 580 230, 596 246, 594 270 Z"/>
+  <rect x="260" y="270" width="360" height="148" rx="10"/>
+  <path d="M220 418 H660 L644 434 H236 Z"/><rect x="420" y="434" width="40" height="24"/><path d="M372 458 H508 L522 470 H358 Z"/></g>
+<g fill="var(--paper)"><path d="M260 272 H620 V292 C 610 312, 590 312, 584 292 C 574 316, 548 316, 540 292 C 530 318, 500 318, 494 292 C 484 316, 456 316, 448 292 C 438 318, 408 318, 400 292 C 390 316, 362 316, 354 292 C 344 314, 318 314, 310 292 C 300 312, 272 312, 260 292 Z"/>
+  <path d="M262 356 C 330 372, 550 372, 618 356" fill="none" stroke="var(--paper)" stroke-width="12" opacity=".55"/></g></svg>`,
   teapot: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
 <g fill="currentColor">
-  <ellipse cx="480" cy="180" rx="34" ry="20"/><rect x="420" y="190" width="120" height="30" rx="14"/>
-  <path d="M360 230 H600 C 640 270, 650 330, 640 390 C 630 440, 580 464, 480 464 C 380 464, 330 440, 320 390 C 310 330, 320 270, 360 230 Z"/>
-  <path d="M630 300 C 690 300, 720 250, 760 228 L 776 244 C 742 270, 716 352, 640 372 Z"/>
-  <path d="M330 290 C 260 280, 250 400, 330 396" fill="none" stroke="currentColor" stroke-width="28"/>
-  <ellipse cx="480" cy="476" rx="170" ry="16"/>
-</g>
-<g fill="none" stroke="var(--paper)" stroke-width="10" stroke-linecap="round" opacity=".6">
-  <path d="M360 300 C 400 316, 560 316, 600 300"/><path d="M356 360 C 400 376, 560 376, 604 360"/>
-</g>
-</svg>`,
-  tteok: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<ellipse cx="500" cy="440" rx="270" ry="50" fill="currentColor"/>
-<ellipse cx="500" cy="430" rx="236" ry="36" fill="var(--paper)" opacity=".25"/>
-<g fill="currentColor" stroke="var(--paper)" stroke-width="8" paint-order="stroke">
-  <rect x="320" y="372" width="170" height="48" rx="24" transform="rotate(-8 405 396)"/>
-  <rect x="500" y="380" width="170" height="48" rx="24" transform="rotate(6 585 404)"/>
-  <rect x="400" y="326" width="170" height="48" rx="24" transform="rotate(-4 485 350)"/>
-  <rect x="560" y="320" width="150" height="48" rx="24" transform="rotate(-14 635 344)"/>
-  <rect x="300" y="318" width="140" height="48" rx="24" transform="rotate(10 370 342)"/>
-  <rect x="440" y="276" width="160" height="48" rx="24" transform="rotate(4 520 300)"/>
-</g>
-<g fill="var(--paper)" opacity=".7">
-  <ellipse cx="482" cy="394" rx="9" ry="18" transform="rotate(-8 405 396)"/><ellipse cx="662" cy="402" rx="9" ry="18" transform="rotate(6 585 404)"/>
-  <ellipse cx="562" cy="350" rx="9" ry="18" transform="rotate(-4 485 350)"/><ellipse cx="592" cy="300" rx="9" ry="18" transform="rotate(4 520 300)"/>
-</g>
-<g fill="none" stroke="var(--paper)" stroke-width="7" stroke-linecap="round" opacity=".8"><path d="M350 300 l22 -18"/><path d="M650 290 l20 -20"/><path d="M420 280 l18 -16"/></g>
-</svg>`,
-  gimbap: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <ellipse cx="500" cy="470" rx="290" ry="22"/>
-  <circle cx="330" cy="380" r="78"/><circle cx="500" cy="374" r="84"/><circle cx="670" cy="380" r="78"/>
-</g>
-<g fill="var(--paper)">
-  <circle cx="330" cy="380" r="62"/><circle cx="500" cy="374" r="68"/><circle cx="670" cy="380" r="62"/>
-</g>
-<g fill="currentColor">
-  <rect x="306" y="350" width="22" height="22" rx="4"/><rect x="334" y="384" width="24" height="16" rx="4"/><circle cx="318" cy="398" r="11"/><rect x="340" y="352" width="10" height="26" rx="4"/>
-  <rect x="474" y="342" width="24" height="24" rx="4"/><rect x="506" y="378" width="26" height="18" rx="4"/><circle cx="486" cy="394" r="12"/><rect x="510" y="344" width="10" height="28" rx="4"/>
-  <rect x="646" y="350" width="22" height="22" rx="4"/><rect x="674" y="384" width="24" height="16" rx="4"/><circle cx="658" cy="398" r="11"/><rect x="680" y="352" width="10" height="26" rx="4"/>
-</g>
-</svg>`,
-  eomuk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <rect x="380" y="70" width="10" height="330" rx="5"/><rect x="540" y="90" width="10" height="320" rx="5"/>
-  <path d="M340 150 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M344 196 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M340 242 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M500 176 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M504 222 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M500 268 c30 -14 60 14 90 0 v40 c-30 14 -60 -14 -90 0 Z"/>
-  <path d="M600 340 H760 L748 478 c-1 8 -7 14 -15 14 H627 c-8 0 -14 -6 -15 -14 Z"/>
-</g>
-<path d="M606 360 H754" stroke="var(--paper)" stroke-width="10" opacity=".55"/>
-<g fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"><path d="M660 316 c-18 -22 18 -34 0 -58"/><path d="M710 316 c-18 -22 18 -34 0 -58"/></g>
-</svg>`,
-  ramyeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <path d="M300 300 H700 V420 c0 40 -30 72 -70 72 H370 c-40 0 -70 -32 -70 -72 Z"/>
-  <rect x="284" y="284" width="432" height="28" rx="14"/>
-  <rect x="226" y="296" width="70" height="22" rx="11"/><rect x="704" y="296" width="70" height="22" rx="11"/>
-  <rect x="520" y="60" width="12" height="230" rx="6" transform="rotate(14 526 175)"/>
-  <rect x="548" y="60" width="12" height="230" rx="6" transform="rotate(20 554 175)"/>
-</g>
-<g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round">
-  <path d="M506 170 C 490 210, 530 240, 506 290"/><path d="M526 168 C 512 214, 552 238, 530 292"/><path d="M546 172 C 534 216, 572 240, 552 290"/>
-</g>
-<path d="M320 340 C 420 360, 580 360, 680 340" fill="none" stroke="var(--paper)" stroke-width="9" opacity=".5"/>
-<g fill="none" stroke="var(--paper)" stroke-width="7" stroke-linecap="round" opacity=".7"><path d="M340 300 c20 -14 40 14 60 0 s40 14 60 0"/><path d="M560 300 c20 -14 40 14 60 0 s40 14 60 0"/></g>
-</svg>`,
-  chicken: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <path d="M290 330 H710 L668 476 c-3 10 -12 16 -22 16 H354 c-10 0 -19 -6 -22 -16 Z"/>
-  <path d="M340 330 C 320 270, 360 220, 410 230 C 430 190, 490 180, 520 214 C 560 180, 630 200, 640 250 C 680 260, 690 310, 670 330 Z"/>
-  <path d="M600 210 L 660 140 c-10 -14 0 -32 16 -28 c8 -14 30 -10 30 6 c14 6 12 28 -4 30 L 640 230 Z"/>
-</g>
-<g fill="var(--paper)">
-  <path d="M296 352 H704" stroke="var(--paper)" stroke-width="10" fill="none" opacity=".6"/>
-  <g opacity=".75"><path d="M340 384 h40 l-6 80 h-28 Z"/><path d="M420 384 h40 l-4 80 h-32 Z"/><path d="M500 384 h40 l-2 80 h-36 Z"/><path d="M580 384 h40 l-4 80 h-32 Z"/></g>
-  <g opacity=".55"><circle cx="398" cy="276" r="7"/><circle cx="470" cy="250" r="7"/><circle cx="560" cy="262" r="7"/><circle cx="430" cy="300" r="6"/><circle cx="600" cy="300" r="6"/></g>
-</g>
-</svg>`,
-  fries: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <rect x="396" y="120" width="30" height="200" rx="6" transform="rotate(-10 411 220)"/>
-  <rect x="440" y="96" width="30" height="220" rx="6" transform="rotate(-3 455 206)"/>
-  <rect x="484" y="104" width="30" height="214" rx="6" transform="rotate(4 499 211)"/>
-  <rect x="528" y="118" width="30" height="200" rx="6" transform="rotate(11 543 218)"/>
-  <rect x="460" y="150" width="28" height="170" rx="6" transform="rotate(16 474 235)"/>
-  <path d="M370 250 H630 L602 480 c-1 7 -7 12 -14 12 H412 c-7 0 -13 -5 -14 -12 Z"/>
-</g>
-<g fill="var(--paper)">
-  <path d="M370 250 H630 L 626 282 C 570 300, 430 300, 374 282 Z" opacity=".35"/>
-  <path d="M440 340 L 500 400 L 560 340" fill="none" stroke="var(--paper)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
-</g>
-</svg>`,
-  skewer: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <rect x="230" y="246" width="560" height="10" rx="5" transform="rotate(-12 510 251)"/>
-  <rect x="230" y="340" width="560" height="10" rx="5" transform="rotate(-6 510 345)"/>
-  <g transform="rotate(-12 510 251)"><rect x="300" y="216" width="70" height="70" rx="18"/><rect x="386" y="214" width="74" height="74" rx="20"/><rect x="476" y="216" width="70" height="70" rx="18"/><rect x="562" y="218" width="66" height="66" rx="16"/></g>
-  <g transform="rotate(-6 510 345)"><rect x="330" y="312" width="64" height="66" rx="16"/><rect x="408" y="310" width="70" height="70" rx="18"/><rect x="492" y="312" width="64" height="66" rx="16"/><rect x="570" y="312" width="64" height="66" rx="16"/></g>
-  <path d="M250 440 H760 c0 30 -20 52 -50 52 H300 c-30 0 -50 -22 -50 -52 Z"/>
-</g>
-<g fill="none" stroke="var(--paper)" stroke-width="7" stroke-linecap="round" opacity=".7">
-  <g transform="rotate(-12 510 251)"><path d="M314 236 l40 30 M402 234 l40 30 M490 236 l40 30 M574 238 l40 30"/></g>
-  <g transform="rotate(-6 510 345)"><path d="M344 332 l36 28 M424 330 l36 28 M506 332 l36 28 M584 332 l36 28"/></g>
-  <path d="M270 452 H740" opacity=".5"/>
-</g>
-</svg>`,
-  lantern: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
-<g fill="currentColor">
-  <rect x="490" y="40" width="10" height="44" rx="4"/>
-  <rect x="430" y="80" width="130" height="34" rx="8"/>
-  <path d="M424 112 H566 C 640 150, 660 240, 660 290 C 660 340, 640 430, 566 468 H424 C 350 430, 330 340, 330 290 C 330 240, 350 150, 424 112 Z"/>
-  <rect x="430" y="462" width="130" height="30" rx="8"/>
-</g>
-<g fill="none" stroke="var(--paper)" stroke-width="8" opacity=".75">
-  <path d="M352 170 C 440 186, 550 186, 638 170"/><path d="M336 226 C 440 244, 550 244, 654 226"/><path d="M332 290 H658"/><path d="M336 354 C 440 336, 550 336, 654 354"/><path d="M352 410 C 440 394, 550 394, 638 410"/>
-</g>
-<path d="M480 150 V430 M510 150 V430" stroke="var(--paper)" stroke-width="6" opacity=".35"/>
-</svg>`
+  <path d="M220 336 C 220 246, 296 198, 390 198 C 484 198, 560 246, 560 336 C 560 414, 500 456, 390 456 C 280 456, 220 414, 220 336 Z"/>
+  <rect x="300" y="448" width="180" height="22" rx="8"/>
+  <path d="M290 204 C 304 158, 476 158, 490 204 Z"/><circle cx="390" cy="146" r="24"/>
+  <path d="M230 318 C 186 298, 164 248, 150 194 L180 184 C 196 232, 220 266, 248 284 Z"/>
+  <path d="M552 260 C 640 254, 652 394, 540 402" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round"/>
+  <path d="M640 392 H770 C 770 436, 744 456, 705 456 C 666 456, 640 436, 640 392 Z"/>
+  <path d="M614 456 H796 C 786 466, 772 470, 758 470 H652 C 638 470, 624 466, 614 456 Z"/></g>
+<g fill="none" stroke="var(--paper)" stroke-linecap="round"><path d="M284 208 H496" stroke-width="9"/><path d="M262 300 C 290 252, 340 232, 380 230" stroke-width="12" opacity=".45"/></g></svg>`,
+  tteok: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"><path d="M400 140 c-30 -28 30 -45 0 -90"/><path d="M490 140 c-30 -28 30 -45 0 -90"/></g>
+<path d="M520 288 L630 140" stroke="currentColor" stroke-width="14" stroke-linecap="round"/>
+<g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><rect x="232" y="352" width="180" height="54" rx="27" transform="rotate(0 322 379)"/><rect x="420" y="352" width="180" height="54" rx="27" transform="rotate(0 510 379)"/><rect x="560" y="352" width="110" height="54" rx="27" transform="rotate(0 615 379)"/><rect x="300" y="302" width="180" height="54" rx="27" transform="rotate(0 390 329)"/><rect x="488" y="302" width="170" height="54" rx="27" transform="rotate(0 573 329)"/><rect x="380" y="252" width="180" height="54" rx="27" transform="rotate(0 470 279)"/></g>
+<g stroke="var(--paper)" stroke-width="8" stroke-linecap="round" opacity=".5"><path d="M326 316 h120 M512 316 h112 M406 266 h120"/></g>
+<g fill="currentColor"><path d="M196 384 H684 L654 452 C 650 464, 640 470, 626 470 H254 C 240 470, 230 464, 226 452 Z"/><rect x="184" y="372" width="512" height="22" rx="10"/></g>
+<path d="M236 420 H644" stroke="var(--paper)" stroke-width="8" opacity=".35"/></svg>`,
+  gimbap: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="currentColor"><rect x="452" y="292" width="300" height="160" rx="80"/></g><path d="M492 330 H712" stroke="var(--paper)" stroke-width="8" opacity=".4"/><ellipse cx="214" cy="372" rx="76" ry="80" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><ellipse cx="214" cy="372" rx="62" ry="66" fill="var(--paper)"/><g fill="currentColor"><rect x="188" y="344" width="24" height="22" rx="4"/><rect x="218" y="340" width="18" height="32" rx="4"/><rect x="192" y="376" width="28" height="16" rx="4"/><rect x="226" y="380" width="16" height="16" rx="4"/><rect x="206" y="366" width="20" height="14" rx="4"/></g><ellipse cx="352" cy="372" rx="76" ry="80" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><ellipse cx="352" cy="372" rx="62" ry="66" fill="var(--paper)"/><g fill="currentColor"><rect x="326" y="344" width="24" height="22" rx="4"/><rect x="356" y="340" width="18" height="32" rx="4"/><rect x="330" y="376" width="28" height="16" rx="4"/><rect x="364" y="380" width="16" height="16" rx="4"/><rect x="344" y="366" width="20" height="14" rx="4"/></g><ellipse cx="490" cy="372" rx="76" ry="80" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><ellipse cx="490" cy="372" rx="62" ry="66" fill="var(--paper)"/><g fill="currentColor"><rect x="464" y="344" width="24" height="22" rx="4"/><rect x="494" y="340" width="18" height="32" rx="4"/><rect x="468" y="376" width="28" height="16" rx="4"/><rect x="502" y="380" width="16" height="16" rx="4"/><rect x="482" y="366" width="20" height="14" rx="4"/></g><rect x="110" y="452" width="660" height="34" rx="10" fill="currentColor"/></svg>`,
+  eomuk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"><path d="M330 100 c-30 -28 30 -30 0 -60"/><path d="M560 100 c-30 -28 30 -30 0 -60"/></g>
+<g stroke="currentColor" stroke-width="12" stroke-linecap="round"><path d="M296 360 L266 90"/><path d="M440 360 L440 80"/><path d="M584 360 L614 90"/></g><polyline points="230 140 322 184 230 228 322 272 230 316" fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="round" stroke-linecap="round"/><polyline points="394 130 486 174 394 218 486 262 394 306" fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="round" stroke-linecap="round"/><polyline points="558 140 650 184 558 228 650 272 558 316" fill="none" stroke="currentColor" stroke-width="48" stroke-linejoin="round" stroke-linecap="round"/>
+<g fill="currentColor"><path d="M196 324 H684 L664 452 C 662 464, 652 470, 640 470 H240 C 228 470, 218 464, 216 452 Z"/><rect x="176" y="304" width="528" height="26" rx="12"/></g>
+<path d="M226 380 H654 M232 424 H648" stroke="var(--paper)" stroke-width="8" opacity=".35"/></svg>`,
+  ramyeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"><path d="M250 150 c-30 -28 30 -40 0 -80"/><path d="M630 150 c-30 -28 30 -40 0 -80"/></g>
+<g fill="currentColor"><g transform="rotate(-10 500 110)"><rect x="300" y="96" width="430" height="16" rx="8"/><rect x="300" y="122" width="430" height="16" rx="8"/></g></g>
+<g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round">
+  <path d="M392 140 c-24 30 24 50 0 80 c-24 30 24 50 0 90"/><path d="M430 134 c-24 30 24 50 0 80 c-24 30 24 50 0 96"/><path d="M468 128 c-24 30 24 50 0 80 c-24 30 24 50 0 102"/><path d="M506 122 c-24 30 24 50 0 80 c-24 30 24 50 0 108"/></g>
+<g fill="currentColor"><path d="M210 292 H670 V430 C 670 456, 648 470, 620 470 H260 C 232 470, 210 456, 210 430 Z"/><rect x="194" y="276" width="492" height="28" rx="12"/>
+  <path d="M212 316 H160 C 140 316, 140 354, 160 354 H212" fill="none" stroke="currentColor" stroke-width="18"/>
+  <path d="M668 316 H720 C 740 316, 740 354, 720 354 H668" fill="none" stroke="currentColor" stroke-width="18"/></g>
+<path d="M232 350 H648 M236 410 H644" stroke="var(--paper)" stroke-width="10" opacity=".3"/></svg>`,
+  chicken: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="rotate(-24 330 320)"><rect x="316" y="130" width="28" height="120" rx="14" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="316" cy="124" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="344" cy="124" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><path d="M308 240 C 234 280, 240 410, 330 412 C 420 410, 426 280, 352 240 Z" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/></g><g transform="rotate(24 560 320)"><rect x="546" y="130" width="28" height="120" rx="14" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="546" cy="124" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="574" cy="124" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><path d="M538 240 C 464 280, 470 410, 560 412 C 650 410, 656 280, 582 240 Z" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/></g><g transform="rotate(0 445 300)"><rect x="431" y="110" width="28" height="120" rx="14" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="431" cy="104" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><circle cx="459" cy="104" r="20" fill="var(--paper)" stroke="currentColor" stroke-width="9"/><path d="M423 220 C 349 260, 355 390, 445 392 C 535 390, 541 260, 467 220 Z" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/></g>
+<g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><path d="M200 340 H680 L640 456 C 636 466, 626 470, 614 470 H266 C 254 470, 244 466, 240 456 Z"/></g>
+<g stroke="var(--paper)" stroke-width="8" opacity=".38"><path d="M250 360 L300 470 M330 350 L390 470 M410 350 L470 470 M490 350 L550 470 M570 350 L620 460"/></g></svg>`,
+  fries: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><rect x="330" y="100" width="34" height="240" rx="6" transform="rotate(-10 347 220)"/><rect x="372" y="80" width="34" height="250" rx="6" transform="rotate(-4 389 205)"/><rect x="414" y="66" width="34" height="260" rx="6" transform="rotate(2 431 196)"/><rect x="456" y="78" width="34" height="250" rx="6" transform="rotate(7 473 203)"/><rect x="498" y="96" width="34" height="240" rx="6" transform="rotate(12 515 216)"/><rect x="352" y="140" width="34" height="200" rx="6" transform="rotate(-14 369 240)"/><rect x="476" y="130" width="34" height="210" rx="6" transform="rotate(10 493 235)"/><rect x="434" y="110" width="34" height="220" rx="6" transform="rotate(-2 451 220)"/><path d="M276 246 C 340 290, 540 290, 604 246 L568 458 C 566 466, 558 470, 548 470 H332 C 322 470, 314 466, 312 458 Z"/></g><path d="M380 360 C 410 400, 470 400, 500 360" fill="none" stroke="var(--paper)" stroke-width="16" stroke-linecap="round" opacity=".75"/></svg>`,
+  skewer: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(440 470) scale(1.4) translate(-440 -470)"><rect x="120" y="402" width="640" height="12" rx="6" fill="currentColor"/><rect x="184" y="362" width="100" height="84" rx="24" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><rect x="304" y="378" width="80" height="68" rx="14" fill="var(--paper)" stroke="currentColor" stroke-width="12"/><rect x="404" y="362" width="100" height="84" rx="24" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><rect x="524" y="378" width="80" height="68" rx="14" fill="var(--paper)" stroke="currentColor" stroke-width="12"/><rect x="624" y="362" width="100" height="84" rx="24" fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"/><path d="M140 446 H740 L720 470 H160 Z" fill="currentColor"/></g></svg>`,
+  lantern: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><rect x="100" y="40" width="680" height="20" rx="6" fill="currentColor"/><path d="M320 58 V96" stroke="currentColor" stroke-width="8"/><g fill="currentColor"><rect x="268" y="96" width="104" height="26" rx="6"/><ellipse cx="320" cy="270" rx="120" ry="150"/><rect x="268" y="416" width="104" height="26" rx="6"/></g><g fill="none" stroke="var(--paper)" stroke-width="7" opacity=".45"><path d="M249 150 Q 320 164 391 150"/><path d="M222 184 Q 320 198 418 184"/><path d="M208 218 Q 320 232 432 218"/><path d="M201 252 Q 320 266 439 252"/><path d="M201 286 Q 320 300 439 286"/><path d="M207 320 Q 320 334 433 320"/><path d="M221 354 Q 320 368 419 354"/><path d="M246 388 Q 320 402 394 388"/></g><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M310 442 v40 M320 442 v50 M330 442 v40"/></g><path d="M610 58 V96" stroke="currentColor" stroke-width="8"/><g fill="currentColor"><rect x="570" y="96" width="81" height="20" rx="6"/><ellipse cx="610" cy="231" rx="93" ry="117"/><rect x="570" y="345" width="81" height="20" rx="6"/></g><g fill="none" stroke="var(--paper)" stroke-width="7" opacity=".45"><path d="M555 137 Q 610 147 665 137"/><path d="M535 163 Q 610 173 685 163"/><path d="M524 189 Q 610 199 696 189"/><path d="M518 215 Q 610 225 702 215"/><path d="M518 241 Q 610 251 702 241"/><path d="M522 267 Q 610 277 698 267"/><path d="M532 293 Q 610 303 688 293"/><path d="M549 319 Q 610 329 671 319"/></g><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M600 365 v31 M610 365 v39 M620 365 v31"/></g></svg>`
 };
 const SEAL_TEXT = { word:"sq", rword:"rd", rrword:"rr" }, SEAL_TXT_MAX = 4;   /* 327번. 글자 도장 셋의 틀 · 글자는 1 ~ 4자 */
 const sealText = x => {   // 327번. 적은 글자, 없으면 상호명 — 4자면 넷(2 × 2), 그보다 길면 앞 세 글자, 상호명도 없으면 「메뉴」
@@ -6283,7 +6170,7 @@ function cleanForSave(root){
   q("#pg-title").forEach(n => { n.textContent = "1쪽 설정"; });
   q("#ow-title").forEach(n => { n.textContent = "한 장에 안 들어갑니다"; });
   q(".panel .ptab").forEach(n => n.classList.toggle("on", n.dataset.tab === "look"));   // 332번
-  q("#pgbar, #pgcopy").forEach(n => n.removeAttribute("hidden"));   // 332번. 열 때 syncPageTabs() 가 다시 정한다
+  q("#pgbar").forEach(n => n.removeAttribute("hidden"));   // 332번. 열 때 syncPageTabs() 가 다시 정한다
   q("dialog").forEach(n => { n.classList.remove("hasmore"); n.removeAttribute("open"); });
   q("details").forEach(n => n.removeAttribute("open"));
   q('.panel .pblock[data-kind="wine"]').forEach(n => n.removeAttribute("hidden"));   // 331번. 열 때 render() 가 다시 정한다
@@ -6683,7 +6570,7 @@ function syncPageTabs(){
   const tabs = PANEL_TABS();
   tabs.forEach(([id, label, hint]) => bar.appendChild(mk(id, label, hint)));
   if (!tabs.some(t => t[0] === panelTab)) panelTab = "look";
-  const pgOn = PAGE_TABS.includes(panelTab); $("#pgbar").hidden = !pgOn; $("#pgcopy").hidden = !pgOn;
+  const pgOn = PAGE_TABS.includes(panelTab); $("#pgbar").hidden = !pgOn;   // 334번. [모든 장에 같게]는 고칠 장 옆(#pgbar 안)
   if (!MENU.sheets[panelPage]) panelPage = 0;
   document.querySelectorAll(".panel .ptab").forEach(x => x.classList.toggle("on", x.dataset.tab === panelTab));
   const pk = $("#pgpick"); pk.innerHTML = "";
@@ -6699,7 +6586,7 @@ function syncPageTabs(){
    파일에 와인 분류가 하나라도 있으면 지금처럼 다 보이고(알프스 예시 그대로), 없으면 둘 다 감춘다. 와인 장을 만드는 입구는 종이 위 탭의
    [＋ 와인 장 추가] 그대로다(299번 — 쪽 탭은 그대로). 규칙 I 「고르는 수단을 조건부로 숨기지 않는다(24번)」의 예외 — 쓸 일이 없는 가게에 길을 보이지 않는 것이다 */
 const hasWine = () => MENU.sheets.some((_, i) => sheetKind(i) !== "menu");
-function syncWineUI(){ const w = hasWine(); document.querySelectorAll('.panel .pblock[data-kind="wine"]').forEach(n => { n.hidden = !w; }); }   // 333번. [와인] 탭은 없어졌다 — 와인 묶음만 감추고 보인다
+function syncWineUI(){ if ($("#panel").hidden) return; const w = hasWine() && sheetKind(panelPage) !== "menu"; document.querySelectorAll('.panel .pblock[data-kind="wine"]').forEach(n => { n.hidden = !w; }); }   // 334번. 와인 묶음만 고칠 장에 맞춘다 — 처음엔 syncPage() 를 통째로 불러 그릴 때마다 격자까지 다시 만들었다(둘러보기가 0.3 → 0.7초로 늦게 떴다)   // 333번. [와인] 탭은 없어졌다 — 와인 묶음만 감추고 보인다
 function sheetKind(i){
   let w = 0, m = 0;
   (MENU.sheets[i] || []).forEach(col => col.forEach(sec => { sec.wine ? w++ : m++; }));
@@ -6714,6 +6601,10 @@ function addPageLabel(nums){
 function sheetKindName(i){ const k = sheetKind(i); return k === "wine" ? "와인" : k === "mix" ? "섞임" : "메뉴"; }
 /* 장 탭의 손잡이에 panelPage 장의 값을 채운다 */
 function syncPage(){
+  /* 334번. **와인 묶음은 「고칠 장」이 와인 장일 때만**(사용자 — 「메뉴장인데 와인 카드가 왜 보여?」). 331번은 파일 어딘가에 와인이 있으면 늘 보였다.
+     와인 카드 · 병 설정 자체는 모든 와인 장에 함께 걸린다 — 묶음 제목이 그렇게 말한다 */
+  const wineHere = hasWine() && sheetKind(panelPage) !== "menu";
+  document.querySelectorAll('.panel .pblock[data-kind="wine"]').forEach(n => { n.hidden = !wineHere; });
   const pg = P(panelPage);
   $("#pg-title").textContent = (panelPage+1) + "쪽 · " + sheetKindName(panelPage) + " 장";
   $("#f-logo").value   = pg.logoColor || "paper";
