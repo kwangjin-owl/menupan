@@ -1304,6 +1304,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
   background:rgba(22,17,10,.96);border:1px solid rgba(240,230,205,.18);
   backdrop-filter:blur(8px);font-family:var(--ui-font)}
 .panel[hidden]{display:none}
+.panel .pblock[hidden]{display:none}   /* 331번. 와인 분류가 없으면 와인 장 묶음을 감춘다 */
 /* 159번. **`scrollbar-width` · `scrollbar-color` 를 함께 쓰면 크롬이 `::-webkit-scrollbar` 를 통째로 무시한다.**
    게다가 `scrollbar-color` 는 크롬을 옛 방식으로 되돌려 **위아래 화살표 단추까지 붙은** 막대가 나온다 —
    157번에서 "가는 줄로 바꿨다"고 적어 놓고 화면에는 아무것도 안 바뀌어 있었다. 표준 속성 둘은 쓰지 않는다.
@@ -3166,7 +3167,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
     <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>나 <b>↶</b> · Ctrl+Z.</li></ul>
   <h4>모양 바꾸기</h4>
-  <ul><li>[꾸미기] <b>전체</b> 탭 — 조합(내 조합 · 추천 조합) · 글꼴 · 색 · 종이 · 와인 카드와 병. <b>장별</b> 탭 — 쪽마다 상단 · 글자 크기 · 바닥 · 그림 · 도장.</li>
+  <ul><li>[꾸미기] <b>전체</b> 탭 — 조합(내 조합 · 추천 조합) · 글꼴 · 색 · 종이(와인 장이 있으면 와인 카드와 병도). <b>장별</b> 탭 — 쪽마다 상단 · 글자 크기 · 바닥 · 그림 · 도장.</li>   <!-- 331번. 와인 묶음은 와인 장이 있을 때만 -->
     <li>한 장에 안 들어가면 <b>붉은 띠</b>와 함께 몇 %로 낮추면 들어가는지 알려 줍니다. <b>[한 장에 맞춤]</b>을 켜면 저절로 맞춥니다.</li></ul>
   <h4>저장</h4>
   <ul><li>인터넷 주소로 열면 고칠 때마다 <b>자동 저장</b>됩니다(위쪽 「✓ 자동 저장됨」).</li>
@@ -4561,7 +4562,7 @@ function drawSection(sec, path){
       if (now && (sec.name || "").trim() === was) sec.name = now;
       if (ws.value) sec.wine = ws.value; else delete sec.wine; touch(); render();
     };
-    tools.appendChild(ws);
+    if (hasWine()) tools.appendChild(ws);   // 331번. 와인 분류가 없는 가게에는 안 붙인다
     // 83번. **삭제는 추가와 같은 자리로 내렸다.** 제목 옆 ✕ 와 아래 ＋ 가 따로 놀아
     // "왜 추가는 아래고 삭제는 위냐"는 지적을 받았다. 제목에는 **옮기기**만 남는다 —
     // 옮기기는 그 분류를 집어 드는 일이라 대상 옆이 맞다(줄의 ★품 과 같다)
@@ -5380,6 +5381,7 @@ function wineFit(only){
 }
 function render(){
   syncTitle();   // 264번
+  syncWineUI();   // 331번
   const box = $("#pages"); box.innerHTML = "";
   buildPages().forEach(p => box.appendChild(drawSheet(p)));
   document.body.classList.toggle("editing", editing);
@@ -6312,6 +6314,7 @@ function cleanForSave(root){
   q(".panel .ptab").forEach(n => n.classList.toggle("on", n.dataset.tab === "common"));
   q("dialog").forEach(n => { n.classList.remove("hasmore"); n.removeAttribute("open"); });
   q("details").forEach(n => n.removeAttribute("open"));
+  q('.panel .pblock[data-kind="wine"]').forEach(n => n.removeAttribute("hidden"));   // 331번. 열 때 render() 가 다시 정한다
   [root, ...q("*")].forEach(n => {
     if (n.getAttribute("style") === "") n.removeAttribute("style");
     if (n.getAttribute("class") === "") n.removeAttribute("class");
@@ -6713,6 +6716,12 @@ function syncPageTabs(){
 /* 157번. **어느 장이 메뉴 장이고 어느 장이 와인 장인지 화면에 적는다.** 창의 손잡이는 장마다 한 벌이라
    지금 고치는 장이 어느 쪽인지 알 수 없었고, [전체] 탭의 "메뉴 줄" · "와인 카드"가 어느 장에 걸리는지도
    짝지을 수가 없었다("구분이 안 간다"). 종류는 **분류가 안다** — 자료에 새 키를 만들지 않는다(138번) */
+/* 331번. **와인 기능은 와인 분류가 있을 때만 보인다**(사용자 — 「분식집이나 한식집 사장님이 사진 찍어서 메뉴판 만들었는데 와인장이 붙어 있으면 이상하냐」).
+   와인 장은 친구 가게 요청(9/8)으로 생긴 기능이라 범용 메뉴판에서는 모든 가게에 [분류 형식] 고르기 · 꾸미기 창 와인 묶음(919px · 창의 39%)이 늘 보였다.
+   파일에 와인 분류가 하나라도 있으면 지금처럼 다 보이고(알프스 예시 그대로), 없으면 둘 다 감춘다. 와인 장을 만드는 입구는 종이 위 탭의
+   [＋ 와인 장 추가] 그대로다(299번 — 쪽 탭은 그대로). 규칙 I 「고르는 수단을 조건부로 숨기지 않는다(24번)」의 예외 — 쓸 일이 없는 가게에 길을 보이지 않는 것이다 */
+const hasWine = () => MENU.sheets.some((_, i) => sheetKind(i) !== "menu");
+function syncWineUI(){ const w = hasWine(); document.querySelectorAll('.panel .pblock[data-kind="wine"]').forEach(n => { n.hidden = !w; }); }
 function sheetKind(i){
   let w = 0, m = 0;
   (MENU.sheets[i] || []).forEach(col => col.forEach(sec => { sec.wine ? w++ : m++; }));

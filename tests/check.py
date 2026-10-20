@@ -1172,6 +1172,20 @@ def t47(b, f):
         r['closed_clean'] = pg.evaluate("()=>!(document.querySelector('#printhint').getAttribute('style')||'').trim()")
         r['err'] = errs; m[str(W)] = r; ctx.close()
     out['mobile330'] = m
+    # 331번 — 와인 분류가 없으면 [분류 형식] 고르기 · 꾸미기 창 와인 묶음이 안 보인다. 와인 장을 넣으면 보이고, 되돌리면 다시 감춘다. 저장본에 감춤 표시가 안 남는다
+    c = Ctx(b, 'start_' + f, dl=True); pg = c.pg
+    pg.click('#st-blank'); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    V = "()=>[document.querySelectorAll('.winesel').length, document.querySelector('.panel .pblock[data-kind=\"wine\"]').hidden]"   # 창이 닫혀 있어도 재게 — 감춤 표시 자체를 본다
+    w = {'blank': c.js(V)}
+    c.js("()=>[...document.querySelectorAll('.pagebar button')].find(b=>b.textContent.includes('와인 장 추가')).click()"); pg.wait_for_timeout(400)
+    w['wine_added'] = c.js(V)
+    with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
+    w['saved_no_hidden'] = 'data-kind="wine" hidden' not in open(d.value.path(), encoding='utf-8').read()
+    pg.keyboard.press('Escape'); c.js("()=>{ if(!editing) document.querySelector('#b-edit').click(); }"); pg.wait_for_timeout(300)
+    c.js("()=>document.querySelector('#b-undo').click()"); pg.wait_for_timeout(400)
+    w['undone'] = c.js(V) + c.js("()=>[MENU.sheets.length, editing]")   # 편집 중이어야 고르기 수가 뜻이 있다
+    w['err'] = c.errs; c.close()
+    out['wine331'] = w
     return out
 
 # ───────────────────────── 48. 글자가 바뀌는 막대 단추의 폭(규칙 I · 267번). 263번이 "편집"↔"편집 끝" 폭을 망가뜨렸는데 t25(종이 튐)는 못 잡았다
@@ -1784,8 +1798,10 @@ def judge(t, r):
                   and r['alps'] == [2, '알프스', True] and r.get('guide_up') and r.get('alps_no_guide') and r['undo_back'] == ['시험 가게', 1] and r['noname'][0] == '메뉴판' and r['noname'][1].startswith('메뉴판-') and not r['err'])
             m330 = r.get('mobile330') or {}   # 330번 — 폰에서 창이 보이는 화면 안에
             ok330 = bool(m330) and all(v['wide'] and v['start'] is True and v['start_wide'] is True and v['print_scrolled'] is True and v['closed_clean'] and not v['err'] for v in m330.values())
-            ok = ok and ok330
-            return ok, f"330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
+            w331 = r.get('wine331') or {}   # 331번 — 와인 분류가 없으면 와인 기능이 안 보인다
+            ok331 = bool(w331) and w331['blank'] == [0, True] and w331['wine_added'][0] > 0 and w331['wine_added'][1] is False and w331['saved_no_hidden'] and w331['undone'] == [0, True, 1, True] and not w331['err']
+            ok = ok and ok330 and ok331
+            return ok, f"331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
