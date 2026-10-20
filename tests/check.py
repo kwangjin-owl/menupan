@@ -388,7 +388,7 @@ def t15(b, f):
     # ＋ㅡ 4% · 막대 1% · 기본값
     c.js("()=>{MENU.sheets[1][0][0].items[0].label='SAPERAVI'; MENU.sheets[0][0][0].items[0].name='단호박 크림 파스타'; render(); applyScale();}")
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200)
-    c.js("()=>{panelTab='size'; syncPageTabs(); syncPage();}")   # 332번 — 글자 크기는 [크기 · 배치]
+    c.js("()=>{panelTab='menu'; syncPageTabs(); syncPage();}")   # 333번 — 글자 크기는 [메뉴]
     s0 = c.js("()=>P(0).scale"); c.pg.click('#b-minus'); s1 = c.js("()=>P(0).scale")
     out['step'] = [s0, s1, c.js("()=>[document.querySelector('#sz-range').step, document.querySelector('#nsz-range').step, P(0).norenScale, document.querySelector('#nsz-val').textContent]")]
     # 창 밀림 시작 폭 (1410px)
@@ -534,7 +534,7 @@ def t27(b, f):
     out['secnote'] = [press('.sheet section', '＋ 안내 추가', 8), c.js("()=>(MENU.sheets[0][0][0].notes||[]).length")]
     out['notes'] = [press('.sheet .foot .zone', '＋ 바닥 글 추가', 12), c.js("()=>F(0).notes.length")]
     out['hours'] = [press('.sheet .hours', '＋ 시간 추가', 8), c.js("()=>MENU.hours.length")]
-    c.js("()=>{panelTab='wine'; syncPageTabs(); document.querySelector('#panel').hidden=false; placePanel();}")   # 332번 — 병은 [와인]
+    c.js("()=>{panelTab='menu'; syncPageTabs(); document.querySelector('#panel').hidden=false; placePanel();}")   # 333번 — 병은 [메뉴] 맨 아래 와인 장
     nb = 0
     for _ in range(12):
         btn = pg.locator('#btpick button', has_text='병 추가')
@@ -564,7 +564,7 @@ def t28(b, f):
     c.js(SEL, ['f-layout', 'landscape']); chk('landscape')
     c.js(SEL, ['f-layout', 'portrait']); chk('portrait')
     c.js(BI, True); chk('bilingual')
-    c.js("()=>{panelTab='size'; syncPageTabs(); syncPage();}")
+    c.js("()=>{panelTab='menu'; syncPageTabs(); syncPage();}")
     for k in range(3): c.js(CLK, 'b-plus'); pg.wait_for_timeout(60)
     chk('plus')
     c.js(CLK, 'b-minus'); chk('minus')
@@ -649,7 +649,7 @@ def t32(b, f):
 def t35(b, f):
     c = Ctx(b, f, 1500, 1000); pg = c.pg
     pg.click('#b-edit'); pg.wait_for_timeout(250); cut = []
-    for tab in ('look', 'top', 'size', 'content', 'wine'):   # 332번 — 탭 다섯을 다 본다
+    for tab in ('look', 'top', 'menu', 'foot', 'deco'):   # 333번 — 탭 다섯을 다 본다
         for pp in (0, 1):
             c.js("([t,p])=>{panelTab=t; panelPage=p; syncPageTabs(); syncPage();}", [tab, pp])
             for kind in ['red', 'white', 'sparkling', 'rose', 'orange']:
@@ -989,7 +989,7 @@ def t44(b, f):
       syncPage(); document.querySelector('#b-copypage').click();
       return PAGE_KEYS.every(k=>JSON.stringify(P(0)[k])===JSON.stringify(P(1)[k])) && JSON.stringify(P(1).arts)==='[{"cell":0,"art":"horse","color":"#112233"},{"cell":3,"art":"fir","op":"mid"}]' && JSON.stringify(P(1).seals)==='[{"cell":1,"seal":"tri"},{"cell":2,"seal":"star","color":"#123456"}]' && P(1).alignRows===true }""")
     # 309번. 분류 줄 스위치 — 켜면 그 장만 true · 맞춘 여백이 생김 · 끄면 키가 없어지고 여백도 / 단이 하나인 장에서는 흐림
-    out['align309'] = c.js("""()=>{ const a=document.querySelector('#f-align'); if(!a) return null; delete P(0).alignRows; delete P(1).alignRows; panelPage=0; panelTab='size'; syncPageTabs(); syncPage(); render();
+    out['align309'] = c.js("""()=>{ const a=document.querySelector('#f-align'); if(!a) return null; delete P(0).alignRows; delete P(1).alignRows; panelPage=0; panelTab='menu'; syncPageTabs(); syncPage(); render();
       a.checked=true; a.dispatchEvent(new Event('change',{bubbles:true})); const on=[P(0).alignRows===true, !('alignRows' in P(1)), document.querySelectorAll('.sheet[data-pi="0"] section[data-al]').length>0];
       a.checked=false; a.dispatchEvent(new Event('change',{bubbles:true})); const off=[!('alignRows' in P(0)), document.querySelectorAll('section[data-al]').length===0];
       const keep=MENU.sheets[0]; MENU.sheets[0]=[keep.flat()]; render(); syncPage(); const one=[a.disabled, getComputedStyle(a.closest('label')).opacity!=='1']; MENU.sheets[0]=keep; render(); syncPage();
@@ -1196,10 +1196,10 @@ def t47(b, f):
       return {ids:bs.map(b=>b.dataset.tab), oneLine:bs.every(b=>b.scrollWidth<=b.clientWidth+1 && b.getBoundingClientRect().height<=44), rows:rows.length, perRow1:rs.filter(r=>Math.round(r.top)===rows[0]).length,
         lastFill:Math.abs(last.reduce((a,r)=>a+r.width,0)-bar.width)<=1, titles:bs.every(b=>b.title.length>3)} }"""
     t = {'blank': c.js(TB)}
-    HOME = {'f-font':'look','f-theme':'look','f-paper':'look','f-secstyle':'look','f-leader':'look','f-mark':'look','f-topmode':'top','f-noren':'top','f-logo':'top','g-art':'top','f-layout':'size','sz-range':'size','b-fit':'size','f-align':'size','f-title':'content','f-notes':'content','f-pageno':'content','f-lang':'content','btpick':'wine'}
+    HOME = {'f-font':'look','f-theme':'look','f-paper':'look','f-topmode':'top','f-title':'top','f-noren':'top','f-logo':'top','f-layout':'menu','sz-range':'menu','b-fit':'menu','f-secstyle':'menu','f-align':'menu','f-mark':'menu','f-leader':'menu','f-lang':'menu','btpick':'menu','f-notes':'foot','f-pageno':'foot','g-art':'deco'}   # 333번
     t['home'] = c.js("(h)=>Object.entries(h).filter(([id,tab])=>(document.getElementById(id)?.closest('.ptab')||{dataset:{}}).dataset.tab!==tab).map(e=>e[0])", HOME)
     t['vis'] = {}
-    for tab in ('look', 'top', 'size', 'content'):
+    for tab in ('look', 'top', 'menu', 'foot', 'deco'):
         c.js(f"()=>document.querySelector('#ptabs [data-tab=\"{tab}\"]').click()"); pg.wait_for_timeout(150)
         t['vis'][tab] = c.js("()=>[!document.querySelector('#pgbar').hidden, !document.querySelector('#pgcopy').hidden, [...document.querySelectorAll('.ptab.on .pgonly')].length]")
     c.js("()=>[...document.querySelectorAll('.pagebar button')].find(b=>b.textContent.includes('와인 장 추가')).click()"); pg.wait_for_timeout(400)
@@ -1354,12 +1354,13 @@ def t54(b, f):
     pg.click('#st-photo'); pg.wait_for_timeout(500)
     out['off'] = [c.js("()=>document.querySelector('#st-way [data-w=\"gem\"]').disabled"), c.js("()=>document.querySelector('#st-gemgo').disabled"), c.js("()=>stWay") == 'app', '쉬고' in c.js("()=>document.querySelector('#st-gemmsg').textContent")]
     out['err'] += c.errs; c.close()
-    RULE318 = """(scope)=>{ const root=document.querySelector(scope); if(!root) return ['no '+scope]; const bad=[];   // 318번. 규칙 I — 안내창 단추는 40 · 완전히 둥글게 · 켜진 칸은 옅은 색, 꾸미기 창 글자는 12 이상
+    RULE318 = """(scope)=>{ const root=document.querySelector(scope); if(!root) return ['no '+scope]; const bad=[];   // 318번. 규칙 I — 안내창 단추는 40 · (333번) 8px 둥근 네모(아이콘 단추만 동그라미) · 켜진 칸은 옅은 색, 꾸미기 창 글자는 12 이상
       root.querySelectorAll('button, select').forEach(b=>{ const r=b.getBoundingClientRect(); if(!r.width||!r.height) return; const cs=getComputedStyle(b), nm=(b.getAttribute('aria-label')||b.textContent||'').trim().slice(0,12);
         if (root.matches('dialog')){
           if (b.closest('.st-cpaper, .st-opt, .st-row, .st-swb') || b.matches('.st-opt, .st-row, .st-swb')) return;   // 종이 모형 · 고르는 카드는 따로
-          const rad=parseFloat(cs.borderTopLeftRadius), round = cs.borderTopLeftRadius.endsWith('%') || rad >= r.height/2 - 0.5 || b.closest('.st-seg');
-          if (Math.abs(r.height-40) > 0.5) bad.push(nm+' h'+Math.round(r.height)); else if (!round) bad.push(nm+' 모서리');
+          const rad=parseFloat(cs.borderTopLeftRadius), circle = cs.borderTopLeftRadius.endsWith('%') || rad >= r.height/2 - 0.5;   // 333번 — 글자 단추는 8px 둥근 네모, 아이콘만 있는 단추만 동그라미
+          const icon = b.matches('.dlg-x, .st-icon, .st-rot button'), shape = icon ? circle : (Math.abs(rad-8) <= 0.5 || (b.closest('.st-seg') && rad === 0));
+          if (Math.abs(r.height-40) > 0.5) bad.push(nm+' h'+Math.round(r.height)); else if (!shape) bad.push(nm+' 모서리');
           if (b.classList.contains('on') && cs.backgroundColor==='rgb(36, 28, 18)') bad.push(nm+' 켜짐 검정');
         } else if (!b.closest('.wfrow') && parseFloat(cs.fontSize) < 12) bad.push(nm+' '+cs.fontSize);
       }); return bad; }"""
@@ -1821,11 +1822,12 @@ def judge(t, r):
             w331 = r.get('wine331') or {}   # 331번 — 와인 분류가 없으면 와인 기능이 안 보인다
             ok331 = bool(w331) and w331['blank'] == [0, True] and w331['wine_added'][0] > 0 and w331['wine_added'][1] is False and w331['saved_no_hidden'] and w331['undone'] == [0, True, 1, True] and not w331['err']
             t332 = r.get('tabs332') or {}   # 332번 — 하려는 일로 나눈 탭
-            G = lambda x, ids: x and x['ids'] == ids and x['oneLine'] and x['rows'] == 2 and x['perRow1'] == 3 and x['lastFill'] and x['titles']
-            ok332 = bool(t332) and G(t332['blank'], ['look','top','size','content']) and G(t332['wine'], ['look','top','size','content','wine']) and t332['home'] == [] \
+            T5 = ['look','top','menu','foot','deco']   # 333번 — 한 줄 다섯, 와인 장을 넣어도 탭은 그대로
+            G = lambda x, ids: x and x['ids'] == ids and x['oneLine'] and x['rows'] == 1 and x['titles']
+            ok332 = bool(t332) and G(t332['blank'], T5) and G(t332['wine'], T5) and t332['home'] == [] \
                     and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
             ok = ok and ok330 and ok331 and ok332
-            return ok, f"332번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 쪽 고르기 · 다른 장에 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
+            return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
