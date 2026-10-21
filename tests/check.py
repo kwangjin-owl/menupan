@@ -1215,7 +1215,8 @@ def t47(b, f):
         [...document.querySelectorAll('#panel .pgrp')].every(h=>getComputedStyle(h).letterSpacing==='normal'),
         (document.querySelector('#b-bold')||{}).type==='checkbox',
         [...document.querySelectorAll('#panel .stepg > button')].length===4 && [...document.querySelectorAll('#panel .stepg > button')].filter(b=>b.offsetParent).every(b=>Math.round(b.getBoundingClientRect().height)===28),
-        !!lb && !!pk && lb.getBoundingClientRect().bottom <= pk.getBoundingClientRect().top + 1 ] }""")
+        !!lb && !!pk && lb.getBoundingClientRect().bottom <= pk.getBoundingClientRect().top + 1,
+        [...document.querySelectorAll('#panel .stepg > button')].every(b=>getComputedStyle(b).borderTopLeftRadius==='0px' && getComputedStyle(b).borderTopRightRadius==='0px') ] }""")   # 336번 — 한 덩어리 [− | +]의 칸은 안쪽 모서리 0(꾸미기 창 「단추 8px」이 이겨 + 칸이 따로 싸여 보였다)
     t['err'] = c.errs; c.close()
     out['tabs332'] = t
     return out
@@ -1225,7 +1226,7 @@ def t48(b, f):
     c = Ctx(b, f); w = lambda: c.js("()=>[...document.querySelectorAll('.bar button')].map(e=>[e.id, +e.getBoundingClientRect().width.toFixed(1)])")
     a = w(); c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); e = w()
     c.js("(sel)=>{const e=document.querySelector(sel), t=e.closest('.ptab'); panelTab=t.dataset.tab; if (e.closest('.pblock[data-kind=wine]')) panelPage=Math.max(0, MENU.sheets.findIndex((_,i)=>sheetKind(i)!=='menu')); syncPageTabs(); syncPage();}", "#btpick"); c.pg.wait_for_timeout(150)   # 332번 — 병 단추는 [와인] 탭(손잡이가 든 탭을 찾아 연다)
-    h = c.js("()=>[[...document.querySelectorAll('#btpick button')].map(b=>Math.round(b.getBoundingClientRect().height)), [...document.querySelectorAll('.wfrow button')].map(b=>Math.round(b.getBoundingClientRect().height))]")   # 268번 — 병 단추 · ▲▼ 높이
+    h = c.js("()=>[[...document.querySelectorAll('#btpick button')].map(b=>Math.round(b.getBoundingClientRect().height)), [...document.querySelectorAll('.wfrow button')].map(b=>Math.round(b.getBoundingClientRect().height - b.closest('.wfrow').getBoundingClientRect().height))]")   # 268번 — 병 단추 높이 · ▲▼ 는 (높이 − 그 줄 높이) — 336번: 숫자 대신 줄과 견준다
     c.pg.click('#b-edit'); c.pg.wait_for_timeout(200); z = w()
     # 308번 — ① 글자 크기 막대의 양 끝 = SCALE_MIN · SCALE_MAX(304번이 상한을 140% 로 올리며 막대만 120 에 남았다) · 140% 에서 막대 값도 140
     #         ② 줄 도구의 켜진 단추가 꺼진 단추와 달라 보일 것(300번부터 같았다) ③ 와인 카드 줄 도구가 한 줄(「추/천」으로 접혔다)
@@ -1808,7 +1809,7 @@ def judge(t, r):
         if t == 't48':
             d = {k: v for k, v in r['idle']}; e = {k: v for k, v in r['edit']}; z = {k: v for k, v in r['back']}
             bad = {k: (d[k], e.get(k)) for k in d if k and k in e and d[k] and e[k] and abs(d[k] - e[k]) > 0.5}   # 폭 0 = 그 모드에서 숨은 단추(편집 도구 막대) — 뺀다
-            hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 30   # 병은 병 모양이 보이는 높이 · ▲▼는 줄(32)보다 작게(268번 — 335번에 22 × 14 → 한 덩어리 [▲ | ▼] 30 × 26)
+            hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 0   # 병은 병 모양이 보이는 높이 · ▲▼는 그 줄보다 작게(268번). 335번에 24px 로 박힌 숫자가 새 크기를 막아 30 으로 고쳤다가, 336번에 숫자를 걷고 줄 높이와 견준다(음수 = 줄보다 작다)
             rg = r.get('range308') or [0] * 6; rok = rg[0] == rg[2] and rg[1] == rg[3] and rg[4] == rg[5] == rg[3]   # 308번 — 막대 끝 = 상한 상수 · 140% 에서 막대도 140
             def onoff(L):   # 켜진 단추와 꺼진 단추의 모양이 다른가 — 둘 다 있어야 잴 수 있다
                 on = {x[2] for x in L if x[1]}; off = {x[2] for x in L if not x[1]}
@@ -1838,7 +1839,7 @@ def judge(t, r):
             T5 = ['look','top','menu','foot','deco']   # 333번 — 한 줄 다섯, 와인 장을 넣어도 탭은 그대로
             G = lambda x, ids: x and x['ids'] == ids and x['oneLine'] and x['rows'] == 1 and x['titles']
             ok332 = bool(t332) and G(t332['blank'], T5) and G(t332['wine'], T5) and t332['home'] == [] \
-                    and t332.get('sticky') == [True, True, True] and t332.get('parts335') == [True, True, True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
+                    and t332.get('sticky') == [True, True, True] and t332.get('parts335') == [True, True, True, True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
             ok = ok and ok330 and ok331 and ok332
             return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"

@@ -1378,8 +1378,8 @@ html body #panel .slhead{display:flex;align-items:baseline;justify-content:space
 html body #panel .slbody{display:flex;align-items:center;gap:10px;margin-top:6px}
 html body #panel .slbody input[type=range]{flex:1;min-width:0;margin:0}
 html body #panel .stepg{display:inline-flex;flex:0 0 auto;border:1px solid rgba(240,230,205,.22);border-radius:8px;overflow:hidden}
-html body #panel .stepg > button{width:34px !important;height:28px !important;min-height:28px !important;padding:0 !important;border:0 !important;border-radius:0 !important;background:transparent !important;font-size:16px;line-height:1;color:#efe3c9;box-shadow:none !important}
-html body #panel .stepg > button + button{border-left:1px solid rgba(240,230,205,.22) !important}
+html body #panel .stepg > button.stp:not(#_){width:34px !important;height:28px !important;min-height:28px !important;padding:0 !important;border:0 !important;border-radius:0 !important;background:transparent !important;font-size:16px;line-height:1;color:#efe3c9;box-shadow:none !important}
+html body #panel .stepg > button.stp + button.stp:not(#_){border-left:1px solid rgba(240,230,205,.22) !important}   /* 336번. :not(#_) — 꾸미기 창 전체 「단추 모서리 8px」(id 둘 · 이름 둘)이 이겨 + 칸 왼쪽이 둥글게 휘어 +만 싸인 것처럼 보였다(사용자). 두 규칙 다 !important 라 선택자 무게로 갈린다 — id 둘 · 이름 둘 이상이어야 이긴다(재 보고 잡음) */
 html body #panel .stepg > button:hover{background:rgba(240,230,205,.08) !important}
 html body #panel [data-only][hidden]{display:none}
 html body #panel .fldone{display:block}
@@ -1401,9 +1401,9 @@ html body #panel input[type=color]{width:32px !important;height:32px !important;
 html body #panel .btview button.del, html body #panel #b-artsame{height:auto !important;min-height:0 !important;width:auto !important;padding:2px 2px !important;border:0 !important;border-radius:4px !important;background:none !important;color:rgba(240,230,205,.72);font-size:12px;font-weight:400;text-decoration:underline;text-underline-offset:3px;box-shadow:none !important}   /* ④ 부수 동작은 글자 단추 */
 html body #panel .btview button.del:disabled, html body #panel #b-artsame:disabled, html body #panel .tbtn:disabled{color:rgba(240,230,205,.32);text-decoration:none}
 html body #panel #b-artsame{display:block;margin-left:auto}
-html body #panel .wfrow > button{width:30px !important;height:26px !important;min-height:26px !important;padding:0 !important;border:1px solid rgba(240,230,205,.22) !important;border-radius:0 !important;background:transparent !important;display:inline-grid;place-items:center;box-shadow:none !important}   /* ⑤ ▲ ▼ 한 덩어리 */
-html body #panel .wfrow > button:first-of-type{margin-left:auto;border-radius:8px 0 0 8px !important}
-html body #panel .wfrow > button + button{border-left:0 !important;border-radius:0 8px 8px 0 !important}
+html body #panel .wfrow > button:not(#_):not(.x_){width:30px !important;height:26px !important;min-height:26px !important;padding:0 !important;border:1px solid rgba(240,230,205,.22) !important;border-radius:0 !important;background:transparent !important;display:inline-grid;place-items:center;box-shadow:none !important}   /* ⑤ ▲ ▼ 한 덩어리 */
+html body #panel .wfrow > button:first-of-type:not(#_){margin-left:auto;border-radius:8px 0 0 8px !important}   /* 336번. 같은 까닭으로 ▲ 도 네 모서리가 둥글었다 */
+html body #panel .wfrow > button + button:not(#_):not(.x_){border-left:0 !important;border-radius:0 8px 8px 0 !important}
 html body #panel .wfrow > button svg{width:10px;height:10px}
 html body #panel .wfrow > button:disabled{opacity:.35}
 html body #panel input[type=checkbox]:not(.m3sw){accent-color:#b9a57a;width:16px;height:16px}
