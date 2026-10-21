@@ -1604,7 +1604,7 @@ def t57(b, f):
         out['start'] = c.js("()=>[L2(), document.querySelector('#f-tr').disabled]")
         pg.evaluate("(sel)=>{const e=document.querySelector(sel), t=e.closest('.ptab'); panelTab=t.dataset.tab; if (e.closest('.pblock[data-kind=wine]')) panelPage=Math.max(0, MENU.sheets.findIndex((_,i)=>sheetKind(i)!=='menu')); syncPageTabs(); syncPage();}", '#f-lang'); pg.wait_for_timeout(150); pg.select_option('#f-lang', 'zh'); pg.wait_for_timeout(200)   # 332번 — 외국어는 [넣을 것]
         out['zh'] = c.js("()=>[SETTINGS.lang2, 'bilingual' in SETTINGS, document.querySelector('#f-tr').disabled, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0, document.querySelector('#font-link').href.includes('SC')]")
-        pg.click('#f-tr'); pg.wait_for_timeout(500)
+        pg.click('#f-tr'); pg.wait_for_timeout(1500)   # 339번 — 500ms 는 검사를 여럿 동시에 돌릴 때(부하) 번역이 화면에 반영되기 전에 쟀다(단독으로는 통과)
         out['sent'] = [len(sent), sent[0]['lang'] if sent else None, len(sent[0]['texts']) == len(set(sent[0]['texts'])) if sent else None]
         out['filled'] = c.js("""()=>{let miss=0,wine=0,ds=0; MENU.sheets.forEach(s=>s.forEach(c=>c.forEach(x=>{ if(String(x.name||'').trim() && !x.zh) miss++;
             (x.items||[]).forEach(i=>{ if(x.wine){ if(i.zh) wine++; return; } if(String(i.name||'').trim() && !i.zh) miss++; if(String(i.desc||'').trim() && !i.desc_zh) miss++; if(i.desc_zh) ds++; }); }))); return [miss, wine, ds > 0]}""")
@@ -1731,6 +1731,16 @@ def t58(b, f):
                   return {inside:b.left>=s.left-.5&&b.right<=s.right+.5&&b.top>=s.top-.5&&b.bottom<=s.bottom+.5, inFoot:c>=4?(!!fo&&fo.contains(q)):!fo||!fo.contains(q), mm:b.width/96*25.4, want:Math.min(30,Math.max(20,(+q.dataset.n)*0.5)), seal:sl, text:tx, sealInCell:(P(0).seals||[]).some(x=>x.cell===c)}}""", c)
                 if not (r['inside'] and r['inFoot'] and r['seal'] == 0 and r['text'] == 0 and abs(r['mm'] - r['want']) < 0.3 and not r['sealInCell']): bad.append((o, c, r))
         out['layout_bad'] = bad
+        # 339번 — 아래 칸 QR 이 있을 때 「한 장에 맞춤」이 QR 자리를 피하는지(완성본에서 글자가 QR 에 안 닿음 · 넘침 아님). 338번 판은 글자가 QR 위로 넘어갔다
+        pg.evaluate("()=>{SETTINGS.orient='portrait'; applyLook(); P(0).scale=1; P(0).seals=[];}")
+        fit_bad = []
+        for cells in ([5], [4], [4, 5]):
+            r = pg.evaluate("""(cells)=>{ P(0).qrs=cells.map(c=>({cell:c,kind:'url',url:'naver.me/abcd',label:'네이버 지도'})); P(0).autofit=true; syncControls(); applyLook(); render(); fitNow(); applyScale(); topBands();
+              document.body.classList.add('preview'); const sh=document.querySelector('.sheet[data-pi="0"]'); let n=0;
+              sh.querySelectorAll('.qr.qf').forEach(q=>{const b=q.getBoundingClientRect(); sh.querySelectorAll('[data-path]').forEach(t=>{ if(q.contains(t)||!t.textContent.trim()||!t.offsetParent) return; const e=t.getBoundingClientRect(); if(e.width>0&&Math.min(b.right,e.right)-Math.max(b.left,e.left)>2&&Math.min(b.bottom,e.bottom)-Math.max(b.top,e.top)>2) n++; }); });
+              const o=overA4(0); document.body.classList.remove('preview'); return {n, over:o, scale:P(0).scale}}""", cells)
+            if r['n'] or r['over']: fit_bad.append((cells, r))
+        out['fit_bad'] = fit_bad
         pg.evaluate("()=>{SETTINGS.orient='portrait'; applyLook(); P(0).scale=1; P(0).seals=[]; delete P(0).qrs; render(); topBands();}")
         out['overlap'] = [max(pg.evaluate("(c)=>{P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd'}]; render(); topBands(); return qrOverlap(0)}", c) for c in range(4)),
                           pg.evaluate("()=>{delete P(0).qrs; render(); return qrOverlap(0)}")]   # 글이 빽빽한 알프스 1쪽에서는 어느 칸이든 가린다 · QR 이 없으면 0
@@ -1767,9 +1777,66 @@ def t58(b, f):
         out['fail'] = str(e).split('\n')[0][:200]
     ctx.close(); return out
 
+# ───────────────────────── 59. 그림 균일(339번)
+def t59(b, f):
+    """모든 그림을 캔버스로 그려 **아래끝이 같은 선**(488 ~ 500 — 알프스 때 그림은 491 ~ 499)이고 **콘셉트 묶음의 그림은 높이 300 이상**인지.
+    329번에 새로 그린 열여섯은 아래끝이 469 ~ 494 로 칸 아래에서 들쭉날쭉했고 꼬치 151 · 김밥 194 · 전 272 로 납작했다(사용자: 균일하게 · 콘셉트에 어울리게 검토)"""
+    out = {'err': []}
+    c = Ctx(b, f)
+    try:
+        res = c.js("""async ()=>{ const W=880,H=520, out={}; const keys=Object.keys(ART).filter(k=>k!=='none');
+          for(const k of keys){ let svg=ART[k].replace(/var\\(--paper\\)/g,'#ffffff').replace(/currentColor/g,'#000000'); if(!/xmlns=/.test(svg)) svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+            const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); await img.decode().catch(()=>{}); const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(img,0,0,W,H);
+            const d=g.getImageData(0,0,W,H).data; let y0=H,y1=-1,x0=W,x1=-1; for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(d[(y*W+x)*4]<128){ if(y<y0)y0=y; if(y>y1)y1=y; if(x<x0)x0=x; if(x>x1)x1=x; } }
+            out[k]=[y1, y1-y0+1, x1-x0+1]; }
+          const groups={}; [...document.querySelectorAll('#f-art optgroup')].forEach(o=>groups[o.label]=[...o.querySelectorAll('option')].map(x=>x.value));
+          return {m:out, groups}}""")
+        m = res['m']; concept = [k for g, ks in res['groups'].items() if g != '풍경 · 동물' for k in ks]
+        out['bottom_bad'] = {k: v[0] for k, v in m.items() if k not in ('bridge', 'pasta') and not (488 <= v[0] <= 500)}
+        out['flat'] = {k: m[k][1] for k in concept if k in m and m[k][1] < 300}
+        out['wide'] = {k: v[2] for k, v in m.items() if v[2] > 880}
+        out['n'] = [len(m), len(concept)]
+    except Exception as e:
+        out['fail'] = str(e).split('\n')[0][:200]
+    out['err'] += c.errs; c.close(); return out
+
+def t02b(b, f):
+    """339번. t02 에서 **그림 · 기타만** — 글꼴 × 도장 121 조합은 그림 · QR 과 상관없어 빼고(세로 8분 · 가로 14분 → 몇 분), 그림을 바꾼 판은 이것만 먼저 돌린다. 제출 직전에는 t02 전체를 한 번"""
+    out = {}
+    c = Ctx(b, f)
+    for o in ('portrait', 'landscape'):
+        arts = []
+        for a in ['none','horse','zebra','ibex','mountain','fir','cabin','night','bridge','highball','beer','soju','sake','wine','pasta','beerpasta','edelweiss','vine',
+                  'ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern']:   # 329번. 콘셉트별 그림 16
+            c.pg.goto(url(f))
+            r = c.js("""([o,a,sel])=>{SETTINGS.orient=o; MENU.sheets.forEach((_,i)=>{ const p=P(i); if (typeof normArts==='function') p.arts = a==='none' ? [] : [0,1,2,3,4,5].map(c=>({cell:c, art:a})); else p.art=a; }); syncControls(); applyLook(); render(); fitNow(); applyScale();
+              let hid=0, n=0; document.querySelectorAll(sel).forEach(e=>{ if(!e.offsetHeight) return; const r=e.getBoundingClientRect(); n++;
+                if (r.top<0||r.bottom>innerHeight){ e.scrollIntoView({block:'center'}); }
+                const q=e.getBoundingClientRect(); const hit=document.elementFromPoint(q.left+Math.min(4,q.width/2), q.top+q.height/2);
+                if (hit && hit.closest('.art')) hid++; });
+              return [[...MENU.sheets.keys()].map(i=>overA4(i)), hid, n]}""", [o, a, INK_SEL])
+            arts.append([a] + r)
+        out['art_' + o] = [x for x in arts if any(x[1]) or x[2]]
+        out['art_checked_' + o] = sum(x[3] for x in arts)
+        misc = []
+        for key, vals in [('shape', SHAPES), ('mark', ['★','●','◆','✿']), ('pageno', ['of','num','none']),
+                          ('bilingual', [False, True]), ('origin', [False, True]), ('bold', [False, True])]:
+            for v in vals:
+                c.pg.goto(url(f))
+                r = c.js("""([o,k,v,KINDS])=>{SETTINGS.orient=o;
+                  if(k==='shape'){ SETTINGS.bottles={}; KINDS.forEach(x=>SETTINGS.bottles[x]={shape:v}); }
+                  else if(k==='origin'){ MENU.sheets.forEach((_,i)=>{P(i).showOrigin=v; F(i).origin=v?'돼지고기: 국내산, 쌀: 국내산, 배추김치(배추 중국산, 고춧가루 국내산)':'';}); }
+                  else SETTINGS[k]=v;
+                  syncControls(); applyLook(); render(); fitNow(); applyScale(); return [...MENU.sheets.keys()].map(i=>overA4(i))}""", [o, key, v, KINDS])
+                misc.append([key, v, r])
+        out['misc_' + o] = [x for x in misc if any(x[2])]
+        out['misc_n_' + o] = len(misc)
+    out['err'] = c.errs; c.close(); return out
+
 def judge(t, r):
     """(통과?, 한 줄 요약). None 이면 사람이 볼 것"""
     try:
+        if t == 't02b': ok = not any(r[k] for k in r if k.startswith(('art_', 'misc_')) and not k.endswith(('_n_portrait', '_n_landscape', 'checked_portrait', 'checked_landscape'))) and not r['err']; return ok, f"넘침·가림 {'0' if ok else '있음'} (그림 {r['art_checked_portrait']}+{r['art_checked_landscape']}칸 · 기타 {r['misc_n_portrait']}×2)"
         if t == 't02': ok = not any(r[k] for k in r if k.startswith(('font_seal_', 'art_', 'misc_')) and not k.endswith(('_n_portrait', '_n_landscape', 'checked_portrait', 'checked_landscape'))) and not r['err']; return ok, f"넘침·가림 {'0' if ok else '있음'} (글꼴×도장 {r['font_seal_n_portrait']}×2)"
         if t == 't03': return None, '상단 모양 그림을 눈으로: _check/res/noren_*.png'
         if t == 't04': ok = r['reach'][0] == r['reach'][1] and all(v is True or (isinstance(v, list) and v[1]) for v in r['fill'].values()) and all(r['act'].values()); return (True if ok else None), f"도달 {r['reach'][0]}/{r['reach'][1]} · 못 닿은 것 {r['unreached_kinds']}(막대 근처면 가운데로 옮겨 다시) · 빈 칸 {r['fill']} · 동작 {r['act']}"
@@ -1916,27 +1983,31 @@ def judge(t, r):
                     and t332.get('sticky') == [True, True, True] and t332.get('parts335') == [True, True, True, True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
             ok = ok and ok330 and ok331 and ok332
             return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
+        if t == 't59':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and r['n'][0] >= 33 and not r['err']
+            return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'}"
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
             pn = r['panel']; sv = r['saved']; ex = r['excl']
             want_norm = [[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, ''] ]
-            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and r['overlap'][0] > 0 and r['overlap'][1] == 0
+            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['overlap'][0] > 0 and r['overlap'][1] == 0
                   and 'f-qrkind' in pn[0] and not any(k in pn[0] for k in ('qr-url', 'qr-wifi', 'f-qrlabel')) and all(k in pn[1] for k in ('f-qrurl', 'f-qrlabel')) and 'qr-wifi' not in pn[1] and pn[2][1:] == [True, True] and pn[2][0] == [{'cell': 1, 'kind': 'url', 'url': 'instagram.com/alps', 'label': '인스타'}]
                   and 'qr-wifi' in pn[3] and 'f-qrssid' in pn[3] and 'qr-url' not in pn[3] and pn[4][0] == [{'cell': 1, 'kind': 'wifi', 'ssid': '알프스', 'pass': '', 'enc': 'nopass', 'label': '인스타'}] and pn[4][1] is True and pn[5] == [True, True, True]
                   and sv == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, '']], False, False] and ex == [[False, True], [True, False], [4]] and not r['err'])
-            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 칸 여섯 × 두 방향 — 도장과 같은 자리 · 아래 칸은 바닥 글 줄 안 · 글자와 안 겹침 · 20 ~ 30mm · 배치 문제 {r['layout_bad'] or '없음'} · 한 칸에 도장 · QR 하나만 [QR 고르면, 도장 고르면, 옛 파일] {r['excl']} · 가림 알림 [글 빽빽한 쪽, QR 없음] {r['overlap']} · 꾸미기 창 {pn} · 저장했다 연 뒤 {sv} · 망가진 값 정리 {r['norm']}"
+            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 칸 여섯 × 두 방향 — 도장과 같은 자리 · 아래 칸은 바닥 글 줄 안 · 글자와 안 겹침 · 20 ~ 30mm · 배치 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + 아래 칸 QR 겹침 {r['fit_bad'] or '없음'} · 한 칸에 도장 · QR 하나만 [QR 고르면, 도장 고르면, 옛 파일] {r['excl']} · 가림 알림 [글 빽빽한 쪽, QR 없음] {r['overlap']} · 꾸미기 창 {pn} · 저장했다 연 뒤 {sv} · 망가진 값 정리 {r['norm']}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
