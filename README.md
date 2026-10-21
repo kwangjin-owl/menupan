@@ -67,3 +67,7 @@ AI가 "넣었습니다"라고 답해도 실제로는 안 들어간 일이 반복
 ## 구조
 
 화면(`index.html`)은 버셀에서 서빙합니다. 사진 읽기는 버셀 서버 함수(`api/read.js`)가 제미나이를 부르고, **AI 키는 서버에만** 둡니다 — 쓰는 사람은 키가 필요 없습니다.
+
+## 쓴 코드
+
+- QR 을 만드는 코드는 [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4(Kazuhiko Arase, MIT 허가)입니다. `index.html` 맨 위 스크립트에 저작권 · 허가 표시와 함께 그대로 들어 있습니다. 인터넷 없이 QR 이 만들어집니다.

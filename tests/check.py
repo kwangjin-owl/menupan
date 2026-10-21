@@ -1461,7 +1461,7 @@ def t54(b, f):
           const q={seals:[{cell:1,seal:'rword',text:'가 나 다 라 마'},{cell:2,seal:'tri',text:'x'}]}; normSeals(q,[]); const norm=JSON.stringify(q.seals)==='[{"cell":1,"seal":"rword","text":"가나다라"},{"cell":2,"seal":"tri"}]';
           const lat=sealSvg('sq','CAFE').includes('>CA<') && sealSvg('sq','CAFE').includes('>FE<'), ko4=(()=>{ const d=document.createElement('div'); d.innerHTML=sealSvg('sq','솔밭식당'); const ts=[...d.querySelectorAll('text')].map(t=>[+t.getAttribute('x'),+t.getAttribute('y'),t.textContent]); return ts[0][2]==='솔' && ts[1][2]==='밭' && ts[0][1]===ts[1][1] && ts[0][0]<ts[1][0] && ts[2][2]==='식' && ts[2][1]>ts[0][1] })(),   /* 328번. 넉 자 가로 차례 */ noAlps=!JSON.stringify(SEALS).includes('알프스');
           set('none'); return [dflt, own, sym, norm, lat && ko4, noAlps] }""")   # 327번. 글자 도장 — 비우면 상호명 · 적은 글자 · 기호 도장엔 글자 없음 · 정리(4자 · 빈칸 · 기호 도장 글자 버림) · 영문 가로 · 「알프스」가 박힌 도장 없음
-        out['p326'] = c.js("""()=>{ const b=[...document.querySelectorAll('#art-cell .cellblk')], h=b.map(x=>(x.querySelector('.blkhd')||{}).textContent);
+        out['p326'] = c.js("""()=>{ const b=[...document.querySelectorAll('#art-cell .cellblk')].filter(x=>!x.classList.contains('qrblk')), h=b.map(x=>(x.querySelector('.blkhd')||{}).textContent);   /* 337번 — QR 묶음은 t58 */
           return [ b.length===2 && h[0]==='그림' && h[1]==='도장', b.length===2 && b[1].getBoundingClientRect().top >= b[0].getBoundingClientRect().bottom && getComputedStyle(b[1]).borderTopStyle==='solid', !!b[0] && b[0].contains(document.querySelector('#f-art')) && !!b[1] && b[1].contains(document.querySelector('#f-seal')) && b[1].contains(document.querySelector('#c-seal')) ] }""")   # 326번. 칸 안 그림 · 도장 두 묶음(제목 · 구분선)
         out['p323'] = c.js("""()=>{ const P0=P(panelPage), cells=[...document.querySelectorAll('#g-art .pcells > button')], fs=document.querySelector('#f-seal'), set=v=>{ fs.value=v; fs.dispatchEvent(new Event('change')); };
           P0.seals=[]; render(); syncPage(); cells[0].click(); set('tri'); cells[5].click(); set('star'); const two=JSON.stringify(P0.seals.map(x=>[x.cell,x.seal]))==='[[0,"tri"],[5,"star"]]';
@@ -1693,6 +1693,72 @@ def t55(b, f):
     return out
 
 def near(x, y, t): return abs(x - y) <= t
+# ───────────────────────── 58. QR (337번)
+def t58(b, f):
+    """만든 QR 을 읽는 도구(zxing-cpp)로 **다시 읽어** 넣은 값 그대로인지 · 여섯 칸 × 두 방향에서 종이 안 · 바닥 글 위 · 같은 칸의 도장과 안 겹치는지 · 약 26mm ·
+    메뉴 글자를 가리면 꾸미기 창이 알리는지 · 꾸미기 창 손잡이 · 저장했다 열어도 남는지 · 망가진 값 정리"""
+    out = {'err': []}
+    try: import zxingcpp
+    except Exception: out['no_reader'] = True; return out
+    ctx = b.new_context(viewport={'width': 1400, 'height': 1300}, device_scale_factor=3, accept_downloads=True); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    def read(sel):
+        png = pg.query_selector(sel).screenshot(); return [x.text for x in zxingcpp.read_barcodes(Image.open(io.BytesIO(png)).convert('RGB'))]
+    def esc(v): return re.sub(r'([\\;,:"])', r'\\\1', v)
+    def wifi(ssid, pw, enc): return 'WIFI:T:%s;S:%s;%s;' % ('nopass' if enc == 'nopass' else 'WPA', esc(ssid), '' if enc == 'nopass' else 'P:' + esc(pw) + ';')
+    try:
+        pg.goto(url(f)); pg.wait_for_timeout(300)
+        cases = [({'kind': 'url', 'url': 'naver.me/abcd'}, 'https://naver.me/abcd'),
+                 ({'kind': 'url', 'url': 'https://map.naver.com/p/search/알프스 흑석'}, 'https://map.naver.com/p/search/알프스 흑석'),
+                 ({'kind': 'url', 'url': 'tel:01012345678'}, 'tel:01012345678'),
+                 ({'kind': 'wifi', 'ssid': '알프스 5G', 'pass': 'a;b:c,d"e\\f', 'enc': 'WPA'}, wifi('알프스 5G', 'a;b:c,d"e\\f', 'WPA')),
+                 ({'kind': 'wifi', 'ssid': 'cafe', 'pass': '', 'enc': 'nopass'}, wifi('cafe', '', 'nopass'))]
+        out['read'] = []
+        for q, want in cases:
+            q = dict(q, cell=5, label='러닝 코스')
+            pg.evaluate("(q)=>{P(0).qrs=[q]; render(); topBands();}", q); pg.wait_for_timeout(150)
+            out['read'].append(read('.sheet[data-pi="0"] .qr svg') == [want])
+        out['none_drawn'] = [pg.evaluate("()=>{P(0).qrs=[{cell:1,kind:'url',url:'ftp://x'},{cell:2,kind:'wifi',ssid:''},{cell:3,kind:'url',url:''}]; render(); return document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length}"),
+                             pg.evaluate("()=>{P(0).qrs=[{cell:1,kind:'url',url:'x'.repeat(300)}]; render(); return document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length}")]   # 못 읽는 주소 · 빈 칸은 안 그린다 · 300자도 그려진다
+        bad = []
+        for o in ('portrait', 'landscape'):
+            pg.evaluate("(o)=>{SETTINGS.orient=o; applyLook(); render(); topBands();}", o); pg.wait_for_timeout(150)
+            for c in range(6):
+                r = pg.evaluate("""(c)=>{ P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd',label:'네이버 지도'}]; P(0).seals=[{cell:c,seal:'word'}]; render(); topBands();
+                  const sh=document.querySelector('.sheet[data-pi="0"]'), q=sh.querySelector('.qr'), s=sh.getBoundingClientRect(), b=q.getBoundingClientRect(), fo=sh.querySelector('.foot'), fb=fo?fo.getBoundingClientRect():null;
+                  const sl=[...sh.querySelectorAll('.seal:not(.blank)')].map(e=>e.getBoundingClientRect()).filter(e=>Math.min(e.right,b.right)-Math.max(e.left,b.left)>1 && Math.min(e.bottom,b.bottom)-Math.max(e.top,b.top)>1).length;
+                  return {inside:b.left>=s.left-.5&&b.right<=s.right+.5&&b.top>=s.top-.5&&b.bottom<=s.bottom+.5, foot:(c>=4&&fb)?b.bottom<=fb.top+1:true, w:b.width, seal:sl}}""", c)
+                if not (r['inside'] and r['foot'] and r['seal'] == 0 and abs(r['w'] - 26 / 25.4 * 96) < 1.5): bad.append((o, c, r))
+        out['layout_bad'] = bad
+        pg.evaluate("()=>{SETTINGS.orient='portrait'; applyLook(); P(0).seals=[]; delete P(0).qrs; render(); topBands();}")
+        out['overlap'] = [max(pg.evaluate("(c)=>{P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd'}]; render(); topBands(); return qrOverlap(0)}", c) for c in range(6)),
+                          pg.evaluate("()=>{delete P(0).qrs; render(); return qrOverlap(0)}")]   # 글이 빽빽한 알프스 1쪽에서는 어느 칸이든 가린다 · QR 이 없으면 0
+        # 꾸미기 창 손잡이
+        pg.evaluate("()=>{panelPage=0; panelTab='deco'; document.querySelector('#b-edit').click(); syncPageTabs(); syncPage();}"); pg.wait_for_timeout(250)
+        pg.evaluate("()=>document.querySelectorAll('#g-art .pcells > button')[1].click()"); pg.wait_for_timeout(150)
+        vis = "()=>[...document.querySelectorAll('#panel .qrblk [id]')].filter(e=>e.offsetParent).map(e=>e.id).join(',')"
+        st = [pg.evaluate(vis)]
+        pg.click('#f-qrkind button[data-k="url"]'); pg.wait_for_timeout(120); st.append(pg.evaluate(vis))
+        pg.fill('#f-qrurl', 'instagram.com/alps'); pg.fill('#f-qrlabel', '인스타'); pg.wait_for_timeout(200)
+        st.append(pg.evaluate("()=>[P(0).qrs, !!document.querySelector('.sheet[data-pi=\"0\"] .qr'), !!document.querySelector('#g-art .pqr')]"))
+        pg.click('#f-qrkind button[data-k="wifi"]'); pg.wait_for_timeout(120); st.append(pg.evaluate(vis))
+        pg.fill('#f-qrssid', '알프스'); pg.select_option('#f-qrenc', 'nopass'); pg.wait_for_timeout(200)
+        st.append(pg.evaluate("()=>[P(0).qrs, document.querySelector('#qr-passrow').hidden]"))
+        pg.click('#f-qrkind button[data-k="none"]'); pg.wait_for_timeout(150)
+        st.append(pg.evaluate("()=>[P(0).qrs === undefined, !document.querySelector('.qr'), !document.querySelector('#g-art .pqr')]"))
+        out['panel'] = st
+        # 저장했다 열어도 남는지
+        pg.evaluate("()=>{P(0).qrs=[{cell:5,kind:'wifi',ssid:'알프스',pass:'pw;1',enc:'WPA',label:'와이파이'}]; render(); touch();}")
+        with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
+        d.value.save_as(D + 'qr_saved.html'); pg.goto(url('qr_saved.html')); pg.wait_for_timeout(300)
+        out['saved'] = [pg.evaluate("()=>JSON.stringify(P(0).qrs)"), pg.evaluate("()=>document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length")]
+        # 망가진 값
+        out['norm'] = pg.evaluate("""()=>{ const g={qrs:[{cell:2,kind:'url',url:'x'.repeat(500),label:'가'.repeat(40)},{cell:2,kind:'wifi'},{cell:9,kind:'url'},{cell:1,kind:'zz'},null,{cell:3,kind:'wifi',ssid:'a',pass:'b',enc:'nopass'}]}; normQrs(g);
+          const h={qrs:'망가짐'}; normQrs(h); const k={qrs:[null]}; normQrs(k); return [g.qrs.map(x=>[x.cell,x.kind,(x.url||x.ssid||'').length,(x.label||'').length,x.pass===undefined?'-':x.pass]), 'qrs' in h, 'qrs' in k] }""")
+    except Exception as e:
+        out['fail'] = str(e).split('\n')[0][:200]
+    ctx.close(); return out
+
 def judge(t, r):
     """(통과?, 한 줄 요약). None 이면 사람이 볼 것"""
     try:
@@ -1842,16 +1908,27 @@ def judge(t, r):
                     and t332.get('sticky') == [True, True, True] and t332.get('parts335') == [True, True, True, True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
             ok = ok and ok330 and ok331 and ok332
             return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
+        if t == 't58':
+            if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            pn = r['panel']; sv = r['saved']
+            want_norm = [[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, ''] ]
+            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and r['overlap'][0] > 0 and r['overlap'][1] == 0
+                  and 'f-qrkind' in pn[0] and not any(k in pn[0] for k in ('qr-url', 'qr-wifi', 'f-qrlabel')) and all(k in pn[1] for k in ('f-qrurl', 'f-qrlabel')) and 'qr-wifi' not in pn[1] and pn[2][1:] == [True, True] and pn[2][0] == [{'cell': 1, 'kind': 'url', 'url': 'instagram.com/alps', 'label': '인스타'}]
+                  and 'qr-wifi' in pn[3] and 'f-qrssid' in pn[3] and 'qr-url' not in pn[3] and pn[4][0] == [{'cell': 1, 'kind': 'wifi', 'ssid': '알프스', 'pass': '', 'enc': 'nopass', 'label': '인스타'}] and pn[4][1] is True and pn[5] == [True, True, True]
+                  and sv == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
+                  and r['norm'] == [[[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, '']], False, False] and not r['err'])
+            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 칸 여섯 × 두 방향 배치 문제 {r['layout_bad'] or '없음'} · 가림 알림 [글 빽빽한 쪽, QR 없음] {r['overlap']} · 꾸미기 창 {pn} · 저장했다 연 뒤 {sv} · 망가진 값 정리 {r['norm']}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
