@@ -1722,16 +1722,17 @@ def t58(b, f):
                              pg.evaluate("()=>{P(0).qrs=[{cell:1,kind:'url',url:'x'.repeat(300)}]; render(); return document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length}")]   # 못 읽는 주소 · 빈 칸은 안 그린다 · 300자도 그려진다
         bad = []
         for o in ('portrait', 'landscape'):
-            pg.evaluate("(o)=>{SETTINGS.orient=o; applyLook(); render(); topBands();}", o); pg.wait_for_timeout(150)
+            pg.evaluate("(o)=>{SETTINGS.orient=o; applyLook(); P(0).scale=0.55; render(); topBands();}", o); pg.wait_for_timeout(150)   # 338번 — 알프스 1쪽은 빽빽해 바닥 글 줄이 커지면 넘친다(넘침 표시가 알리는 기존 동작) · 글자를 줄여 놓고 자리만 본다
             for c in range(6):
-                r = pg.evaluate("""(c)=>{ P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd',label:'네이버 지도'}]; P(0).seals=[{cell:c,seal:'word'}]; render(); topBands();
-                  const sh=document.querySelector('.sheet[data-pi="0"]'), q=sh.querySelector('.qr'), s=sh.getBoundingClientRect(), b=q.getBoundingClientRect(), fo=sh.querySelector('.foot'), fb=fo?fo.getBoundingClientRect():null;
+                r = pg.evaluate("""(c)=>{ P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd',label:'네이버 지도'}]; P(0).seals=[0,1,2,3,4,5].filter(k=>k!==c).map(k=>({cell:k,seal:'word'})); normQrs(P(0)); render(); topBands();
+                  const sh=document.querySelector('.sheet[data-pi="0"]'), q=sh.querySelector('.qr'), s=sh.getBoundingClientRect(), b=q.getBoundingClientRect(), fo=sh.querySelector('.foot');
                   const sl=[...sh.querySelectorAll('.seal:not(.blank)')].map(e=>e.getBoundingClientRect()).filter(e=>Math.min(e.right,b.right)-Math.max(e.left,b.left)>1 && Math.min(e.bottom,b.bottom)-Math.max(e.top,b.top)>1).length;
-                  return {inside:b.left>=s.left-.5&&b.right<=s.right+.5&&b.top>=s.top-.5&&b.bottom<=s.bottom+.5, foot:(c>=4&&fb)?b.bottom<=fb.top+1:true, w:b.width, seal:sl}}""", c)
-                if not (r['inside'] and r['foot'] and r['seal'] == 0 and abs(r['w'] - 26 / 25.4 * 96) < 1.5): bad.append((o, c, r))
+                  const tx=c>=4?[...sh.querySelectorAll('[data-path]')].filter(t=>!q.contains(t)&&t.textContent.trim()).filter(t=>{const e=t.getBoundingClientRect(); return e.width>0&&Math.min(b.right,e.right)-Math.max(b.left,e.left)>2&&Math.min(b.bottom,e.bottom)-Math.max(b.top,e.top)>2}).length:0;
+                  return {inside:b.left>=s.left-.5&&b.right<=s.right+.5&&b.top>=s.top-.5&&b.bottom<=s.bottom+.5, inFoot:c>=4?(!!fo&&fo.contains(q)):!fo||!fo.contains(q), mm:b.width/96*25.4, want:Math.min(30,Math.max(20,(+q.dataset.n)*0.5)), seal:sl, text:tx, sealInCell:(P(0).seals||[]).some(x=>x.cell===c)}}""", c)
+                if not (r['inside'] and r['inFoot'] and r['seal'] == 0 and r['text'] == 0 and abs(r['mm'] - r['want']) < 0.3 and not r['sealInCell']): bad.append((o, c, r))
         out['layout_bad'] = bad
-        pg.evaluate("()=>{SETTINGS.orient='portrait'; applyLook(); P(0).seals=[]; delete P(0).qrs; render(); topBands();}")
-        out['overlap'] = [max(pg.evaluate("(c)=>{P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd'}]; render(); topBands(); return qrOverlap(0)}", c) for c in range(6)),
+        pg.evaluate("()=>{SETTINGS.orient='portrait'; applyLook(); P(0).scale=1; P(0).seals=[]; delete P(0).qrs; render(); topBands();}")
+        out['overlap'] = [max(pg.evaluate("(c)=>{P(0).qrs=[{cell:c,kind:'url',url:'naver.me/abcd'}]; render(); topBands(); return qrOverlap(0)}", c) for c in range(4)),
                           pg.evaluate("()=>{delete P(0).qrs; render(); return qrOverlap(0)}")]   # 글이 빽빽한 알프스 1쪽에서는 어느 칸이든 가린다 · QR 이 없으면 0
         # 꾸미기 창 손잡이
         pg.evaluate("()=>{panelPage=0; panelTab='deco'; document.querySelector('#b-edit').click(); syncPageTabs(); syncPage();}"); pg.wait_for_timeout(250)
@@ -1747,6 +1748,13 @@ def t58(b, f):
         pg.click('#f-qrkind button[data-k="none"]'); pg.wait_for_timeout(150)
         st.append(pg.evaluate("()=>[P(0).qrs === undefined, !document.querySelector('.qr'), !document.querySelector('#g-art .pqr')]"))
         out['panel'] = st
+        pg.evaluate("()=>{P(0).seals=[{cell:1,seal:'word'}]; delete P(0).qrs; render(); syncPage();}"); pg.wait_for_timeout(150)
+        pg.click('#f-qrkind button[data-k="url"]'); pg.wait_for_timeout(150)
+        ex1 = pg.evaluate("()=>[(P(0).seals||[]).some(x=>x.cell===1), (P(0).qrs||[]).some(x=>x.cell===1)]")   # QR 을 고르면 도장이 빠진다
+        pg.select_option('#f-seal', 'tri'); pg.wait_for_timeout(150)
+        ex2 = pg.evaluate("()=>[(P(0).seals||[]).some(x=>x.cell===1), (P(0).qrs||[]).some(x=>x.cell===1)]")   # 도장을 고르면 QR 이 빠진다
+        g = pg.evaluate("()=>{const g={seals:[{cell:3,seal:'word'},{cell:4,seal:'tri'}],qrs:[{cell:3,kind:'url',url:'a.kr'}]}; normQrs(g); return g.seals.map(x=>x.cell)}")   # 337번 판에서 둘 다 둔 파일 — QR 을 남긴다
+        out['excl'] = [ex1, ex2, g]
         # 저장했다 열어도 남는지
         pg.evaluate("()=>{P(0).qrs=[{cell:5,kind:'wifi',ssid:'알프스',pass:'pw;1',enc:'WPA',label:'와이파이'}]; render(); touch();}")
         with pg.expect_download() as d: pg.click('#b-file'); pg.click('#b-save')
@@ -1911,14 +1919,14 @@ def judge(t, r):
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            pn = r['panel']; sv = r['saved']
+            pn = r['panel']; sv = r['saved']; ex = r['excl']
             want_norm = [[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, ''] ]
             ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and r['overlap'][0] > 0 and r['overlap'][1] == 0
                   and 'f-qrkind' in pn[0] and not any(k in pn[0] for k in ('qr-url', 'qr-wifi', 'f-qrlabel')) and all(k in pn[1] for k in ('f-qrurl', 'f-qrlabel')) and 'qr-wifi' not in pn[1] and pn[2][1:] == [True, True] and pn[2][0] == [{'cell': 1, 'kind': 'url', 'url': 'instagram.com/alps', 'label': '인스타'}]
                   and 'qr-wifi' in pn[3] and 'f-qrssid' in pn[3] and 'qr-url' not in pn[3] and pn[4][0] == [{'cell': 1, 'kind': 'wifi', 'ssid': '알프스', 'pass': '', 'enc': 'nopass', 'label': '인스타'}] and pn[4][1] is True and pn[5] == [True, True, True]
                   and sv == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
-                  and r['norm'] == [[[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, '']], False, False] and not r['err'])
-            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 칸 여섯 × 두 방향 배치 문제 {r['layout_bad'] or '없음'} · 가림 알림 [글 빽빽한 쪽, QR 없음] {r['overlap']} · 꾸미기 창 {pn} · 저장했다 연 뒤 {sv} · 망가진 값 정리 {r['norm']}"
+                  and r['norm'] == [[[2, 'url', 300, 20, '-'], [3, 'wifi', 1, 0, '']], False, False] and ex == [[False, True], [True, False], [4]] and not r['err'])
+            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 칸 여섯 × 두 방향 — 도장과 같은 자리 · 아래 칸은 바닥 글 줄 안 · 글자와 안 겹침 · 20 ~ 30mm · 배치 문제 {r['layout_bad'] or '없음'} · 한 칸에 도장 · QR 하나만 [QR 고르면, 도장 고르면, 옛 파일] {r['excl']} · 가림 알림 [글 빽빽한 쪽, QR 없음] {r['overlap']} · 꾸미기 창 {pn} · 저장했다 연 뒤 {sv} · 망가진 값 정리 {r['norm']}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'

@@ -2401,16 +2401,17 @@ dialog .st-picrow.has .st-picimg{height:220px;max-width:100%}
    도장 · 그림 색 · 그림 진하기(변수) · 줄 도구 ★품설✕ 를 키움(9px · 높이 13 — 종이 위 도구 중 가장 작았다. 다른 도구는 그대로 — 사용자) · 확인 화면 가로 종이 · 빠진 메뉴 넣기 · 사진 크게 */
 .seal{color:var(--seal-col, var(--accent));z-index:0}   /* 296번. 그림처럼 글자 뒤 — 겹쳐도 글자가 읽히고, 완성본 인쇄(도장이 위)와 편집 중 인쇄(글자가 위)가 달랐다(t07) */
 
-/* 337번. **QR** — 흰 바탕 · 검은 칸의 SVG(둘레 흰 여백 4칸 포함 — 조합 색과 상관없이 어두운 종이에서도 읽힌다), 칸의 바깥 구석에 약 26mm. 글자 위에 놓이므로(z 2) 빈 칸에 두게 안내하고 가리면 꾸미기 창이 알린다.
-   같은 칸에 도장이 있으면(.sh) 안쪽으로 비킨다. 아래 칸은 바닥 글 위(--footh — topBands() 가 잰다) */
+/* 337 · 338번. **QR** — 흰 바탕 · 검은 칸의 SVG(둘레 흰 여백 4칸 포함 — 조합 색과 상관없이 어두운 종이에서도 읽힌다), 한 칸 0.5mm 라 20 ~ 30mm(qrNode 가 정한다).
+   **도장과 같은 자리**(한 칸에 둘 중 하나만): 위 · 가운데 칸은 종이 기준 absolute(도장과 같은 좌우 · 위 5mm · 가운데), **아래 칸은 바닥 글 줄 안**(`.qf` — 도장 자리 `.sealgap` 를 대신한다. 흐름에 있어 글자와 안 겹친다).
+   글자 위에 놓이는 위 · 가운데 칸은 빈 칸에 두게 안내하고 가리면 꾸미기 창이 알린다 */
 .qr{position:absolute;width:26mm;z-index:2;color:var(--ink);text-align:center;line-height:1.25;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .qr svg{display:block;width:100%;height:auto}
 .qr .qrl{display:block;margin-top:1mm;font-size:9pt;font-weight:700;word-break:keep-all}
 .qr.qx0{left:var(--mg);right:auto} .qr.qx1{right:var(--mg);left:auto}
-.qr.sh.qx0{left:calc(var(--mg) + var(--sealw) + 4mm)} .qr.sh.qx1{right:calc(var(--mg) + var(--sealw) + 4mm)}
 .qr.qy0{top:calc(var(--topband, 0px) + 5mm);bottom:auto}
 .qr.qy1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px)) / 2);bottom:auto;transform:translateY(-50%)}
-.qr.qy2{top:auto;bottom:calc(var(--footh, 11mm) + 3mm)}
+.qr.qf{position:relative;flex:none;align-self:flex-end}
+.qr.qy2{top:auto;bottom:11mm}   /* 바닥 글이 없는 장(spec.foot 아님)의 아래 칸 — 도장과 같은 자리 */
 .art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
 /* 299번 — 296번의 그림 키우기는 글자 단추로 바뀌어 걷었다 */   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
 
@@ -5619,6 +5620,7 @@ function qrSvg(text){   // → {svg, n}(n = 둘레 포함 한 변의 칸 수). �
 function qrNode(q, cls){   // 종이에 놓을 상자(없으면 null)
   const t = qrPayload(q), r = t && qrSvg(t); if (!r) return null;
   const w = document.createElement("div"); w.className = cls; w.dataset.cell = q.cell; w.dataset.n = r.n; w.innerHTML = r.svg;
+  w.style.width = Math.min(30, Math.max(20, r.n * 0.5)).toFixed(1) + "mm";   // 338번. 한 칸 0.5mm(읽기 편한 크기) — 짧은 주소는 20mm 로 작게, 긴 주소는 30mm 까지
   const lb = String(q.label || "").trim(); if (lb){ const l = document.createElement("span"); l.className = "qrl"; l.textContent = lb; w.appendChild(l); }
   return w;
 }
@@ -5633,7 +5635,8 @@ function normQrs(pg){   /* 337번. 망가진 값은 버리고 칸마다 하나 �
       else { const enc = x.enc === "nopass" ? "nopass" : "WPA"; q.ssid = clip(x.ssid, QR_MAX.ssid); q.pass = enc === "nopass" ? "" : clip(x.pass, QR_MAX.pass); q.enc = enc; }   // 키 순서를 고정(저장본이 같은 모양으로)
       const l = clip(x.label, QR_MAX.label); if (l) q.label = l; return q; })
     .sort((a, b) => a.cell - b.cell);
-  if (!pg.qrs.length) delete pg.qrs;
+  if (!pg.qrs.length){ delete pg.qrs; return; }
+  if (Array.isArray(pg.seals)){ const qc = new Set(pg.qrs.map(x => x.cell)); pg.seals = pg.seals.filter(x => !qc.has(x.cell)); }   // 338번. 한 칸에 도장과 QR 중 하나만 — 337번 판에서 둘 다 둔 파일은 QR 을 남긴다
 }
 /* ── 277번. 자동 저장 · 불러오기 — 파일을 열 때 가장 먼저 ─────────────────────────────────────────
    · 버셀 주소(http · https)에서만 자동 저장한다. 브라우저 저장소는 주소마다 따로라, 58번이 걷어낸 까닭("컴퓨터 파일끼리 저장소를 같이 써
@@ -7427,7 +7430,12 @@ function drawSheet(spec){
     row.appendChild(left);
     /* 155번. 도장을 없애도 **자리는 남긴다** — 빼면 바닥이 낮아져 spread() 가 남는 자리를 분류 사이로 나눠 위 내용이 통째로 움직인다.
        179번. 그 자리(`.sealgap`)만 바닥 줄에 남고, **그림은 종이 오른쪽 맨 아래에 고정**이다 — 배율 · 원산지에 안 흔들린다 */
-    row.appendChild(el("div","sealgap"));
+    /* 338번. 아래 칸 QR 은 **바닥 글 줄 안**에(도장 자리 `.sealgap` 를 대신한다) — 글자와 겹치지 않고 종이 아래가 그만큼 차지된다. 사용자: 「QR 코드 위치 장난해??? 그림이랑 도장이랑 위치를 타협해야 할 거 아니야」 */
+    const qIn = c => { const q = (PS.qrs || []).find(x => x.cell === c); return q && qrNode(q, "qr qf"); };
+    const qL = qIn(4), qR = qIn(5);
+    if (qL) row.insertBefore(qL, left);
+    else if (qR && sealAt(PS, 4)) row.insertBefore(el("div","sealgap"), left);   // 왼쪽 아래 도장이 바닥 글을 안 가리게
+    row.appendChild(qR || el("div","sealgap"));
     foot.appendChild(row);
     // 켜져 있어도 내용이 비었으면 안 그린다. 편집 중에는 빈 칸을 눌러 채울 수 있게 그린다
     if (PS.showOrigin !== false && (editing || String(FT.origin || "").trim())){
@@ -7453,7 +7461,8 @@ function drawSheet(spec){
   (sealOn ? PS.seals : [{ cell:SEAL_POS_DEF, seal:"word" }]).forEach(x => { const sp = x.cell, seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
     seal.dataset.cell = sp; seal.innerHTML = sealHTML(x); sheet.appendChild(seal); });   // 327번. 글자 도장은 적은 글자 · 상호명   // 323번. 칸마다 모양
   sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));
-  (PS.qrs || []).forEach(q => { const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy" + Math.floor(q.cell / 2) + (sealAt(PS, q.cell) ? " sh" : "")); if (n) sheet.appendChild(n); });   // 337번. QR — 같은 칸에 도장이 있으면 안쪽으로 비킨다   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
+  (PS.qrs || []).forEach(q => { if (q.cell >= 4 && spec.foot) return;   // 338번. 아래 칸은 바닥 글 줄 안에서 그린다(자리를 흐름에 남긴다 — 도장 자리와 같은 방식)
+    const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy" + Math.floor(q.cell / 2)); if (n) sheet.appendChild(n); });   // 337 · 338번. QR 은 도장과 같은 자리(칸마다 둘 중 하나만)   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
     const a = el("div","art ax" + (x.cell % 2) + " ay" + Math.floor(x.cell / 2)); a.dataset.cell = x.cell; a.innerHTML = ART[x.art]; artVars(a, x); sheet.appendChild(a); });
@@ -8361,8 +8370,7 @@ if (document.fonts && document.fonts.addEventListener)
 /* 303번. 장마다 상단 아래 끝(종이 위에서 px)을 `--topband` 로 — 칸(그림 · 도장 자리)이 그 아래부터다. 꾸미기 창 격자의 상단 띠도 이 비율 */
 function topBands(){
   document.querySelectorAll(".sheet").forEach(sh => { const n = sh.querySelector(".noren");
-    const t = n ? Math.max(0, n.getBoundingClientRect().bottom - sh.getBoundingClientRect().top) : 0; sh.style.setProperty("--topband", t.toFixed(1) + "px");
-    const f = sh.querySelector(".foot"); if (f) sh.style.setProperty("--footh", Math.max(0, sh.getBoundingClientRect().bottom - f.getBoundingClientRect().top).toFixed(1) + "px"); else sh.style.removeProperty("--footh"); });   // 337번. 아래 칸 QR 은 바닥 글 위에
+    const t = n ? Math.max(0, n.getBoundingClientRect().bottom - sh.getBoundingClientRect().top) : 0; sh.style.setProperty("--topband", t.toFixed(1) + "px"); });
   document.querySelectorAll("#g-art .pband").forEach(b => b.style.height = bandPct(panelPage) + "%");
 }
 function bandPct(i){ const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 15;
@@ -8925,6 +8933,7 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
 $("#f-seal").onchange   = e => { const pg = P(panelPage), old = sealAt(pg, panelCell), v = e.target.value;   // 323번. 고른 칸의 도장 — 모양을 바꿔도 그 칸의 색은 남긴다
   pg.seals = (pg.seals || []).filter(x => x.cell !== panelCell);
   if (v !== "none"){ const q = Object.assign({}, old, { cell:panelCell, seal:v }); if (!SEAL_TEXT[v]) delete q.text; pg.seals.push(q); }   // 327번. 기호 도장엔 글자가 없다
+  if (v !== "none" && qrAt(pg, panelCell)){ pg.qrs = pg.qrs.filter(x => x.cell !== panelCell); if (!pg.qrs.length) delete pg.qrs; toast("이 칸의 QR 을 도장으로 바꿨습니다 — 한 칸에는 도장과 QR 중 하나만 둘 수 있습니다", null); }   // 338번
   pg.seals.sort((a, b) => a.cell - b.cell); render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
 const sealAt = (pg, c) => (pg.seals || []).find(x => x.cell === c);   // 323번. 칸의 도장
@@ -8944,7 +8953,7 @@ function qrOverlap(i){   // 그 장의 QR 이 가리는 메뉴 글자 수(내용
 }
 function syncQrNote(){
   const pg = P(panelPage), x = qrAt(pg, panelCell), note = $("#qr-note"); let m = "";
-  if (!x) m = "종이에 약 26mm 로 찍힙니다. 메뉴 글자가 없는 빈 칸에 두세요.";
+  if (!x) m = "한 칸에는 도장과 QR 중 하나만 둘 수 있습니다. 위 · 가운데 칸은 글자 위에 놓이니 빈 칸에 두세요. 아래 칸은 바닥 글 줄에 들어갑니다.";
   else { const t = qrPayload(x), r = t && qrSvg(t);
     if (x.kind === "url" && !String(x.url || "").trim()) m = "주소를 적으면 QR 이 나옵니다.";
     else if (x.kind === "url" && !t) m = "읽을 수 없는 주소입니다 — https:// 로 시작하는 주소를 적어 주세요.";
@@ -8952,7 +8961,8 @@ function syncQrNote(){
     else if (t && !r) m = "글이 너무 길어 QR 을 만들 수 없습니다.";
     else { topBands(); const c = qrOverlap(panelPage);
       if (c) m = "이 장의 QR 이 메뉴 글자 " + c + "곳을 가립니다 — 빈 칸으로 옮겨 주세요.";
-      else if (r && r.n > 65) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다).";
+      else if (r && r.n > 69) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다).";
+      else if (panelCell >= 4 && t) m = "아래 칸의 QR 은 바닥 글 줄에 들어가 종이 아래를 차지합니다 — 메뉴가 넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜거나 글자 크기를 줄여 주세요.";
       else m = x.kind === "wifi" ? "비밀번호가 QR 에 그대로 담깁니다 — 메뉴판을 보는 누구나 접속할 수 있습니다." : "인쇄한 뒤 폰 카메라로 읽어 보세요."; } }
   note.textContent = m;
 }
@@ -8968,6 +8978,7 @@ function syncQr(pg){
 $("#f-qrkind").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.k, pg = P(panelPage);
   if (k === "none"){ pg.qrs = (pg.qrs || []).filter(x => x.cell !== panelCell); if (!pg.qrs.length) delete pg.qrs; }
   else { const old = qrAt(pg, panelCell); if (!old || old.kind !== k){ const keep = old && old.label ? { label:old.label } : {}; pg.qrs = (pg.qrs || []).filter(x => x.cell !== panelCell); qrPut(Object.assign({ kind:k }, k === "wifi" ? { ssid:"", pass:"", enc:"WPA" } : { url:"" }, keep)); } }
+  if (k !== "none" && sealAt(pg, panelCell)){ pg.seals = pg.seals.filter(x => x.cell !== panelCell); toast("이 칸의 도장을 QR 로 바꿨습니다 — 한 칸에는 도장과 QR 중 하나만 둘 수 있습니다", null); }   // 338번
   render(); touch(); syncPage(); });
 [["#f-qrurl", "url"], ["#f-qrssid", "ssid"], ["#f-qrpass", "pass"], ["#f-qrlabel", "label"]].forEach(([id, key]) => $(id).addEventListener("input", e => {
   const v = [...e.target.value].slice(0, QR_MAX[key === "url" ? "url" : key]).join(""); const x = qrAt(P(panelPage), panelCell); if (!x) return;
