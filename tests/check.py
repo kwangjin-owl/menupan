@@ -1209,6 +1209,13 @@ def t47(b, f):
     t['wine'] = c.js(TB)
     c.js("()=>{panelTab='menu'; panelPage=MENU.sheets.findIndex((_,i)=>sheetKind(i)!=='menu'); syncPageTabs(); syncPage(); const p=document.querySelector('#panel'); p.scrollTop=p.scrollHeight;}"); pg.wait_for_timeout(150)
     t['sticky'] = c.js("()=>{const p=document.querySelector('#panel').getBoundingClientRect(), a=document.querySelector('#ptabs').getBoundingClientRect(), g=document.querySelector('#pgbar').getBoundingClientRect(); return [a.top>=p.top-1 && a.bottom<=p.top+140, g.top>=a.bottom-1 && g.bottom<=p.top+240, !!document.querySelector('#pgbar #b-copypage')]}")   # 334번
+    # 335번 — 부품 규칙: 나뉜 고르기는 바탕 하나(칸에 테두리 없음) · 묶음 제목 보통 글자 간격 · 굵게는 스위치 · [− | +] 한 덩어리 28px · 「고칠 장」 이름표가 고르기 위
+    t['parts335'] = c.js("""()=>{ const seg=document.querySelector('#f-topmode'), bs=seg?[...seg.querySelectorAll('button')]:[], lb=document.querySelector('#pgbar .pglbl'), pk=document.querySelector('#pgpick');
+      return [ bs.length===2 && bs.every(b=>parseFloat(getComputedStyle(b).borderTopWidth)===0) && parseFloat(getComputedStyle(seg).borderTopWidth)>0,
+        [...document.querySelectorAll('#panel .pgrp')].every(h=>getComputedStyle(h).letterSpacing==='normal'),
+        (document.querySelector('#b-bold')||{}).type==='checkbox',
+        [...document.querySelectorAll('#panel .stepg > button')].length===4 && [...document.querySelectorAll('#panel .stepg > button')].filter(b=>b.offsetParent).every(b=>Math.round(b.getBoundingClientRect().height)===28),
+        !!lb && !!pk && lb.getBoundingClientRect().bottom <= pk.getBoundingClientRect().top + 1 ] }""")
     t['err'] = c.errs; c.close()
     out['tabs332'] = t
     return out
@@ -1801,7 +1808,7 @@ def judge(t, r):
         if t == 't48':
             d = {k: v for k, v in r['idle']}; e = {k: v for k, v in r['edit']}; z = {k: v for k, v in r['back']}
             bad = {k: (d[k], e.get(k)) for k in d if k and k in e and d[k] and e[k] and abs(d[k] - e[k]) > 0.5}   # 폭 0 = 그 모드에서 숨은 단추(편집 도구 막대) — 뺀다
-            hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 24   # 병은 병 모양이 보이는 높이 · ▲▼는 줄보다 작게(268번)
+            hb, hw = r.get('heights', [[], []]); hok = bool(hb) and min(hb) > 80 and bool(hw) and max(hw) < 30   # 병은 병 모양이 보이는 높이 · ▲▼는 줄(32)보다 작게(268번 — 335번에 22 × 14 → 한 덩어리 [▲ | ▼] 30 × 26)
             rg = r.get('range308') or [0] * 6; rok = rg[0] == rg[2] and rg[1] == rg[3] and rg[4] == rg[5] == rg[3]   # 308번 — 막대 끝 = 상한 상수 · 140% 에서 막대도 140
             def onoff(L):   # 켜진 단추와 꺼진 단추의 모양이 다른가 — 둘 다 있어야 잴 수 있다
                 on = {x[2] for x in L if x[1]}; off = {x[2] for x in L if not x[1]}
@@ -1831,7 +1838,7 @@ def judge(t, r):
             T5 = ['look','top','menu','foot','deco']   # 333번 — 한 줄 다섯, 와인 장을 넣어도 탭은 그대로
             G = lambda x, ids: x and x['ids'] == ids and x['oneLine'] and x['rows'] == 1 and x['titles']
             ok332 = bool(t332) and G(t332['blank'], T5) and G(t332['wine'], T5) and t332['home'] == [] \
-                    and t332.get('sticky') == [True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
+                    and t332.get('sticky') == [True, True, True] and t332.get('parts335') == [True, True, True, True, True] and t332['vis']['look'] == [False, False, 0] and all(v[0] and v[1] and v[2] >= 1 for k, v in t332['vis'].items() if k != 'look') and not t332['err']
             ok = ok and ok330 and ok331 and ok332
             return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
