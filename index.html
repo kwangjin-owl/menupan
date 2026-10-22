@@ -1420,10 +1420,15 @@ html body #panel small, html body #panel .pnote, html body #panel .layinfo, html
 /* 343번. 꾸미기 창 탭 — 글자 12px · 여백 4px 로 줄여 「그림·도장·QR」까지 한 줄에 · 탭 사이에 구분선(붙어 보이지 않게) */
 html body #panel #ptabs .ptab-btn{font-size:12px;padding:0 4px;position:relative}
 html body #panel #ptabs .ptab-btn + .ptab-btn::before{content:"";position:absolute;left:0;top:11px;bottom:11px;border-left:1px solid rgba(240,230,205,.26)}
-/* 343번. QR 묶음은 칸 설정과 별개 — 위 선 · 자리 4곳은 2 × 2 */
+/* 344번. 격자의 맨 위 영역 좌우 끝 = QR 자리(점선 상자 · QR 이 있으면 흰 상자) · 설정 쪽 */
+html body #panel .pgrid .pband{gap:4%;padding:0 4%}
+html body #panel .pgrid .pband > i{flex:1;font-style:normal;text-align:center}
+html body #panel .pgrid .pband .qs{flex:none;width:24%;height:72%;padding:0;border:1px dashed rgba(240,230,205,.5);border-radius:3px;background:transparent;color:#111;font:700 7px/1 sans-serif;cursor:pointer}
+html body #panel .pgrid .pband .qs.has{background:#fff;border:1px solid #fff}
+html body #panel .pgrid .pband .qs.on{outline:2px solid #efe3c9;outline-offset:1px}
+html body #panel .pgrid .pband .qs.has.empty, .panel .pgrid .pqr.empty{background:rgba(255,255,255,.4);border:1px dashed #fff}
+html body #panel #corner-row[hidden], html body #panel #b-artsame[hidden]{display:none !important}
 html body #panel .qrblk{border-top:1px solid rgba(240,230,205,.12);padding-top:14px;margin-top:14px}
-html body #panel #f-qrslot{grid-template-columns:1fr 1fr !important;grid-auto-flow:row !important}
-html body #panel #f-qrslot button.taken{opacity:.5}
 html body #panel .qrblk [hidden], html body #panel .cellblk[hidden]{display:none !important}
 .st-wtag{margin-left:8px;padding:1px 8px;border-radius:8px;background:rgba(120,40,60,.14);font-size:12px;white-space:nowrap}   /* 341번 */
 .st-narrow{margin:6px 0 10px;padding:8px 12px;border-radius:8px;background:rgba(160,110,40,.16);font-size:13px;line-height:1.5}   /* 341번 */
@@ -2983,9 +2988,9 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       </select>
   </div>
   <div class="ptab" data-tab="deco">
-  <div class="pgrp">칸마다 그림 · 도장 <small class="pgonly">이 장만</small></div>
+  <div class="pgrp">종이 위 자리 — 그림 · 도장 · QR <small class="pgonly">이 장만</small></div>
   <span class="grp two artseal">
-    <span class="fld artpick"><label id="l-gart">자리 <small>칸을 눌러 고릅니다</small></label>
+    <span class="fld artpick"><label id="l-gart">자리 <small>칸이나 맨 위 좌우 끝을 눌러 고릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="cellname" id="art-cellname"></span>
@@ -3004,8 +3009,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span id="art-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span></span>
+    <span class="subrow nosw" id="corner-row" hidden><label id="l-corner">모퉁이</label><span class="grp st-pseg" id="f-corner" role="group" aria-labelledby="l-corner"><button type="button" data-k="none">없음</button><button type="button" data-k="seal">도장</button><button type="button" data-k="qr">QR</button></span></span>   <!-- 344번. 아래 두 칸의 모퉁이는 도장과 QR 이 같은 자리 — 하나만 -->
     <span class="cellblk sealblk" role="group" aria-labelledby="h-cseal"><span class="blkhd" id="h-cseal">도장</span>
-    <small class="qrnote" id="seal-note"></small>
     <span class="subrow nosw sealrow"><label for="f-seal">모양</label>
     <select id="f-seal">
       <option value="none">없음</option>
@@ -3016,12 +3021,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span id="seal-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span></span>
 
-    <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
-  </span>
-    <div class="cellblk qrblk" role="group" aria-labelledby="h-qr">   <!-- 337 · 342번. 찍으면 주소 · 와이파이로 이어지는 QR — 자리 넷(맨 위 · 바닥 × 왼쪽 · 오른쪽). 도장과 따로 -->
-    <div class="pgrp" id="h-qr"><span id="h-qrt">QR</span> <small class="pgonly">이 장만 · 자리 4곳</small></div>
-    <span class="subrow nosw"><label id="l-qrslot">자리</label><span class="grp st-pseg" id="f-qrslot" role="group" aria-labelledby="l-qrslot"><button type="button" data-k="0">맨 위 왼쪽</button><button type="button" data-k="1">맨 위 오른쪽</button><button type="button" data-k="4">바닥 왼쪽</button><button type="button" data-k="5">바닥 오른쪽</button></span></span>
-    <small class="qrnote" id="qr-slotnote"></small>
+    <span class="cellblk qrblk" role="group" aria-labelledby="h-qr">   <!-- 337 · 342번. 찍으면 주소 · 와이파이로 이어지는 QR — 자리 넷(맨 위 · 바닥 × 왼쪽 · 오른쪽). 도장과 따로 -->
+    <div class="pgrp" id="h-qr"><span id="h-qrt">QR</span> <small class="pgonly">이 장만</small></div>
     <span class="subrow nosw"><label id="l-qrkind">종류</label>
       <span class="grp st-pseg" id="f-qrkind" role="group" aria-labelledby="l-qrkind"><button type="button" data-k="none">없음</button><button type="button" data-k="url">주소</button><button type="button" data-k="wifi">와이파이</button></span></span>
     <span id="qr-url" hidden><span class="subrow nosw"><label for="f-qrurl">주소</label><input type="text" id="f-qrurl" maxlength="300" autocomplete="off" spellcheck="false" placeholder="예: naver.me/abcd" title="네이버 지도 · 인스타 · 카카오톡 채널 · 가민 코스의 공유 주소. https:// 는 안 적어도 됩니다. 전화는 tel:01012345678"></span></span>
@@ -3031,7 +3032,9 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
     <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">바탕</label><span class="grp st-pseg" id="f-qrbg" role="group" aria-labelledby="l-qrbg"><button type="button" data-k="white">흰색</button><button type="button" data-k="paper">종이색</button></span></span>   <!-- 341번 -->
     <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 아래 글자</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적힙니다(비워도 됩니다)"></span>
-    <small class="qrnote" id="qr-note"></small></div>
+    <small class="qrnote" id="qr-note"></small></span>
+    <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
+  </span>
   </div>
 </div>
 
@@ -8986,11 +8989,6 @@ $("#c-seal").addEventListener("change", () => syncPage());
 $("#f-sealtx").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x || !SEAL_TEXT[x.seal]) return;   // 327번. 글자 도장의 글자
   const t = [...e.target.value.replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX).join(""); if (t) x.text = t; else delete x.text; render(); drawGrids(P(panelPage)); touchLater(); });
 var qrSlot = 0;   // 343번. 자리 4곳(0 · 1 = 맨 위 왼쪽 · 오른쪽, 4 · 5 = 바닥 왼쪽 · 오른쪽) — 칸 격자와 별개. var — 처음 그릴 때 먼저 불려도 안전
-$("#f-qrslot").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qrSlot = +b.dataset.k; syncQr(P(panelPage)); });
-function syncSealLock(pg){   // 343번. 이 칸이 아래 구석이고 QR 이 쓰고 있으면 도장을 못 고른다
-  const q = qrCorner(panelCell) ? qrAt(pg, panelCell) : null, f = $("#f-seal"); f.disabled = !!q;
-  $("#seal-note").textContent = q ? "이 구석은 QR이 쓰고 있어 도장을 둘 수 없습니다 — 아래 QR에서 이 자리를 「없음」으로 바꾸면 둘 수 있습니다." : "";
-}
 function qrPut(patch){ const pg = P(panelPage); pg.qrs = pg.qrs || []; let x = qrAt(pg, qrSlot); if (!x){ x = { cell:qrSlot, kind:"url" }; pg.qrs.push(x); } Object.assign(x, patch); pg.qrs.sort((a, b) => a.cell - b.cell); return x; }
 function qrOverlap(i){   // 그 장의 QR 이 가리는 메뉴 글자 수(내용이 있는 글자만)
   const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 0; let n = 0;
@@ -9016,17 +9014,33 @@ function syncQrNote(){
   note.textContent = m;
 }
 function syncQr(pg){
-  const x = qrAt(pg, qrSlot), taken = qrCorner(qrSlot) && !!sealAt(pg, qrSlot) && !x, k = x ? x.kind : "none";
-  $("#f-qrslot").querySelectorAll("button").forEach(b => { const kk = +b.dataset.k, on = kk === qrSlot, sealed = qrCorner(kk) && !!sealAt(pg, kk) && !qrAt(pg, kk); b.classList.toggle("on", on); b.classList.toggle("taken", sealed); b.setAttribute("aria-pressed", String(on)); b.title = sealed ? "이 구석은 도장이 쓰고 있습니다" : ""; });
-  $("#qr-slotnote").textContent = taken ? "이 구석에는 도장이 있어 QR을 둘 수 없습니다 — 위 칸 설정에서 이 칸의 도장을 「없음」으로 바꾸면 둘 수 있습니다." : "";
-  $("#f-qrkind").querySelectorAll("button").forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.disabled = taken; });
-  $("#qr-url").hidden = taken || k !== "url"; $("#qr-wifi").hidden = taken || k !== "wifi"; $("#qr-labrow").hidden = taken || k === "none"; $("#qr-bgrow").hidden = taken || k === "none";
+  const x = qrAt(pg, qrSlot), k = x ? x.kind : "none";
+  $("#f-qrkind").querySelectorAll("button").forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  $("#qr-url").hidden = k !== "url"; $("#qr-wifi").hidden = k !== "wifi"; $("#qr-labrow").hidden = k === "none"; $("#qr-bgrow").hidden = k === "none";
   { const ok = qrPaperOK(), pb = $("#f-qrbg"); pb.querySelectorAll("button").forEach(b => { const on = b.dataset.k === (x && x.bg === "paper" ? "paper" : "white"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (b.dataset.k === "paper"){ b.disabled = !ok; b.title = ok ? "" : "종이 색이 어둡거나 글자색 대비가 약해 폰이 못 읽을 수 있어 흰색으로만 찍습니다"; } }); }
   const set = (id, v) => { const e = $(id); if (document.activeElement !== e) e.value = v || ""; };
   set("#f-qrurl", x && x.url); set("#f-qrssid", x && x.ssid); set("#f-qrpass", x && x.pass); set("#f-qrlabel", x && x.label);
-  $("#f-qrenc").value = x && x.enc === "nopass" ? "nopass" : "WPA"; $("#qr-passrow").hidden = taken || (!!x && x.enc === "nopass");
+  $("#f-qrenc").value = x && x.enc === "nopass" ? "nopass" : "WPA"; $("#qr-passrow").hidden = !!x && x.enc === "nopass";
   syncQrNote();
 }
+/* 344번. 격자에서 고른 자리에 맞춰 설정을 펼친다 — 맨 위 좌우 끝 = QR 만 · 위 · 가운데 칸 = 그림 + 도장 · 아래 두 칸 = 그림 + 모퉁이(없음 | 도장 | QR 중 하나 — 같은 구석이라 겹치지 못한다) */
+function syncSpot(pg){
+  const top = panelTop !== null, cor = !top && qrCorner(panelCell), st = !cor ? null : qrAt(pg, panelCell) ? "qr" : sealAt(pg, panelCell) ? "seal" : "none";
+  qrSlot = top ? panelTop : panelCell;
+  document.querySelector('[aria-labelledby="h-cart"]').hidden = top; $("#corner-row").hidden = !cor; document.querySelector(".sealblk").hidden = top || (cor && st !== "seal");
+  document.querySelector(".qrblk").hidden = !(top || st === "qr"); $("#b-artsame").hidden = top;
+  $("#f-corner").querySelectorAll("button").forEach(b => { const on = b.dataset.k === st; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  $("#art-cellname").textContent = top ? (panelTop === 0 ? "맨 위 왼쪽" : "맨 위 오른쪽") + " — QR 자리" : CELL_NAMES[panelCell] + " 칸";
+  $("#h-qrt").textContent = top ? "QR" : "QR · " + CELL_NAMES[panelCell] + " 모퉁이";
+}
+$("#f-corner").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.k, pg = P(panelPage), c = panelCell;
+  if (k === "none"){ pg.seals = (pg.seals || []).filter(x => x.cell !== c); pg.qrs = (pg.qrs || []).filter(x => x.cell !== c); if (!pg.qrs.length) delete pg.qrs; render(); touch(); syncPage(); }
+  else if (k === "seal"){ if (sealAt(pg, c)) return;
+    if (qrAt(pg, c)){ pg.qrs = pg.qrs.filter(x => x.cell !== c); if (!pg.qrs.length) delete pg.qrs; toast("이 모퉁이의 QR 을 도장으로 바꿨습니다 — 한 모퉁이에는 도장과 QR 중 하나만 둘 수 있습니다", null); }
+    const sel = $("#f-seal"); sel.value = "word"; sel.dispatchEvent(new Event("change")); }
+  else if (k === "qr"){ if (qrAt(pg, c)) return;
+    if (sealAt(pg, c)){ pg.seals = pg.seals.filter(x => x.cell !== c); toast("이 모퉁이의 도장을 QR 로 바꿨습니다 — 한 모퉁이에는 도장과 QR 중 하나만 둘 수 있습니다", null); }
+    qrSlot = c; $("#f-qrkind").querySelector('button[data-k="url"]').click(); } });
 $("#f-qrkind").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.k, pg = P(panelPage);
   if (k === "none"){ pg.qrs = (pg.qrs || []).filter(x => x.cell !== qrSlot); if (!pg.qrs.length) delete pg.qrs; }
   else { const old = qrAt(pg, qrSlot); if (!old || old.kind !== k){ const keep = old && old.label ? { label:old.label } : {}; pg.qrs = (pg.qrs || []).filter(x => x.cell !== qrSlot); qrPut(Object.assign({ kind:k }, k === "wifi" ? { ssid:"", pass:"", enc:"WPA" } : { url:"" }, keep)); } }
@@ -9038,7 +9052,7 @@ $("#f-qrkind").addEventListener("click", e => { const b = e.target.closest("butt
 $("#f-qrbg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || b.disabled) return; const x = qrAt(P(panelPage), qrSlot); if (!x) return; if (b.dataset.k === "paper") x.bg = "paper"; else delete x.bg; render(); touch(); syncPage(); });   // 341번
 $("#f-qrenc").addEventListener("change", e => { const x = qrAt(P(panelPage), qrSlot); if (!x) return; x.enc = e.target.value === "nopass" ? "nopass" : "WPA"; if (x.enc === "nopass") x.pass = ""; render(); touch(); syncPage(); });
 /* 302번. 그림 격자 — 고른 칸(panelCell)만 고친다. 색 상자는 끄는 동안 변수만(240번) */
-let panelCell = ART_CELL_OLD, panelCellPage = -1;
+let panelCell = ART_CELL_OLD, panelCellPage = -1, panelTop = null;   // 344번. panelTop — 격자의 맨 위 QR 자리(0 · 1)를 골랐으면 그 번호, 칸을 골랐으면 null
 const artAt = (pg, c) => (pg.arts || []).find(x => x.cell === c);
 $("#c-art").addEventListener("input", e => { const x = artAt(P(panelPage), panelCell); if (!x) return; x.color = e.target.value; applyLook(); touchLater(); });
 $("#c-art").addEventListener("change", () => syncPage());
@@ -9134,9 +9148,9 @@ function syncPage(){
     /* 302번. 죽은 함수 chipOld(301번에 남김)를 걷었다 */
     if (panelCellPage !== panelPage){ panelCellPage = panelPage; if (!artAt(pg, panelCell) && (pg.arts || []).length) panelCell = pg.arts[0].cell; }   // 302번. 장을 바꾸면 그림이 있는 칸부터
     const x = artAt(pg, panelCell);
-    $("#art-cellname").textContent = CELL_NAMES[panelCell] + " 칸";   // 321번
+    syncSpot(pg);   // 321 · 344번. 고른 자리(맨 위 QR 자리 · 칸 · 아래 모퉁이)에 맞춰 설정을 펼치고 이름을 단다
     $("#f-artop").value = (x && x.op) || "light";
-    const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none"; syncQr(pg); syncSealLock(pg);   // 323번 · 337번(QR) · 343번
+    const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none"; syncQr(pg);   // 323번 · 337번(QR) · 344번
     { const tx = $("#f-sealtx"), on = !!dz && !!SEAL_TEXT[dz.seal]; if (document.activeElement !== tx) tx.value = on && dz.text || ""; tx.placeholder = sealText({}) + " (상호명)"; tx.disabled = !on;   /* 327번. 글자 칸 — 글자 도장일 때만, 아니면 흐리게(322번) */
       $("#seal-txrow").classList.toggle("off", !on); $("#seal-txrow").title = on ? "" : "글자 도장(네모 · 동그라미 · 두 겹)을 고르면 적을 수 있습니다"; }
     { const noArt = !x, noSeal = !dz;   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
@@ -9164,14 +9178,17 @@ function drawGrids(pg){
   const box = $("#g-art"), sc = sealCellsOf(pg);
   const artNm = k => { const o = [...$("#f-art").options].find(o => o.value === k); return o ? o.textContent : k; };
   box.classList.toggle("land", SETTINGS.orient === "landscape");
-  if (!box.querySelector(".pcells")){ box.innerHTML = '<i class="pband" aria-hidden="true">상단</i><span class="pcells"></span>';
-    const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
+  if (!box.querySelector(".pcells")){ box.innerHTML = '<div class="pband"><button type="button" class="qs" aria-label="맨 위 왼쪽 QR 자리"></button><i aria-hidden="true">상단</i><button type="button" class="qs" aria-label="맨 위 오른쪽 QR 자리"></button></div><span class="pcells"></span>';   /* 344번. 맨 위 영역 좌우 끝 = QR 자리 */
+    box.querySelectorAll(".pband .qs").forEach((q, k) => { q.onclick = () => { panelTop = k; syncPage(); }; });
+    const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; panelTop = null; syncPage(); }; pc.appendChild(b); } }
   box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
+  box.querySelectorAll(".pband .qs").forEach((q, k) => { const d = qrAt(pg, k), has = !!d, on = panelTop === k; q.classList.toggle("has", has); q.classList.toggle("empty", has && !qrPayload(d)); q.classList.toggle("on", on);   // 주소를 아직 안 적었어도 QR 자리로 보인다(옅게)
+    q.textContent = has ? "QR" : ""; q.setAttribute("aria-pressed", String(on)); q.title = (k ? "맨 위 오른쪽" : "맨 위 왼쪽") + " QR 자리" + (has ? (qrPayload(d) ? " — QR 있음" : " — QR 을 골랐지만 주소가 비었음") : ""); });   // 344번
   [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
-    const d = sealAt(pg, c), qd = qrCorner(c) ? qrAt(pg, c) : null, h = (x ? ART[x.art] : "") + (qd && qrPayload(qd) ? '<span class="pqr sx' + (c % 2) + ' sy2" aria-hidden="true">QR</span>' : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + sealHTML(d) + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
+    const d = sealAt(pg, c), qd = qrCorner(c) ? qrAt(pg, c) : null, h = (x ? ART[x.art] : "") + (qd ? '<span class="pqr' + (qrPayload(qd) ? "" : " empty") + ' sx' + (c % 2) + ' sy2" aria-hidden="true">QR</span>' : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + sealHTML(d) + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
     if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
     const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (d ? " · 도장" : "") + (qd ? " · QR" : "");
-    b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
+    b.classList.toggle("on", c === panelCell && panelTop === null); b.setAttribute("aria-pressed", String(c === panelCell && panelTop === null)); b.title = nm; b.setAttribute("aria-label", nm); });
 }
 /* [다른 장에도 똑같이] — 이 장의 **모양 설정**을 모든 장에 복사한다.
    157번. 바닥 글(안내 문구 · 한 줄 항목 · 원산지)은 **내용**이라 안 옮긴다 — 장마다 다른 말이 들어가는 자리다.

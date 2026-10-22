@@ -1471,8 +1471,8 @@ def t54(b, f):
           cells[0].click(); const cs=document.querySelector('#c-seal'); cs.value='#1155cc'; cs.dispatchEvent(new Event('input')); cs.dispatchEvent(new Event('change'));
           const col=P0.seals.find(x=>x.cell===0).color==='#1155cc' && !('color' in P0.seals.find(x=>x.cell===5));
           set('none'); const one=JSON.stringify(P0.seals.map(x=>x.cell))==='[5]' && fs.value==='none' && document.querySelector('#c-seal').disabled;
-          const H=()=>document.querySelector('.panel').scrollHeight; cells[5].click(); const h1=H(); cells[1].click(); const h2=H();
-          return [ two, gridShows, paper, col, one, h1===h2 /* 342번 — QR 이 도장에서 떨어져 나가 다시 같다 */, document.querySelector('#art-cellname').textContent===CELL_NAMES[1]+' 칸' ] }""")   # 323번. 도장도 칸마다 — 두 칸에 다른 모양 · 격자에 보임 · 종이에 그 칸만 · 색은 그 칸만 · 없음이면 그 칸만 빠지고 색 흐림 · 칸을 바꿔도 창 길이 같음 · 칸 이름
+          const H=()=>document.querySelector('.panel').scrollHeight; cells[2].click(); const h1=H(); cells[1].click(); const h2=H();
+          return [ two, gridShows, paper, col, one, h1===h2 /* 344번 — 위 · 가운데 칸끼리는 같다(아래 두 칸은 모퉁이 줄이 더 있다) */, document.querySelector('#art-cellname').textContent===CELL_NAMES[1]+' 칸' ] }""")   # 323번. 도장도 칸마다 — 두 칸에 다른 모양 · 격자에 보임 · 종이에 그 칸만 · 색은 그 칸만 · 없음이면 그 칸만 빠지고 색 흐림 · 칸을 바꿔도 창 길이 같음 · 칸 이름
         out['p322'] = c.js("""()=>{ const P0=P(panelPage), H=()=>document.querySelector('.panel').scrollHeight, cells=[...document.querySelectorAll('#g-art .pcells > button')];
           if (!(P0.arts||[]).length){ cells[0].click(); const fa=document.querySelector('#f-art'); fa.value='horse'; fa.dispatchEvent(new Event('change')); }
           const withArt=cells.findIndex((b,k)=>artAt(P0,k)), empty=cells.findIndex((b,k)=>!artAt(P0,k)); if (withArt<0||empty<0) return ['no cells'];
@@ -1744,35 +1744,36 @@ def t58(b, f):
             if r['n'] or r['over']: fit_bad.append((cells, r))
         out['fit_bad'] = fit_bad
         out['mid'] = pg.evaluate("()=>{const g={qrs:[{cell:2,kind:'url',url:'a.kr'},{cell:3,kind:'url',url:'a.kr'},{cell:1,kind:'url',url:'a.kr'}]}; normQrs(g); return (g.qrs||[]).map(x=>x.cell)}")   # 가운데 칸 QR 은 버린다
-        # 꾸미기 창 — [그림·도장·QR] 탭: QR 자리 4곳은 칸 격자와 별개 · 아래 구석은 도장과 서로 못 쓴다(343번)
-        pg.evaluate("()=>{P(0).autofit=false; delete P(0).qrs; P(0).seals=[]; render(); document.querySelector('#b-edit').click(); panelPage=0; panelTab='deco'; qrSlot=0; syncPageTabs(); syncPage();}"); pg.wait_for_timeout(250)
-        V = "()=>({tab:document.querySelector('.qrblk').closest('.ptab').dataset.tab, slot:qrSlot, kind:(document.querySelector('#f-qrkind .on')||{dataset:{}}).dataset.k||null, url:!!document.querySelector('#f-qrurl').offsetParent, wifi:!!document.querySelector('#f-qrssid').offsetParent, kdis:[...document.querySelectorAll('#f-qrkind button')].every(b=>b.disabled), note:document.querySelector('#qr-slotnote').textContent.length>0})"
+        # 꾸미기 창 — 격자 한 그림(344번): 맨 위 좌우 끝 = QR 만 · 칸 = 그림 + 도장 · 아래 두 칸 = 그림 + 모퉁이(없음 | 도장 | QR 중 하나)
+        pg.evaluate("()=>{P(0).autofit=false; delete P(0).qrs; P(0).seals=[]; render(); document.querySelector('#b-edit').click(); panelPage=0; panelTab='deco'; panelTop=null; panelCell=2; syncPageTabs(); syncPage();}"); pg.wait_for_timeout(250)
+        V = "()=>({art:!document.querySelector('[aria-labelledby=h-cart]').hidden, corner:!document.querySelector('#corner-row').hidden, seal:!document.querySelector('.sealblk').hidden, qr:!document.querySelector('.qrblk').hidden, slot:qrSlot, on:(document.querySelector('#f-corner .on')||{dataset:{}}).dataset.k||null, name:document.querySelector('#art-cellname').textContent})"
+        cell = lambda n: pg.evaluate("(c)=>{document.querySelectorAll('#g-art .pcells > button')[c].click()}", n)
+        topk = lambda k: pg.evaluate("(k)=>{document.querySelectorAll('#g-art .pband .qs')[k].click()}", k)
         pn = []
         tabs = pg.evaluate("()=>[[...document.querySelectorAll('#ptabs button')].map(b=>b.textContent), document.querySelector('#ptabs').scrollWidth <= document.querySelector('#ptabs').clientWidth + 1, [...document.querySelectorAll('#ptabs .ptab-btn + .ptab-btn')].every(b=>getComputedStyle(b,'::before').borderLeftWidth==='1px')]")
         pn.append(tabs[0] == ['색 · 글꼴', '맨 위', '메뉴', '바닥', '그림·도장·QR'] and tabs[1] is True and tabs[2] is True)   # 탭 다섯이 한 줄 · 사이마다 구분선
-        s0 = pg.evaluate(V); pn.append(s0['tab'] == 'deco' and s0['slot'] == 0 and s0['kind'] == 'none' and not s0['url'])
+        v = pg.evaluate(V); pn.append(v['art'] and not v['corner'] and v['seal'] and not v['qr'])   # 위 · 가운데 칸 = 그림 + 도장
+        topk(0); pg.wait_for_timeout(150); v = pg.evaluate(V); pn.append(not v['art'] and not v['corner'] and not v['seal'] and v['qr'] and v['slot'] == 0 and v['name'] == '맨 위 왼쪽 — QR 자리')   # 맨 위 자리 = QR 만
         pg.click('#f-qrkind button[data-k="url"]'); pg.fill('#f-qrurl', 'instagram.com/alps'); pg.fill('#f-qrlabel', '인스타'); pg.wait_for_timeout(200)
-        pn.append(pg.evaluate("()=>[JSON.stringify(P(0).qrs), document.querySelectorAll('.sheet[data-pi=\"0\"] .noren .qr.qh').length]") == ['[{"cell":0,"kind":"url","url":"instagram.com/alps","label":"인스타"}]', 1])
-        pg.click('#f-qrslot button[data-k="1"]'); pg.wait_for_timeout(150); s1 = pg.evaluate(V); pn.append(s1['slot'] == 1 and s1['kind'] == 'none' and not s1['url'])
+        pn.append(pg.evaluate("()=>[JSON.stringify(P(0).qrs), document.querySelectorAll('.sheet[data-pi=\"0\"] .noren .qr.qh').length, document.querySelectorAll('#g-art .pband .qs.has').length]") == ['[{"cell":0,"kind":"url","url":"instagram.com/alps","label":"인스타"}]', 1, 1])   # 종이에 · 격자에 둘 다 보인다
+        topk(1); pg.wait_for_timeout(150); v = pg.evaluate(V); pn.append(v['slot'] == 1 and v['qr'])
         pg.click('#f-qrkind button[data-k="wifi"]'); pg.wait_for_timeout(150); pg.fill('#f-qrssid', '알프스'); pg.select_option('#f-qrenc', 'nopass'); pg.wait_for_timeout(200)
         pn.append(pg.evaluate("()=>[JSON.stringify(P(0).qrs), document.querySelectorAll('.sheet[data-pi=\"0\"] .noren .qr.qh').length]") == ['[{"cell":0,"kind":"url","url":"instagram.com/alps","label":"인스타"},{"cell":1,"kind":"wifi","ssid":"알프스","pass":"","enc":"nopass"}]', 2])
-        # 위 자리는 도장과 안 겹친다 — 같은 번호 칸에 도장이 있어도 둘 다 둔다
+        # 아래 칸의 모퉁이 — 하나만
+        cell(4); pg.wait_for_timeout(150); v = pg.evaluate(V); pn.append(v['art'] and v['corner'] and v['on'] == 'none' and not v['seal'] and not v['qr'])
+        pg.click('#f-corner button[data-k="seal"]'); pg.wait_for_timeout(200); v = pg.evaluate(V)
+        pn.append(v['on'] == 'seal' and v['seal'] and not v['qr'] and pg.evaluate("()=>[!!sealAt(P(0),4), !qrAt(P(0),4)]") == [True, True])
+        pg.click('#f-corner button[data-k="qr"]'); pg.wait_for_timeout(250); v = pg.evaluate(V)
+        pn.append(v['on'] == 'qr' and v['qr'] and not v['seal'] and v['slot'] == 4 and pg.evaluate("()=>[!sealAt(P(0),4), !!qrAt(P(0),4), !!document.querySelector('#g-art .pcells > button:nth-child(5) .pqr')]") == [True, True, True])   # QR 을 고르면 그 모퉁이 도장이 빠지고 격자에 QR 표시
+        pg.click('#f-corner button[data-k="seal"]'); pg.wait_for_timeout(250)
+        pn.append(pg.evaluate("()=>[!!sealAt(P(0),4), !qrAt(P(0),4)]") == [True, True])   # 도장을 고르면 QR 이 빠진다
+        pg.click('#f-corner button[data-k="none"]'); pg.wait_for_timeout(200)
+        pn.append(pg.evaluate("()=>[!sealAt(P(0),4), !qrAt(P(0),4)]") == [True, True])
+        okc = True
+        for n in (0, 1, 2, 3): cell(n); pg.wait_for_timeout(80); okc = okc and not pg.evaluate(V)['corner']
+        pn.append(okc)   # 위 · 가운데 칸에는 모퉁이 선택이 없다
         pg.evaluate("()=>{P(0).seals=[{cell:0,seal:'word'}]; render(); syncPage();}"); pg.wait_for_timeout(150)
-        pn.append(pg.evaluate("()=>[document.querySelectorAll('.sheet[data-pi=\"0\"] .seal:not(.blank)').length, document.querySelectorAll('.sheet[data-pi=\"0\"] .noren .qr.qh').length]") == [1, 2])
-        # 아래 구석: 도장이 있으면 QR 을 못 둔다(편집창이 막는다)
-        pg.evaluate("()=>{P(0).seals=[{cell:4,seal:'word'}]; render(); syncPage();}"); pg.click('#f-qrslot button[data-k="4"]'); pg.wait_for_timeout(150); s2 = pg.evaluate(V)
-        pn.append(s2['slot'] == 4 and s2['kdis'] and s2['note'] and not s2['url'] and pg.evaluate("()=>!qrAt(P(0),4)"))
-        # 반대 방향: QR 이 쓰는 아래 구석은 도장을 못 고른다
-        pg.evaluate("()=>{P(0).seals=[]; P(0).qrs=[{cell:5,kind:'url',url:'naver.me/abcd'}]; render(); panelTab='deco'; syncPageTabs(); syncPage(); document.querySelectorAll('#g-art .pcells > button')[5].click(); syncPage();}"); pg.wait_for_timeout(200)
-        lock5 = pg.evaluate("()=>[document.querySelector('#f-seal').disabled, document.querySelector('#seal-note').textContent.length>0, !!document.querySelector('#g-art .pqr')]")
-        pg.evaluate("()=>{document.querySelectorAll('#g-art .pcells > button')[4].click(); syncPage();}"); pg.wait_for_timeout(100)
-        free4 = pg.evaluate("()=>[document.querySelector('#f-seal').disabled, document.querySelector('#seal-note').textContent.length]")
-        pn.append(lock5 == [True, True, True] and free4 == [False, 0])
-        # 맨 위 자리는 칸 0 · 1 에서 도장을 막지 않는다
-        pg.evaluate("()=>{P(0).qrs=[{cell:0,kind:'url',url:'a.kr'}]; render(); document.querySelectorAll('#g-art .pcells > button')[0].click(); syncPage();}"); pg.wait_for_timeout(100)
-        pn.append(pg.evaluate("()=>document.querySelector('#f-seal').disabled") is False)
-        pg.click('#f-qrslot button[data-k="0"]'); pg.click('#f-qrkind button[data-k="none"]'); pg.wait_for_timeout(150)
-        pn.append(pg.evaluate("()=>P(0).qrs === undefined"))
+        pn.append(pg.evaluate("()=>[document.querySelectorAll('.sheet[data-pi=\"0\"] .seal:not(.blank)').length, document.querySelectorAll('.sheet[data-pi=\"0\"] .noren .qr.qh').length]") == [1, 2])   # 맨 위 QR 은 같은 번호 도장과 둘 다
         out['panel'] = pn
         # 저장했다 열어도 남는지
         pg.evaluate("()=>{P(0).qrs=[{cell:5,kind:'wifi',ssid:'알프스',pass:'pw;1',enc:'WPA',label:'와이파이'}]; render(); touch();}")
@@ -2074,10 +2075,10 @@ def judge(t, r):
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 10 and r['excl'] == [0, 5] and r['loadqr'] == [True, 3, [], 0]
+            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 13 and r['excl'] == [0, 5] and r['loadqr'] == [True, 3, [], 0]
                   and r['saved'] == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[4, 'url', 300, 20, '-'], [5, 'wifi', 1, 0, '']], False, False] and not r['err'])
-            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창([그림·도장·QR] 탭 — 탭 한 줄 · 구분선 · 자리 4곳 · 아래 구석은 도장과 서로 못 씀) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
+            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창(격자 한 그림 — 탭 한 줄 · 구분선 · 맨 위 좌우 끝 = QR · 아래 두 칸은 모퉁이 하나만) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
