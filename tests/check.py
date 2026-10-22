@@ -1864,7 +1864,7 @@ READ_HANSIK = '가게: 해성 국밥\n콘셉트: 한식\n방향: 세로\n단: 2\
 READ_COLORS_ONLY = "가게: 새 가게\n방향: 세로\n단: 2\n글꼴: 고딕\n색: 종이 #FFFFFF · 글자 #1A1A1A · 띠 없음 · 포인트 #a53528\n\n[식사] 1\n김치찌개 | 9000\n[음료] 2\n콜라 | 2000"
 def t60(b, f):
     """사진 읽기 결과(글)를 첫 화면부터 끝까지 따라가 **가게 콘셉트에 맞는 처음 모양**(사진의 글꼴 · 색 + 콘셉트의 모양)과 **와인 장**(원산지 · 품종 · 맛 · 글라스 / 병 가격)이 되는지 · 요청 글에 새 줄이 있는지 ·
-    QR 종이색 바탕이 읽히는지(어두운 종이는 흰색으로) · 그림 목록에서 알프스 전용 묶음이 맨 아래인지 · 폰 크기에서 안내가 뜨는지"""
+    QR 바탕(흰색 · 고른 색 · 바탕 없음 · 대비 안내) · 그림 목록에서 알프스 전용 묶음이 맨 아래인지 · 폰 크기에서 안내가 뜨는지"""
     out = {'err': []}
     src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
     open(D + 'start_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))   # 341번 — t47 이 만들어 둔 것에 기대지 않는다(안 돌았거나 옛 것이면 옛 코드로 읽는다)
@@ -1888,19 +1888,27 @@ def t60(b, f):
         # 그림 목록 순서
         pg.goto(url(f)); pg.wait_for_timeout(300)
         out['groups'] = pg.evaluate("()=>[...document.querySelectorAll('#f-art optgroup')].map(o=>o.label)")
-        # QR 종이색 바탕
+        # QR 바탕(348번) — 흰색(기본) · 고른 색 · 바탕 없음 · 대비가 낮으면 안내만(막지 않는다) · 설정 창의 색 상자 · 바탕 없음 단추
         out['qrbg'] = None
         if zxingcpp:
             def read(sel):
                 png = pg.query_selector(sel).screenshot(); return [x.text for x in zxingcpp.read_barcodes(Image.open(io.BytesIO(png)).convert('RGB'))]
-            ok1 = pg.evaluate("()=>{P(0).qrs=[{cell:5,kind:'url',url:'naver.me/abcd',bg:'paper'}]; render(); topBands(); return [qrPaperOK(), document.querySelector('.sheet[data-pi=\"0\"] .qr svg rect').getAttribute('fill')]}")
-            r1 = read('.sheet[data-pi="0"] .qr svg')
-            ok2 = pg.evaluate("()=>{const r=document.documentElement; r.style.setProperty('--paper','#1d1813'); r.style.setProperty('--ink','#f3e6cc'); render(); topBands(); return [qrPaperOK(), document.querySelector('.sheet[data-pi=\"0\"] .qr svg rect').getAttribute('fill')]}")
-            r2 = read('.sheet[data-pi="0"] .qr svg')
-            pg.evaluate("()=>{const r=document.documentElement; r.style.setProperty('--paper','#e9dfc5'); r.style.setProperty('--ink','#8a8070'); render(); return qrPaperOK()}")
-            weak = pg.evaluate("()=>qrPaperOK()")
-            out['qrbg'] = [ok1, r1, ok2, r2, weak]
-        out['norm'] = pg.evaluate("()=>{const g={qrs:[{cell:5,kind:'url',url:'a.kr',bg:'paper'},{cell:4,kind:'url',url:'b.kr',bg:'x'}]}; normQrs(g); return g.qrs.map(x=>x.bg||null)}")
+            def put(cell, bg):
+                return pg.evaluate("([c,b])=>{const q={cell:c,kind:'url',url:'naver.me/abcd'}; if(b) q.bg=b; P(0).qrs=[q]; render(); topBands(); const r=document.querySelector('.sheet[data-pi=\"0\"] .qr svg rect'); return [r?r.getAttribute('fill'):null, qrContrast(q)]}", [cell, bg])
+            st = []
+            for bgv in (None, '#e8dcc2', 'none'):   # b 는 브라우저라 덮어쓰면 안 된다
+                v = put(5, bgv); st.append([v[0], round(v[1], 1), read('.sheet[data-pi="0"] .qr svg')])   # 변수 f 는 파일 이름이라 덮어쓰면 안 된다
+            def note(cell, bg):
+                put(cell, bg); return pg.evaluate("([c])=>{panelPage=0; qrSlot=c; syncQrNote(); return $('#qr-note').textContent}", [cell])
+            n_dark_none_top = note(0, 'none'); n_dark_pick = note(5, '#303030'); n_white = note(5, None); n_none_paper = note(5, 'none')
+            ui = pg.evaluate("""()=>{ P(0).qrs=[{cell:5,kind:'url',url:'naver.me/abcd'}]; panelPage=0; qrSlot=5; syncQr(P(0)); const o={};
+              o.shown = !$('#qr-bgrow').hidden; o.val = $('#c-qrbg').value;
+              const cp=$('#c-qrbg'); cp.value='#112233'; cp.dispatchEvent(new Event('input',{bubbles:true})); o.pick = P(0).qrs[0].bg;
+              cp.value='#ffffff'; cp.dispatchEvent(new Event('input',{bubbles:true})); o.white = P(0).qrs[0].bg === undefined;
+              const nb=$('#f-qrnone button'); nb.click(); o.none = P(0).qrs[0].bg; o.on = nb.classList.contains('on'); o.dim = $('#c-qrbg').parentNode.classList.contains('off');
+              nb.click(); o.back = P(0).qrs[0].bg === undefined; o.off = !$('#f-qrnone button').classList.contains('on'); return o }""")
+            out['qrbg'] = [st, n_dark_none_top, n_dark_pick, n_white, n_none_paper, ui]
+        out['norm'] = pg.evaluate("()=>{const g={qrs:[{cell:0,kind:'url',url:'a.kr',bg:'paper'},{cell:1,kind:'url',url:'b.kr',bg:'x'},{cell:4,kind:'url',url:'c.kr',bg:'#E8DCC2'},{cell:5,kind:'url',url:'d.kr',bg:'none'}]}; normQrs(g); const h={qrs:[{cell:5,kind:'url',url:'e.kr',bg:'#FFFFFF'}]}; normQrs(h); return g.qrs.map(x=>x.bg||null).concat(h.qrs.map(x=>x.bg||null))}")   # 348번. 옛 paper · 이상한 값은 흰색(없음) · 대문자 색은 소문자로 · #fff 는 기본으로
         # 맨 위 크기 하한 30%(342번) — 막대 범위 · 줄여도 위 여백선 밑으로는 안 내려감 · 45% 밑 안내
         pg.goto(url(f)); pg.wait_for_timeout(300)
         out['nscale'] = pg.evaluate("""()=>{ const hh=ns=>{ P(0).norenScale=ns; render(); return Math.round(document.querySelector('.sheet[data-pi="0"] .noren').getBoundingClientRect().height); };
@@ -2077,9 +2085,12 @@ def judge(t, r):
             ok_m = m[2]['kinds'] == ['menu', 'wine'] and m[2]['feet'][0] == [] and m[2]['feet'][1] == ['가격은 글라스 / 병 순서입니다'] and m[2]['pages'][0]['art'] == ['lantern'] and m[2]['pages'][1]['art'] == ['vine'] and m[2]['font'] == 'gothic' and all(p['autofit'] for p in m[2]['pages']) and not any(m[2]['over'])
             ok_h = h[1]['name'] == '추천 · 한식 식당' and h[1]['art'] == 'ttuk' and h[1]['font'] == 'serif' and h[1]['theme'] == 'pat' and h[2]['kinds'] == ['menu'] and h[2]['pages'][0]['art'] == ['ttuk'] and h[2]['theme'] == 'pat'
             ok_c = k[0]['concept'] is None and k[1]['name'] == '사진처럼' and k[1]['art'] == 'none' and k[2]['kinds'] == ['menu'] and k[2]['pages'][0]['art'] == []   # 콘셉트가 없으면 예전 그대로
-            q = r['qrbg']; ok_q = q is None or (q[0][0] is True and q[0][1] == 'var(--paper)' and q[1] == ['https://naver.me/abcd'] and q[2][0] is False and q[2][1] == '#fff' and q[3] == ['https://naver.me/abcd'] and q[4] is False)
-            ok = all(r['prompt']) and ok_w and ok_m and ok_h and ok_c and ok_q and r['groups'][-1].startswith('알프스 느낌') and r['groups'][0] != r['groups'][-1] and r['norm'] == [None, 'paper'] and r['nscale'][0] == '30' and r['nscale'][2] <= r['nscale'][1] - 20 and r['nscale'][3] == 0.3 and r['nscale'][4] is True and r['nscale'][5] is True and r['narrow'] == [True, True] and r['narrow_box'] == [True, True, True] and r['wide'] == [False, False] and not r['err']
-            return ok, f"요청 글 {r['prompt']} · 와인만 {ok_w} · 섞임 {ok_m} · 한식 콘셉트만 {ok_h} · 콘셉트 없음 {ok_c} · QR 종이색 {'읽는 도구 없음' if q is None else ok_q} · 그림 목록 맨 아래 {r['groups'][-1]} · 폰 {r['narrow']} · 컴퓨터 {r['wide']} · 정리 {r['norm']} · 맨 위 크기 [막대 최소, 60% 높이, 30% 높이, 눌러 본 하한, 작을 때 안내, 끄면 안내 없음] {r['nscale']}"
+            q = r['qrbg']; U = ['https://naver.me/abcd']
+            ok_q = q is None or (q[0][0][0] == '#fff' and q[0][0][2] == U and q[0][1][0] == '#e8dcc2' and q[0][1][2] == U and q[0][2][0] is None and q[0][2][2] == U
+                and '못 읽을 수' in q[1] and '못 읽을 수' in q[2] and '못 읽을 수' not in q[3] and '못 읽을 수' not in q[4]
+                and q[5]['shown'] is True and q[5]['val'] == '#ffffff' and q[5]['pick'] == '#112233' and q[5]['white'] is True and q[5]['none'] == 'none' and q[5]['on'] is True and q[5]['dim'] is True and q[5]['back'] is True and q[5]['off'] is True)   # 348번
+            ok = all(r['prompt']) and ok_w and ok_m and ok_h and ok_c and ok_q and r['groups'][-1].startswith('알프스 느낌') and r['groups'][0] != r['groups'][-1] and r['norm'] == [None, None, '#e8dcc2', 'none', None] and r['nscale'][0] == '30' and r['nscale'][2] <= r['nscale'][1] - 20 and r['nscale'][3] == 0.3 and r['nscale'][4] is True and r['nscale'][5] is True and r['narrow'] == [True, True] and r['narrow_box'] == [True, True, True] and r['wide'] == [False, False] and not r['err']
+            return ok, f"요청 글 {r['prompt']} · 와인만 {ok_w} · 섞임 {ok_m} · 한식 콘셉트만 {ok_h} · 콘셉트 없음 {ok_c} · QR 바탕 {'읽는 도구 없음' if q is None else ok_q} · 그림 목록 맨 아래 {r['groups'][-1]} · 폰 {r['narrow']} · 컴퓨터 {r['wide']} · 정리 {r['norm']} · 맨 위 크기 [막대 최소, 60% 높이, 30% 높이, 눌러 본 하한, 작을 때 안내, 끄면 안내 없음] {r['nscale']}"
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
