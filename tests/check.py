@@ -1769,6 +1769,14 @@ def t58(b, f):
         pn.append(pg.evaluate("()=>[!!sealAt(P(0),4), !qrAt(P(0),4)]") == [True, True])   # 도장을 고르면 QR 이 빠진다
         pg.click('#f-corner button[data-k="none"]'); pg.wait_for_timeout(200)
         pn.append(pg.evaluate("()=>[!sealAt(P(0),4), !qrAt(P(0),4)]") == [True, True])
+        # 346번 — QR 이 놓일 수 있는 네 곳이 그림에 항상 보인다(맨 위 좌우 끝 · 비어 있는 아래 두 모퉁이) · 누르기 쉬운 크기 · 아래 점선 상자를 누르면 바로 그 모퉁이가 QR · 도장이 있으면 상자 대신 도장
+        hint = lambda n: pg.evaluate("(c)=>document.querySelectorAll('#g-art .pcells > button')[c].querySelectorAll('.pqr.hint').length", n)
+        pn.append(hint(4) == 1 and hint(5) == 1 and hint(0) == 0 and hint(2) == 0)
+        pn.append(pg.evaluate("()=>[...document.querySelectorAll('#g-art .pband .qs')].every(q=>{const r=q.getBoundingClientRect(); return r.width>=36 && r.height>=20 && getComputedStyle(q,'::after').content.includes('QR') || q.classList.contains('has')})"))
+        pg.evaluate("()=>{document.querySelectorAll('#g-art .pcells > button')[4].querySelector('.pqr.hint').click()}"); pg.wait_for_timeout(250); v = pg.evaluate(V)
+        pn.append(v['on'] == 'qr' and v['qr'] and v['slot'] == 4 and pg.evaluate("()=>!!qrAt(P(0),4)") and hint(4) == 0)
+        pg.click('#f-corner button[data-k="seal"]'); pg.wait_for_timeout(250); pn.append(hint(4) == 0 and pg.evaluate("()=>!!sealAt(P(0),4)"))
+        pg.click('#f-corner button[data-k="none"]'); pg.wait_for_timeout(200); pn.append(hint(4) == 1)
         okc = True
         for n in (0, 1, 2, 3): cell(n); pg.wait_for_timeout(80); okc = okc and not pg.evaluate(V)['corner']
         pn.append(okc)   # 위 · 가운데 칸에는 모퉁이 선택이 없다
@@ -2075,7 +2083,7 @@ def judge(t, r):
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 13 and r['excl'] == [0, 5] and r['loadqr'] == [True, 3, [], 0]
+            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 18 and r['excl'] == [0, 5] and r['loadqr'] == [True, 3, [], 0]
                   and r['saved'] == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[4, 'url', 300, 20, '-'], [5, 'wifi', 1, 0, '']], False, False] and not r['err'])
             return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창(격자 한 그림 — 탭 한 줄 · 구분선 · 맨 위 좌우 끝 = QR · 아래 두 칸은 모퉁이 하나만) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
