@@ -1417,7 +1417,10 @@ html body dialog input[type=text], html body dialog input[type=number], html bod
 html body dialog small{font-size:12px !important}
 /* 339번. **12px 밑 글자 없애기**(규칙 I 글자 단계 바닥 12 — 꾸미기 창에 설명 글 11px · 색 이름표 10.5px · 격자 띠 10px 이 남아 있었다. 재서 찾음) */
 html body #panel small, html body #panel .pnote, html body #panel .layinfo, html body #panel .pk > b, html body #panel .pgrid .pband{font-size:12px !important}
-html body #panel .qrblk [hidden]{display:none !important}
+html body #panel .qrblk [hidden], html body #panel .cellblk[hidden]{display:none !important}
+.st-wtag{margin-left:8px;padding:1px 8px;border-radius:8px;background:rgba(120,40,60,.14);font-size:12px;white-space:nowrap}   /* 341번 */
+.st-narrow{margin:6px 0 10px;padding:8px 12px;border-radius:8px;background:rgba(160,110,40,.16);font-size:13px;line-height:1.5}   /* 341번 */
+
 html body #panel .qrblk input[type=text]{width:100%;box-sizing:border-box}
 html body #panel .qrnote{display:block;margin-top:6px;font-size:12px;line-height:1.5;color:rgba(240,230,205,.62)}
 .panel .pgrid .pqr{position:absolute;width:34%;aspect-ratio:1;background:#fff;color:#111;font:700 8px/1 sans-serif;display:grid;place-items:center;border-radius:2px;pointer-events:none}
@@ -2406,17 +2409,20 @@ dialog .st-picrow.has .st-picimg{height:220px;max-width:100%}
    도장 · 그림 색 · 그림 진하기(변수) · 줄 도구 ★품설✕ 를 키움(9px · 높이 13 — 종이 위 도구 중 가장 작았다. 다른 도구는 그대로 — 사용자) · 확인 화면 가로 종이 · 빠진 메뉴 넣기 · 사진 크게 */
 .seal{color:var(--seal-col, var(--accent));z-index:0}   /* 296번. 그림처럼 글자 뒤 — 겹쳐도 글자가 읽히고, 완성본 인쇄(도장이 위)와 편집 중 인쇄(글자가 위)가 달랐다(t07) */
 
-/* 337 · 338번. **QR** — 흰 바탕 · 검은 칸의 SVG(둘레 흰 여백 4칸 포함 — 조합 색과 상관없이 어두운 종이에서도 읽힌다), 한 칸 0.5mm 라 20 ~ 30mm(qrNode 가 정한다).
-   **도장과 같은 자리**(한 칸에 둘 중 하나만): 위 · 가운데 칸은 종이 기준 absolute(도장과 같은 좌우 · 위 5mm · 가운데), **아래 칸은 바닥 글 줄 안**(`.qf` — 도장 자리 `.sealgap` 를 대신한다. 흐름에 있어 글자와 안 겹친다).
-   글자 위에 놓이는 위 · 가운데 칸은 빈 칸에 두게 안내하고 가리면 꾸미기 창이 알린다 */
+/* 337 · 338 · 340 · 342번. **QR** — 흰 바탕 · 검은 칸의 SVG(둘레 흰 여백 4칸 포함), 한 칸 0.5mm 라 20 ~ 30mm(qrNode 가 정한다).
+   **레이아웃이 QR 자리를 먼저 잡는다**(글자 위에 얹지 않는다): 위 칸 = 그 단 맨 위(`.qrstrip` · 흐름), 아래 칸 = 바닥 글 전체의 옆(`.foot.hasqr` — 바닥 글 줄 · 원산지 줄을 `.footmain` 에 담고 QR 은 그 곁 아래),
+   가운데 칸은 두지 못한다(normQrs 가 버린다). 바닥 글이 없는 장의 아래 칸만 absolute(`.qy2`) */
 .qr{position:absolute;width:26mm;z-index:2;color:var(--ink);text-align:center;line-height:1.25;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .qr svg{display:block;width:100%;height:auto}
 .qr .qrl{display:block;margin-top:1mm;font-size:9pt;font-weight:700;word-break:keep-all}
 .qr.qx0{left:var(--mg);right:auto} .qr.qx1{right:var(--mg);left:auto}
-.qr.qy0{top:calc(var(--topband, 0px) + 5mm);bottom:auto}
-.qr.qy1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px)) / 2);bottom:auto;transform:translateY(-50%)}
+.qr.qy2{top:auto;bottom:11mm}   /* 바닥 글이 없는 장의 아래 칸 */
+.noren .qr.qh{position:absolute;top:var(--mt);bottom:auto;z-index:2;color:inherit}   /* 342번. 맨 위 QR — 맨 위 영역의 좌우 끝(글자 색은 영역을 따른다) */
+.noren .qr.qx0{left:var(--mg);right:auto} .noren .qr.qx1{right:var(--mg);left:auto}
+.noren.hasqr{min-height:calc(var(--mt) + var(--qrh) + 5mm + var(--nr-fringe));padding-left:calc(var(--mg) + var(--qrw) + 4mm);padding-right:calc(var(--mg) + var(--qrw) + 4mm)}
 .qr.qf{position:relative;flex:none;align-self:flex-end}
-.qr.qy2{top:auto;bottom:11mm}   /* 바닥 글이 없는 장(spec.foot 아님)의 아래 칸 — 도장과 같은 자리 */
+.foot.hasqr{display:flex;flex-direction:row;align-items:flex-end;gap:1.1em}   /* 340번. .foot 은 원래 세로로 쌓는다 — 방향을 안 정했더니 QR 이 바닥 글 옆이 아니라 아래에 쌓였다(재 보고 잡음) */
+.foot.hasqr > .footmain{flex:1 1 0;min-width:0}
 .art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
 /* 299번 — 296번의 그림 키우기는 글자 단추로 바뀌어 걷었다 */   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
 
@@ -2843,7 +2849,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <option value="plain">띠 없음</option>
   </select>
   <span class="slhead"><label>맨 위 크기 <b id="nsz-val"></b></label><button id="b-nreset" class="tbtn" type="button">기본으로</button></span>
-  <span class="slbody"><input type="range" id="nsz-range" min="60" max="160" step="1" title="상단 크기"><span class="stepg"><button id="b-nminus" class="stp" type="button" title="맨 위를 작게" aria-label="맨 위를 작게">−</button><button id="b-nplus" class="stp" type="button" title="맨 위를 크게" aria-label="맨 위를 크게">+</button></span></span>
+  <span class="slbody"><input type="range" id="nsz-range" min="30" max="160" step="1" title="상단 크기"><span class="stepg"><button id="b-nminus" class="stp" type="button" title="맨 위를 작게" aria-label="맨 위를 작게">−</button><button id="b-nplus" class="stp" type="button" title="맨 위를 크게" aria-label="맨 위를 크게">+</button></span></span>
+  <small class="pnote" id="nsz-note" hidden></small>   <!-- 342번 -->
   <label for="f-logo">로고 색</label>
   <span class="grp">
     <select id="f-logo">
@@ -2855,6 +2862,21 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     </select>
     <span class="pk"><input type="color" id="c-logo" title="로고 색"><b>로고</b></span>
   </span>
+  <div id="qr-host-top">
+    <div class="cellblk qrblk" role="group" aria-labelledby="h-qr">   <!-- 337 · 342번. 찍으면 주소 · 와이파이로 이어지는 QR — 자리 넷(맨 위 · 바닥 × 왼쪽 · 오른쪽). 도장과 따로 -->
+    <div class="pgrp" id="h-qr"><span id="h-qrt">맨 위 QR</span> <small class="pgonly">이 장만</small></div>
+    <span class="subrow nosw"><label id="l-qrslot">자리</label><span class="grp st-pseg" id="f-qrslot" role="group" aria-labelledby="l-qrslot"><button type="button" data-k="L">왼쪽</button><button type="button" data-k="R">오른쪽</button></span></span>
+    <span class="subrow nosw"><label id="l-qrkind">종류</label>
+      <span class="grp st-pseg" id="f-qrkind" role="group" aria-labelledby="l-qrkind"><button type="button" data-k="none">없음</button><button type="button" data-k="url">주소</button><button type="button" data-k="wifi">와이파이</button></span></span>
+    <span id="qr-url" hidden><span class="subrow nosw"><label for="f-qrurl">주소</label><input type="text" id="f-qrurl" maxlength="300" autocomplete="off" spellcheck="false" placeholder="예: naver.me/abcd" title="네이버 지도 · 인스타 · 카카오톡 채널 · 가민 코스의 공유 주소. https:// 는 안 적어도 됩니다. 전화는 tel:01012345678"></span></span>
+    <span id="qr-wifi" hidden>
+      <span class="subrow nosw"><label for="f-qrssid">와이파이 이름</label><input type="text" id="f-qrssid" maxlength="32" autocomplete="off" spellcheck="false"></span>
+      <span class="subrow nosw"><label for="f-qrenc">보안</label><select id="f-qrenc"><option value="WPA">비밀번호 있음</option><option value="nopass">비밀번호 없음</option></select></span>
+      <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
+    <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">바탕</label><span class="grp st-pseg" id="f-qrbg" role="group" aria-labelledby="l-qrbg"><button type="button" data-k="white">흰색</button><button type="button" data-k="paper">종이색</button></span></span>   <!-- 341번 -->
+    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 아래 글자</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적힙니다(비워도 됩니다)"></span>
+    <small class="qrnote" id="qr-note"></small></div>
+  </div>
   </div>
   <div class="ptab" data-tab="menu">
   <div class="pgrp">종이 방향 · 단</div>
@@ -2967,9 +2989,10 @@ dialog#start.wide .row2.foot2{margin-top:auto}
         <option value="num">1</option>
         <option value="none">없음</option>
       </select>
+  <div id="qr-host-foot"></div>
   </div>
   <div class="ptab" data-tab="deco">
-  <div class="pgrp">칸마다 그림 · 도장 · QR <small class="pgonly">이 장만</small></div>
+  <div class="pgrp">칸마다 그림 · 도장 <small class="pgonly">이 장만</small></div>
   <span class="grp two artseal">
     <span class="fld artpick"><label id="l-gart">자리 <small>칸을 눌러 고릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
@@ -2979,12 +3002,13 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="subrow nosw"><label for="f-art">종류</label>
     <select id="f-art">   <!-- 329번. 그림 34 → 묶음 여섯(고르기 칸 안에서 찾기 쉽게) -->
     <option value="none">없음</option>
-    <optgroup label="풍경 · 동물"><option value="horse">야생마</option><option value="zebra">얼룩말</option><option value="ibex">산양</option><option value="mountain">알프스 산</option><option value="fir">전나무 숲</option><option value="cabin">산장</option><option value="night">달밤</option><option value="bridge">한강 다리</option><option value="edelweiss">에델바이스</option></optgroup>
     <optgroup label="한식"><option value="ttuk">뚝배기 찌개</option><option value="bapsujeo">밥공기와 수저</option><option value="bibim">비빔밥</option><option value="jeon">전(부침개)</option></optgroup>
     <optgroup label="카페"><option value="coffee">커피잔</option><option value="croissant">크루아상</option><option value="cake">조각 케이크</option><option value="teapot">찻주전자</option></optgroup>
     <optgroup label="분식"><option value="tteok">떡볶이</option><option value="gimbap">김밥</option><option value="eomuk">어묵꼬치</option><option value="ramyeon">라면</option></optgroup>
     <optgroup label="호프 · 치킨"><option value="beer">생맥주</option><option value="highball">하이볼</option><option value="soju">소주</option><option value="chicken">치킨</option><option value="fries">감자튀김</option></optgroup>
     <optgroup label="요리주점 · 와인"><option value="sake">사케</option><option value="skewer">꼬치</option><option value="lantern">초롱(등불)</option><option value="wine">와인</option><option value="vine">포도나무</option><option value="pasta">파스타</option><option value="beerpasta">생맥주와 파스타</option></optgroup>
+    
+    <optgroup label="알프스 느낌 (산 · 동물 · 풍경)"><option value="horse">야생마</option><option value="zebra">얼룩말</option><option value="ibex">산양</option><option value="mountain">알프스 산</option><option value="fir">전나무 숲</option><option value="cabin">산장</option><option value="night">달밤</option><option value="bridge">한강 다리</option><option value="edelweiss">에델바이스</option></optgroup>   <!-- 341번. 알프스 전용 느낌이라 맨 아래로(다른 가게가 열면 안 맞는 그림부터 보였다) -->
     </select></span>
     <span id="art-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
@@ -3000,16 +3024,6 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span id="seal-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span></span>
 
-    <span class="cellblk qrblk" role="group" aria-labelledby="h-cqr"><span class="blkhd" id="h-cqr">QR</span>   <!-- 337번. 찍으면 주소 · 와이파이로 이어지는 QR 을 칸마다 하나 -->
-    <span class="subrow nosw"><label id="l-qrkind">종류</label>
-      <span class="grp st-pseg" id="f-qrkind" role="group" aria-labelledby="l-qrkind"><button type="button" data-k="none">없음</button><button type="button" data-k="url">주소</button><button type="button" data-k="wifi">와이파이</button></span></span>
-    <span id="qr-url" hidden><span class="subrow nosw"><label for="f-qrurl">주소</label><input type="text" id="f-qrurl" maxlength="300" autocomplete="off" spellcheck="false" placeholder="예: naver.me/abcd" title="네이버 지도 · 인스타 · 카카오톡 채널 · 가민 코스의 공유 주소. https:// 는 안 적어도 됩니다. 전화는 tel:01012345678"></span></span>
-    <span id="qr-wifi" hidden>
-      <span class="subrow nosw"><label for="f-qrssid">와이파이 이름</label><input type="text" id="f-qrssid" maxlength="32" autocomplete="off" spellcheck="false"></span>
-      <span class="subrow nosw"><label for="f-qrenc">보안</label><select id="f-qrenc"><option value="WPA">비밀번호 있음</option><option value="nopass">비밀번호 없음</option></select></span>
-      <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
-    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 아래 글자</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적힙니다(비워도 됩니다)"></span>
-    <small class="qrnote" id="qr-note"></small></span>
     <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
   </span>
   </div>
@@ -3118,7 +3132,9 @@ dialog#start.wide .row2.foot2{margin-top:auto}
 <dialog id="start"><div class="in"><span id="st-closerow" hidden><button type="button" class="dlg-x" id="st-close" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></span>   <!-- 284번. ✕ 는 창에 하나 — 다시 열었을 때 모든 단계에서 같은 자리(사용자). 처음 열 때는 숨긴다 -->
   <!-- 264번. 첫 화면 — 처음 여는 파일(SETTINGS.startScreen)이면 열자마자, 아니면 꾸미기 [처음 화면으로]로 연다 -->
   <div id="st-choose">   <!-- 280번. 넷을 한 줄로 늘어놓지 않고 두 갈래로 — 새로 만들기(큰 둘) · 이미 있는 메뉴판(작은 둘) -->
-    <div class="st-head"><h3 tabindex="-1">메뉴판을 어떻게 시작할까요?</h3></div>   <!-- 281번. 닫기는 머리 오른쪽 ✕ -->
+    <div class="st-head"><h3 tabindex="-1">메뉴판을 어떻게 시작할까요?</h3>
+</div>   <!-- 281번. 닫기는 머리 오른쪽 ✕ -->
+    <p class="st-narrow" id="st-narrow" hidden>폰에서는 메뉴판 보기와 인쇄 확인을 권합니다. 만들고 고치는 일은 컴퓨터에서 해 주세요(종이가 A4 크기라 폰 화면에는 다 안 들어갑니다).</p>   <!-- 341 · 342번. 제목과 같은 가로 줄(.st-head)에 넣었더니 제목이 한 글자씩 세로로 눌렸다 — 줄 밖으로(폰 모양을 안 보고 놓쳤다) -->
     <p class="sub">고른 뒤에도 위쪽 [파일 ▾] → [새로 만들기]에서 다시 고를 수 있습니다.</p>   <!-- 293번. 처음 여는 사람에게 필요한 것은 "되돌릴 수 있다" 하나 — 자동 저장 동작 설명은 뺐다 -->
     <p class="st-grp">새로 만들기</p>
     <div class="st-big">
@@ -3235,7 +3251,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
     <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>나 <b>↶</b> · Ctrl+Z.</li></ul>
   <h4>모양 바꾸기</h4>
-  <ul><li>[꾸미기] 탭 다섯 — <b>색 · 글꼴</b>(추천 조합 · 글꼴 · 색 · 종이 결) · <b>맨 위</b>(가게 이름 글자/로고 · 업종 · 한 줄 소개 · 띠) · <b>메뉴</b>(종이 방향 · 단 · 글자 크기 · 분류 제목 · 메뉴 줄 · 외국어, 와인 장이 있으면 맨 아래 와인 카드 · 병) · <b>바닥</b>(바닥 글 · 원산지 · 쪽 번호) · <b>칸 꾸미기</b>(칸마다 그림 · 도장 · QR). 「이 장만」이 붙은 묶음은 위 「고칠 장」에서 고른 장에만 걸립니다</li>   <!-- 331 · 332번. 탭을 하려는 일로 넷 — 와인 탭은 와인 장이 있을 때만 -->
+  <ul><li>[꾸미기] 탭 다섯 — <b>색 · 글꼴</b>(추천 조합 · 글꼴 · 색 · 종이 결) · <b>맨 위</b>(가게 이름 글자/로고 · 업종 · 한 줄 소개 · 띠) · <b>메뉴</b>(종이 방향 · 단 · 글자 크기 · 분류 제목 · 메뉴 줄 · 외국어, 와인 장이 있으면 맨 아래 와인 카드 · 병) · <b>바닥</b>(바닥 글 · 원산지 · 쪽 번호) · <b>그림 · 도장</b>. 「이 장만」이 붙은 묶음은 위 「고칠 장」에서 고른 장에만 걸립니다</li>   <!-- 331 · 332번. 탭을 하려는 일로 넷 — 와인 탭은 와인 장이 있을 때만 -->
     <li>한 장에 안 들어가면 <b>붉은 띠</b>와 함께 몇 %로 낮추면 들어가는지 알려 줍니다. <b>[한 장에 맞춤]</b>을 켜면 저절로 맞춥니다.</li></ul>
   <h4>저장</h4>
   <ul><li>인터넷 주소로 열면 고칠 때마다 <b>자동 저장</b>됩니다(위쪽 「✓ 자동 저장됨」).</li>
@@ -5615,15 +5631,20 @@ function qrPayload(q){   // 찍을 글. 못 읽으면 빈 글
   if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
   return /^(https?|tel|mailto|sms):/i.test(u) ? u : "";
 }
-function qrSvg(text){   // → {svg, n}(n = 둘레 포함 한 변의 칸 수). 너무 길면 null
+function qrPaperOK(){   /* 341번. 종이색 바탕은 종이가 충분히 밝고 글자색이 충분히 진할 때만(대비 7 : 1 — 어두운 종이 · 약한 대비는 폰이 못 읽는다). 아니면 흰색으로 찍는다 */
+  const cs = getComputedStyle(document.documentElement), hx = v => { const m = String(v).trim().match(/^#([0-9a-f]{6})$/i); return m ? m[1] : null; }, pa = hx(cs.getPropertyValue("--paper")), ik = hx(cs.getPropertyValue("--ink")); if (!pa || !ik) return false;
+  const lum = h => { const v = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255).map(x => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4)); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }, a = lum(pa), b = lum(ik);
+  return a > b && (a + .05) / (b + .05) >= 7;
+}
+function qrSvg(text, pm){   // → {svg, n}(n = 둘레 포함 한 변의 칸 수). 너무 길면 null. pm — 종이색 바탕
   try { const q = qrcode(0, "M"); q.addData(text, "Byte"); q.make();
     const m = q.getModuleCount(), M = 4, N = m + M * 2; let d = "";
     for (let r = 0; r < m; r++) for (let c = 0; c < m; c++) if (q.isDark(r, c)) d += "M" + (c + M) + " " + (r + M) + "h1v1h-1z";
-    return { n:N, svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + N + " " + N + '" shape-rendering="crispEdges" role="img"><rect width="' + N + '" height="' + N + '" fill="#fff"/><path fill="#000" d="' + d + '"/></svg>' };
+    return { n:N, svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + N + " " + N + '" shape-rendering="crispEdges" role="img"><rect width="' + N + '" height="' + N + '" fill="' + (pm ? "var(--paper)" : "#fff") + '"/><path fill="' + (pm ? "var(--ink)" : "#000") + '" d="' + d + '"/></svg>' };
   } catch (e) { return null; }
 }
 function qrNode(q, cls){   // 종이에 놓을 상자(없으면 null)
-  const t = qrPayload(q), r = t && qrSvg(t); if (!r) return null;
+  const t = qrPayload(q), pm = q.bg === "paper" && qrPaperOK(), r = t && qrSvg(t, pm); if (!r) return null;   // 341번. 종이색 바탕
   const w = document.createElement("div"); w.className = cls; w.dataset.cell = q.cell; w.dataset.n = r.n; w.innerHTML = r.svg;
   w.style.width = Math.min(30, Math.max(20, r.n * 0.5)).toFixed(1) + "mm";   // 338번. 한 칸 0.5mm(읽기 편한 크기) — 짧은 주소는 20mm 로 작게, 긴 주소는 30mm 까지
   const lb = String(q.label || "").trim(); if (lb){ const l = document.createElement("span"); l.className = "qrl"; l.textContent = lb; w.appendChild(l); }
@@ -5634,14 +5655,13 @@ function normQrs(pg){   /* 337번. 망가진 값은 버리고 칸마다 하나 �
   if (pg.qrs === undefined) return;
   if (!Array.isArray(pg.qrs)){ delete pg.qrs; return; }
   const seen = new Set(), clip = (v, n) => typeof v === "string" ? [...v].slice(0, n).join("") : "";
-  pg.qrs = pg.qrs.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && x.cell >= 0 && x.cell < NCELL && ["url","wifi"].includes(x.kind) && !seen.has(x.cell) && seen.add(x.cell))
+  pg.qrs = pg.qrs.filter(x => x && typeof x === "object" && Number.isInteger(x.cell) && [0, 1, 4, 5].includes(x.cell) /* 340번. 가운데 칸은 글자 사이라 자리를 못 만든다 */ && ["url","wifi"].includes(x.kind) && !seen.has(x.cell) && seen.add(x.cell))
     .map(x => { const q = { cell:x.cell, kind:x.kind };
       if (x.kind === "url") q.url = clip(x.url, QR_MAX.url);
       else { const enc = x.enc === "nopass" ? "nopass" : "WPA"; q.ssid = clip(x.ssid, QR_MAX.ssid); q.pass = enc === "nopass" ? "" : clip(x.pass, QR_MAX.pass); q.enc = enc; }   // 키 순서를 고정(저장본이 같은 모양으로)
-      const l = clip(x.label, QR_MAX.label); if (l) q.label = l; return q; })
+      const l = clip(x.label, QR_MAX.label); if (l) q.label = l; if (x.bg === "paper") q.bg = "paper"; return q; })   // 341번. bg — 종이색 바탕(없으면 흰색)
     .sort((a, b) => a.cell - b.cell);
   if (!pg.qrs.length){ delete pg.qrs; return; }
-  if (Array.isArray(pg.seals)){ const qc = new Set(pg.qrs.map(x => x.cell)); pg.seals = pg.seals.filter(x => !qc.has(x.cell)); }   // 338번. 한 칸에 도장과 QR 중 하나만 — 337번 판에서 둘 다 둔 파일은 QR 을 남긴다
 }
 /* ── 277번. 자동 저장 · 불러오기 — 파일을 열 때 가장 먼저 ─────────────────────────────────────────
    · 버셀 주소(http · https)에서만 자동 저장한다. 브라우저 저장소는 주소마다 따로라, 58번이 걷어낸 까닭("컴퓨터 파일끼리 저장소를 같이 써
@@ -5684,7 +5704,7 @@ const ART = {
      오른끝을 도장 왼끝에서 40 안쪽에 두면 "조금만 겹친다".
      그래야 도장(종이 오른쪽 아래)과의 간격이 그림마다 같다. 유리잔의 빈 부분과 거품은
      `fill="var(--paper)" opacity=".5"` 로 잉크보다 밝게만 둔다 */
-  cabin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+  cabin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_cabin"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_cabin" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_cabin)"/></mask></defs><g mask="url(#fm_cabin)" transform="translate(440 491) scale(.84) translate(-440 -491)">
 <g transform="translate(350 500) scale(1.15) translate(-500 -500)">
 <g fill="currentColor" opacity=".28">
   <path d="M40 500 L250 70 L470 500 Z"/>
@@ -5706,8 +5726,8 @@ const ART = {
 </g>
 <g stroke="var(--paper)" stroke-width="6" fill="none" stroke-linecap="round"><path d="M322 326 L374 348 M322 348 L374 326"/><path d="M381 326 L433 348 M381 348 L433 326"/><path d="M440 326 L492 348 M440 348 L492 326"/><path d="M499 326 L551 348 M499 348 L551 326"/><path d="M558 326 L610 348 M558 348 L610 326"/><path d="M617 326 L669 348 M617 348 L669 326"/></g>
 </g>
-</svg>`,
-  bridge: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-71.6 -52.4) scale(1.0233)">
+</g></svg>`,
+  bridge: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_bridge"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_bridge" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_bridge)"/></mask></defs><g mask="url(#fm_bridge)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-71.6 -52.4) scale(1.0233)">
 <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
   <g stroke-width="20">
     <path d="M116 322 C 176 232, 417 232, 477 322"/>
@@ -5734,7 +5754,7 @@ const ART = {
     <path d="M158 526 h150"/><path d="M356 526 h226"/><path d="M628 526 h192"/>
   </g>
 </g>
-</g></svg>`,
+</g></g></svg>`,
   beer: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
 <g transform="translate(-150 0)">
 <g fill="currentColor">
@@ -5981,7 +6001,7 @@ const ART = {
 </g></g></svg>`,
   /* 초승달은 바깥 원의 긴 호 + 파내는 원의 짧은 호, 한 획이다.
      원 두 개에 fill-rule="evenodd" 를 쓰면 대칭차라서 초승달이 둘 생겨 고리처럼 보인다 */
-  night: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-44.0 -25.0) scale(1.1000)">
+  night: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_night"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_night" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_night)"/></mask></defs><g mask="url(#fm_night)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-44.0 -25.0) scale(1.1000)">
 <g fill="currentColor">
   <g transform="translate(1210.7 0) scale(-1 1)"><path d="M708.6 246 A118 118 0 1 1 617.4 50 A118 118 0 0 0 708.6 246 Z"/></g>
   <path d="M158 91 C 162.6 115.4, 162.6 115.4, 187 120 C 162.6 124.6, 162.6 124.6, 158 149 C 153.4 124.6, 153.4 124.6, 129 120 C 153.4 115.4, 153.4 115.4, 158 91 Z"/>
@@ -5997,7 +6017,7 @@ const ART = {
   <path opacity=".42" d="M0 470 L126 300 L214 388 L342 236 L448 366 L540 274 L664 392 L774 288 L880 402 L880 470 Z"/>
   <path d="M0 470 L96 408 L188 442 L306 338 L398 424 L470 388 L560 446 L682 356 L788 430 L880 396 L880 470 Z"/>
 </g>
-</g></svg>`,
+</g></g></svg>`,
   highball: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
 <g transform="translate(-190 0)">
 <g stroke="var(--paper)" stroke-width="10" paint-order="stroke">
@@ -6067,7 +6087,7 @@ const ART = {
   <circle cx="766" cy="156" r="6.6"/><circle cx="769.3" cy="144.4" r="5.6"/><circle cx="777.7" cy="153.1" r="5.6"/><circle cx="774.4" cy="164.7" r="5.6"/><circle cx="762.7" cy="167.6" r="5.6"/><circle cx="754.3" cy="158.9" r="5.6"/><circle cx="757.6" cy="147.3" r="5.6"/>
 </g>
 </g></svg>`,
-  fir: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-41.9 -37.7) scale(1.0476)">
+  fir: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_fir"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_fir" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_fir)"/></mask></defs><g mask="url(#fm_fir)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-41.9 -37.7) scale(1.0476)">
 <g fill="currentColor">
   <g opacity=".32">
     <path d="M150 252 L185.2 362 L114.8 362 Z"/>
@@ -6107,7 +6127,7 @@ const ART = {
     <rect x="441.3" y="445.8" width="21.4" height="50.2"/>
   <rect x="0" y="496" width="920" height="9" rx="4.5"/>
 </g>
-</g></svg>`,
+</g></g></svg>`,
   /* 산양은 야생마·얼룩말과 **같은 몸통·다리**를 쓴다. 머리와 뿔만 다르다 —
      넷을 따로 그리면 한 벌로 안 보인다. 뿔 마디는 손으로 찍지 말고 곡선에서 뽑았다 */
   ibex: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 42 880 520">
@@ -6207,6 +6227,7 @@ const ART = {
 </g>
 </svg>`,
   /* 329번. 콘셉트별 그림 16 — 한식 · 카페 · 분식 넷씩, 호프 · 치킨 · 요리주점 둘씩(사용자 — 지금은 알프스 맞춤 그림뿐). 같은 결: 880 × 520 · 글자색 실루엣 + 종이색 무늬 */
+  /* 340번. **양쪽이 뚝 끊기던 그림 넷**(달밤 · 전나무 숲 · 한강 다리 · 산장 — 그림 틀 폭 880 을 꽉 채워 칸 가장자리에서 잘렸다. 사용자) 을 0.84배로 줄이고 **양 끝 13% 를 서서히 흐리게**(mask) 했다 — 줄이기만 하면 끝이 벽처럼 서 있다 */
   /* 339번. **바닥선을 491 로 맞췄다**(알프스 때 그림은 아래끝이 491 ~ 499 였는데 새 그림은 469 ~ 494 라 칸 아래에서 들쭉날쭉했다 — 재서 정함) · **납작한 셋을 다시 그렸다**(꼬치 높이 151 · 김밥 194 · 전 272 → 꼬치 통 · 쌓은 김밥 단면 · 쌓은 전과 주전자. 알프스 그림은 330 ~ 490). 아래는 334번 설명 */
   /* 334번. 329번의 열여섯을 다시 그렸다(사용자 — 「뭔지 모르겠어」 · 「밥은 옆에서 보는데 수저는 왜 세워져 있어?」 · 「접시 위에 음식이 공중에 떠 있거나 구도나 각도가 안 맞아」).
      규칙 셋: ① 보는 방향은 옆에서 하나(위를 보이는 타원을 안 쓴다 — 알프스 그림과 같다) ② 바닥선 하나 — 음식 밑면 = 접시 윗면, 접시 밑면 = 상 윗면을 숫자로 맞춘다
@@ -6459,7 +6480,7 @@ const PAGE_KEYS = ["noren","norenScale","norenTall","showTitle","showSub","logoC
    0.8 / 0.9 / 1 로 **셋으로 갈라져 있던 것**을 이 상수 하나로 모았다.
    갈라져 있던 탓에 (가) 망가진 저장본이 0.9 로 복구되고 (나) 키가 없으면
    **창은 100% 라고 적는데 종이는 0.9 로 그렸다**(상단 158px 대 175px) — 205번이 잡은 그 사고다 */
-const NSCALE_DEFAULT = 0.8;
+const NSCALE_DEFAULT = 0.8, NSCALE_MIN = 0.3;   // 342번. 맨 위는 위 여백선(11mm) 밑으로는 못 내려간다 — 30% 에서 글자 모드 약 75px · 로고 모드 약 81px(60% 는 108 · 120px)
 /* 212번. **글자 크기 기본값도 상수 하나로.** 211번(f)이 상단 크기에 대해 한 것을 글자 크기에는 안 옮겼다 —
    `pageDefaults()` 는 1.0 인데 아래 122번 방어만 **0.94** 로 남아 있어서, 값이 망가진 저장본이
    100% 가 아니라 **94% 로 복구**됐다. 8장 검사의 "망가진 저장본" 목록에 `scale` 이 없어서 안 걸렸다.
@@ -7279,6 +7300,9 @@ function drawSheet(spec){
   noren.appendChild(SETTINGS.topMode === "text" ? brand("logo txt", "top") : el("div","logo"));
   if (PS.showTitle !== false) noren.append(brand("jp","title"));
   if (PS.showSub   !== false) noren.append(brand("ko","sub"));
+  /* 342번. **맨 위 QR — 맨 위 영역의 좌우 끝**(0 = 왼쪽 · 1 = 오른쪽). 영역이 낮으면 QR 높이만큼 커지고, 가운데 글자 · 로고는 옆으로 비킨다(사용자: 「qr을 메뉴판 맨 위의 좌우끝에 놓고 싶을 수도」) */
+  { let mw = 0, mh = 0; [0, 1].forEach(c => { const q = (PS.qrs || []).find(x => x.cell === c); if (!q) return; const n = qrNode(q, "qr qh qx" + c); if (!n) return; noren.appendChild(n); const w = parseFloat(n.style.width); mw = Math.max(mw, w); mh = Math.max(mh, w + (q.label ? 6 : 0)); });
+    if (mw){ noren.classList.add("hasqr"); noren.style.setProperty("--qrw", mw + "mm"); noren.style.setProperty("--qrh", mh + "mm"); } }
   sheet.appendChild(noren);
   // 241번. 흰 테두리 4mm(242번) — 화면 · 인쇄 모두(편집 중에는 반투명 · 이름표). **상단 바로 뒤에** 둔다 — z 가 같은 1 이므로
   // 문서 차례로 칠해져 상단 띠는 덮고, 뒤에 오는 영업시간 · 본문 · 바닥(편집 이름표가 왼쪽 여백에 선다)은 덮지 않는다
@@ -7333,7 +7357,7 @@ function drawSheet(spec){
   }
 
   const body = el("div","body c"+spec.cols.length);
-  spec.cols.forEach(({ci, secs}) => {
+  spec.cols.forEach(({ci, secs}, k) => {
     const col = el("div","col");
     secs.forEach(x => { const n = drawSection(x.sec, x.path); if (n) col.appendChild(n); });
     /* 157번. **와인 카드만 있는 단인지는 코드가 안다.** 전에는 `:has(...):not(:has(...))` 사슬로 CSS 가 알아내게
@@ -7440,10 +7464,11 @@ function drawSheet(spec){
     /* 338번. 아래 칸 QR 은 **바닥 글 줄 안**에(도장 자리 `.sealgap` 를 대신한다) — 글자와 겹치지 않고 종이 아래가 그만큼 차지된다. 사용자: 「QR 코드 위치 장난해??? 그림이랑 도장이랑 위치를 타협해야 할 거 아니야」 */
     const qIn = c => { const q = (PS.qrs || []).find(x => x.cell === c); return q && qrNode(q, "qr qf"); };
     const qL = qIn(4), qR = qIn(5);
-    if (qL) row.insertBefore(qL, left);
-    else if (qR && sealAt(PS, 4)) row.insertBefore(el("div","sealgap"), left);   // 왼쪽 아래 도장이 바닥 글을 안 가리게
-    row.appendChild(qR || el("div","sealgap"));
-    foot.appendChild(row);
+    /* 340번. **QR 은 바닥 글 줄 하나가 아니라 바닥 전체(원산지 줄까지)의 옆에 선다** — 줄 안에 두었더니 원산지 줄이 생기면 QR 이 그 줄 위로 올라갔다(사용자: 「바닥글을 넣으니까 qr이 위로 올라가 버리는데」) */
+    if (!qL && qR && sealAt(PS, 4)) row.insertBefore(el("div","sealgap"), left);   // 왼쪽 아래 도장이 바닥 글을 안 가리게
+    if (!qR) row.appendChild(el("div","sealgap"));
+    const fm = (qL || qR) ? el("div","footmain") : foot;
+    fm.appendChild(row);
     // 켜져 있어도 내용이 비었으면 안 그린다. 편집 중에는 빈 칸을 눌러 채울 수 있게 그린다
     if (PS.showOrigin !== false && (editing || String(FT.origin || "").trim())){
       const oz = el("div","zone"); oz.dataset.t = "식재료 원산지";   // 152번. 와인의 "원산지" 줄과 이름이 겹쳐 바꿨다
@@ -7457,8 +7482,9 @@ function drawSheet(spec){
         if (editing && !preview && e.target !== ov){ e.preventDefault(); focusOrigin(spec.pi); }
       });
       oz.appendChild(og);
-      foot.appendChild(oz);
+      fm.appendChild(oz);
     }
+    if (fm !== foot){ foot.classList.add("hasqr"); if (qL) foot.appendChild(qL); foot.appendChild(fm); if (qR) foot.appendChild(qR); }   // 340번
     sheet.appendChild(foot);
   }
   sheet.appendChild(el("div","guide"));   // 194번. 인쇄 여백선(편집 중에만 보인다)
@@ -7468,8 +7494,8 @@ function drawSheet(spec){
   (sealOn ? PS.seals : [{ cell:SEAL_POS_DEF, seal:"word" }]).forEach(x => { const sp = x.cell, seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
     seal.dataset.cell = sp; seal.innerHTML = sealHTML(x); sheet.appendChild(seal); });   // 327번. 글자 도장은 적은 글자 · 상호명   // 323번. 칸마다 모양
   sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));
-  (PS.qrs || []).forEach(q => { if (q.cell >= 4 && spec.foot) return;   // 338번. 아래 칸은 바닥 글 줄 안에서 그린다(자리를 흐름에 남긴다 — 도장 자리와 같은 방식)
-    const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy" + Math.floor(q.cell / 2)); if (n) sheet.appendChild(n); });   // 337 · 338번. QR 은 도장과 같은 자리(칸마다 둘 중 하나만)   // 302번. 왼쪽 아래에만 도장이면 바닥 글이 피하는 자리도 왼쪽으로
+  (PS.qrs || []).forEach(q => { if (q.cell < 4 || spec.foot) return;   // 342번. 맨 위는 맨 위 영역 안에서 · 바닥은 바닥 글 옆에서 그린다 — 여기는 바닥 글이 없는 장의 바닥뿐
+    const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy2"); if (n) sheet.appendChild(n); });   // 337 · 338 · 340번
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
     const a = el("div","art ax" + (x.cell % 2) + " ay" + Math.floor(x.cell / 2)); a.dataset.cell = x.cell; a.innerHTML = ART[x.art]; artVars(a, x); sheet.appendChild(a); });
@@ -8032,7 +8058,7 @@ function applyLook(){
   const r = document.documentElement.style;
   r.setProperty("--kr", f.kr); r.setProperty("--jp", f.jp); r.setProperty("--ja", f.ja || f.jp); r.setProperty("--zh", zhSerif ? "'Noto Serif SC'" : "'Noto Sans SC'");
   // 152번. 배율 · 상단 크기 · 로고 색은 장마다 — drawSheet 가 종이에 직접 넣는다. 여기서는 표시 값만
-  $("#nsz-val").textContent = Math.round((P(panelPage).norenScale ?? NSCALE_DEFAULT) * 100) + "%";
+  $("#nsz-val").textContent = Math.round((P(panelPage).norenScale ?? NSCALE_DEFAULT) * 100) + "%"; nszNote();
   r.setProperty("--w-name", SETTINGS.bold ? 700 : 400);
 
   let t;
@@ -8682,6 +8708,7 @@ function setPreview(on){
 
 function toggleEdit(){
   editing = !editing;
+  if (editing && narrowView()) toast("폰에서는 고치기가 불편합니다 — 컴퓨터에서 여는 것을 권합니다", null);   // 341번
   hideUndo();
   setPreview(false);
   $("#b-edit").classList.toggle("on", editing);
@@ -8907,8 +8934,9 @@ $("#b-style").onclick   = () => {
 $("#f-logo").onchange   = e => { P(panelPage).logoColor = e.target.value; applyLook(); touch(); };
 /* 상단 배율. 본문(`--scale`)과 완전히 따로 논다 — 로고 · 업종 · 한 줄 소개 · 술 높이 ·
    여백이 전부 이 하나를 따르므로 상단 안에서 따로 노는 것이 없다(93번) */
+function nszNote(){ const n = $("#nsz-note"); if (!n) return; const pg = P(panelPage), ns = pg.norenScale ?? NSCALE_DEFAULT, on = pg.showTitle !== false || pg.showSub !== false; n.hidden = !(ns < .45 && on); n.textContent = "작게 하면 업종 · 한 줄 소개가 8px 밑으로 작아져 읽기 어렵습니다 — 끄거나 키우세요."; }   // 342번
 const setNScale = v => {
-  P(panelPage).norenScale = Math.round(Math.min(1.6, Math.max(.6, v)) * 100) / 100;
+  P(panelPage).norenScale = Math.round(Math.min(1.6, Math.max(NSCALE_MIN, v)) * 100) / 100;   // 342번. 하한 60 → 30%
   applyLook(); render(); touch();
 };
 /* 239번. ＋ㅡ 는 **4%** — 글자 크기의 ＋ㅡ 와 같은 걸음이다(200번: 같은 일을 하는 손잡이는 같은 꼴). 5% 로 남아 있어
@@ -8918,7 +8946,7 @@ $("#b-nminus").onclick = () => setNScale((P(panelPage).norenScale ?? NSCALE_DEFA
 $("#b-nreset").onclick = () => setNScale(NSCALE_DEFAULT);   // 198번. 기본은 0.8 이다
 /* 200번. 상단도 끌어서 1% 단위 — 글자 크기 막대와 같은 방식(끄는 동안 가볍게, 놓으면 저장) */
 $("#nsz-range").oninput  = e => { P(panelPage).norenScale = Math.round(+e.target.value)/100;
-  applyLook(); render(); $("#nsz-val").textContent = Math.round(P(panelPage).norenScale*100) + "%"; };
+  applyLook(); render(); $("#nsz-val").textContent = Math.round(P(panelPage).norenScale*100) + "%"; nszNote(); };
 $("#nsz-range").onchange = () => touch();
 $("#f-noren").onchange  = e => {
   P(panelPage).noren = e.target.value;
@@ -8941,7 +8969,6 @@ $("#f-leader").onchange = e => { const v = e.target.value;   // 273번. 없음�
 $("#f-seal").onchange   = e => { const pg = P(panelPage), old = sealAt(pg, panelCell), v = e.target.value;   // 323번. 고른 칸의 도장 — 모양을 바꿔도 그 칸의 색은 남긴다
   pg.seals = (pg.seals || []).filter(x => x.cell !== panelCell);
   if (v !== "none"){ const q = Object.assign({}, old, { cell:panelCell, seal:v }); if (!SEAL_TEXT[v]) delete q.text; pg.seals.push(q); }   // 327번. 기호 도장엔 글자가 없다
-  if (v !== "none" && qrAt(pg, panelCell)){ pg.qrs = pg.qrs.filter(x => x.cell !== panelCell); if (!pg.qrs.length) delete pg.qrs; toast("이 칸의 QR 을 도장으로 바꿨습니다 — 한 칸에는 도장과 QR 중 하나만 둘 수 있습니다", null); }   // 338번
   pg.seals.sort((a, b) => a.cell - b.cell); render(); touch(); syncPage(); };   // 321번. 「없음」으로 바꾸기 전 모양을 기억   // 303번. 모양만 — 자리(칸)는 격자에서
 /* 303번. 고른 칸에 도장 켜고 끄기. 없음에서 켜면 모양 도장(네모 · 삼각 — 글자 도장 「알프스」는 다른 가게에 찍지 않는다, 273번), 마지막 칸을 끄면 없음 */
 const sealAt = (pg, c) => (pg.seals || []).find(x => x.cell === c);   // 323번. 칸의 도장
@@ -8950,8 +8977,15 @@ $("#c-seal").addEventListener("input", e => { const x = sealAt(P(panelPage), pan
 $("#c-seal").addEventListener("change", () => syncPage());
 $("#f-sealtx").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x || !SEAL_TEXT[x.seal]) return;   // 327번. 글자 도장의 글자
   const t = [...e.target.value.replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX).join(""); if (t) x.text = t; else delete x.text; render(); drawGrids(P(panelPage)); touchLater(); });
-/* 337번. QR — 고른 칸(panelCell)의 QR 하나. 글자 칸은 칠 때마다 다시 그리되 syncPage() 는 안 부른다(치는 도중 값이 되돌려진다 — f-sealtx 와 같은 까닭) */
-function qrPut(patch){ const pg = P(panelPage); pg.qrs = pg.qrs || []; let x = qrAt(pg, panelCell); if (!x){ x = { cell:panelCell, kind:"url" }; pg.qrs.push(x); } Object.assign(x, patch); pg.qrs.sort((a, b) => a.cell - b.cell); return x; }
+var qrSide = "L", qrSlot = 0;   // 342번. var — 처음 그릴 때 syncPageTabs() 가 이 구역보다 먼저 불려도 안전하게
+function qrPlace(){   // 같은 QR 묶음을 지금 탭([맨 위] · [바닥])에 옮기고 자리 번호를 정한다
+  const t = panelTab === "top", f = panelTab === "foot"; if (!t && !f) return;
+  const host = $(t ? "#qr-host-top" : "#qr-host-foot"), blk = document.querySelector(".qrblk"); if (blk && host && blk.parentElement !== host) host.appendChild(blk);
+  qrSlot = (t ? 0 : 4) + (qrSide === "R" ? 1 : 0); const h = $("#h-qrt"); if (h) h.textContent = t ? "맨 위 QR" : "바닥 QR";
+}
+$("#f-qrslot").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qrSide = b.dataset.k === "R" ? "R" : "L"; syncQr(P(panelPage)); });
+/* 337 · 342번. QR — 자리(qrSlot)의 QR 하나. 글자 칸은 칠 때마다 다시 그리되 syncPage() 는 안 부른다(치는 도중 값이 되돌려진다 — f-sealtx 와 같은 까닭) */
+function qrPut(patch){ const pg = P(panelPage); pg.qrs = pg.qrs || []; let x = qrAt(pg, qrSlot); if (!x){ x = { cell:qrSlot, kind:"url" }; pg.qrs.push(x); } Object.assign(x, patch); pg.qrs.sort((a, b) => a.cell - b.cell); return x; }
 function qrOverlap(i){   // 그 장의 QR 이 가리는 메뉴 글자 수(내용이 있는 글자만)
   const sh = document.querySelector('.sheet[data-pi="' + i + '"]'); if (!sh) return 0; let n = 0;
   sh.querySelectorAll(".qr").forEach(q => { const r = q.getBoundingClientRect();
@@ -8960,39 +8994,43 @@ function qrOverlap(i){   // 그 장의 QR 이 가리는 메뉴 글자 수(내용
   return n;
 }
 function syncQrNote(){
-  const pg = P(panelPage), x = qrAt(pg, panelCell), note = $("#qr-note"); let m = "";
-  if (!x) m = "한 칸에는 도장과 QR 중 하나만 둘 수 있습니다. 위 · 가운데 칸은 글자 위에 놓이니 빈 칸에 두세요. 아래 칸은 바닥 글 줄에 들어갑니다.";
+  const pg = P(panelPage), x = qrAt(pg, qrSlot), note = $("#qr-note"); let m = "";
+  if (!x) m = "";
   else { const t = qrPayload(x), r = t && qrSvg(t);
     if (x.kind === "url" && !String(x.url || "").trim()) m = "주소를 적으면 QR 이 나옵니다.";
     else if (x.kind === "url" && !t) m = "읽을 수 없는 주소입니다 — https:// 로 시작하는 주소를 적어 주세요.";
     else if (x.kind === "wifi" && !x.ssid) m = "와이파이 이름을 적어 주세요.";
     else if (t && !r) m = "글이 너무 길어 QR 을 만들 수 없습니다.";
+    else if (x.bg === "paper" && !qrPaperOK()) m = "종이 색이 어둡거나 글자색 대비가 약해 흰색으로 찍힙니다.";
     else { topBands(); const c = qrOverlap(panelPage);
       if (c) m = "이 장의 QR 이 메뉴 글자 " + c + "곳을 가립니다 — 빈 칸으로 옮겨 주세요.";
       else if (r && r.n > 69) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다).";
-      else if (panelCell >= 4 && t) m = "아래 칸의 QR 은 바닥 글 줄에 들어가 종이 아래를 차지합니다 — 메뉴가 넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜거나 글자 크기를 줄여 주세요.";
+      else if (t) m = (qrSlot >= 4 ? "바닥 QR 은 바닥 글 옆 맨 아래에 들어가 종이 아래를 차지합니다" : "맨 위 QR 은 맨 위 영역의 좌우 끝에 들어갑니다 — 영역이 낮으면 QR 높이만큼 커지고 가운데 글자는 옆으로 비킵니다") + " — 메뉴가 넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜거나 글자 크기를 줄여 주세요.";
       else m = x.kind === "wifi" ? "비밀번호가 QR 에 그대로 담깁니다 — 메뉴판을 보는 누구나 접속할 수 있습니다." : "인쇄한 뒤 폰 카메라로 읽어 보세요."; } }
   note.textContent = m;
 }
 function syncQr(pg){
-  const x = qrAt(pg, panelCell), k = x ? x.kind : "none";
+  qrPlace();
+  $("#f-qrslot").querySelectorAll("button").forEach(b => { const on = b.dataset.k === qrSide; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  const x = qrAt(pg, qrSlot), k = x ? x.kind : "none";
   $("#f-qrkind").querySelectorAll("button").forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
-  $("#qr-url").hidden = k !== "url"; $("#qr-wifi").hidden = k !== "wifi"; $("#qr-labrow").hidden = k === "none";
+  $("#qr-url").hidden = k !== "url"; $("#qr-wifi").hidden = k !== "wifi"; $("#qr-labrow").hidden = k === "none"; $("#qr-bgrow").hidden = k === "none";
+  { const ok = qrPaperOK(), pb = $("#f-qrbg"); pb.querySelectorAll("button").forEach(b => { const on = b.dataset.k === (x && x.bg === "paper" ? "paper" : "white"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); if (b.dataset.k === "paper"){ b.disabled = !ok; b.title = ok ? "" : "종이 색이 어둡거나 글자색 대비가 약해 폰이 못 읽을 수 있어 흰색으로만 찍습니다"; } }); }   // 341번
   const set = (id, v) => { const e = $(id); if (document.activeElement !== e) e.value = v || ""; };
   set("#f-qrurl", x && x.url); set("#f-qrssid", x && x.ssid); set("#f-qrpass", x && x.pass); set("#f-qrlabel", x && x.label);
   $("#f-qrenc").value = x && x.enc === "nopass" ? "nopass" : "WPA"; $("#qr-passrow").hidden = !!x && x.enc === "nopass";
   syncQrNote();
 }
 $("#f-qrkind").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.k, pg = P(panelPage);
-  if (k === "none"){ pg.qrs = (pg.qrs || []).filter(x => x.cell !== panelCell); if (!pg.qrs.length) delete pg.qrs; }
-  else { const old = qrAt(pg, panelCell); if (!old || old.kind !== k){ const keep = old && old.label ? { label:old.label } : {}; pg.qrs = (pg.qrs || []).filter(x => x.cell !== panelCell); qrPut(Object.assign({ kind:k }, k === "wifi" ? { ssid:"", pass:"", enc:"WPA" } : { url:"" }, keep)); } }
-  if (k !== "none" && sealAt(pg, panelCell)){ pg.seals = pg.seals.filter(x => x.cell !== panelCell); toast("이 칸의 도장을 QR 로 바꿨습니다 — 한 칸에는 도장과 QR 중 하나만 둘 수 있습니다", null); }   // 338번
+  if (k === "none"){ pg.qrs = (pg.qrs || []).filter(x => x.cell !== qrSlot); if (!pg.qrs.length) delete pg.qrs; }
+  else { const old = qrAt(pg, qrSlot); if (!old || old.kind !== k){ const keep = old && old.label ? { label:old.label } : {}; pg.qrs = (pg.qrs || []).filter(x => x.cell !== qrSlot); qrPut(Object.assign({ kind:k }, k === "wifi" ? { ssid:"", pass:"", enc:"WPA" } : { url:"" }, keep)); } }
   render(); touch(); syncPage(); });
 [["#f-qrurl", "url"], ["#f-qrssid", "ssid"], ["#f-qrpass", "pass"], ["#f-qrlabel", "label"]].forEach(([id, key]) => $(id).addEventListener("input", e => {
-  const v = [...e.target.value].slice(0, QR_MAX[key === "url" ? "url" : key]).join(""); const x = qrAt(P(panelPage), panelCell); if (!x) return;
+  const v = [...e.target.value].slice(0, QR_MAX[key === "url" ? "url" : key]).join(""); const x = qrAt(P(panelPage), qrSlot); if (!x) return;
   if (v) x[key] = v; else if (key === "label") delete x.label; else x[key] = "";
   render(); drawGrids(P(panelPage)); syncQrNote(); touchLater(); }));
-$("#f-qrenc").addEventListener("change", e => { const x = qrAt(P(panelPage), panelCell); if (!x) return; x.enc = e.target.value === "nopass" ? "nopass" : "WPA"; if (x.enc === "nopass") x.pass = ""; render(); touch(); syncPage(); });
+$("#f-qrbg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || b.disabled) return; const x = qrAt(P(panelPage), qrSlot); if (!x) return; if (b.dataset.k === "paper") x.bg = "paper"; else delete x.bg; render(); touch(); syncPage(); });   // 341번
+$("#f-qrenc").addEventListener("change", e => { const x = qrAt(P(panelPage), qrSlot); if (!x) return; x.enc = e.target.value === "nopass" ? "nopass" : "WPA"; if (x.enc === "nopass") x.pass = ""; render(); touch(); syncPage(); });
 /* 302번. 그림 격자 — 고른 칸(panelCell)만 고친다. 색 상자는 끄는 동안 변수만(240번) */
 let panelCell = ART_CELL_OLD, panelCellPage = -1;
 const artAt = (pg, c) => (pg.arts || []).find(x => x.cell === c);
@@ -9034,7 +9072,7 @@ $("#f-markc").addEventListener("change", e => { const v = e.target.value.trim();
 let panelTab = "look";   // 332번
 const PAGE_TABS = ["top", "menu", "foot", "deco"];   // 333번   // 332번. 「이 장만」 묶음이 있는 탭
 const PANEL_TABS = () => [["look","색 · 글꼴","추천 조합 · 글꼴 · 색 · 종이 결"], ["top","맨 위","가게 이름 글자 · 로고 · 업종 · 한 줄 소개 · 띠"],
-  ["menu","메뉴","종이 방향 · 단 · 글자 크기 · 분류 제목 · 메뉴 줄 · 외국어 (와인 장이 있으면 와인 카드 · 병)"], ["foot","바닥","바닥 글 · 원산지 · 쪽 번호"], ["deco","칸 꾸미기","칸마다 그림 · 도장 · QR"]];   // 333번 — 와인은 [메뉴] 맨 아래(탭을 한 줄로 — 두 줄 탭은 단추 묶음처럼 보였다)   // 333번   // 332번. 셋째 값은 마우스를 올리면 뜨는 안내(보조 — 이름만으로 알 수 있게 짓는 것이 먼저)
+  ["menu","메뉴","종이 방향 · 단 · 글자 크기 · 분류 제목 · 메뉴 줄 · 외국어 (와인 장이 있으면 와인 카드 · 병)"], ["foot","바닥","바닥 글 · 원산지 · 쪽 번호"], ["deco","그림 · 도장","칸마다 그림과 도장"]];   // 333번 — 와인은 [메뉴] 맨 아래(탭을 한 줄로 — 두 줄 탭은 단추 묶음처럼 보였다)   // 333번   // 332번. 셋째 값은 마우스를 올리면 뜨는 안내(보조 — 이름만으로 알 수 있게 짓는 것이 먼저)
 function syncPageTabs(){
   const bar = $("#ptabs"); bar.innerHTML = "";
   const mk = (id, label, hint) => { const b = el("button","ptab-btn"); b.type = "button"; b.textContent = label; b.dataset.tab = id; if (hint) b.title = hint;
@@ -9092,7 +9130,7 @@ function syncPage(){
     const x = artAt(pg, panelCell);
     $("#art-cellname").textContent = CELL_NAMES[panelCell] + " 칸";   // 321번
     $("#f-artop").value = (x && x.op) || "light";
-    const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none"; syncQr(pg);   // 323번 · 337번(QR)
+    const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none"; syncQr(pg);   // 323번 · 337번(QR) · 342번
     { const tx = $("#f-sealtx"), on = !!dz && !!SEAL_TEXT[dz.seal]; if (document.activeElement !== tx) tx.value = on && dz.text || ""; tx.placeholder = sealText({}) + " (상호명)"; tx.disabled = !on;   /* 327번. 글자 칸 — 글자 도장일 때만, 아니면 흐리게(322번) */
       $("#seal-txrow").classList.toggle("off", !on); $("#seal-txrow").title = on ? "" : "글자 도장(네모 · 동그라미 · 두 겹)을 고르면 적을 수 있습니다"; }
     { const noArt = !x, noSeal = !dz;   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
@@ -9111,7 +9149,7 @@ function syncPage(){
   $("#f-sub").checked    = pg.showSub   !== false;
   { const one = (MENU.sheets[panelPage] || []).length < 2, a = $("#f-align");   // 309번
     a.checked = pg.alignRows === true; a.disabled = one; const l = a.closest("label"); if (one) l.title = "이 장은 단이 하나라 맞출 것이 없습니다"; else l.removeAttribute("title"); }   // 빈 title="" 을 저장본에 남기지 않는다(t24 — 9바이트)
-  $("#nsz-val").textContent = Math.round((pg.norenScale ?? NSCALE_DEFAULT) * 100) + "%";
+  $("#nsz-val").textContent = Math.round((pg.norenScale ?? NSCALE_DEFAULT) * 100) + "%"; nszNote();
   syncSize();
 }
 /* 302번 → 303번. 격자 하나 — 맨 위 상단(고를 수 없다 · 실제 비율), 그 아래 칸 여섯. 칸마다 그 칸의 그림과 도장을 그린다.
@@ -9124,9 +9162,9 @@ function drawGrids(pg){
     const pc = box.querySelector(".pcells"); for (let c = 0; c < NCELL; c++){ const b = el("button"); b.type = "button"; b.onclick = () => { panelCell = c; syncPage(); }; pc.appendChild(b); } }
   box.querySelector(".pband").style.height = bandPct(panelPage) + "%";
   [...box.querySelectorAll(".pcells > button")].forEach((b, c) => { const x = artAt(pg, c), on = sc.includes(c);
-    const d = sealAt(pg, c), qd = qrAt(pg, c), h = (x ? ART[x.art] : "") + (qd && qrPayload(qd) ? '<span class="pqr sx' + (c % 2) + " sy" + Math.floor(c / 2) + '" aria-hidden="true">QR</span>' : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + sealHTML(d) + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
+    const d = sealAt(pg, c), h = (x ? ART[x.art] : "") + (d ? '<span class="psl sx' + (c % 2) + ' sy' + Math.floor(c / 2) + '">' + sealHTML(d) + "</span>" : "");   /* 323번. 격자 하나 — 칸마다 그림과 도장(도장은 종이에서 서는 쪽 구석에 작게) */
     if (b.dataset.h !== h){ b.innerHTML = h; b.dataset.h = h; }
-    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (d ? " · 도장" : "") + (qd ? " · QR" : "");
+    const nm = CELL_NAMES[c] + " 칸 — " + (x ? artNm(x.art) : "그림 없음") + (d ? " · 도장" : "");
     b.classList.toggle("on", c === panelCell); b.setAttribute("aria-pressed", String(c === panelCell)); b.title = nm; b.setAttribute("aria-label", nm); });
 }
 /* [다른 장에도 똑같이] — 이 장의 **모양 설정**을 모든 장에 복사한다.
@@ -9566,8 +9604,9 @@ function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장
 }
 /* 266번. 바깥(어두운 영역)을 눌러도 안 닫히는 때 — 처음 열 때(고르기 전에는 나갈 곳이 없다)와 정하기 창(적던 상호명 · 올린 로고가
    실수 한 번에 날아간다). 264번이 Esc 만 막고 이 길을 빠뜨렸다 — 모든 안내창을 바깥 누르기로 닫는 한 줄이 따로 있었다 */
+const narrowView = () => (window.visualViewport ? visualViewport.width : innerWidth) < 760;   // 341번. 폰 크기(보이는 화면 폭)
 function openStart(){
-  stReset();
+  stReset(); { const n = $("#st-narrow"); if (n) n.hidden = !narrowView(); }   // 341번
   $("#st-closerow").hidden = SETTINGS.startScreen === true;   // 처음 열 때는 닫기 없이 고른다
   $("#start").classList.toggle("first", SETTINGS.startScreen === true);   // 284번. 처음 열 때는 뒤를 가린다 — 아직 아무 메뉴판도 없다
   openDlg($("#start"));
@@ -9655,20 +9694,31 @@ function startWith(menu, settings, msg){
   else { touch(); toast(msg, () => stepBack()); }
   if (SETTINGS.guideDone !== true) setTimeout(guideStart, 300);   // 269번. 길을 고른 직후에만 가이드
 }
+function stSheets(sec){   // 341번. 사진에서 읽은 분류 중 와인은 한 장(와인 장 — 두 단)으로 따로, 나머지는 메뉴 장으로
+  if (!stParsed) return [[[sec()], [sec()]]];
+  const ws = stParsed.filter(s => s.wine), ms = stParsed.filter(s => !s.wine), out = [];
+  if (ms.length || !ws.length) out.push(splitCols(ms, stLook.cols || 2));
+  if (ws.length) out.push(splitCols(ws.map(s => ({ ...s, col:undefined })), 2));
+  return out;
+}
+var stWineTwo = false;   // 341번. 와인 가격이 「글라스 / 병」 두 값인지(와인 장 바닥 글에 순서를 적는다)
+function stFeet(){ const hasW = !!stParsed && stParsed.some(s => s.wine), hasM = !stParsed || stParsed.some(s => !s.wine) || !hasW, n = (hasM ? 1 : 0) + (hasW ? 1 : 0);
+  return Array.from({ length:n }, (_, i) => { const notes = i === 0 && stParsed ? stFoot.slice(0, NOTES_MAX) : []; if (hasW && i === n - 1 && stWineTwo && !notes.some(t => /글라스/.test(t))) notes.push("가격은 글라스 / 병 순서입니다"); return { notes:notes.slice(0, NOTES_MAX), origin:"" }; }); }
 $("#st-go").onclick = () => {
   const shop = $("#st-shop").value.trim(), top = $("#st-top").value.trim(), text = stMode === "text" || !stLogo;
   const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
-  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours: stParsed ? stHours.map(h => ({ label:h.label, time:h.time })) : [], sheets:[ stParsed ? splitCols(stParsed, stLook.cols || 2) : [[sec()], [sec()]] ], feet:[{ notes: stParsed ? stFoot.slice(0, NOTES_MAX) : [], origin:"" }] };   /* 312번. 사진의 바닥 안내 */   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로 · 304번. 읽은 영업시간도
+  const menu = { brand:{ title:"", sub:"", top: text ? top : "" }, hours: stParsed ? stHours.map(h => ({ label:h.label, time:h.time })) : [], sheets: stSheets(sec), feet: stFeet() };   // 341번. 와인 분류는 따로 한 장(와인 장)으로   /* 312번. 사진의 바닥 안내 */   // 275번. 사진으로 읽은 메뉴가 있으면 그것으로 · 304번. 읽은 영업시간도
   if (shop) menu.brand.shop = shop;
   const pg = Object.assign(pageDefaults(0), { arts:[], seals:[], showTitle:false });   // 323번   // 302번
   Object.keys(pg).forEach(k => { if (pg[k] === undefined) delete pg[k]; });
   /* 기본 글꼴은 본고딕 — 궁서는 알프스 사장님이 고른 것이다(규칙 A). 글자 도장은 "알프스"가 박혀 있어 끈다 */
   const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", lang2:"", pageno:"none", bold:false, pages:[pg] };
-  applyPresetTo(settings, menu, stPreset);   // 273번. 추천 조합을 새 설정에 직접 건다
-  if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages[0].autofit = true; }   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
+  applyPresetTo(settings, menu, stPreset);
+  menu.sheets.forEach((sh, i) => { if (sh.length && sh.every(col => col.every(sc => sc.wine))){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.arts = [{ cell:ART_CELL_OLD, art:"vine" }]; pp.showOrigin = false; if (i > 0) pp.showNotes = false; } });   // 341번. 와인 장은 포도나무 그림   // 273번. 추천 조합을 새 설정에 직접 건다
+  if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages.forEach(pp => { pp.autofit = true; }); }   // 341번. 모든 장   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
-  const fromPic = !!stParsed; stParsed = null;
-  startWith(menu, settings, fromPic ? "사진에서 읽은 메뉴로 시작했습니다" : "빈 메뉴판을 만들었습니다");
+  const cn = stPreset === "photo" && stLook.concept && PRESETS[stLook.concept] ? PRESETS[stLook.concept].name : ""; const fromPic = !!stParsed; stParsed = null;   // 341번
+  startWith(menu, settings, fromPic ? "사진에서 읽은 메뉴로 시작했습니다" + (cn ? " — 「" + cn + "」 느낌으로 꾸몄습니다(꾸미기에서 바꿀 수 있습니다)" : "") : "빈 메뉴판을 만들었습니다");
   if (!editing) toggleEdit();
   focusPath("sheets.0.0.0.name");
 };
@@ -9769,9 +9819,11 @@ const READ_PROMPT = [
   "- 분류 아래의 안내 문구(※ · * 로 시작하는 짧은 글)는 그 분류의 메뉴 다음 줄에 ※ 안내 문구 로 적습니다.",
   "- 메뉴판 맨 아래에 단 전체 폭으로 따로 적힌 안내 문구(어느 분류에도 딸리지 않은 것)는 맨 끝에 바닥: 안내 문구 로 적습니다. 분류 바로 밑의 ※ 와 헷갈리지 않게 합니다.",
   "- 잘 안 보이거나 확실하지 않은 이름 · 가격 · 영업시간은 보이는 만큼만 적고 그 값 바로 뒤에 ? 를 붙입니다. 작은 글씨를 짐작해 지어내지 않습니다.",
-  "- 메뉴 설명 · 원산지 · 전화번호는 적지 않습니다.",
+  "- 와인이 아닌 메뉴의 설명 · 원산지 · 전화번호는 적지 않습니다.",
+  "- 와인 목록이면 와인 분류는 줄 끝에 와인을 붙여 [레드 와인] 1 와인 처럼 적고, 그 분류의 줄은 와인 이름 | 글라스 가격 | 병 가격 | 원산지 | 품종 | 향 | 맛 으로 적습니다. 가격이 하나면 병 가격 칸에만 적고, 사진에 없는 칸은 비워 둡니다(| 는 남깁니다). 원산지 · 품종 · 향 · 맛은 사진에 적힌 것만 적고 짐작하지 않습니다.",
   "- 맨 앞 몇 줄에 이 메뉴판의 모양을 적습니다. 알 수 없는 것은 그 줄을 쓰지 않습니다.",
   "가게: 가게 이름",
+  "콘셉트: 한식 · 카페 · 분식 · 호프 · 요리주점 · 와인 · 기타 중 이 가게에 가장 가까운 것 하나 (가게 이름 · 메뉴 · 분위기를 보고 고릅니다)",
   "영업: 이름 시간 · 이름 시간 (예: 점심 11:00 - 15:00 · 저녁 17:00 - 23:00)",
   "방향: 글자를 바로 세워 읽었을 때 메뉴판 종이의 방향 — 세로 또는 가로 (사진이 누워 있거나 뒤집혀 있어도 종이 기준)",
   "단: 메뉴가 세로로 나뉜 칸 수(1~4)",
@@ -9779,6 +9831,7 @@ const READ_PROMPT = [
   "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB (조명 · 그림자는 빼고 종이와 글자의 원래 색. 맨 위에 색 띠가 없으면 「띠 없음」)",
   "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
 ].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이 · 304번. 영업시간 줄
+const wineKind = n => /스파클링|sparkling|샴페인|champagne|prosecco|프로세코/i.test(n) ? "sparkling" : /로제|ros[eé]/i.test(n) ? "rose" : /화이트|white|오렌지|orange/i.test(n) ? "white" : "red";   // 341번. 와인 분류의 종류(병 그림)
 function parseMenuText(txt){
   const secs = []; let cur = null; const foot = [];
   const unq = v => { v = String(v || "").trim(); const Q = /\s*[?？](?=\s*(?:[(（]|$))/g; const u = Q.test(v); return [v.replace(Q, "").replace(/\s{2,}/g, " ").trim(), u]; };   /* 314번. AI 가 붙인 「?」는 값 끝만이 아니라 괄호 앞에서도 뗀다 — 「24:00? (가끔변동)」이 그대로 남았다(사용자 화면) */
@@ -9794,9 +9847,16 @@ function parseMenuText(txt){
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
     const hr = l.match(/^영업(?:\s*시간)?\s*[:：]\s*(.+)$/);   // 304번. 영업시간 — "점심 11:00 - 15:00 · 저녁 17:00 - 23:00"
     if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x0 => { const [x, u] = unq(x0), m = x.match(/^(\D*?)\s*(\d.*)$/); const o = m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; if (u) o.un = true; return o; }); return; }   /* 312번. 영업시간도 ? 면 노란 칸(확실하면 키 없음 — 304번 모양 그대로) */
-    const lk = l.match(/^(방향|단|글꼴|색)\s*[:：]\s*(.+)$/); if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
-    const hc = l.match(/^\[(.*?)\]\s*([1-4])?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);   /* 312번. [] — 이름 없는 묶음도 분류로 */
-    if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u || !n, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; secs.push(cur); return; }   /* 312번. 이름이 비면 노란 칸 — 지어 넣지 않고 사장님이 채운다 */
+    const lk = l.match(/^(방향|단|글꼴|색|콘셉트)\s*[:：]\s*(.+)$/);   /* 341번. 콘셉트 */ if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
+    const hc = l.match(/^\[(.*?)\]\s*([1-4])?\s*(와인)?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);   /* 341번. 줄 끝 「와인」 — 와인 분류 */   /* 312번. [] — 이름 없는 묶음도 분류로 */
+    if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u || !n, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; if (hc && hc[3]) cur.wine = wineKind(n); secs.push(cur); return; }   /* 312번. 이름이 비면 노란 칸 — 지어 넣지 않고 사장님이 채운다 */
+    if (cur && cur.wine && l.includes("|")){   /* 341번. 와인 줄 — 이름 | 글라스 | 병 | 원산지 | 품종 | 향 | 맛 */
+      const f = l.split("|").map(x => x.trim()), [nm, g, b, org, gr, ar, ta] = f, [wn, wu] = unq(nm); if (!wn) return;
+      const pr = v => { const [t, u] = unq(v), d = t.replace(/[,원\s]/g, ""); return [/^\d+$/.test(d) ? Number(d) : t, u]; }, mo = v => typeof v === "number" ? v.toLocaleString("ko-KR") : v;
+      const gp = g ? pr(g) : null, bp = b ? pr(b) : null; let wp = "", wup = false;
+      if (gp && bp){ wp = mo(gp[0]) + " / " + mo(bp[0]); wup = gp[1] || bp[1]; } else if (bp){ wp = bp[0]; wup = bp[1]; } else if (gp){ wp = "글라스 " + mo(gp[0]); wup = gp[1]; }
+      const wi = { name:wn, price:wp, un:wu, unp:wup }; [["origin", org], ["grapes", gr], ["aroma", ar], ["taste", ta]].forEach(([k, v]) => { const t = unq(v || "")[0]; if (t) wi[k] = t; });
+      cur.items.push(wi); return; }
     let name, price, pick = false;
     if (l.includes("|")){ const ps = l.split("|").map(x => x.trim()); [name, price] = ps; pick = ps.slice(2).some(x => /추천/.test(x)); }   /* 312번. 셋째 칸 「추천」 */
     else { const m = l.match(/^(.*?)[\s.·…\-]+([\d,]+)\s*원?\s*([?？])?$/); if (!m) return; name = m[1]; price = m[2] + (m[3] || ""); }
@@ -9824,6 +9884,7 @@ function readLook(lk){
   const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
   if (pa && ink && cr(pa, ink) >= 4.5){ L.colors = { paper:pa, ink, band: band || ink, accent: ac || band || ink }; }
   L.band = !/띠\s*없음/.test(col) && !!band;
+  const cc = String(lk["콘셉트"] || ""); const ck = /와인/.test(cc) ? "wine" : /한식|국밥|백반|찌개|고깃집/.test(cc) ? "hansik" : /카페|커피|베이커리|디저트/.test(cc) ? "cafe" : /분식|김밥|떡볶이/.test(cc) ? "bunsik" : /호프|치킨|맥주|펍/.test(cc) ? "hof" : /주점|이자카야|요리|바$/.test(cc) ? "alps" : null; if (ck) L.concept = ck;   // 341번. 가게 콘셉트 — 처음 모양을 거기에 맞춘다
   return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
@@ -9998,7 +10059,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
       const si = stParsed.indexOf(s); if (si < 0) return;   // 한쪽이 비어 splitCols 가 넣은 빈 분류는 그리지 않는다
       const sb = el("div", "st-csecbox");
       const h = el("input", "st-cin st-csec" + (s.un ? " un" : "")); h.value = s.name; h.dataset.s = si; h.setAttribute("aria-label", "분류 이름");
-      const hd = el("div", "st-chead"); hd.append(h); sb.append(hd);   // 297번. [＋ 메뉴]는 분류 이름 줄 오른쪽 — 분류마다 한 줄을 따로 먹어 A4 비율 안에서 스크롤이 생겼다
+      const hd = el("div", "st-chead"); hd.append(h); if (s.wine){ const wt = el("span", "st-wtag"); wt.textContent = "와인 카드"; wt.title = "와인 장으로 만들어집니다(원산지 · 품종 · 향 · 맛 칸 포함)"; hd.append(wt); } sb.append(hd);   // 341번   // 297번. [＋ 메뉴]는 분류 이름 줄 오른쪽 — 분류마다 한 줄을 따로 먹어 A4 비율 안에서 스크롤이 생겼다
       s.items.forEach((it, ii) => {
         const row = el("div", "st-crow");
         const n = el("input", "st-cin" + (it.un ? " un" : "")); n.value = it.name; n.dataset.s = si; n.dataset.i = ii; n.dataset.k = "name"; n.setAttribute("aria-label", "메뉴 이름");
@@ -10027,7 +10088,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
 }
 function syncCheck(){ const keep = readCheck(false); keep.forEach((s, i) => { stParsed[i].name = s.name; stParsed[i].items = s.items; stParsed[i].notes = s.notes; }); readExtra(); }   // 296번. 칸에 고친 것을 그대로 담아 둔다(다시 그리기 전에)
 function readCheck(drop = true){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
-  const secs = stParsed.map(s => ({ name:s.name, col:s.col, notes:(s.notes || []).slice(), items:s.items.map(it => ({ ...it })) }));
+  const secs = stParsed.map(s => ({ name:s.name, col:s.col, wine:s.wine, notes:(s.notes || []).slice(), items:s.items.map(it => ({ ...it })) }));   // 341번. wine
   $("#st-ctab").querySelectorAll("input").forEach(x => {
     const s = secs[+x.dataset.s]; if (!s) return;
     if (x.dataset.n !== undefined){ s.notes[+x.dataset.n] = x.value.trim(); return; }   // 312번
@@ -10036,7 +10097,7 @@ function readCheck(drop = true){   // 확인 화면의 칸 → 분류 목록(빈
     if (x.dataset.k === "name") it.name = v; else { const d = v.replace(/[,원\s]/g, ""); it.price = /^\d+$/.test(d) ? Number(d) : v; }
   });
   if (!drop) return secs;
-  return secs.map(s => { const o = { name:s.name, col:s.col, items:s.items.filter(it => it.name).map(it => Object.assign({ name:it.name, price:it.price }, it.pick ? { pick:true } : {})) };
+  return secs.map(s => { const o = { name:s.name, col:s.col, items:s.items.filter(it => it.name).map(it => Object.assign({ name:it.name, price:it.price }, it.pick ? { pick:true } : {}, ["origin", "grapes", "aroma", "taste"].reduce((a, k) => { if (it[k]) a[k] = it[k]; return a; }, {}))) }; if (s.wine) o.wine = s.wine;   // 341번. 와인 칸
     const nt = s.notes.filter(t => t); if (nt.length) o.notes = nt; return o; }).filter(s => s.items.length);   /* 312번. 추천 · 분류 안내도 들고 간다 */
 }
 function readExtra(){   // 312번. 확인 화면의 영업시간 · 바닥 글 칸 → stHours · stFoot(빈 줄은 뺀다)
@@ -10133,8 +10194,13 @@ $("#st-check-go").onclick = () => {
   stParsed = secs; const keep = stParsed;
   $("#st-check").hidden = true; $("#st-blank").onclick(); stParsed = keep; $("#start").classList.add("wide");   // 325번. ③ 정하기도 사진 흐름이면 같은 넓은 틀(빈 메뉴판 길은 좁은 틀 그대로)
   stFromPhoto = true; $("#st-pg3").hidden = false;
-  if (stLook.font || stLook.colors){   // 296번. 사진에서 읽은 글꼴 · 색을 「사진처럼」 조합으로 — 처음 골라져 있다. 고르지 않으면 다른 조합
-    const B = PRESETS.basic; PRESETS.photo = Object.assign({}, B, { name:"사진처럼", hidden:true, font: stLook.font || B.font, custom: stLook.colors || null, noren: stLook.band ? "flat" : "plain" });
+  stWineTwo = stParsed.some(s => s.wine && s.items.some(it => typeof it.price === "string" && / \/ /.test(it.price)));   // 341번. 두 가격 표시 — 와인 장 바닥 글에
+  if (stLook.font || stLook.colors || stLook.concept){   // 296번. 사진에서 읽은 글꼴 · 색을 「사진처럼」 조합으로 — 처음 골라져 있다. 고르지 않으면 다른 조합
+    /* 341번. **AI 초기 세팅** — 사진의 글꼴 · 색에 가게 콘셉트(한식 · 카페 · 분식 · 호프 · 요리주점 · 와인)의 모양(상단 · 분류 제목 · 점선 · 표시 · 그림 · 도장)을 얹는다. 사진에서 못 읽은 것은 콘셉트의 값 */
+    const B = PRESETS.basic, C = PRESETS[stLook.concept] || B, ph = !!(stLook.font || stLook.colors), col = !!stLook.colors;
+    PRESETS.photo = Object.assign({}, C, { name: ph ? "사진처럼" : "추천 · " + C.name, hidden:true,
+      font: stLook.font || (C.font === "gungseo" ? "gothic" : C.font), art: C.art === null ? "lantern" : C.art,   // 궁서 · 알프스 그림은 알프스 사장님 것(규칙 A) — 다른 가게에는 본고딕 · 초롱
+      custom: stLook.colors || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? (stLook.band ? (C.noren !== "plain" ? C.noren : "flat") : "plain") : C.noren });
     stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(), tf = $("#st-topfrom"); if (nm) $("#st-top").value = nm;
     tf.textContent = !nm ? "사진에서 가게 이름을 찾지 못했습니다" : nm === stShopRead ? "사진에서 읽은 가게 이름입니다. " : ""; tf.hidden = !tf.textContent; tf.classList.toggle("warn", !nm); }   /* 313번. 못 찾았으면 붉은 경고 한 줄 */
@@ -10149,6 +10215,7 @@ const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타�
   cafe:   { name:"카페",        font:"gothica1", bold:false, theme:"milk",  paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"coffee", seal:"none", mark:"✿" },
   bunsik: { name:"분식",        font:"round",    bold:true,  theme:"chili", paper:"gingham", sec:"pill", align:"left",   leader:"none", noren:"arch",  art:"tteok", seal:"none", mark:"best" },
   hof:    { name:"호프 · 치킨", font:"nanum",    bold:true,  theme:"board", paper:"wood",    sec:"band", align:"left",   leader:"dash", noren:"twin",  art:"chicken", seal:"rword", mark:"hot" },
+  wine:   { name:"와인바",     font:"serif",    bold:false, theme:"pat",   paper:"plain",   sec:"line", align:"center", leader:"none", noren:"frame", art:"vine", seal:"rword", mark:"✿" },   // 341번. 와인 목록 사진의 콘셉트
   alps:   { name:"요리주점",    font:"gungseo",  bold:false, theme:"night", paper:"grain",   sec:"line", align:"left",   leader:"dots", noren:"flat",  art:null,   seal:"word",  mark:"★" }   // 282번. 이름 "알프스 모양" → "요리주점"(가게 이름을 조합 이름으로 쓰지 않는다 · 알프스의 업종, 사용자). "기본" → "일반 식당". 그림은 예시의 장별 값. 도장은 모양 도장 — 예시의 "알프스" 글자 도장을 다른 가게에 찍지 않는다
 };
 function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하기 창은 새로 만들 설정에, 꾸미기 창은 지금 설정에
@@ -10256,7 +10323,7 @@ const GUIDE = [
     dl:[[K("＋ 메뉴 추가"), "메뉴 한 줄"], [K("＋ 안내 추가"), "※ 로 시작하는 안내"], [K("＋ 분류 추가"), "새 분류"], [K("◀") + K("▶"), "분류를 옆 단으로 — 분류 제목 옆"]],   // 종이 위 ＋ 단추는 밝은 테두리 — 표지도 같은 모양
     prep:() => setAddHere(firstSec()), at:() => firstSec()?.querySelector(":scope > .addrow") },
   { h:"꾸미기 창", p:"글꼴 · 색 · 상단 모양 · 그림 · 도장을 고릅니다.",
-    dl:[[BTN("색 · 글꼴"), "추천 조합 · 색"], [BTN("맨 위"), "가게 이름 · 띠"], [BTN("메뉴"), "글자 크기 · 단"], [BTN("바닥"), "바닥 글 · 쪽 번호"], [BTN("칸 꾸미기"), "그림 · 도장 · QR"]],   // 332번
+    dl:[[BTN("색 · 글꼴"), "추천 조합 · 색"], [BTN("맨 위"), "가게 이름 · 띠"], [BTN("메뉴"), "글자 크기 · 단"], [BTN("바닥"), "바닥 글 · 쪽 번호"], [BTN("그림 · 도장"), "칸마다 꾸밈"]],   // 332번
     prep:() => { if ($("#panel").hidden) $("#b-style").click(); }, at:() => $("#panel") },
   { h:"다 되면 인쇄",   // 288번. 가이드의 끝은 목표(뽑아 쓰기)로 — 실제로 막힌 곳이 인쇄 창이었다(사용자 가게 · 9/7 좌우 잘림 · 9/18 위 잘림). 저장은 한 줄로
     p: BTN("인쇄") + "를 누르면 인쇄 창에서 맞출 셋(용지 A4 · 여백 없음 · 배경 그래픽)을 그림과 함께 먼저 알려 줍니다."
