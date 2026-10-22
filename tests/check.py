@@ -1772,7 +1772,7 @@ def t58(b, f):
         # 346번 — QR 이 놓일 수 있는 네 곳이 그림에 항상 보인다(맨 위 좌우 끝 · 비어 있는 아래 두 모퉁이) · 누르기 쉬운 크기 · 아래 점선 상자를 누르면 바로 그 모퉁이가 QR · 도장이 있으면 상자 대신 도장
         hint = lambda n: pg.evaluate("(c)=>document.querySelectorAll('#g-art .pcells > button')[c].querySelectorAll('.pqr.hint').length", n)
         pn.append(hint(4) == 1 and hint(5) == 1 and hint(0) == 0 and hint(2) == 0)
-        pn.append(pg.evaluate("()=>[...document.querySelectorAll('#g-art .pband .qs')].every(q=>{const r=q.getBoundingClientRect(); return r.width>=36 && r.height>=20 && getComputedStyle(q,'::after').content.includes('QR') || q.classList.contains('has')})"))
+        pn.append(pg.evaluate("()=>{const E=[...document.querySelectorAll('#g-art .pband .qs'), ...document.querySelectorAll('#g-art .pqr.hint')]; return E.length===4 && E.every(e=>{const r=e.getBoundingClientRect(); return Math.abs(r.width-r.height)<0.6 && Math.abs(r.width-24)<0.6 && (e.classList.contains('has') || e.classList.contains('hint') || getComputedStyle(e,'::after').content.includes('QR'))})}"))   # 347번 — 맨 위 좌우 끝과 아래 모퉁이의 QR 자리는 모두 크기가 같은 정사각형(24px)
         pg.evaluate("()=>{document.querySelectorAll('#g-art .pcells > button')[4].querySelector('.pqr.hint').click()}"); pg.wait_for_timeout(250); v = pg.evaluate(V)
         pn.append(v['on'] == 'qr' and v['qr'] and v['slot'] == 4 and pg.evaluate("()=>!!qrAt(P(0),4)") and hint(4) == 0)
         pg.click('#f-corner button[data-k="seal"]'); pg.wait_for_timeout(250); pn.append(hint(4) == 0 and pg.evaluate("()=>!!sealAt(P(0),4)"))

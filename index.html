@@ -1436,6 +1436,11 @@ html body #panel .pgrid .pband .qs.has{color:#111}
 html body #panel .pgrid .pband .qs.on{outline:0;box-shadow:inset 0 0 0 2px #efe3c9}
 html body #panel .pgrid .pqr.hint{background:transparent;color:rgba(240,230,205,.75);border:1px dashed rgba(240,230,205,.6);pointer-events:auto;cursor:pointer;font:700 9px/1 sans-serif}
 html body #panel .pgrid .pqr.hint:hover{background:rgba(255,255,255,.18)}
+/* 347번. **QR 자리 네 곳은 크기가 모두 같은 정사각형**(24px) — 맨 위 좌우 끝도 아래 모퉁이와 같은 모양(사용자). 맨 위 띠가 낮은 종이에서도 상자가 띠 안에 들어가게 격자 띠에 최소 높이 */
+html body #panel .pgrid .pband{min-height:30px}
+html body #panel .pgrid .pband .qs{width:24px;height:24px;aspect-ratio:1}
+html body #panel .pgrid .pqr{width:24px;height:24px;aspect-ratio:1}
+html body #panel .pgrid .pqr.sy2{bottom:4px}
 html body #panel .qrblk.lead{border-top:0;padding-top:0;margin-top:6px}
 html body #panel #corner-row[hidden], html body #panel #b-artsame[hidden]{display:none !important}
 html body #panel .qrblk{border-top:1px solid rgba(240,230,205,.12);padding-top:14px;margin-top:14px}
