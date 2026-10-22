@@ -1780,6 +1780,11 @@ def t58(b, f):
         d.value.save_as(D + 'qr_saved.html'); pg.goto(url('qr_saved.html')); pg.wait_for_timeout(300)
         out['saved'] = [pg.evaluate("()=>JSON.stringify(P(0).qrs)"), pg.evaluate("()=>document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length")]
         # 망가진 값 · 337번 판에서 도장과 QR 을 둘 다 둔 파일
+        # **불러오는 순간** — 저장 데이터(파일 안 설정)에 QR 이 들어 있고 같은 아래 구석에 도장도 있는 파일을 연다. 343번에 정리 함수가 const 로 뒤에 정의돼 「초기화 전에 접근」 오류로 종이가 하나도 안 그려졌는데, 불러올 때 도장이 하나도 없는 파일만 열어 보던 검사가 못 잡았다(사용자가 브라우저에 저장해 둔 작업이 이 경우였다)
+        src2 = open(D + f, encoding='utf-8').read(); mm = re.search(r'"pages"\s*:\s*\[\s*\{', src2)
+        open(D + 'qrload_' + f, 'w', encoding='utf-8').write(src2[:mm.end()] + '"qrs":[{"cell":0,"kind":"url","url":"a.kr"},{"cell":1,"kind":"url","url":"b.kr"},{"cell":5,"kind":"wifi","ssid":"x","pass":"y","enc":"WPA"}],' + src2[mm.end():])
+        n_err = len(out['err']); pg.goto(url('qrload_' + f)); pg.wait_for_timeout(600)
+        out['loadqr'] = [pg.evaluate("()=>document.querySelectorAll('.sheet').length > 0"), pg.evaluate("()=>document.querySelectorAll('.sheet[data-pi=\"0\"] .qr').length"), pg.evaluate("()=>(P(0).seals||[]).map(x=>x.cell)"), len(out['err']) - n_err]   # 종이가 그려지고 · QR 셋(맨 위 둘 · 바닥 하나) · 겹친 아래 구석 도장은 빠지고 · 오류 0
         out['excl'] = pg.evaluate("()=>{const g={seals:[{cell:0,seal:'word'},{cell:4,seal:'tri'},{cell:5,seal:'word'}],qrs:[{cell:0,kind:'url',url:'a.kr'},{cell:4,kind:'url',url:'a.kr'}]}; normQrs(g); return g.seals.map(x=>x.cell)}")   # 아래 구석은 서로 못 쓴다(QR 을 남긴다) · 위 자리는 도장과 안 겹쳐 그대로
         out['norm'] = pg.evaluate("""()=>{ const g={qrs:[{cell:4,kind:'url',url:'x'.repeat(500),label:'가'.repeat(40)},{cell:4,kind:'wifi'},{cell:9,kind:'url'},{cell:1,kind:'zz'},null,{cell:5,kind:'wifi',ssid:'a',pass:'b',enc:'nopass'}]}; normQrs(g);
           const h={qrs:'망가짐'}; normQrs(h); const k={qrs:[null]}; normQrs(k); return [g.qrs.map(x=>[x.cell,x.kind,(x.url||x.ssid||'').length,(x.label||'').length,x.pass===undefined?'-':x.pass]), 'qrs' in h, 'qrs' in k] }""")
@@ -2069,10 +2074,10 @@ def judge(t, r):
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 10 and r['excl'] == [0, 5]
+            ok = (r['read'] == [True] * 5 and r['none_drawn'] == [0, 1] and not r['layout_bad'] and not r['fit_bad'] and r['mid'] == [1] and all(r['panel']) and len(r['panel']) == 10 and r['excl'] == [0, 5] and r['loadqr'] == [True, 3, [], 0]
                   and r['saved'] == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[4, 'url', 300, 20, '-'], [5, 'wifi', 1, 0, '']], False, False] and not r['err'])
-            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창([그림·도장·QR] 탭 — 탭 한 줄 · 구분선 · 자리 4곳 · 아래 구석은 도장과 서로 못 씀) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
+            return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창([그림·도장·QR] 탭 — 탭 한 줄 · 구분선 · 자리 4곳 · 아래 구석은 도장과 서로 못 씀) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
         if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'

@@ -5629,6 +5629,7 @@ qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
 /* 337번. **QR** — 만드는 코드는 위 라이브러리(파일 안 — 인터넷 없이 인쇄된다). 칸마다 하나: `pg.qrs = [{cell, kind:"url", url, label?} | {cell, kind:"wifi", ssid, pass, enc, label?}]`(내용이라 [이 장 설정을 다른 장에도 적용]이 안 옮긴다 — 장마다 다른 주소가 들어간다).
    종이에는 **흰 바탕 · 검은 칸**(조합 색과 상관없이 — 어두운 종이에서도 폰이 읽게)의 SVG 하나(둘레 흰 여백 4칸 포함), 칸의 바깥 구석에 약 26mm. 이름표는 그 아래(종이 글자색) */
 const QR_MAX = { url:300, label:20, ssid:32, pass:63 };
+function qrCorner(k){ return k === 4 || k === 5; }   /* 343 · 344번. 아래 두 자리(4 · 5)는 도장의 아래 두 칸과 같은 구석이라 서로 못 쓴다 — 맨 위 두 자리는 맨 위 영역 안이라 도장(영역 아래)과 안 겹친다. **함수 선언**: 불러올 때 정리 단계(normQrs)가 이 구역보다 먼저 돌아 const 로 두면 「초기화 전에 접근」 오류로 종이가 하나도 안 그려진다(343번에 그랬다) */
 function qrPayload(q){   // 찍을 글. 못 읽으면 빈 글
   if (!q) return "";
   if (q.kind === "wifi"){ if (!q.ssid) return ""; const e = v => String(v).replace(/([\\;,:"])/g, "\\$1"), open = q.enc === "nopass";
@@ -8985,7 +8986,6 @@ $("#c-seal").addEventListener("change", () => syncPage());
 $("#f-sealtx").addEventListener("input", e => { const x = sealAt(P(panelPage), panelCell); if (!x || !SEAL_TEXT[x.seal]) return;   // 327번. 글자 도장의 글자
   const t = [...e.target.value.replace(/\s+/g, "")].slice(0, SEAL_TXT_MAX).join(""); if (t) x.text = t; else delete x.text; render(); drawGrids(P(panelPage)); touchLater(); });
 var qrSlot = 0;   // 343번. 자리 4곳(0 · 1 = 맨 위 왼쪽 · 오른쪽, 4 · 5 = 바닥 왼쪽 · 오른쪽) — 칸 격자와 별개. var — 처음 그릴 때 먼저 불려도 안전
-const qrCorner = k => k === 4 || k === 5;   // 아래 두 자리는 도장의 아래 두 칸(4 · 5)과 같은 구석이라 서로 못 쓴다 — 맨 위 두 자리는 맨 위 영역 안이라 도장(영역 아래)과 안 겹친다
 $("#f-qrslot").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qrSlot = +b.dataset.k; syncQr(P(panelPage)); });
 function syncSealLock(pg){   // 343번. 이 칸이 아래 구석이고 QR 이 쓰고 있으면 도장을 못 고른다
   const q = qrCorner(panelCell) ? qrAt(pg, panelCell) : null, f = $("#f-seal"); f.disabled = !!q;
