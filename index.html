@@ -2476,6 +2476,12 @@ dialog p.st-czoomhint{margin:6px 0 0;text-align:center}
 
 .panel .subrow label{margin:0}
 .panel .subrow input[type=color]{width:32px;height:32px;padding:2px}
+/* 352번. 점검 목록 — 안내창 안. 글자 12px 아래로 내리지 않는다(규칙 I) */
+dialog .st-notes{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:#f3ead4;color:#241c12}
+dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
+dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
+dialog .st-notes.ok .st-nhd{font-weight:600}
+dialog #st-readsum i.sw{display:inline-block;width:12px;height:12px;margin:0 3px -1px;border:1px solid rgba(0,0,0,.35);border-radius:2px}
 dialog p.st-ccount{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:#e8dcc2;color:#241c12;font-size:14px;line-height:1.5}
 dialog p.st-ccount b{font-weight:700;color:var(--ui-accent)}
 .st-cpaper .st-cin{height:26px;font-size:13.5px}
@@ -3181,7 +3187,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <!-- 275번. 사진으로 시작 — 제미나이 키로 바로 읽기 · 또는 쓰는 AI 앱에서 읽은 답을 붙여 넣기. 둘 다 같은 "읽은 값 확인"으로 간다 -->
   <div id="st-read" hidden>   <!-- 280번. 할 일을 순서대로 두 단계로 · 읽기 단추는 바닥 줄 -->
     <div class="st-head"><button type="button" class="st-icon" id="st-read-back" aria-label="처음 화면으로" title="처음 화면으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">사진으로 시작</h3><span class="st-pg stepdots" role="img" aria-label="3단계 중 1단계" title="3단계 중 1단계"><i class="on"></i><i></i><i></i></span></div>   <!-- 288번. 몇 단계 남았는지 -->   <!-- 281번. 뒤로는 머리 왼쪽 ← -->
-    <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름과 가격을 읽어 채웁니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
+    <p class="sub">지금 쓰는 메뉴판을 찍은 사진을 올리면 AI가 메뉴 이름 · 가격과 분위기(글꼴 · 색 · 단 수)를 읽어 메뉴판을 맞춥니다. 읽은 내용은 다음 화면에서 확인하고 고칠 수 있습니다.</p>
     <!-- 288번. 「읽는 방법 고르기」를 첫 단계에서 뺐다 — 할 일은 사진 올리기 하나. [다른 AI 앱에서]는 바로 읽기가 안 될 때만(#st-other) -->
     <div class="st-picrow"><span class="st-picbox" id="st-picbox" hidden><span class="st-picwrap"><img id="st-picimg" class="st-picimg" alt="올린 메뉴판 사진" hidden><span class="st-busy" id="st-busy" role="status" aria-live="polite" hidden><i class="st-spin" aria-hidden="true"></i><b id="st-busytx"></b></span></span>   <!-- 316번. 읽는 동안 사진 위에 막 · 돌아가는 표시 · 단계 글(사용자 — 갑자기 사진만 돌아 어색했다) -->
     <span class="st-rot" id="st-rot"><button type="button" class="bt-out" id="st-rotl" title="사진을 왼쪽으로 90° 돌립니다" aria-label="왼쪽으로 돌리기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" class="bt-out" id="st-rotr" title="사진을 오른쪽으로 90° 돌립니다" aria-label="오른쪽으로 돌리기"><span class="mir"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 5.5H11a7 7 0 0 0-7 7V14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M1.6 11.6 4 14l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><small>방향은 [읽기] 때 자동으로 맞춥니다</small></span></span>   <!-- 314번. 돌리기는 사진 바로 옆 · 그린 그림(네모 + 굽은 화살표) + 글자. ↺ ↻ 는 글꼴마다 다르고 편집 막대의 되돌리기 ↶ ↷ 와 닮았다(규칙 H) · 사진에서 두 칸 떨어진 맨 아래였다 -->
@@ -3220,6 +3226,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <p class="sub">나중에 [편집] · [꾸미기]에서 전부 다시 바꿀 수 있습니다.</p>
     <p class="sub st-cap">미리보기</p>   <!-- 293번 -->
     <div class="st-prev" id="st-prev"></div>
+    <p class="sub st-note" id="st-readsum" hidden></p>   <!-- 352번. 사진에서 AI 가 읽어 낸 모양 한 줄 -->
+    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p></div>
     <label class="st-lbl" for="st-shop">상호명 <small>파일로 저장할 때 이름이 됩니다</small></label>   <!-- 293번. 아래 「저장하면 ○○.html 로 내려받아집니다」는 걷었다 — 배포 주소에서는 자동 저장이라 사실과 달랐고, 같은 말을 두 줄로 했다 -->
     <input type="text" id="st-shop" class="st-in" autocomplete="off" placeholder="예: 우리 식당">   <!-- 291번. 빈칸이 무엇을 받는지 -->
     <div class="st-toprow"><span class="st-lbl">메뉴판 맨 위</span>
@@ -9629,7 +9637,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stTypos = []; $("#st-readsum").hidden = true; $("#st-notes").hidden = true; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -9863,6 +9871,7 @@ const READ_PROMPT = [
   "단: 메뉴가 세로로 나뉜 칸 수(1~4)",
   "글꼴: 명조 · 고딕 · 궁서 · 손글씨 · 둥근 · 붓 중 가장 가까운 것",
   "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB (조명 · 그림자는 빼고 종이와 글자의 원래 색. 맨 위에 색 띠가 없으면 「띠 없음」)",
+  "점검: 원문 → 제안 (메뉴 이름의 맞춤법이 확실히 틀려 보이는 것만 최대 5줄. 사진에 적힌 그대로가 맞을 수 있으니 확실하지 않으면 쓰지 않습니다)",
   "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
 ].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이 · 304번. 영업시간 줄
 const wineKind = n => /스파클링|sparkling|샴페인|champagne|prosecco|프로세코/i.test(n) ? "sparkling" : /로제|ros[eé]/i.test(n) ? "rose" : /화이트|white|오렌지|orange/i.test(n) ? "white" : "red";   // 341번. 와인 분류의 종류(병 그림)
@@ -9881,6 +9890,8 @@ function parseMenuText(txt){
     const sh = l.match(/^가게\s*(?:이름)?\s*[:：]\s*(.+)$/); if (sh){ secs.shop = unq(sh[1])[0]; return; }   // 290번
     const hr = l.match(/^영업(?:\s*시간)?\s*[:：]\s*(.+)$/);   // 304번. 영업시간 — "점심 11:00 - 15:00 · 저녁 17:00 - 23:00"
     if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x0 => { const [x, u] = unq(x0), m = x.match(/^(\D*?)\s*(\d.*)$/); const o = m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; if (u) o.un = true; return o; }); return; }   /* 312번. 영업시간도 ? 면 노란 칸(확실하면 키 없음 — 304번 모양 그대로) */
+    const ty = l.match(/^점검\s*[:：]\s*(.+?)\s*(?:→|->|=>)\s*(.+)$/);   /* 352번. 맞춤법 점검 — 「원문 → 제안」. 모양이 다르면 버린다(읽기를 깨지 않게) */
+    if (ty){ const a = unq(ty[1])[0], b = unq(ty[2])[0]; if (a && b && a !== b) (secs.typos = secs.typos || []).push({ from:a, to:b }); return; }
     const lk = l.match(/^(방향|단|글꼴|색|콘셉트)\s*[:：]\s*(.+)$/);   /* 341번. 콘셉트 */ if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
     const hc = l.match(/^\[(.*?)\]\s*([1-4])?\s*(와인)?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);   /* 341번. 줄 끝 「와인」 — 와인 분류 */   /* 312번. [] — 이름 없는 묶음도 분류로 */
     if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u || !n, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; if (hc && hc[3]) cur.wine = wineKind(n); secs.push(cur); return; }   /* 312번. 이름이 비면 노란 칸 — 지어 넣지 않고 사장님이 채운다 */
@@ -9902,7 +9913,7 @@ function parseMenuText(txt){
     cur.items.push(Object.assign({ name:n, price:p, un:un1, unp:un2 }, pick ? { pick:true } : {}));
   });
   const out = secs.filter(s => s.items.length); out.forEach(s => { if (s.notes) s.notes = s.notes.slice(0, SECNOTE_MAX); });
-  out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}); return out;
+  out.typos = (secs.typos || []).slice(0, 5); out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}); return out;
 }
 /* 296번. 사진의 모양 → 메뉴판(사용자: "AI 를 쓰는 거면 처음 찍은 사진과 가장 비슷한 형태로 — 글자 크기든 구성이든 색깔이든").
    방향 · 단 수 · 분류가 놓인 칸 · 글꼴 · 색(종이 · 글자 · 띠 · 포인트). 못 읽은 것은 비워 두고 지금 기본값을 쓴다.
@@ -9922,6 +9933,7 @@ function readLook(lk){
   return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
+let stTypos = [];   // 352번. AI 가 적은 맞춤법 점검(원문 → 제안)
 let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [], stFoot = [], stFootUn = [], stBlankWarned = false;   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img, rot = 0, max = 1600, q = .85){   // 313번. rot — 90 · 180 · 270(시계 방향). 돌린 사진을 보내고 확인 화면에도 그것을 쓴다
@@ -10067,7 +10079,7 @@ async function geminiRead(dataUrl){
 function toCheck(txt, msgEl){
   const secs = parseMenuText(txt);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stHours = secs.hours || []; stFoot = secs.foot || []; stFootUn = secs.footUn || []; $("#st-cshop").value = stShopRead;
+  stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stTypos = secs.typos || []; stHours = secs.hours || []; stFoot = secs.foot || []; stFootUn = secs.footUn || []; $("#st-cshop").value = stShopRead;
   $("#st-cshop").placeholder = "가게 이름";   /* 313번. 못 찾은 안내는 칸 안 흐린 글씨가 아니라 「읽은 메뉴」 줄의 붉은 경고로(사용자 — 일반 글과 구분이 안 됐고 칸이 좁으면 잘렸다) */   /* 312번. 비어 있는 까닭을 칸에 적는다(사용자). 「사진에 없다」고 단정하지 않는다 — 작아서 놓친 것과 가를 수 없다 */
   drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
@@ -10238,9 +10250,40 @@ $("#st-check-go").onclick = () => {
     stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(), tf = $("#st-topfrom"); if (nm) $("#st-top").value = nm;
     tf.textContent = !nm ? "사진에서 가게 이름을 찾지 못했습니다" : nm === stShopRead ? "사진에서 읽은 가게 이름입니다. " : ""; tf.hidden = !tf.textContent; tf.classList.toggle("warn", !nm); }   /* 313번. 못 찾았으면 붉은 경고 한 줄 */
+  stReadInfo();   // 352번
   stSync();   /* 312번. 늘 다시 그린다 — 가게 이름을 읽었을 때만 불러, 이름이 없는 사진에서는 「사진처럼」이 골라졌는데 타일 표시 · 미리보기 색이 「내 조합」으로 남았다(사용자 화면). 안내 줄은 못 찾았을 때도(사용자) · 확인 화면에서 직접 적은 이름이면 안 적는다 */   // 291번. 사진의 가게 이름은 맨 위 글자에만 — 두 칸이 같으면 무엇이 다른지 안 보였다(267번 · 사용자). 어디서 온 글자인지 적는다   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
 };
 
+/* 352번. 점검 — 중복 · 가격 형식은 코드로(AI 호출 없이 틀릴 일이 없다), 맞춤법은 AI 가 적은 「원문 → 제안」만. 메뉴 이름은 절대 자동으로 고치지 않는다 */
+function menuChecks(secs, typos){
+  const L = [], key = t => String(t).replace(/\s+/g, "").toLowerCase(), seen = new Map();
+  secs.forEach(sec => sec.items.forEach(it => { const k = key(it.name); if (!k) return; (seen.get(k) || seen.set(k, []).get(k)).push({ it, sec }); }));
+  seen.forEach(a => { if (a.length > 1){ const where = [...new Set(a.map(x => x.sec.name || "이름 없는 분류"))].join(" · "); L.push("같은 메뉴가 " + a.length + "번 있습니다: 「" + a[0].it.name + "」(" + where + ")"); } });
+  secs.forEach(sec => { if (sec.wine) return;
+    const nums = sec.items.filter(it => typeof it.price === "number" && it.price > 0).map(it => it.price).sort((x, y) => x - y), med = nums.length ? nums[Math.floor(nums.length / 2)] : 0;
+    sec.items.forEach(it => { const p = it.price;
+      if (typeof p === "number"){ if (p === 0) L.push("「" + it.name + "」 — 가격이 0원입니다"); else if (nums.length >= 3 && (p >= med * 8 || p * 8 <= med)) L.push("「" + it.name + "」 가격 " + p.toLocaleString("ko-KR") + "원 — 같은 분류의 다른 가격과 자릿수가 다릅니다(0이 빠지거나 더 붙었을 수 있습니다)"); }
+      else if (p === "" || p == null) L.push("「" + it.name + "」 — 가격이 비어 있습니다");
+      else if (!/시가|변동|문의|별도/.test(p)) L.push("「" + it.name + "」 — 숫자가 아닌 가격 「" + p + "」"); }); });
+  const names = secs.flatMap(sec => [sec.name].concat(sec.items.map(it => it.name)));
+  (typos || []).forEach(t => { if (names.some(n => n && n.includes(t.from))) L.push("맞춤법: 「" + t.from + "」 → 「" + t.to + "」(AI 의견 — 사진에 적힌 그대로가 맞을 수도 있습니다)"); });
+  return L;
+}
+function stReadInfo(){   // 352번. [이대로 시작] 화면 — 사진에서 읽어 낸 모양 한 줄 + 점검
+  const lk = stLook || {}, FN = { myeongjo:"명조", gothic:"고딕", hand:"손글씨", round:"둥근 글꼴", gungseo:"붓 · 궁서" }, sm = $("#st-readsum"), box = $("#st-notes");
+  const secs = stParsed || [], n = secs.reduce((a, x) => a + x.items.length, 0), bits = [];
+  bits.push("메뉴 " + n + "개 · 분류 " + secs.length + "개");
+  if (lk.concept && PRESETS[lk.concept]) bits.push(PRESETS[lk.concept].name);
+  if (lk.cols) bits.push(lk.cols + "단"); if (lk.orient) bits.push(lk.orient === "landscape" ? "가로" : "세로"); if (lk.font) bits.push(FN[lk.font]);
+  sm.textContent = "사진에서 읽은 것: " + bits.join(" · ");
+  if (lk.colors){ const sw = c => { const i = el("i"); i.className = "sw"; i.style.background = c; return i; }; sm.append(" · 종이", sw(lk.colors.paper), "글자", sw(lk.colors.ink)); }
+  sm.append(stPreset === "photo" ? " — 이 모양으로 시작합니다. 아래 조합에서 바꿀 수 있습니다." : "");
+  sm.hidden = false;
+  const L = menuChecks(secs, stTypos), nl = $("#st-nl"); nl.innerHTML = ""; L.slice(0, 8).forEach(t => { const li = el("li"); li.textContent = t; nl.append(li); });
+  box.classList.toggle("ok", !L.length); $("#st-nhd").textContent = L.length ? "점검 " + L.length + "건 — 확인해 보세요" : "점검할 곳이 없습니다 (이름 중복 · 가격 형식 · 맞춤법을 봤습니다)";
+  $("#st-nft").textContent = L.length ? (L.length > 8 ? "그 밖에 " + (L.length - 8) + "건이 더 있습니다. " : "") + "메뉴 이름 · 가격은 고치지 않았습니다. 시작한 뒤 종이에서 글자를 눌러 고칠 수 있습니다." : ""; $("#st-nft").hidden = !L.length;
+  box.hidden = false;
+}
 /* ── 273번. 추천 조합(프리셋) — 이미 있는 손잡이 값의 묶음. 누르면 한 번 맞추고 끝난다(저장되는 설정이 아니다 — 규칙 H · 89번).
    글자 크기 · 내용 · 맨 위(글자 / 로고)는 건드리지 않는다 — 채운 메뉴가 바로 넘치지 않게(크기는 사장님 몫). 값을 늘리면 t52 가 이름 · 값을 본다 */
 const PRESETS = {   // 285번. basic 은 빈 메뉴판의 시작 모양 — 타일에서는 「내 조합」으로 보인다(hidden: 추천 조합 목록에는 안 나온다)
