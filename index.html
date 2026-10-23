@@ -5729,6 +5729,7 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAMdCAYAAAAI/FxO
 const NOREN_KINDS = ["full","flat","wave","scallop","ridge","saw","arch","ribbon","twin","fade","frame","line","plain"];
 const LIGHT_NOREN = ["plain","frame","line"];
 
+/* 349번. 그림 좌우 쏠림 · 끝 잘림 바로잡기(사용자 — 「산장은 좌측이 많이 잘려 보인다」 · 「쏠리게 한 건 의도가 아니야」). 33개를 재서(칠해진 부분의 왼쪽 · 오른쪽 여백, 폭 880 기준) 가운데에서 25 넘게 벗어나거나 여백이 60 미만인 열넷(산장 · 파스타 · 맥주+파스타 · 말 · 얼룩말 · 알프스 산 · 전 · 찻주전자 · 에델바이스 · 맥주 · 소주 · 사케 · 와인 · 하이볼)을 그림 전체를 감싼 <g transform> 으로 가운데로 옮기고(바닥선 491 은 그대로), 폭이 740 을 넘는 것(말 · 얼룩말 · 알프스 산 · 전)은 바닥 가운데 기준으로 줄였다(말 · 얼룩말은 viewBox 가 `60 89 …` 라 기준점이 사용자 좌표 500 · 580 이다 — 처음에 491 을 써 아래끝이 8 올라갔다). 전은 줄이면 높이가 300 밑이 돼 0.985 만 줄였다 */
 const ART = {
   none:"",
   /* 132번. 동물 말고 **가게와 동네에 붙는 그림**을 넷 더한다. 알프스 쪽은 산장,
@@ -5741,7 +5742,7 @@ const ART = {
      오른끝을 도장 왼끝에서 40 안쪽에 두면 "조금만 겹친다".
      그래야 도장(종이 오른쪽 아래)과의 간격이 그림마다 같다. 유리잔의 빈 부분과 거품은
      `fill="var(--paper)" opacity=".5"` 로 잉크보다 밝게만 둔다 */
-  cabin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_cabin"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_cabin" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_cabin)"/></mask></defs><g mask="url(#fm_cabin)" transform="translate(440 491) scale(.84) translate(-440 -491)">
+  cabin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(43 0)"><!-- 349번 --><defs><linearGradient id="fd_cabin"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_cabin" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_cabin)"/></mask></defs><g mask="url(#fm_cabin)" transform="translate(440 491) scale(.84) translate(-440 -491)">
 <g transform="translate(350 500) scale(1.15) translate(-500 -500)">
 <g fill="currentColor" opacity=".28">
   <path d="M40 500 L250 70 L470 500 Z"/>
@@ -5763,7 +5764,7 @@ const ART = {
 </g>
 <g stroke="var(--paper)" stroke-width="6" fill="none" stroke-linecap="round"><path d="M322 326 L374 348 M322 348 L374 326"/><path d="M381 326 L433 348 M381 348 L433 326"/><path d="M440 326 L492 348 M440 348 L492 326"/><path d="M499 326 L551 348 M499 348 L551 326"/><path d="M558 326 L610 348 M558 348 L610 326"/><path d="M617 326 L669 348 M617 348 L669 326"/></g>
 </g>
-</g></svg>`,
+</g></g><!-- 349번 --></svg>`,
   bridge: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_bridge"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_bridge" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_bridge)"/></mask></defs><g mask="url(#fm_bridge)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-71.6 -52.4) scale(1.0233)">
 <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
   <g stroke-width="20">
@@ -5792,7 +5793,7 @@ const ART = {
   </g>
 </g>
 </g></g></svg>`,
-  beer: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+  beer: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-74 0)"><!-- 349번 -->
 <g transform="translate(-150 0)">
 <g fill="currentColor">
   <path d="M510 168 H730 L720 485 c0 4 -3 7 -7 7 H527 c-4 0 -7 -3 -7 -7 Z"/>
@@ -5808,8 +5809,8 @@ const ART = {
   <rect x="532" y="444" width="176" height="10" rx="5"/>
 </g>
 </g>
-</svg>`,
-  soju: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+</g><!-- 349번 --></svg>`,
+  soju: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-52 0)"><!-- 349번 -->
 <g transform="translate(-160 0)">
 <g fill="currentColor">
   <rect x="587" y="119" width="46" height="33" rx="5"/>
@@ -5820,8 +5821,8 @@ const ART = {
 <path fill="currentColor" d="M684 410 H750 L744 480 c-1 7 -6 12 -13 12 H703 c-7 0 -12 -5 -13 -12 L684 410 Z"/>
 <path fill="var(--paper)" opacity=".5" d="M684 410 H750 l-1 16 H685 Z"/>
 </g>
-</svg>`,
-  sake: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+</g><!-- 349번 --></svg>`,
+  sake: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-66 0)"><!-- 349번 -->
 <g transform="translate(-200 0)">
 <g fill="currentColor">
   <path d="M616 100 C 616 118, 622 122, 622 136 V208 C 622 240, 556 264, 556 352 C 556 412, 564 452, 578 476
@@ -5837,8 +5838,8 @@ const ART = {
   <path d="M700 420 H796 L784 480 c-1.5 7 -6 12 -13 12 H725 c-7 0 -11.5 -5 -13 -12 Z"/>
 </g>
 </g>
-</svg>`,
-  wine: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+</g><!-- 349번 --></svg>`,
+  wine: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-49 0)"><!-- 349번 -->
 <g transform="translate(-168 0)">
 <g fill="currentColor">
   <rect x="590" y="112" width="36" height="9" rx="2"/>
@@ -5847,8 +5848,8 @@ const ART = {
 <rect fill="var(--paper)" x="578" y="330" width="60" height="96" rx="3"/>
 <path fill="currentColor" d="M678 272 C662 292 660 332 672 362 C682 386 696 398 706 402 V478 H742 c7 0 11 4 11 7 s-4 7 -11 7 H678 c-7 0 -11 -4 -11 -7 s4 -7 11 -7 H714 V402 C724 398 738 386 748 362 C760 332 758 292 742 272 Z"/><path fill="var(--paper)" opacity=".55" d="M678 272 C666 290 661 308 660 330 H760 C759 308 754 290 742 272 Z"/>
 </g>
-</svg>`,
-  pasta: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+</g><!-- 349번 --></svg>`,
+  pasta: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(76 0)"><!-- 349번 -->
 <g transform="translate(-155 14)">
 <g fill="currentColor">
   <path d="M312 392 C 306 352, 334 326, 366 324 C 360 292, 396 272, 428 286 C 440 250, 490 240, 512 268
@@ -5874,11 +5875,11 @@ const ART = {
   </g>
 </g>
 </g>
-</svg>`,
+</g><!-- 349번 --></svg>`,
   /* 136번. 생맥주 + 파스타 한 장. 위 두 그림을 그대로 가져와 잔은 .82, 접시는 .72 로 밑선(492)을 축으로 줄이고
      나란히 놓았다. 잔이 뒤, 접시가 앞 — 접시 테두리·몸통에만 종이색 테두리를 둬서 잔이 잘려 나간다(135번).
      포크는 잔 쪽으로 기울면 잔에 겹치므로 왼쪽으로 눕혔다. 원본 둘을 고치면 여기도 같이 고칠 것 */
-  beerpasta: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+  beerpasta: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(110 0)"><!-- 349번 -->
 <!-- 172번. **접시를 먼저, 잔을 나중에** 그린다 — 반대로 두면 접시 테두리가 잔을 관통한다(170번 a).
      170번에서는 두 묶음을 정규식으로 바꿔치기했는데 **중첩된 닫는 g 에서 잘려** 면 가닥이 잔 위로 올라갔다.
      이제 beer 와 pasta 의 속만 그대로 가져와 순서만 다르게 조립한다 — 둘을 고치면 여기도 따라온다.
@@ -5927,11 +5928,11 @@ const ART = {
 </g>
 </g>
 </g>
-</svg>`,
+</g><!-- 349번 --></svg>`,
   /* 머리·목은 **한 획**이다. 전에는 목(굵은 선) + 머리(원) + 코(큰 타원)를 겹쳐 놨는데
      코가 장화처럼 늘어지고 이음매가 다 보였다("머리쪽이 어색하다").
      갈기는 목보다 **나중에** 그린다 — 먼저 그리면 목에 덮여 아예 안 보인다 */
-  horse: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 89 880 520"><g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  horse: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 89 880 520"><g transform="translate(20 0) translate(500 580) scale(0.906) translate(-500 -580)"><!-- 349번 --><g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <path d="M372 366 L322 484 L276 556" fill="none" stroke-width="34"/>
     <path d="M276 556 L258 574" fill="none" stroke-width="16"/>
     <path d="M598 372 L608 470 L558 538" fill="none" stroke-width="32"/>
@@ -5959,11 +5960,11 @@ const ART = {
     <ellipse cx="608" cy="318" rx="54" ry="68"/>
     <path d="M730 156 L726 112 L752 144 Z"/>
     <path d="M752 148 L760 106 L782 144 Z"/>
-</g></svg>`,
+</g></g><!-- 349번 --></svg>`,
   /* 줄무늬는 `clipPath` 로 실루엣에서 잘라낸다. 눈대중으로 놓았더니 목 줄무늬가
      몸 밖으로 삐져나오고 서로 겹쳐 흰 덩어리가 됐다. 이제 넉넉히 넘겨 긋고 잘라낸다 —
      몸이 바뀌어도 줄무늬가 따라간다. 목·얼굴 줄무늬는 목마루·목밑 곡선에서 뽑았다 */
-  zebra: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 89 880 520"><g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  zebra: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 89 880 520"><g transform="translate(20 0) translate(500 580) scale(0.906) translate(-500 -580)"><!-- 349번 --><g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <path d="M372 366 L322 484 L276 556" fill="none" stroke-width="34"/>
     <path d="M276 556 L258 574" fill="none" stroke-width="16"/>
     <path d="M598 372 L608 470 L558 538" fill="none" stroke-width="32"/>
@@ -6030,12 +6031,12 @@ const ART = {
     <path d="M770.391 139.929 L779.202 232.587" stroke-width="10"/>
     <path d="M798.671 156.462 L796.876 240.571" stroke-width="10"/>
     <path d="M825.483 182.845 L815.582 242.818" stroke-width="10"/>
-</g></svg>`,
-  mountain: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-41.4 5.4) scale(1.0353)"><g fill="currentColor">
+</g></g><!-- 349번 --></svg>`,
+  mountain: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(1 0) translate(440 491) scale(0.885) translate(-440 -491)"><!-- 349번 --><g transform="translate(-41.4 5.4) scale(1.0353)"><g fill="currentColor">
     <path d="M40 470 L232 208 L396 470 Z" opacity=".5"/>
     <path d="M600 470 L764 246 L888 470 Z" opacity=".38"/>
     <path d="M248 470 L520 118 L792 470 Z"/>
-</g></g></svg>`,
+</g></g></g><!-- 349번 --></svg>`,
   /* 초승달은 바깥 원의 긴 호 + 파내는 원의 짧은 호, 한 획이다.
      원 두 개에 fill-rule="evenodd" 를 쓰면 대칭차라서 초승달이 둘 생겨 고리처럼 보인다 */
   night: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_night"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_night" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_night)"/></mask></defs><g mask="url(#fm_night)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-44.0 -25.0) scale(1.1000)">
@@ -6055,7 +6056,7 @@ const ART = {
   <path d="M0 470 L96 408 L188 442 L306 338 L398 424 L470 388 L560 446 L682 356 L788 430 L880 396 L880 470 Z"/>
 </g>
 </g></g></svg>`,
-  highball: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+  highball: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-94 0)"><!-- 349번 -->
 <g transform="translate(-190 0)">
 <g stroke="var(--paper)" stroke-width="10" paint-order="stroke">
   <path fill="currentColor" d="M772 132 A40 40 0 0 1 812 92 A40 40 0 0 1 852 132 Z" transform="rotate(-12 812 132)"/>
@@ -6074,8 +6075,8 @@ const ART = {
   <rect x="620" y="456" width="140" height="9" rx="4"/>
 </g>
 </g>
-</svg>`,
-  edelweiss: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520">
+</g><!-- 349번 --></svg>`,
+  edelweiss: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-71 0)"><!-- 349번 -->
 <!-- 157번. "그림이 커서 오른쪽으로 붙은 것 같다 · 전체를 조금 줄이고 세 송이 사이를 좁혀 달라."
      배율 1.236 → 1.06 이고, 송이 사이는 안쪽 좌표로 266 · 200 → 218 · 164(-18%) 다.
      전에는 오른쪽 끝이 989(상자 880) 라 셋째 송이가 **잘려 있었다** — 지금은 845 로 상자 안이다.
@@ -6123,7 +6124,7 @@ const ART = {
   <path d="M752.6 148 C 759.9 132.8, 724.5 113, 699.1 115.8 C 708.6 139.5, 742.7 161.5, 752.6 148 Z"/>
   <circle cx="766" cy="156" r="6.6"/><circle cx="769.3" cy="144.4" r="5.6"/><circle cx="777.7" cy="153.1" r="5.6"/><circle cx="774.4" cy="164.7" r="5.6"/><circle cx="762.7" cy="167.6" r="5.6"/><circle cx="754.3" cy="158.9" r="5.6"/><circle cx="757.6" cy="147.3" r="5.6"/>
 </g>
-</g></svg>`,
+</g></g><!-- 349번 --></svg>`,
   fir: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><defs><linearGradient id="fd_fir"><stop offset="0" stop-color="#000"/><stop offset=".13" stop-color="#fff"/><stop offset=".87" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="fm_fir" maskUnits="userSpaceOnUse" x="0" y="0" width="880" height="520"><rect width="880" height="520" fill="url(#fd_fir)"/></mask></defs><g mask="url(#fm_fir)" transform="translate(440 491) scale(.84) translate(-440 -491)"><g transform="translate(-41.9 -37.7) scale(1.0476)">
 <g fill="currentColor">
   <g opacity=".32">
@@ -6298,7 +6299,7 @@ const ART = {
   <path d="M248 262 H632 L618 428 C 614 454, 592 470, 564 470 H316 C 288 470, 266 454, 262 428 Z"/>
   <rect x="230" y="242" width="420" height="30" rx="10"/></g>
 <path d="M258 330 H622" stroke="var(--paper)" stroke-width="10" opacity=".35"/></svg>`,
-  jeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(440 491) scale(1.07) translate(-480 -491)">
+  jeon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(7 0) translate(440 491) scale(0.985) translate(-440 -491)"><!-- 349번 --><g transform="translate(440 491) scale(1.07) translate(-480 -491)">
 <g fill="currentColor" stroke="var(--paper)" stroke-width="9" paint-order="stroke"><rect x="124" y="432" width="332" height="40" rx="20"/><rect x="146" y="394" width="292" height="40" rx="20"/><rect x="130" y="356" width="322" height="40" rx="20"/><rect x="160" y="318" width="262" height="40" rx="20"/><rect x="186" y="280" width="212" height="40" rx="20"/></g>
 <g fill="var(--paper)" opacity=".6"><circle cx="190" cy="452" r="6"/><circle cx="300" cy="446" r="5"/><circle cx="400" cy="454" r="6"/><circle cx="220" cy="414" r="5"/><circle cx="350" cy="410" r="6"/><circle cx="200" cy="376" r="6"/><circle cx="300" cy="338" r="5"/><circle cx="380" cy="376" r="5"/><circle cx="260" cy="300" r="5"/><circle cx="340" cy="300" r="5"/></g>
 <g fill="currentColor"><path d="M110 470 H470 L452 491 H128 Z"/>
@@ -6307,7 +6308,7 @@ const ART = {
   <path d="M694 246 C698 220 734 220 738 246 Z"/><rect x="702" y="204" width="32" height="22" rx="8"/>
   <path d="M788 300 C844 300 844 410 782 410" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"/>
   <path d="M666 360 L622 310 L634 300 L682 344 Z"/></g>
-<path d="M500 452 H606" stroke="var(--paper)" stroke-width="8" opacity=".6"/><path d="M652 400 H780" stroke="var(--paper)" stroke-width="8" opacity=".5"/></g></svg>`,
+<path d="M500 452 H606" stroke="var(--paper)" stroke-width="8" opacity=".6"/><path d="M652 400 H780" stroke="var(--paper)" stroke-width="8" opacity=".5"/></g></g><!-- 349번 --></svg>`,
   /* 334번. 다시 그림(위 ttuk 앞의 규칙 셋) */
   coffee: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(0 18)"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><path d="M390 160 c-30 -28 30 -55 0 -110"/><path d="M450 160 c-30 -28 30 -55 0 -110"/><path d="M510 160 c-30 -28 30 -55 0 -110"/></g>
 <g fill="currentColor">
@@ -6323,7 +6324,7 @@ const ART = {
   <path d="M220 418 H660 L644 434 H236 Z"/><rect x="420" y="434" width="40" height="24"/><path d="M372 458 H508 L522 470 H358 Z"/></g>
 <g fill="var(--paper)"><path d="M260 272 H620 V292 C 610 312, 590 312, 584 292 C 574 316, 548 316, 540 292 C 530 318, 500 318, 494 292 C 484 316, 456 316, 448 292 C 438 318, 408 318, 400 292 C 390 316, 362 316, 354 292 C 344 314, 318 314, 310 292 C 300 312, 272 312, 260 292 Z"/>
   <path d="M262 356 C 330 372, 550 372, 618 356" fill="none" stroke="var(--paper)" stroke-width="12" opacity=".55"/></g></g></svg>`,
-  teapot: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(0 22)">
+  teapot: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(-32 0)"><!-- 349번 --><g transform="translate(0 22)">
 <g fill="currentColor">
   <path d="M220 336 C 220 246, 296 198, 390 198 C 484 198, 560 246, 560 336 C 560 414, 500 456, 390 456 C 280 456, 220 414, 220 336 Z"/>
   <rect x="300" y="448" width="180" height="22" rx="8"/>
@@ -6332,7 +6333,7 @@ const ART = {
   <path d="M552 260 C 640 254, 652 394, 540 402" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round"/>
   <path d="M640 392 H770 C 770 436, 744 456, 705 456 C 666 456, 640 436, 640 392 Z"/>
   <path d="M614 456 H796 C 786 466, 772 470, 758 470 H652 C 638 470, 624 466, 614 456 Z"/></g>
-<g fill="none" stroke="var(--paper)" stroke-linecap="round"><path d="M284 208 H496" stroke-width="9"/><path d="M262 300 C 290 252, 340 232, 380 230" stroke-width="12" opacity=".45"/></g></g></svg>`,
+<g fill="none" stroke="var(--paper)" stroke-linecap="round"><path d="M284 208 H496" stroke-width="9"/><path d="M262 300 C 290 252, 340 232, 380 230" stroke-width="12" opacity=".45"/></g></g></g><!-- 349번 --></svg>`,
   tteok: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520"><g transform="translate(0 22)"><g fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"><path d="M400 140 c-30 -28 30 -45 0 -90"/><path d="M490 140 c-30 -28 30 -45 0 -90"/></g>
 <path d="M520 288 L630 140" stroke="currentColor" stroke-width="14" stroke-linecap="round"/>
 <g fill="currentColor" stroke="var(--paper)" stroke-width="10" paint-order="stroke"><rect x="232" y="352" width="180" height="54" rx="27" transform="rotate(0 322 379)"/><rect x="420" y="352" width="180" height="54" rx="27" transform="rotate(0 510 379)"/><rect x="560" y="352" width="110" height="54" rx="27" transform="rotate(0 615 379)"/><rect x="300" y="302" width="180" height="54" rx="27" transform="rotate(0 390 329)"/><rect x="488" y="302" width="170" height="54" rx="27" transform="rotate(0 573 329)"/><rect x="380" y="252" width="180" height="54" rx="27" transform="rotate(0 470 279)"/></g>

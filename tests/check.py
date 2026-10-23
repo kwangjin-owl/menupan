@@ -1811,14 +1811,15 @@ def t59(b, f):
         res = c.js("""async ()=>{ const W=880,H=520, out={}; const keys=Object.keys(ART).filter(k=>k!=='none');
           for(const k of keys){ let svg=ART[k].replace(/var\\(--paper\\)/g,'#ffffff').replace(/currentColor/g,'#000000'); if(!/xmlns=/.test(svg)) svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
             const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); await img.decode().catch(()=>{}); const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(img,0,0,W,H);
-            const d=g.getImageData(0,0,W,H).data; let y0=H,y1=-1,x0=W,x1=-1; for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(d[(y*W+x)*4]<128){ if(y<y0)y0=y; if(y>y1)y1=y; if(x<x0)x0=x; if(x>x1)x1=x; } }
-            out[k]=[y1, y1-y0+1, x1-x0+1]; }
+            const d=g.getImageData(0,0,W,H).data; let y0=H,y1=-1,x0=W,x1=-1; for(let y=0;y<H;y++)for(let x=0;x<W;x++){ if(d[(y*W+x)*4]<128){ if(y<y0)y0=y; if(y>y1)y1=y; } if(d[(y*W+x)*4]<225){ if(x<x0)x0=x; if(x>x1)x1=x; } }
+            out[k]=[y1, y1-y0+1, x1-x0+1, x0, x1]; }   /* 349번. 좌우는 옅은 부분(연한 산 · 흐린 끝)까지 센다(225) — 위아래 규칙은 그대로(128) */
           const groups={}; [...document.querySelectorAll('#f-art optgroup')].forEach(o=>groups[o.label]=[...o.querySelectorAll('option')].map(x=>x.value));
           return {m:out, groups}}""")
         m = res['m']; concept = [k for g, ks in res['groups'].items() if not g.startswith('알프스 느낌') for k in ks]
         out['bottom_bad'] = {k: v[0] for k, v in m.items() if k not in ('bridge', 'pasta') and not (488 <= v[0] <= 500)}
         out['flat'] = {k: m[k][1] for k in concept if k in m and m[k][1] < 300}
         out['wide'] = {k: v[2] for k, v in m.items() if v[2] > 880}
+        out['side_bad'] = {k: [v[3], 879 - v[4]] for k, v in m.items() if v[3] < 50 or 879 - v[4] < 50 or abs((v[3] + v[4]) / 2 - 440) > 25}   # 349번. 칠해진 부분이 틀 왼쪽 · 오른쪽 끝에서 50 이상 떨어지고 가운데에서 25 넘게 안 벗어난다(산장이 왼쪽으로 쏠려 잘려 보였다)
         out['n'] = [len(m), len(concept)]
     except Exception as e:
         out['fail'] = str(e).split('\n')[0][:200]
@@ -2076,8 +2077,8 @@ def judge(t, r):
             return ok, f"333번 탭 [빈 메뉴판, 와인 장, 제 탭이 아닌 손잡이, 탭마다 고칠 장 · 모든 장에 같게 · 이 장만] {[t332.get('blank'), t332.get('wine'), t332.get('home'), t332.get('vis')]} · 331번 와인 기능 [빈 메뉴판, 와인 장 넣음, 저장본, 되돌림] {[w331.get('blank'), w331.get('wine_added'), w331.get('saved_no_hidden'), w331.get('undone')]} · 330번 폰 창 [첫 화면, 넓은 틀, 밀어 둔 뒤 인쇄 안내, 닫으면 걷힘] {[[v['start'], v['start_wide'], v['print_scrolled'], v['closed_clean']] for v in m330.values()]} · 첫 화면 {r['open_first']} · Esc {r['esc_stays']} · 바깥 누르기 처음/정하기 {r.get('backdrop_stays')}/{r.get('setup_backdrop_stays')} · 맨 위 글자는 상호명을 안 따라감(267번) {r['top_follows']} · 로고 · 뒤집기 {r['logo_mask_invert']} · 시작 {s} · 저장 이름 {r['save_name']} · 저장본 바로 {r['saved_opens_direct']} · 다시 열기 닫기 {r['reopen_close']} · 알프스 {r['alps']} · 되돌리기 {r['undo_back']} · 상호명 없음 {r['noname']} · 오류 {r['err'][:2]}"
         if t == 't59':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and r['n'][0] >= 33 and not r['err']
-            return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'}"
+            ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
+            return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
         if t == 't60':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             w, m, h, k = r['wine'], r['mix'], r['hansik'], r['colors']
