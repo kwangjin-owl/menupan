@@ -1690,7 +1690,7 @@ def t61(b, f):
     try:
         pg.goto(url('p61_' + f)); pg.wait_for_timeout(500); pg.click('#st-photo'); pg.wait_for_timeout(200)
         pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T); pg.wait_for_timeout(300)
-        out['ck_rows'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length")
+        out['ck_rows'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length"); out['ck_h'] = pg.evaluate("()=>Math.round(document.querySelector('#st-cnotes').clientHeight)")   # 356번. 5건이 3줄 넘게 보이는 높이
         pg.evaluate("()=>document.querySelector('#st-cnotes .st-cnr .go').click()"); pg.wait_for_timeout(200)
         out['ck_go'] = pg.evaluate("()=>document.querySelectorAll('#st-ctab input.flash').length")
         pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr')].find(r=>/우동/.test(r.textContent)).querySelector('.ab:not(.ap)').click()"); pg.wait_for_timeout(100)
@@ -1715,14 +1715,41 @@ def t61(b, f):
         # 이동 — 창이 닫히고 종이의 그 줄이 표시된다
         pg.evaluate("()=>document.querySelector('#ai-list .st-cnr .go').click()"); pg.wait_for_timeout(300)
         out['go'] = pg.evaluate("()=>[document.querySelector('#ai').open, document.querySelectorAll('.aiflash').length, (document.querySelector('.aiflash')||{}).dataset && document.querySelector('.aiflash').dataset.path]")
+        # 356번 — 점검 막대: 창이 닫혀도 ◀ ▶ · [적용] · [무시]를 이어 누른다 · 토스트가 막대 위로 · 인쇄에 안 나옴
+        bar = lambda: pg.evaluate("()=>[document.querySelector('#aibar').hidden, document.querySelector('#aibar-n').textContent, document.querySelector('#aibar-m').textContent.slice(0,40), document.querySelector('#aibar-ap').hidden, document.querySelectorAll('.aiflash').length]")
+        out['bar0'] = bar()
+        pg.click('#aibar-next'); pg.wait_for_timeout(100); out['bar1'] = bar()
+        pg.click('#aibar-prev'); pg.click('#aibar-prev'); pg.wait_for_timeout(100); out['barwrap'] = bar()   # 첫 줄에서 ◀ → 맨 끝으로 돈다
+        # 맞춤법 줄까지 가서 [적용] — 막대에서
+        pg.evaluate("()=>{const i=aiList().L.findIndex(f=>f.kind==='typo'); aiShow(i);}"); pg.wait_for_timeout(100)
+        pg.click('#aibar-ap'); pg.wait_for_timeout(200)
+        out['bar_ap'] = [pg.evaluate("()=>MENU.sheets[0][0][0].items[0].name"), bar()]
+        pg.click('#aibar-ig'); pg.wait_for_timeout(100); out['bar_ig'] = bar()
+        pg.emulate_media(media='print'); out['bar_print'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#aibar')).display"); pg.emulate_media(media='screen')
+        pg.click('#aibar-list'); pg.wait_for_timeout(200); out['bar_list'] = pg.evaluate("()=>document.querySelector('#ai').open"); pg.keyboard.press('Escape')
+        pg.click('#aibar-x'); out['bar_x'] = bar()[0]
+        # 저장본에는 막대가 비어 닫힌 채로
+        pg.evaluate("()=>aiShow(0)")
+        out['save_bar'] = pg.evaluate("()=>{const c=cleanForSave(document.documentElement.cloneNode(true)); const b=c.querySelector('#aibar'); return [b.hasAttribute('hidden'), c.querySelector('#aibar-m').textContent, c.querySelector('#aibar-n').textContent]}")
         # 번역은 창 안에서
         pg.click('#b-ai'); pg.wait_for_timeout(200); pg.select_option('#f-lang', 'en'); pg.wait_for_timeout(200)
         out['lang'] = pg.evaluate("()=>[SETTINGS.lang2, document.querySelector('#f-tr').disabled]")
         pg.keyboard.press('Escape'); pg.wait_for_timeout(100)
-        # 첫 화면에서 넘어온 의견(돈까스) + AI 가 더한 것(비빈밥) · 무시한 것(우동 + 방금 누른 것)
+        # 첫 화면에서 넘어온 의견(돈까스) + AI 가 더한 것(비빈밥) · 무시한 것(우동 + 창에서 누른 것 + 막대에서 누른 것)
         out['mem'] = pg.evaluate("()=>[aiTypos.length, aiIgnore.size]")
     except Exception as e:
         out['fail'] = str(e)[:300]
+    # 356번 — 폰 폭(360 · 390 · 430): 위쪽 막대 단추가 화면 안에 다 들어오고, 점검 줄 글이 줄끼리 겹치지 않는다
+    out['narrow'] = {}
+    for W in (360, 390, 430):
+        try:
+            pg2 = ctx.new_page(); pg2.set_viewport_size({'width': W, 'height': 844}); pg2.on('pageerror', lambda e: out['err'].append(str(e)))
+            pg2.goto(url(f)); pg2.wait_for_timeout(500)
+            pg2.evaluate("()=>{MENU.sheets[0][0][0].items[0].price=''; MENU.sheets[0][0][0].items[1].price='abc'; MENU.sheets[0][0][0].items[2].price=1; MENU.sheets[0][0][0].items[3].price=900000; render(); document.querySelector('#b-ai').click()}"); pg2.wait_for_timeout(300)
+            out['narrow'][W] = pg2.evaluate("""()=>[['#b-file','#b-ai','#b-edit','#b-print','#b-help'].map(s=>Math.round(document.querySelector(s).getBoundingClientRect().right)).every(x=>x<=innerWidth),
+              [...document.querySelectorAll('#ai-list .st-cnr .go')].every(g=>g.scrollHeight<=g.clientHeight+1), document.querySelectorAll('#ai-list .st-cnr').length]""")
+            pg2.close()
+        except Exception as e: out['narrow'][W] = str(e)[:100]
     ctx.close()
     try: sv = open('api/read.js', encoding='utf-8').read(); out['server'] = ['mode === "typo"' in sv, 'TYPO' in sv and 'maxOutputTokens: typo' in sv, 'MAX_NAMES' in sv]
     except Exception: out['server'] = None
@@ -2150,14 +2177,18 @@ def judge(t, r):
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok_ck = r['ck_rows'] == 5 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
+            ok_ck = r['ck_rows'] == 5 and r['ck_h'] >= 200 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
             ok_pl = r['place'] == [False, True, True, True, True]
             ok_ai = len(r['rows']) == 4 and r['sent']['mode'] == 'typo' and '돈까스' in r['sent']['names'] and len(r['rows2']) == 5 and any('비빈밥' in x for x in r['rows2']) and not any('없는이름' in x for x in r['rows2'])
             ok_ap = r['applied'][0] == '돈가스' and r['applied'][1] == '돈가스' and r['applied'][2] and r['undone'] == '돈까스'
             ok_ig = r['ign'] == [5, 4] and r['go'][0] is False and r['go'][1] == 1 and r['go'][2] and r['lang'] == ['en', False]
+            b0, b1, bw = r['bar0'], r['bar1'], r['barwrap']
+            ok_bar = b0[0] is False and re.match(r'^1 / \d+$', b0[1]) and b0[4] == 1 and b1[1].startswith('2 / ') and bw[1].split(' / ')[0] == bw[1].split(' / ')[1] \
+                     and r['bar_ap'][0] == '돈가스' and r['bar_ap'][1][4] == 1 and r['bar_print'] == 'none' and r['bar_list'] is True and r['bar_x'] is True and r['save_bar'] == [True, '', ''] and r['bar_ig'][0] is False
+            ok_nw = all(isinstance(v, list) and v[0] and v[1] and v[2] >= 4 for v in r['narrow'].values()) and len(r['narrow']) == 3
             ok_sv = r['server'] is None or r['server'] == [True, True, True]
-            ok = ok_ck and ok_pl and ok_ai and ok_ap and ok_ig and ok_sv and r['mem'] == [2, 2] and not r['err']
-            return ok, f"확인 화면 점검 {ok_ck} {[r['ck_rows'], r['ck_go'], r['ck_ign'], r['sum']]} · 단추와 번역 자리 {r['place']} · AI 창 {ok_ai} {r['rows']} → {r['rows2']} · 적용 {r['applied']} → 되돌림 {r['undone']} · 무시 {r['ign']} · 이동 {r['go']} · 번역 {r['lang']} · 서버 {r['server']}"
+            ok = ok_ck and ok_pl and ok_ai and ok_ap and ok_ig and ok_bar and ok_nw and ok_sv and r['mem'] == [2, 3] and not r['err']
+            return ok, f"확인 화면 점검 {ok_ck} {[r['ck_rows'], r['ck_go'], r['ck_ign'], r['sum']]} · 단추와 번역 자리 {r['place']} · AI 창 {ok_ai} {r['rows']} → {r['rows2']} · 적용 {r['applied']} → 되돌림 {r['undone']} · 무시 {r['ign']} · 이동 {r['go']} · 번역 {r['lang']} · 점검 막대 {ok_bar} {[r['bar0'], r['bar1'], r['barwrap'], r['bar_ap'], r['bar_ig'], r['bar_print']]} · 폰 폭(막대 단추 안에 · 줄 안 넘침 · 줄 수) {r['narrow']} · 서버 {r['server']}"
         if t == 't60':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             w, m, h, k = r['wine'], r['mix'], r['hansik'], r['colors']
