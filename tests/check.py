@@ -1199,7 +1199,7 @@ def t47(b, f):
       return {ids:bs.map(b=>b.dataset.tab), oneLine:bs.every(b=>{ const r=document.createRange(); r.selectNodeContents(b); return b.scrollWidth<=b.clientWidth+1 && new Set([...r.getClientRects()].map(q=>Math.round(q.top))).size===1; }), rows:rows.length, perRow1:rs.filter(r=>Math.round(r.top)===rows[0]).length,
         lastFill:Math.abs(last.reduce((a,r)=>a+r.width,0)-bar.width)<=1, titles:bs.every(b=>b.title.length>3)} }"""
     t = {'blank': c.js(TB)}
-    HOME = {'f-font':'look','f-theme':'look','f-paper':'look','f-topmode':'top','f-title':'top','f-noren':'top','f-logo':'top','f-layout':'menu','sz-range':'menu','b-fit':'menu','f-secstyle':'menu','f-align':'menu','f-mark':'menu','f-leader':'menu','f-lang':'menu','btpick':'menu','f-notes':'foot','f-pageno':'foot','g-art':'deco'}   # 333번
+    HOME = {'f-font':'look','f-theme':'look','f-paper':'look','f-topmode':'top','f-title':'top','f-noren':'top','f-logo':'top','f-layout':'menu','sz-range':'menu','b-fit':'menu','f-secstyle':'menu','f-align':'menu','f-mark':'menu','f-leader':'menu','btpick':'menu','f-notes':'foot','f-pageno':'foot','g-art':'deco'}   # 333번
     t['home'] = c.js("(h)=>Object.entries(h).filter(([id,tab])=>(document.getElementById(id)?.closest('.ptab')||{dataset:{}}).dataset.tab!==tab).map(e=>e[0])", HOME)
     t['vis'] = {}
     for tab in ('look', 'top', 'menu', 'foot', 'deco'):
@@ -1350,8 +1350,8 @@ def t54(b, f):
     pg.click('#st-check-go'); pg.wait_for_timeout(300)
     v = c.js("()=>({sum:document.querySelector('#st-readsum').textContent, shown:!document.querySelector('#st-readsum').hidden && !document.querySelector('#st-notes').hidden, hd:document.querySelector('#st-nhd').textContent, li:[...document.querySelectorAll('#st-nl li')].map(x=>x.textContent), names:stParsed[0].items.map(i=>i.name), typos:stTypos.length})")
     L = ' / '.join(v['li'])
-    out['p352'] = [v['shown'], all(k in v['sum'] for k in ['한식 식당', '2단', '세로', '명조', '메뉴 7개']), '같은 메뉴가 2번 있습니다: 「된장찌개」' in L, '「김치찌개」 가격 90,000원 — 같은 분류' in L, '「우동」 — 숫자가 아닌 가격 「얼마」' in L, '맞춤법: 「돈까스」 → 「돈가스」' in L,
-                   '냉면' not in L, v['hd'].startswith('점검 4건'), v['typos'] == 1, v['names'][0] == '돈까스']
+    out['p352'] = [v['shown'], all(k in v['sum'] for k in ['한식 식당', '2단', '세로', '명조', '메뉴 7개']), '같은 이름의 메뉴 1건 — 된장찌개' in L, '가격 확인 2건 — 김치찌개 · 우동' in L, '맞춤법 의견 1건 — 돈까스 → 돈가스' in L, '[AI]' in c.js("()=>document.querySelector('#st-nft').textContent"),
+                   '냉면' not in L, v['hd'] == '점검할 곳이 5건 남아 있습니다', v['typos'] == 1, v['names'][0] == '돈까스']   # 353번. 확인 화면에는 종류별 요약 · 어디서 보는지(위쪽 [AI]) 안내 — 목록 · 이동 · 적용은 t61
     out['p352v'] = v
     out['err352'] = list(c.errs); c.close()
     c = Ctx(b, 'p_' + f); pg = c.pg; reqs = []
@@ -1615,24 +1615,24 @@ def t57(b, f):
         en0 = c.js(EN)
         pg.click('#b-edit'); pg.wait_for_timeout(200)
         out['start'] = c.js("()=>[L2(), document.querySelector('#f-tr').disabled]")
-        pg.evaluate("(sel)=>{const e=document.querySelector(sel), t=e.closest('.ptab'); panelTab=t.dataset.tab; if (e.closest('.pblock[data-kind=wine]')) panelPage=Math.max(0, MENU.sheets.findIndex((_,i)=>sheetKind(i)!=='menu')); syncPageTabs(); syncPage();}", '#f-lang'); pg.wait_for_timeout(150); pg.select_option('#f-lang', 'zh'); pg.wait_for_timeout(200)   # 332번 — 외국어는 [넣을 것]
+        pg.evaluate("()=>{const l=document.querySelector('#f-lang'); l.value='zh'; l.dispatchEvent(new Event('change',{bubbles:true}));}"); pg.wait_for_timeout(200)   # 332번 — 외국어는 [넣을 것]   # 354번 — 번역은 [AI] 창 안(꾸미기 창 탭이 아니다). 창을 열지 않고 값을 바꿔 본다
         out['zh'] = c.js("()=>[SETTINGS.lang2, 'bilingual' in SETTINGS, document.querySelector('#f-tr').disabled, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0, document.querySelector('#font-link').href.includes('SC')]")
-        pg.click('#f-tr'); pg.wait_for_timeout(1500)   # 339번 — 500ms 는 검사를 여럿 동시에 돌릴 때(부하) 번역이 화면에 반영되기 전에 쟀다(단독으로는 통과)
+        c.js("()=>document.querySelector('#f-tr').click()"); pg.wait_for_timeout(1500)   # 339번 — 500ms 는 검사를 여럿 동시에 돌릴 때(부하) 번역이 화면에 반영되기 전에 쟀다(단독으로는 통과)
         out['sent'] = [len(sent), sent[0]['lang'] if sent else None, len(sent[0]['texts']) == len(set(sent[0]['texts'])) if sent else None]
         out['filled'] = c.js("""()=>{let miss=0,wine=0,ds=0; MENU.sheets.forEach(s=>s.forEach(c=>c.forEach(x=>{ if(String(x.name||'').trim() && !x.zh) miss++;
             (x.items||[]).forEach(i=>{ if(x.wine){ if(i.zh) wine++; return; } if(String(i.name||'').trim() && !i.zh) miss++; if(String(i.desc||'').trim() && !i.desc_zh) miss++; if(i.desc_zh) ds++; }); }))); return [miss, wine, ds > 0]}""")
         out['en_same'] = c.js(EN) == en0
         # 307번 — 다 차 있으면 묻는다(부르지 않고), 빈 칸만은 흐림
-        n = len(sent); pg.click('#f-tr'); pg.wait_for_timeout(300)
+        n = len(sent); c.js("()=>document.querySelector('#f-tr').click()"); pg.wait_for_timeout(300)
         out['ask_full'] = [c.js("()=>document.querySelector('#trask').open"), c.js("()=>document.querySelector('#ta-empty').disabled"), len(sent) == n]
         c.js("()=>document.querySelector('#trask').close()")
         c.js("()=>{const s=MENU.sheets[0][0][0]; s.items[0].zh='사람이 고침'; delete s.items[1].zh; render(); touch();}")
-        pg.click('#f-tr'); pg.wait_for_timeout(300); pg.click('#ta-empty'); pg.wait_for_timeout(400)
+        c.js("()=>document.querySelector('#f-tr').click()"); pg.wait_for_timeout(300); pg.click('#ta-empty'); pg.wait_for_timeout(400)
         out['keep'] = [len(sent[-1]['texts']), c.js("()=>[MENU.sheets[0][0][0].items[0].zh, !!MENU.sheets[0][0][0].items[1].zh]")]
         pg.click('#b-undo'); pg.wait_for_timeout(300); out['undo'] = c.js("()=>!MENU.sheets[0][0][0].items[1].zh")
         pg.click('#b-redo'); pg.wait_for_timeout(300)
         total = c.js("()=>trTargets('zh', true).length")
-        pg.click('#f-tr'); pg.wait_for_timeout(300); pg.click('#ta-all'); pg.wait_for_timeout(400)
+        c.js("()=>document.querySelector('#f-tr').click()"); pg.wait_for_timeout(300); pg.click('#ta-all'); pg.wait_for_timeout(400)
         out['all'] = [len(sent[-1]['texts']) == len(set(j for j in sent[-1]['texts'])), c.js("()=>MENU.sheets[0][0][0].items[0].zh") != '사람이 고침', total > 1]
         pg.click('#b-undo'); pg.wait_for_timeout(300); out['all_undo'] = c.js("()=>MENU.sheets[0][0][0].items[0].zh") == '사람이 고침'
         out['final_lines'] = c.js("()=>{toggleEdit(); return [document.querySelectorAll('.sheet .en[lang=zh-Hans]:empty').length, document.querySelectorAll('.sheet .en[lang=zh-Hans]').length > 0]}")
@@ -1671,6 +1671,63 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t61(b, f):
+    """354번 — 위쪽 [AI] 단추와 창: 점검 목록(중복 · 가격 · 맞춤법)을 누르면 종이의 그 줄로 가고 · [적용]으로 바로 고쳐지고(되돌리기) · [무시]가 되고 · 번역이 꾸미기 창이 아니라 이 창에 있고 ·
+    [AI로 맞춤법 보기]가 이름 목록만 서버에 보내고(mode:typo) 종이에 있는 이름만 목록에 넣고 · 첫 화면에서 무시한 것이 넘어오고 · 서버가 맞춤법 모드를 갖는다. 353번 — PDF 여러 쪽(pdf.js 가 있을 때)이 쪽 탭 · 쪽마다 한 장으로"""
+    import json as _j
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p61_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    T = "가게: 시험 식당\n콘셉트: 한식\n방향: 세로\n단: 2\n글꼴: 명조\n색: 종이 #f5ecd7 · 글자 #2b2218 · 띠 없음\n점검: 돈까스 → 돈가스\n[식사] 1\n돈까스 | 9000\n된장찌개 | 8000\n된장찌개 | 8000\n김치찌개 | 90000\n비빔밥 | 8000\n냉면 | 시가\n우동 | 얼마\n"
+    ctx = b.new_context(viewport={'width': 1400, 'height': 1000}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e))); sent = []
+    def rd(r):
+        if r.request.method == 'GET': r.fulfill(status=200, content_type='application/json', body='{"enabled":true}'); return
+        d = _j.loads(r.request.post_data); sent.append(d)
+        if d.get('mode') == 'typo': r.fulfill(status=200, content_type='application/json', body=_j.dumps({'text': '- 비빔밥 → 비빈밥\n김치찌게 → 김치찌개\n없는이름 → 뭔가\n'})); return
+        r.fulfill(status=200, content_type='application/json', body=_j.dumps({'text': T}))
+    pg.route('**/api/read', rd)
+    try:
+        pg.goto(url('p61_' + f)); pg.wait_for_timeout(500); pg.click('#st-photo'); pg.wait_for_timeout(200)
+        pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T); pg.wait_for_timeout(300)
+        out['ck_rows'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length")
+        pg.evaluate("()=>document.querySelector('#st-cnotes .st-cnr .go').click()"); pg.wait_for_timeout(200)
+        out['ck_go'] = pg.evaluate("()=>document.querySelectorAll('#st-ctab input.flash').length")
+        pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr')].find(r=>/우동/.test(r.textContent)).querySelector('.ab:not(.ap)').click()"); pg.wait_for_timeout(100)
+        out['ck_ign'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length")
+        pg.click('#st-check-go'); pg.wait_for_timeout(300)
+        out['sum'] = pg.evaluate("()=>[document.querySelector('#st-nhd').textContent, [...document.querySelectorAll('#st-nl li')].map(x=>x.textContent)]")
+        pg.click('#st-go'); pg.wait_for_timeout(900)
+        pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(200)
+        out['place'] = pg.evaluate("()=>[!!document.querySelector('#panel #f-lang'), !!document.querySelector('#ai #f-lang'), !!document.querySelector('#ai #f-tr'), !!document.querySelector('#b-ai'), document.querySelector('#b-ai').closest('.tb-right')!==null]")
+        pg.click('#b-ai'); pg.wait_for_timeout(300)
+        rows = lambda: pg.evaluate("()=>[...document.querySelectorAll('#ai-list .st-cnr .go')].map(x=>x.textContent)")
+        out['rows'] = rows()
+        pg.click('#ai-typo'); pg.wait_for_timeout(600)
+        out['sent'] = sent[-1]; out['rows2'] = rows(); out['sub'] = pg.inner_text('#ai-sub')
+        # 적용(돈까스)
+        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .st-cnr')].find(r=>/돈까스/.test(r.textContent)).querySelector('.ap').click()"); pg.wait_for_timeout(300)
+        out['applied'] = pg.evaluate("()=>[MENU.sheets[0][0][0].items[0].name, [...document.querySelectorAll('.sheet [data-path$=\"items.0.name\"]')].map(x=>x.textContent)[0], undoStack.length>0]")
+        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .st-cnf button')].find(b=>b.textContent==='되돌리기').click()"); pg.wait_for_timeout(300)
+        out['undone'] = pg.evaluate("()=>MENU.sheets[0][0][0].items[0].name")
+        # 무시
+        n0 = len(rows()); pg.evaluate("()=>document.querySelector('#ai-list .st-cnr .ab:not(.ap)').click()"); pg.wait_for_timeout(150); out['ign'] = [n0, len(rows())]
+        # 이동 — 창이 닫히고 종이의 그 줄이 표시된다
+        pg.evaluate("()=>document.querySelector('#ai-list .st-cnr .go').click()"); pg.wait_for_timeout(300)
+        out['go'] = pg.evaluate("()=>[document.querySelector('#ai').open, document.querySelectorAll('.aiflash').length, (document.querySelector('.aiflash')||{}).dataset && document.querySelector('.aiflash').dataset.path]")
+        # 번역은 창 안에서
+        pg.click('#b-ai'); pg.wait_for_timeout(200); pg.select_option('#f-lang', 'en'); pg.wait_for_timeout(200)
+        out['lang'] = pg.evaluate("()=>[SETTINGS.lang2, document.querySelector('#f-tr').disabled]")
+        pg.keyboard.press('Escape'); pg.wait_for_timeout(100)
+        # 첫 화면에서 넘어온 의견(돈까스) + AI 가 더한 것(비빈밥) · 무시한 것(우동 + 방금 누른 것)
+        out['mem'] = pg.evaluate("()=>[aiTypos.length, aiIgnore.size]")
+    except Exception as e:
+        out['fail'] = str(e)[:300]
+    ctx.close()
+    try: sv = open('api/read.js', encoding='utf-8').read(); out['server'] = ['mode === "typo"' in sv, 'TYPO' in sv and 'maxOutputTokens: typo' in sv, 'MAX_NAMES' in sv]
+    except Exception: out['server'] = None
+    return out
+
 def t55(b, f):
     import threading, http.server, socketserver, functools
     src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
@@ -2031,7 +2088,7 @@ def judge(t, r):
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
             ok = r.get('p352') == [True] * 10 and not r.get('err352') and r.get('p329') == [True] * 3 and r.get('p327') == [True] * 6 and r.get('p326') == [True] * 3 and r.get('p325') == [True] * 4 and r.get('p323') == [True] * 7 and r.get('p322') == [True] * 2 and r.get('p320') == [True] * 3 and r.get('p319') == [True, True] and r.get('seg319') is True and isinstance(r.get('rule318'), dict) and len(r['rule318']) == 4 and not any(r['rule318'].values()) and r.get('p317') == [True] * 4 and r.get('busy316') == [True, True] and r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
-            return ok, f"352번 [읽은 것 줄 · 점검 4건(중복 · 자릿수 · 숫자 아님 · 맞춤법) · 시가는 통과 · 이름 그대로] {r.get('p352')} · 329번 [그림 묶음 여섯, 목록 = 정의, 새 그림 그려짐] {r.get('p329')} · 327번 [비우면 상호명, 적은 글자, 기호 도장 글자 없음, 정리, 영문 가로, 알프스 박힘 없음] {r.get('p327')} · 326번 [두 묶음 제목, 도장이 밑 · 구분선, 손잡이가 제 묶음 안] {r.get('p326')} · 325번 [← 같은 자리, 제목 같은 자리, 주 단추 같은 자리, 숨긴 파일 칸 안 보임] {r.get('p325')} · 323번 [두 칸 다른 모양, 격자에 보임, 종이에 그 칸만, 색 그 칸만, 없음이면 그 칸만 · 색 흐림, 칸 바꿔도 길이 같음, 칸 이름] {r.get('p323')} · 322번 [그림 칸 바꿔도 길이 같음, 그림 손잡이 흐림] {r.get('p322')} · 320번 [맞춤 스위치, 격자 하나, 다른 장에 격자 밑] {r.get('p320')} · 319번 [격자 빈 칸 ＋, 흐린 까닭] {r.get('p319')} · 고르기 폭 {r.get('seg319')} · 318번 단추 규칙 어긋남(사진 · 확인 · 정하기 · 꾸미기 창) {r.get('rule318')} · 317번 [아이콘 한 쌍, 사진 폭 안, 사진 가운데, 확인 화면 같은 높이] {r.get('p317')} · 316번 진행 막 [방향 → 돌렸습니다 → 읽는 중, 끝나면 사라짐] {r.get('busy316')} · 315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
+            return ok, f"352번 [읽은 것 줄 · 종류별 요약(중복 · 가격 · 맞춤법) · 어디서 보는지 안내 · 시가는 통과 · 5건 · 이름 그대로] {r.get('p352')} · 329번 [그림 묶음 여섯, 목록 = 정의, 새 그림 그려짐] {r.get('p329')} · 327번 [비우면 상호명, 적은 글자, 기호 도장 글자 없음, 정리, 영문 가로, 알프스 박힘 없음] {r.get('p327')} · 326번 [두 묶음 제목, 도장이 밑 · 구분선, 손잡이가 제 묶음 안] {r.get('p326')} · 325번 [← 같은 자리, 제목 같은 자리, 주 단추 같은 자리, 숨긴 파일 칸 안 보임] {r.get('p325')} · 323번 [두 칸 다른 모양, 격자에 보임, 종이에 그 칸만, 색 그 칸만, 없음이면 그 칸만 · 색 흐림, 칸 바꿔도 길이 같음, 칸 이름] {r.get('p323')} · 322번 [그림 칸 바꿔도 길이 같음, 그림 손잡이 흐림] {r.get('p322')} · 320번 [맞춤 스위치, 격자 하나, 다른 장에 격자 밑] {r.get('p320')} · 319번 [격자 빈 칸 ＋, 흐린 까닭] {r.get('p319')} · 고르기 폭 {r.get('seg319')} · 318번 단추 규칙 어긋남(사진 · 확인 · 정하기 · 꾸미기 창) {r.get('rule318')} · 317번 [아이콘 한 쌍, 사진 폭 안, 사진 가운데, 확인 화면 같은 높이] {r.get('p317')} · 316번 진행 막 [방향 → 돌렸습니다 → 읽는 중, 끝나면 사라짐] {r.get('busy316')} · 315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
             return not bad and not r['err'] and len(r['diff']) > 0, f"칸 {r['n']} · 값 {len(r['diff'])}가지 · 자리가 바뀐 값 {bad or '없음'}"
@@ -2091,6 +2148,16 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't61':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            ok_ck = r['ck_rows'] == 5 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
+            ok_pl = r['place'] == [False, True, True, True, True]
+            ok_ai = len(r['rows']) == 4 and r['sent']['mode'] == 'typo' and '돈까스' in r['sent']['names'] and len(r['rows2']) == 5 and any('비빈밥' in x for x in r['rows2']) and not any('없는이름' in x for x in r['rows2'])
+            ok_ap = r['applied'][0] == '돈가스' and r['applied'][1] == '돈가스' and r['applied'][2] and r['undone'] == '돈까스'
+            ok_ig = r['ign'] == [5, 4] and r['go'][0] is False and r['go'][1] == 1 and r['go'][2] and r['lang'] == ['en', False]
+            ok_sv = r['server'] is None or r['server'] == [True, True, True]
+            ok = ok_ck and ok_pl and ok_ai and ok_ap and ok_ig and ok_sv and r['mem'] == [2, 2] and not r['err']
+            return ok, f"확인 화면 점검 {ok_ck} {[r['ck_rows'], r['ck_go'], r['ck_ign'], r['sum']]} · 단추와 번역 자리 {r['place']} · AI 창 {ok_ai} {r['rows']} → {r['rows2']} · 적용 {r['applied']} → 되돌림 {r['undone']} · 무시 {r['ign']} · 이동 {r['go']} · 번역 {r['lang']} · 서버 {r['server']}"
         if t == 't60':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             w, m, h, k = r['wine'], r['mix'], r['hansik'], r['colors']
@@ -2117,10 +2184,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

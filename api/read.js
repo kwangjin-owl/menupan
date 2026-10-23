@@ -11,6 +11,7 @@
 //   「글자가 바로 선 것은 몇 번」만 묻고 { rot } 를 돌려준다(316번 — 한 장에 「몇 도?」는 거꾸로를 90° 로 답했다). 받는 것은 여전히 사진뿐
 //
 //   352번. 점검 줄(맞춤법 의심 이름 — 원문 → 제안). index.html 의 READ_PROMPT 와 같게
+//   354번. mode:"typo" 면 사진 없이 메뉴 이름 목록(names)만 받아, 고정된 요청 글(TYPO)로 「원문 → 제안」 줄만 돌려준다(메뉴판 [AI] 창의 맞춤법 보기). 받는 것은 짧은 이름 글뿐
 //   341번. 콘셉트(한식 · 카페 · 분식 · 호프 · 요리주점 · 와인) · 와인 목록 줄(와인 이름 | 글라스 | 병 | 원산지 | 품종 | 향 | 맛) — index.html 의 READ_PROMPT 와 같게
 //
 // 비용
@@ -51,6 +52,8 @@ const PROMPT = [
 ].join("\n");   // 313번(방향 = 종이 기준 · 바닥 = 맨 아래 단 전체 폭). 312번(분류 제목 · 이름 없는 묶음 · 추천 · 안내 · 바닥 · 영업시간 ? · 짐작 금지 · 궁서 · 조명 뺀 색). index.html 의 READ_PROMPT 와 같게
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const ORIENT = "아래 네 사진은 같은 가게 메뉴판 사진을 서로 다르게 돌린 것입니다(1번 ~ 4번). 글자가 바로 서서 위에서 아래로 자연스럽게 읽히는 사진의 번호 하나만 1, 2, 3, 4 중 숫자로 답하세요. 다른 말은 쓰지 마세요.";   // 316번
+const TYPO = "아래는 가게 메뉴판의 메뉴 이름 목록입니다(한 줄에 하나). 한국어 맞춤법 · 표준 표기가 확실히 틀린 이름만 찾아 원문 → 제안 모양으로 한 줄씩, 최대 8줄만 적으세요. 다른 말은 쓰지 마세요. 외래어 · 가게 고유 이름 · 방언처럼 틀렸는지 확실하지 않은 것은 쓰지 않습니다. 틀린 것이 없으면 아무것도 쓰지 마세요.";
+const MAX_NAMES = 120;   // 354번. 이름 목록 상한
 const ROTS = [0, 90, 180, 270];   // 1 ~ 4번 사진이 돌린 각도(시계 방향) — 메뉴판(index.html)의 geminiOrient 와 같은 순서
 const MAX_B64 = 4000000;   // 사진(base64) 약 3MB. 메뉴판은 긴 쪽 1600px JPEG 로 줄여 보낸다(보통 0.5MB 안)
 
@@ -81,8 +84,14 @@ module.exports = async function handler(req, res){
   if (typeof body === "string"){ try { body = JSON.parse(body); } catch(e){ body = {}; } }
   const RE = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
   const orient = !!body && body.mode === "orient";   // 315 · 316번
+  const typo = !!body && body.mode === "typo";   // 354번
   let parts;
-  if (orient){
+  if (typo){
+    const arr = Array.isArray(body.names) ? body.names : [];
+    const names = arr.filter(x => typeof x === "string").map(x => x.replace(/[\r\n]+/g, " ").trim().slice(0, 40)).filter(Boolean).slice(0, MAX_NAMES);
+    if (!names.length){ res.status(400).json({ error:"메뉴 이름(names)이 필요합니다", code:"names" }); return; }
+    parts = [{ text:TYPO + "\n\n" + names.join("\n") }];
+  } else if (orient){
     const arr = Array.isArray(body.images) ? body.images : [], ms = arr.map(x => typeof x === "string" ? x.match(RE) : null);
     if (arr.length !== 4 || ms.some(x => !x)){ res.status(400).json({ error:"사진 넷(data:image/…;base64)이 필요합니다", code:"image" }); return; }
     if (ms.reduce((a, x) => a + x[2].length, 0) > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
@@ -93,13 +102,13 @@ module.exports = async function handler(req, res){
     if (m[2].length > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
     parts = [{ text:PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }];
   }
-  const payload = JSON.stringify({ contents:[{ parts }], generationConfig:{ temperature:0, maxOutputTokens: orient ? 8 : 2048 } });
+  const payload = JSON.stringify({ contents:[{ parts }], generationConfig:{ temperature:0, maxOutputTokens: typo ? 400 : orient ? 8 : 2048 } });
 
   const first = process.env.GEMINI_MODEL || DEFAULT_MODEL;
   const models = [...new Set([first, DEFAULT_MODEL, "gemini-2.5-flash-lite", "gemini-2.5-flash"])];
   let lastStatus = 0, lastDetail = "";
   const t0 = Date.now(), tries = [];   // 292번. 모델마다 걸린 시간 — 버셀 Logs 에 남긴다(느려진 까닭을 가리려고)
-  const log = extra => console.log(JSON.stringify({ route: orient ? "orient" : "read", ms:Date.now() - t0, tries, ...extra }));
+  const log = extra => console.log(JSON.stringify({ route: typo ? "typo" : orient ? "orient" : "read", ms:Date.now() - t0, tries, ...extra }));
   for (const model of models){
     let r; const t1 = Date.now();
     try {
@@ -120,6 +129,7 @@ module.exports = async function handler(req, res){
     if (!r.ok){ log({ result:"error" }); res.status(502).json({ error:"제미나이 응답 오류 " + r.status, code:"gemini", detail:(await r.text()).slice(0, 300), model }); return; }
     const data = await r.json();
     const text = ((((data.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || "").join("");
+    if (!text.trim() && typo){ log({ result:"ok", model, none:true }); res.status(200).json({ text:"", model }); return; }   // 354번. 틀린 것이 없으면 빈 답이 맞다
     if (!text.trim()){ log({ result:"empty" }); res.status(422).json({ error:"빈 답", code:"empty", model }); return; }
     if (orient){ const k = (String(text).match(/[1-4]/) || [])[0]; log({ result: k ? "ok" : "bad", model, pick: k || null }); res.status(200).json({ rot: k ? ROTS[k - 1] : 0, pick: k ? +k : 0, model, ms:Date.now() - t0 }); return; }   // 316번. 번호를 못 찾으면 0(안 돌림)
     log({ result:"ok", model }); res.status(200).json({ text:text.slice(0, 20000), model, ms:Date.now() - t0, tries:tries.length });
