@@ -65,7 +65,7 @@ def t02(b, f):
         out['font_seal_n_' + o] = len(fs)
         arts = []
         for a in ['none','horse','zebra','ibex','mountain','fir','cabin','night','bridge','highball','beer','soju','sake','wine','pasta','beerpasta','edelweiss','vine',
-                  'ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern']:   # 329번. 콘셉트별 그림 16
+                  'ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','bingsu','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern']:   # 329번. 콘셉트별 그림 16
             c.pg.goto(url(f))
             r = c.js("""([o,a,sel])=>{SETTINGS.orient=o; MENU.sheets.forEach((_,i)=>{ const p=P(i); if (typeof normArts==='function') p.arts = a==='none' ? [] : [0,1,2,3,4,5].map(c=>({cell:c, art:a})); else p.art=a; }); syncControls(); applyLook(); render(); fitNow(); applyScale();
               let hid=0, n=0; document.querySelectorAll(sel).forEach(e=>{ if(!e.offsetHeight) return; const r=e.getBoundingClientRect(); n++;
@@ -1448,7 +1448,7 @@ def t54(b, f):
         out['p320'] = c.js("""()=>{ const fit=document.querySelector('#b-fit'), cp=document.querySelector('#b-copypage'), g=document.querySelector('#g-art');
           return [ !!fit && fit.type==='checkbox' && fit.classList.contains('m3sw'), !document.querySelector('#g-seal') && !document.querySelector('#f-sealhere'), !!cp && !!cp.closest('#pgbar') ] }""")   # 320 → 323 → 334번. [한 장에 맞춤] 스위치 · 격자 하나(도장 격자 · 칸 스위치 없음) · [모든 장에 같게]는 고칠 장 줄 안(334번에 격자 밑에서 옮김)
         out['p329'] = c.js("""()=>{ const sel=document.querySelector('#f-art'), gs=[...sel.querySelectorAll('optgroup')], vals=[...sel.options].map(o=>o.value).filter(v=>v!=='none');
-          const keys=Object.keys(ART).filter(k=>k!=='none'), NEW=['ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern'];
+          const keys=Object.keys(ART).filter(k=>k!=='none'), NEW=['ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','bingsu','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern'];
           const P0=P(panelPage), keep=JSON.stringify(P0.arts); let drawn=0;
           for (const k of NEW){ P0.arts=[{cell:5, art:k}]; render(); const a=document.querySelector('.sheet[data-pi="'+panelPage+'"] .art[data-cell="5"] svg') || document.querySelector('.sheet[data-pi="'+panelPage+'"] .art svg'); const r=a && a.getBBox ? a.getBBox() : {width:0}; if (r.width > 100) drawn++; }
           P0.arts=JSON.parse(keep); render();
@@ -1832,7 +1832,7 @@ def t02b(b, f):
     for o in ('portrait', 'landscape'):
         arts = []
         for a in ['none','horse','zebra','ibex','mountain','fir','cabin','night','bridge','highball','beer','soju','sake','wine','pasta','beerpasta','edelweiss','vine',
-                  'ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern']:   # 329번. 콘셉트별 그림 16
+                  'ttuk','bapsujeo','bibim','jeon','coffee','croissant','cake','bingsu','teapot','tteok','gimbap','eomuk','ramyeon','chicken','fries','skewer','lantern']:   # 329번. 콘셉트별 그림 16
             c.pg.goto(url(f))
             r = c.js("""([o,a,sel])=>{SETTINGS.orient=o; MENU.sheets.forEach((_,i)=>{ const p=P(i); if (typeof normArts==='function') p.arts = a==='none' ? [] : [0,1,2,3,4,5].map(c=>({cell:c, art:a})); else p.art=a; }); syncControls(); applyLook(); render(); fitNow(); applyScale();
               let hid=0, n=0; document.querySelectorAll(sel).forEach(e=>{ if(!e.offsetHeight) return; const r=e.getBoundingClientRect(); n++;
