@@ -1815,7 +1815,7 @@ def t59(b, f):
             out[k]=[y1, y1-y0+1, x1-x0+1, x0, x1]; }   /* 349번. 좌우는 옅은 부분(연한 산 · 흐린 끝)까지 센다(225) — 위아래 규칙은 그대로(128) */
           const groups={}; [...document.querySelectorAll('#f-art optgroup')].forEach(o=>groups[o.label]=[...o.querySelectorAll('option')].map(x=>x.value));
           return {m:out, groups}}""")
-        m = res['m']; concept = [k for g, ks in res['groups'].items() if not g.startswith('알프스 느낌') for k in ks]
+        m = res['m']; concept = [k for g, ks in res['groups'].items() if not g.startswith('산 · 동물 · 풍경') for k in ks]
         out['bottom_bad'] = {k: v[0] for k, v in m.items() if k not in ('bridge', 'pasta') and not (488 <= v[0] <= 500)}
         out['flat'] = {k: m[k][1] for k in concept if k in m and m[k][1] < 300}
         out['wide'] = {k: v[2] for k, v in m.items() if v[2] > 880}
@@ -2090,7 +2090,7 @@ def judge(t, r):
             ok_q = q is None or (q[0][0][0] == '#fff' and q[0][0][2] == U and q[0][1][0] == '#e8dcc2' and q[0][1][2] == U and q[0][2][0] is None and q[0][2][2] == U
                 and '못 읽을 수' in q[1] and '못 읽을 수' in q[2] and '못 읽을 수' not in q[3] and '못 읽을 수' not in q[4]
                 and q[5]['shown'] is True and q[5]['val'] == '#ffffff' and q[5]['pick'] == '#112233' and q[5]['white'] is True and q[5]['none'] == 'none' and q[5]['on'] is True and q[5]['dim'] is True and q[5]['back'] is True and q[5]['off'] is True)   # 348번
-            ok = all(r['prompt']) and ok_w and ok_m and ok_h and ok_c and ok_q and r['groups'][-1].startswith('알프스 느낌') and r['groups'][0] != r['groups'][-1] and r['norm'] == [None, None, '#e8dcc2', 'none', None] and r['nscale'][0] == '30' and r['nscale'][2] <= r['nscale'][1] - 20 and r['nscale'][3] == 0.3 and r['nscale'][4] is True and r['nscale'][5] is True and r['narrow'] == [True, True] and r['narrow_box'] == [True, True, True] and r['wide'] == [False, False] and not r['err']
+            ok = all(r['prompt']) and ok_w and ok_m and ok_h and ok_c and ok_q and r['groups'][-1].startswith('산 · 동물 · 풍경') and r['groups'][0] != r['groups'][-1] and r['norm'] == [None, None, '#e8dcc2', 'none', None] and r['nscale'][0] == '30' and r['nscale'][2] <= r['nscale'][1] - 20 and r['nscale'][3] == 0.3 and r['nscale'][4] is True and r['nscale'][5] is True and r['narrow'] == [True, True] and r['narrow_box'] == [True, True, True] and r['wide'] == [False, False] and not r['err']
             return ok, f"요청 글 {r['prompt']} · 와인만 {ok_w} · 섞임 {ok_m} · 한식 콘셉트만 {ok_h} · 콘셉트 없음 {ok_c} · QR 바탕 {'읽는 도구 없음' if q is None else ok_q} · 그림 목록 맨 아래 {r['groups'][-1]} · 폰 {r['narrow']} · 컴퓨터 {r['wide']} · 정리 {r['norm']} · 맨 위 크기 [막대 최소, 60% 높이, 30% 높이, 눌러 본 하한, 작을 때 안내, 끄면 안내 없음] {r['nscale']}"
         if t == 't58':
             if r.get('no_reader'): return False, '만든 QR 을 읽는 도구가 없습니다 — pip install zxing-cpp'

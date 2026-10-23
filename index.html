@@ -2758,9 +2758,11 @@ dialog#start.wide > .in{box-sizing:border-box;min-height:100%;display:flex;flex-
 dialog#start.wide > .in > div:not([hidden]){flex:1 0 auto;display:flex;flex-direction:column}
 dialog#start.wide .row2.foot2{margin-top:auto}
 /* 326번. 칸 안의 그림 · 도장 묶음 — 작은 제목 · 도장 위 구분선 */
+.panel .pzoom{margin:0 0 8px;padding:8px 0 0;font-size:12px;line-height:16px;color:rgba(240,230,205,.6)}   /* 351번 */
+.panel .pzoom b{color:#efe3c9}
 .panel #art-cell .cellblk{display:flex;flex-direction:column;gap:8px}
 .panel #art-cell .blkhd{font-size:13px;font-weight:700;color:rgba(240,230,205,.88);letter-spacing:.02em}
-.panel #art-cell .sealblk{border-top:1px solid rgba(240,230,205,.14);padding-top:12px;margin-top:4px}
+.panel #art-cell .sealblk, .panel #art-cell .cornerblk{border-top:1px solid rgba(240,230,205,.14);padding-top:12px;margin-top:4px}   /* 351번. 모퉁이도 도장처럼 제목 · 구분선 */
 .panel #art-cell #b-artsame{margin-top:6px}
 /* 327번. 도장 글자 칸 */
 .panel #f-sealtx{width:100%;box-sizing:border-box;height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(240,230,205,.28);background:rgba(240,230,205,.06);color:#f0e6cd;font:inherit;font-size:14px}
@@ -2793,6 +2795,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
        쪽 고르기(#pgbar)와 [다른 장에도 똑같이](#pgcopy)는 그런 묶음이 있는 탭에서만 보인다. 손잡이의 id 는 하나도 안 바꿨다 — 덩어리만 옮겼다 -->
   <!-- 333번. 탭을 종이를 보며 고치는 순서로 — [색 · 글꼴] · [맨 위] · [메뉴] · [바닥] · [그림 · 도장], 한 줄 밑줄 탭(와인 장 묶음은 [메뉴] 맨 아래, 와인 장이 있을 때만).
        제목과 같은 말을 되풀이하던 이름표 · 쪽 제목 · 「다른 장에」 제목 · 「AI 번역」을 걷고, 묶음 제목 아래 간격을 8px 하나로(재 보니 2 · 6 · 10px 였다) -->
+  <p class="pzoom"><!-- 351번. 편집은 화면 배율 100% 에서 — 배율이 다르면 줄바꿈이 달리 보인다(229번) -->화면 <b>100%</b>에서 고쳐야 인쇄물과 줄바꿈이 같습니다 (Ctrl+0)</p>
   <div class="pgbar" id="pgbar"><span class="pglbl">고칠 장</span><div class="pgpick" id="pgpick"></div><button id="b-copypage" class="tbtn" type="button" title="고른 장의 「이 장만」 설정(맨 위 · 메뉴 · 바닥 · 그림 · 도장 탭에 걸친 것)을 다른 모든 장에 그대로 씁니다. 바닥에 쓴 글은 장마다 따로라 안 옮깁니다">이 장 설정을 다른 장에도 적용</button><div class="pgrp pgtitle"><span id="pg-title">1쪽 설정</span></div></div>
   </div>
   <div class="ptab on" data-tab="look">
@@ -3023,12 +3026,12 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <optgroup label="호프 · 치킨"><option value="beer">생맥주</option><option value="highball">하이볼</option><option value="soju">소주</option><option value="chicken">치킨</option><option value="fries">감자튀김</option></optgroup>
     <optgroup label="요리주점 · 와인"><option value="sake">사케</option><option value="skewer">꼬치</option><option value="lantern">초롱(등불)</option><option value="wine">와인</option><option value="vine">포도나무</option><option value="pasta">파스타</option><option value="beerpasta">생맥주와 파스타</option></optgroup>
     
-    <optgroup label="알프스 느낌 (산 · 동물 · 풍경)"><option value="horse">야생마</option><option value="zebra">얼룩말</option><option value="ibex">산양</option><option value="mountain">알프스 산</option><option value="fir">전나무 숲</option><option value="cabin">산장</option><option value="night">달밤</option><option value="bridge">한강 다리</option><option value="edelweiss">에델바이스</option></optgroup>   <!-- 341번. 알프스 전용 느낌이라 맨 아래로(다른 가게가 열면 안 맞는 그림부터 보였다) -->
+    <optgroup label="산 · 동물 · 풍경"><!-- 351번 --><option value="horse">야생마</option><option value="zebra">얼룩말</option><option value="ibex">산양</option><option value="mountain">알프스 산</option><option value="fir">전나무 숲</option><option value="cabin">산장</option><option value="night">달밤</option><option value="bridge">한강 다리</option><option value="edelweiss">에델바이스</option></optgroup>   <!-- 341번. 알프스 전용 느낌이라 맨 아래로(다른 가게가 열면 안 맞는 그림부터 보였다) -->
     </select></span>
     <span id="art-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span></span>
-    <span class="subrow nosw" id="corner-row" hidden><label id="l-corner">모퉁이</label><span class="grp st-pseg" id="f-corner" role="group" aria-labelledby="l-corner"><button type="button" data-k="none">없음</button><button type="button" data-k="seal">도장</button><button type="button" data-k="qr">QR</button></span></span>   <!-- 344번. 아래 두 칸의 모퉁이는 도장과 QR 이 같은 자리 — 하나만 -->
+    <span class="cellblk cornerblk" id="corner-row" role="group" aria-labelledby="l-corner" hidden><span class="blkhd" id="l-corner">모퉁이</span><!-- 351번. 모퉁이는 그림의 설정이 아니라 도장 · QR 을 가르는 자리라 그림과 같은 높이의 제목 · 구분선 --><span class="grp st-pseg" id="f-corner" role="group" aria-labelledby="l-corner"><button type="button" data-k="none">없음</button><button type="button" data-k="seal">도장</button><button type="button" data-k="qr">QR</button></span></span>   <!-- 344번. 아래 두 칸의 모퉁이는 도장과 QR 이 같은 자리 — 하나만 -->
     <span class="cellblk sealblk" role="group" aria-labelledby="h-cseal"><span class="blkhd" id="h-cseal">도장</span>
     <span class="subrow nosw sealrow"><label for="f-seal">모양</label>
     <select id="f-seal">
