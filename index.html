@@ -8686,10 +8686,11 @@ function cleanForSave(root){
   q(".gd-block, .gd-hole, .gd-tip").forEach(n => n.remove());   // 269번. 가이드 중에 저장해도 안 남게
   q("#f-presets, #f-mine").forEach(n => { n.textContent = ""; n.removeAttribute("data-keys"); });   // 284 · 286번
   q("#f-shop").forEach(n => n.removeAttribute("style"));   // 290번. 글자 길이로 잰 폭
-  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다)
+  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles, #g-art").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다) · 355번. #g-art(그림 격자)도 — 꾸미기 창을 한 번 열면 칸마다 그림 코드(data-h)가 단추에 붙어 저장본이 2만 바이트쯤 커졌다(t24 가 늘 실패하던 까닭 — 302번 격자부터). 열 때 syncPage 가 다시 만든다
   q("#pg-title").forEach(n => { n.textContent = "1쪽 설정"; });
   q("#ow-title").forEach(n => { n.textContent = "한 장에 안 들어갑니다"; });
   q(".panel .ptab").forEach(n => n.classList.toggle("on", n.dataset.tab === "look"));   // 332번
+  q('.panel [data-only="menu"]').forEach(n => n.removeAttribute("hidden"));   // 355번. 와인 장을 골랐을 때 붙는 hidden(335번) — 열 때 syncPage 가 다시 정한다. 이게 남아 t24 가 10바이트 어긋났다
   q("#pgbar").forEach(n => n.removeAttribute("hidden"));   // 332번. 열 때 syncPageTabs() 가 다시 정한다
   q("dialog").forEach(n => { n.classList.remove("hasmore"); n.removeAttribute("open"); });
   q("details").forEach(n => n.removeAttribute("open"));
