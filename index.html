@@ -2511,14 +2511,14 @@ dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
 .aipanel .aip-it:hover{background:rgba(240,230,205,.07)}
 .aipanel .aip-it:focus-visible{outline:2px solid #efe3c9;outline-offset:2px}
 .aipanel .aip-it.on{border-color:#e0a020;background:rgba(224,160,32,.13)}
-.aipanel .aip-it .m{display:block;overflow-wrap:anywhere}
-.aipanel .aip-it .d{display:block}
-.aipanel .aip-it .s{display:block;font-size:12px;color:rgba(240,230,205,.6);margin-top:2px}
-.aipanel .aip-it .fr,.aipanel .aip-it .to{display:block}   /* 358번 */
-.aipanel .aip-it .d{font-weight:700;color:#f0d9a0;margin-top:3px;font-size:13.5px}
-.aipanel .aip-it .why{display:block;font-size:12.5px;line-height:1.5;color:rgba(240,230,205,.7);margin-top:2px}
-.aipanel .aip-it .fr{color:rgba(240,230,205,.6);text-decoration:line-through;text-decoration-thickness:1px}
-.aipanel .aip-it .to{font-weight:700;color:#f0d9a0}
+.aipanel .aip-it .ln{display:flex;gap:8px;align-items:baseline;margin-top:3px}   /* 359번 */
+.aipanel .aip-it .ln:first-child{margin-top:0}
+.aipanel .aip-it .ln b{flex:0 0 44px;font-size:12px;font-weight:400;color:rgba(240,230,205,.55)}
+.aipanel .aip-it .ln .v{flex:1;min-width:0;overflow-wrap:anywhere}
+.aipanel .aip-it .ln.why .v{font-size:12.5px;line-height:1.5;color:rgba(240,230,205,.75)}
+.aipanel .aip-it .ln.fr .v{color:rgba(240,230,205,.7);text-decoration:line-through;text-decoration-thickness:1px}
+.aipanel .aip-it .ln.to .v{font-weight:700;color:#f0d9a0}
+.aipanel .aip-it .s{display:block;font-size:12px;color:rgba(240,230,205,.6);margin-top:5px;padding-left:52px}
 .aipanel .aip-btns{display:flex;gap:6px;margin-top:8px}
 .aipanel .aip-btns button{flex:0 0 auto;min-height:34px;padding:0 16px}
 .aipanel .aip-btns button.ap{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff;font-weight:700}
@@ -10434,9 +10434,11 @@ function menuFindings(pages){   // 354번. 무시 열쇠(key)에는 「N쪽 · �
         if (typeof v === "number"){ if (v === 0) add("price", { s, i, name:it.name, detail:"가격이 0원입니다", msg:tag + nm + " — 가격이 0원입니다" }); else if (nums.length >= 3 && (v >= med * 8 || v * 8 <= med)) add("price", { s, i, name:it.name, detail:v.toLocaleString("ko-KR") + "원 — 같은 분류의 다른 가격과 자릿수가 다릅니다(0이 빠지거나 더 붙었을 수 있습니다)", msg:tag + nm + " 가격 " + v.toLocaleString("ko-KR") + "원 — 같은 분류의 다른 가격과 자릿수가 다릅니다(0이 빠지거나 더 붙었을 수 있습니다)" }); }
         else if (v === "" || v == null) add("price", { s, i, name:it.name, detail:"가격이 비어 있습니다", msg:tag + nm + " — 가격이 비어 있습니다" });
         else if (!/시가|변동|문의|별도/.test(v)) add("price", { s, i, name:it.name, detail:"숫자가 아닌 가격 「" + v + "」", msg:tag + nm + " — 숫자가 아닌 가격 「" + v + "」" }); }); });
-    (pg.typos || []).forEach(t => secs.forEach((sec, s) => { const m = "맞춤법: 「" + t.from + "」 → 「" + t.to + "」";   // 357번. 「AI 의견 …」 문구는 줄마다 두지 않고 목록 위에 한 번
-      if (sec.name && sec.name.includes(t.from)) add("typo", { s, i:-1, from:t.from, to:t.to, msg:tag + m });
-      sec.items.forEach((it, i) => { if (it.name && it.name.includes(t.from)) add("typo", { s, i, from:t.from, to:t.to, msg:tag + m }); }); }));
+    const stray = [];   // 359번. 한글 이름 끝에 뜻 없이 붙은 영문자(야끼소바dd) — AI 를 부르지 않아도 규칙으로 바로 잡는다. 단위(ml · g …)는 뺀다
+    secs.forEach(sec => sec.items.forEach(it => { const m = /^(.*[가-힣])([A-Za-z]{1,3})$/.exec(String(it.name || "")); if (m && !/^(ml|cl|l|g|kg|oz|ea|pcs|x)$/i.test(m[2]) && !(pg.typos || []).some(t => t.from === it.name)) stray.push({ from:it.name, to:m[1], rule:"한글 이름 뒤에 뜻 없는 영문자가 붙은 것 같습니다" }); }));
+    (pg.typos || []).concat(stray.filter((t, k) => stray.findIndex(u => u.from === t.from) === k)).forEach(t => secs.forEach((sec, s) => { const m = "맞춤법: 「" + t.from + "」 → 「" + t.to + "」";   // 357번. 「AI 의견 …」 문구는 줄마다 두지 않고 목록 위에 한 번
+      if (sec.name && sec.name.includes(t.from)) add("typo", { s, i:-1, from:t.from, to:t.to, why:t.rule || "", msg:tag + m });
+      sec.items.forEach((it, i) => { if (it.name && it.name.includes(t.from)) add("typo", { s, i, from:t.from, to:t.to, why:t.rule || "", msg:tag + m }); }); }));
   });
   return L;
 }
@@ -10477,7 +10479,7 @@ function drawCkNotes(){
   const all = menuFindings(ckPagesNow()), L = all.filter(f => !stCkIgnore.has(f.key)), hid = all.length - L.length;
   box.innerHTML = ""; box.hidden = !all.length && !ckLast; if (box.hidden) return;
   const hd = el("p", "st-cnh"); hd.textContent = L.length ? "점검 " + L.length + "건 — 누르면 그 칸으로 갑니다" : "점검할 곳이 없습니다"; box.append(hd);
-  if (L.some(f => f.kind === "typo")){ const nt = el("p", "st-cnf"); nt.textContent = "맞춤법은 AI 의견입니다. 사진에 적힌 그대로가 맞을 수도 있으니 확인하고 [적용]하세요."; box.append(nt); }   // 357번. 줄마다 붙이지 않고 한 번
+  if (L.some(f => f.kind === "typo")){ const nt = el("p", "st-cnf"); nt.textContent = "맞춤법은 AI 의견 · 글자 규칙으로 찾은 것입니다. 사진에 적힌 그대로가 맞을 수도 있으니 확인하고 [적용]하세요."; box.append(nt); }   // 357번. 줄마다 붙이지 않고 한 번
   L.slice(0, 40).forEach(f => { const r = el("div", "st-cnr"), g = el("button", "go"); g.type = "button"; g.textContent = f.msg; g.onclick = () => ckGo(f); r.append(g);
     if (f.kind === "typo"){ const a = el("button", "ab ap"); a.type = "button"; a.textContent = "적용"; a.title = "이 칸의 「" + f.from + "」를 「" + f.to + "」로 바꿉니다"; a.onclick = () => ckApply(f); r.append(a); }
     const k = el("button", "ab"); k.type = "button"; k.textContent = "무시"; k.onclick = () => { stCkIgnore.add(f.key); drawCkNotes(); }; r.append(k); box.append(r); });
@@ -10539,21 +10541,18 @@ function aiDraw(){
   const box = $("#ai-list"); if (!box) return; box.innerHTML = "";
   const { L, map, hid } = aiList(); aiList.last = L; if (aiSel && !L.some(f => f.key === aiSel)) aiSel = "";
   $("#ai-count").textContent = L.length ? L.length + "건" : "";
-  if (!L.length){ const e = el("p", "aip-note"); e.textContent = "점검할 곳이 없습니다 — 같은 이름의 메뉴 · 가격 형식" + (aiTypos.length || aiTypoRan ? " · 맞춤법 의견" : "") + "을 봤습니다."; box.append(e); }
+  if (!L.length){ const e = el("p", "aip-note"); e.textContent = aiTypoRan ? "점검할 곳이 없습니다. 같은 이름 · 가격 · 맞춤법 모두 문제가 없습니다." : "같은 이름 · 가격은 문제가 없습니다. 맞춤법은 AI가 아직 안 봤습니다 — 아래 [AI로 맞춤법 보기]를 누르세요."; box.append(e); }   // 359번. 누르기 전에 「점검할 곳이 없다」로만 보이면 맞춤법까지 본 것처럼 읽힌다
   const GROUPS = [["typo", "맞춤법"], ["price", "가격"], ["dup", "같은 이름"]];
   GROUPS.forEach(([kind, lab]) => {
     const part = L.filter(f => f.kind === kind); if (!part.length) return;
     const gh = el("div", "aip-gh"); gh.textContent = lab; const sm = el("small"); sm.textContent = part.length + "건"; gh.append(" ", sm); box.append(gh);
-    if (kind === "typo"){ const nt = el("p", "aip-note"); nt.textContent = "AI 의견입니다. 사진이나 가게의 표기가 맞을 수도 있으니 확인하고 고치세요."; box.append(nt); }
+    if (kind === "typo"){ const nt = el("p", "aip-note"); nt.textContent = "AI 의견 · 글자 규칙으로 찾은 것입니다. 사진이나 가게의 표기가 맞을 수도 있으니 확인하고 고치세요."; box.append(nt); }
     part.slice(0, 40).forEach(f => {
       const path = aiPath(f, map), it = el("div", "aip-it" + (f.key === aiSel ? " on" : "")); it.tabIndex = 0; it.setAttribute("role", "button"); it.setAttribute("aria-pressed", f.key === aiSel ? "true" : "false");
-      const m = el("span", "m");
-      if (kind === "typo"){ const a = el("span", "fr"), z = el("span", "to"); a.textContent = f.from; z.textContent = "→ " + f.to; m.append(a, z); }   // 358번. 틀린 글 · 고친 글을 두 줄로
-      else if (kind === "dup") m.textContent = "「" + f.name + "」 " + f.n + "번 중 " + f.j + "번째";
-      else m.textContent = "「" + f.name + "」";
-      it.append(m);
-      if (kind === "price"){ const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3);   // 358번. 「값」 줄과 「까닭」 줄을 나눈다
-        if (v){ const d = el("span", "d"); d.textContent = v; it.append(d); } const y = el("span", "why"); y.textContent = w; it.append(y); }
+      const ln = (lab, txt, cls) => { const r = el("span", "ln" + (cls ? " " + cls : "")), l = el("b"), v = el("span", "v"); l.textContent = lab; v.textContent = txt; r.append(l, v); it.append(r); };   // 359번. 「이름표 + 내용」 줄 — 무엇이 · 어떻게 · 왜가 한눈에 갈린다
+      if (kind === "typo"){ ln("틀린 곳", f.from, "fr"); ln("이렇게", f.to, "to"); if (f.why) ln("이유", f.why, "why"); }
+      else if (kind === "dup"){ ln("메뉴", f.name); ln("이유", "같은 이름이 " + f.n + "번 있습니다(" + f.j + "번째)", "why"); }
+      else { const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3); ln("메뉴", f.name); if (v) ln("가격", v, "to"); ln("이유", w, "why"); }
       const loc = el("span", "s"); loc.textContent = (L.some(x => x.pg !== f.pg) || MENU.sheets.length > 1 ? f.pg + "쪽 · " : "") + (f.sn || "이름 없는 분류"); it.append(loc);
       const pick = () => { aiSelect(f.key); aiMark(path); };
       it.onclick = pick; it.onkeydown = e => { if ((e.key === "Enter" || e.key === " ") && e.target === it){ e.preventDefault(); pick(); } };
