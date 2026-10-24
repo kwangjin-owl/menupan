@@ -1742,6 +1742,9 @@ def t61(b, f):
         out['empty'] = pg.inner_text('#ai-list')
         pg.evaluate("()=>{MENU.sheets[0][0][0].items=[{name:'야끼소바dd',price:9000},{name:'우동',price:9000}]; render(); aiDraw(); document.querySelector('#ai-list .aip-it').click()}"); pg.wait_for_timeout(100)
         out['labels'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it.on .ln b')].map(b=>b.textContent)")
+        # 360번 — 상호명 · 도장: 읽은 맨 위 글이 가게 이름이면 상호명에 · 「메뉴」 · 「안주」 면 비워 두고 · 상호명도 글자도 없으면 도장은 「메뉴」 글자 대신 기호
+        out['shoplike'] = pg.evaluate("()=>['행복한 그릇','솔밭식당','바다향 횟집','메뉴','안주','메뉴판','밥','사이드 메뉴','주류 · 음료','안주류'].map(stShopLike)")
+        out['sealsym'] = pg.evaluate("()=>{const keep=MENU.brand.shop; delete MENU.brand.shop; const a=sealHTML({seal:'word'}), b=sealHTML({seal:'word',text:'알프스'}); MENU.brand.shop='솔밭식당'; const c=sealHTML({seal:'word'}); if(keep) MENU.brand.shop=keep; else delete MENU.brand.shop; return [a.includes('<text')||a.includes('메'), b.includes('알'), c.includes('솔')]}")
         pg.click('#ai-close')
         out['mem'] = pg.evaluate("()=>[aiTypos.length, aiIgnore.size]")
     except Exception as e:
@@ -2192,10 +2195,11 @@ def judge(t, r):
             ok_ap = r['applied'][0] == '돈가스' and r['applied'][1] == '돈가스' and r['applied'][2] and r['undone'] == '돈까스'
             ok_ig = r['ign'] == [5, 4, 1] and r['lang'] == ['en', False]
             ok_st = r['stray'] == [1, '야끼소바dd', '야끼소바', True] and '아직 안 봤습니다' in r['empty'] and r['labels'] == ['틀린 곳', '이렇게', '이유']
+            ok_sh = r['shoplike'] == [True, True, True, False, False, False, False, False, False, False] and r['sealsym'] == [False, True, True]
             ok_sw = r['swap'] == [[True, False, 0], [False, True], [True, 0, False]] and r['print'] == 'none' and r['save'] == [True, '', 0]
             ok_nw = all(isinstance(v, list) and v[0] and v[1] and v[2] >= 4 and v[3] for v in r['narrow'].values()) and len(r['narrow']) == 3
             ok_sv = r['server'] is None or r['server'] == [True, True, True]
-            ok = ok_ck and ok_pl and ok_op and ok_se and ok_ai and ok_ap and ok_ig and ok_sw and ok_st and ok_nw and ok_sv and r['mem'] == [2, 2] and not r['err']
+            ok = ok_ck and ok_pl and ok_op and ok_se and ok_ai and ok_ap and ok_ig and ok_sw and ok_st and ok_sh and ok_nw and ok_sv and r['mem'] == [2, 2] and not r['err']
             return ok, f"확인 화면 점검 {ok_ck} {[r['ck_rows'], r['ck_go'], r['ck_ign'], r['sum']]} · 자리 {r['place']} · 열기 {ok_op} {r['open']} {r['gh']} {r['note']} {r['scroll']} · 고르면 {ok_se} {r['sel']} · AI {ok_ai} {len(r['rows'])} → {len(r['rows2'])} · 적용 {r['applied']} → 되돌림 {r['undone']} · 무시 {r['ign']} · 꾸미기와 한자리 {r['swap']} 인쇄 {r['print']} 저장 {r['save']} · 번역 {r['lang']} · 기억 {r['mem']} · 폰 폭(막대 단추 · 줄 안 넘침 · 줄 수 · 창이 화면 안) {r['narrow']} · 서버 {r['server']}"
         if t == 't60':
             if r.get('fail'): return False, f"실패: {r['fail']}"

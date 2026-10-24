@@ -6441,7 +6441,9 @@ function sealSvg(frame, text){   /* 327번. 글자 수로 배치 — 1자 크게
   else { fs = rd ? (frame === "rr" ? 9.4 : 10.6) : 12.4; const xr = rd ? 25.6 : 26.4, xl = rd ? 14.4 : 13.6, y1 = rd ? 18.4 : 17.8, y2 = rd ? 29.6 : 31.4;
     t = T(xl, y1, ch[0]) + T(xr, y1, ch[1]) + T(xl, y2, ch[2]) + T(xr, y2, ch[3]); }   /* 328번. 넉 자는 가로 차례(솔밭 / 식당) — 전통 차례(오른쪽 줄부터 세로)는 「식솔 / 당밭」으로 읽혀 어색했다(사용자) */
   return '<svg viewBox="0 0 40 40">' + bg + '<g fill="var(--paper)" text-anchor="middle" font-size="' + fs + '" font-family="inherit">' + t + "</g></svg>"; }
-const sealHTML = x => SEAL_TEXT[x.seal] ? sealSvg(SEAL_TEXT[x.seal], sealText(x)) : SEALS[x.seal];   // 327번
+const sealPlain = x => !String((x && x.text) || "").replace(/\s+/g, "") && !shopName();   // 360번. 적은 글자도 상호명도 없다
+const SEAL_SYM = { sq:"tri", rd:"star", rr:"ring" };   // 360번. 글자 도장 틀 → 같은 모양의 기호 도장
+const sealHTML = x => SEAL_TEXT[x.seal] ? (sealPlain(x) ? SEALS[SEAL_SYM[SEAL_TEXT[x.seal]]] : sealSvg(SEAL_TEXT[x.seal], sealText(x))) : SEALS[x.seal];   // 327번. 360번. 글자가 없으면 「메뉴」 글자 대신 기호
 const SEALS = {
   none: "",
   tri:  '<svg viewBox="0 0 40 40" fill="none"><rect x="1.4" y="1.4" width="37.2" height="37.2" rx="3" stroke="currentColor" stroke-width="2.4"/><path d="M20 11.5 L29.5 28 H10.5 Z" fill="currentColor"/></svg>',
@@ -9241,7 +9243,7 @@ function syncPage(){
     syncSpot(pg);   // 321 · 344번. 고른 자리(맨 위 QR 자리 · 칸 · 아래 모퉁이)에 맞춰 설정을 펼치고 이름을 단다
     $("#f-artop").value = (x && x.op) || "light";
     const dz = sealAt(pg, panelCell); $("#f-seal").value = dz ? dz.seal : "none"; syncQr(pg);   // 323번 · 337번(QR) · 344번
-    { const tx = $("#f-sealtx"), on = !!dz && !!SEAL_TEXT[dz.seal]; if (document.activeElement !== tx) tx.value = on && dz.text || ""; tx.placeholder = sealText({}) + " (상호명)"; tx.disabled = !on;   /* 327번. 글자 칸 — 글자 도장일 때만, 아니면 흐리게(322번) */
+    { const tx = $("#f-sealtx"), on = !!dz && !!SEAL_TEXT[dz.seal]; if (document.activeElement !== tx) tx.value = on && dz.text || ""; tx.placeholder = shopName() ? sealText({}) + " (상호명)" : "글자 1~4자 (비우면 기호 도장)"; tx.disabled = !on;   /* 327번. 글자 칸 — 글자 도장일 때만, 아니면 흐리게(322번) */
       $("#seal-txrow").classList.toggle("off", !on); $("#seal-txrow").title = on ? "" : "글자 도장(네모 · 동그라미 · 두 겹)을 고르면 적을 수 있습니다"; }
     { const noArt = !x, noSeal = !dz;   /* 322번. 접지 않고 흐리게 — 297번은 그림 · 도장이 없으면 딸린 손잡이를 접어, 칸을 고를 때마다 꾸미기 창이 길어졌다 짧아졌다 했다(사용자). 24번 「고르는 수단을 조건부로 숨기지 않는다」 · 284번 「막힌 것은 흐리게」 */
       $("#art-opts").classList.toggle("off", noArt); $("#c-art").disabled = noArt; $("#f-artop").disabled = noArt;
@@ -9708,7 +9710,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stTypos = []; stPgs = []; stPgsFinal = null; stCkIgnore = new Set(); stPdf = null; stPdfTxt = {}; $("#st-pdfrow").hidden = true; $("#st-ptabs").hidden = true; $("#st-cnotes").hidden = true; $("#st-readsum").hidden = true; $("#st-notes").hidden = true; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stShopAuto = ""; stTypos = []; stPgs = []; stPgsFinal = null; stCkIgnore = new Set(); stPdf = null; stPdfTxt = {}; $("#st-pdfrow").hidden = true; $("#st-ptabs").hidden = true; $("#st-cnotes").hidden = true; $("#st-readsum").hidden = true; $("#st-notes").hidden = true; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -9756,7 +9758,7 @@ function stSwatches(){   // 273번. 추천 조합 타일 — 띠 · 종이 · �
 $("#st-blank").onclick = () => {
   stParsed = null;   // 275번. 사진으로 읽은 메뉴가 빈 메뉴판에 따라 들어가지 않게(사진 길은 이 뒤에 다시 채운다)
   stMode = "text"; stPreset = "basic"; delete PRESETS.photo; stTheme = PRESETS[stPreset].theme; stLogo = null; logoOrig = null; logoInv = false;
-  $("#st-shop").value = ""; $("#st-top").value = "";
+  $("#st-shop").value = ""; $("#st-top").value = ""; stShopAuto = "";
   $("#start").classList.remove("wide");   // 280번. 확인 화면에서 넘어오면 창 폭을 되돌린다
   $("#st-choose").hidden = true; $("#st-setup").hidden = false;
   stFromPhoto = false; $("#st-pg3").hidden = true; $("#st-topfrom").hidden = true;   // 288번. 사진 길이면 아래 [다음]이 바꾼다. 292번. 제목은 두 길 모두 「이름과 모양 정하기」(같은 창 · 같은 일 — 이름이 다르면 다른 창으로 읽힌다)
@@ -10015,6 +10017,8 @@ function readLook(lk){
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
 let stTypos = [];   // 352번. AI 가 적은 맞춤법 점검(원문 → 제안)
+let stShopAuto = "";   // 360번. 사진에서 읽어 상호명 칸에 넣은 글(사용자가 고치면 더는 덮지 않는다)
+const stShopLike = nm => { const k = String(nm).replace(/[\s·\-_.,/&]/g, "").toLowerCase(); return k.length > 0 && !/^(메뉴판?|menu|안주류?|밥류?|식사류?|주류|음료류?|술|사이드(메뉴)?|디저트|커피|요리|세트(메뉴)?|식사|런치|디너|점심|저녁|가격표?|price|food|drink|drinks|beverage)+$/.test(k); };   // 360번
 let stLook = {}, stPic = null, stParsed = null, stWay = "app", stOther = false, stFromPhoto = false, stShopRead = "", stHours = [], stFoot = [], stFootUn = [], stBlankWarned = false;   // 290번. 사진에서 읽은 가게 이름
    // 288번. stOther — 다른 앱 길을 보여 줄 때(한 번 실패) · stFromPhoto — 정하기 창에 사진 길로 왔는지
 function picToJpeg(img, rot = 0, max = 1600, q = .85){   // 313번. rot — 90 · 180 · 270(시계 방향). 돌린 사진을 보내고 확인 화면에도 그것을 쓴다
@@ -10414,6 +10418,7 @@ $("#st-check-go").onclick = () => {
       custom: stLook.colors || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? (stLook.band ? (C.noren !== "plain" ? C.noren : "flat") : "plain") : C.noren });
     stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(), tf = $("#st-topfrom"); if (nm) $("#st-top").value = nm;
+    { const sh = $("#st-shop"), want = nm && stShopLike(nm) ? nm : ""; if (!sh.value.trim() || sh.value === stShopAuto){ sh.value = want; stShopAuto = want; stSync(); } }   // 360번. 읽은 맨 위 글자가 가게 이름이면 상호명에도(「메뉴」 · 「안주」 같은 분류 말이면 넣지 않는다). 사용자가 직접 적은 상호명은 안 덮는다
     tf.textContent = !nm ? "사진에서 가게 이름을 찾지 못했습니다" : nm === stShopRead ? "사진에서 읽은 가게 이름입니다. " : ""; tf.hidden = !tf.textContent; tf.classList.toggle("warn", !nm); }   /* 313번. 못 찾았으면 붉은 경고 한 줄 */
   stReadInfo();   // 352번
   stSync();   /* 312번. 늘 다시 그린다 — 가게 이름을 읽었을 때만 불러, 이름이 없는 사진에서는 「사진처럼」이 골라졌는데 타일 표시 · 미리보기 색이 「내 조합」으로 남았다(사용자 화면). 안내 줄은 못 찾았을 때도(사용자) · 확인 화면에서 직접 적은 이름이면 안 적는다 */   // 291번. 사진의 가게 이름은 맨 위 글자에만 — 두 칸이 같으면 무엇이 다른지 안 보였다(267번 · 사용자). 어디서 온 글자인지 적는다   // 288번. 빈 메뉴판을 만드는 것이 아니다   // 정하기 창(상호명 · 맨 위 · 추천 조합)으로 — 읽은 메뉴는 들고 간다
