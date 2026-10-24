@@ -2512,8 +2512,11 @@ dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
 .aipanel .aip-it:focus-visible{outline:2px solid #efe3c9;outline-offset:2px}
 .aipanel .aip-it.on{border-color:#e0a020;background:rgba(224,160,32,.13)}
 .aipanel .aip-it .m{display:block;overflow-wrap:anywhere}
-.aipanel .aip-it .d{display:block;font-size:12.5px;color:rgba(240,230,205,.8);margin-top:2px}
+.aipanel .aip-it .d{display:block}
 .aipanel .aip-it .s{display:block;font-size:12px;color:rgba(240,230,205,.6);margin-top:2px}
+.aipanel .aip-it .fr,.aipanel .aip-it .to{display:block}   /* 358번 */
+.aipanel .aip-it .d{font-weight:700;color:#f0d9a0;margin-top:3px;font-size:13.5px}
+.aipanel .aip-it .why{display:block;font-size:12.5px;line-height:1.5;color:rgba(240,230,205,.7);margin-top:2px}
 .aipanel .aip-it .fr{color:rgba(240,230,205,.6);text-decoration:line-through;text-decoration-thickness:1px}
 .aipanel .aip-it .to{font-weight:700;color:#f0d9a0}
 .aipanel .aip-btns{display:flex;gap:6px;margin-top:8px}
@@ -10545,11 +10548,12 @@ function aiDraw(){
     part.slice(0, 40).forEach(f => {
       const path = aiPath(f, map), it = el("div", "aip-it" + (f.key === aiSel ? " on" : "")); it.tabIndex = 0; it.setAttribute("role", "button"); it.setAttribute("aria-pressed", f.key === aiSel ? "true" : "false");
       const m = el("span", "m");
-      if (kind === "typo"){ const a = el("span", "fr"), z = el("span", "to"); a.textContent = f.from; z.textContent = f.to; m.append(a, " → ", z); }
+      if (kind === "typo"){ const a = el("span", "fr"), z = el("span", "to"); a.textContent = f.from; z.textContent = "→ " + f.to; m.append(a, z); }   // 358번. 틀린 글 · 고친 글을 두 줄로
       else if (kind === "dup") m.textContent = "「" + f.name + "」 " + f.n + "번 중 " + f.j + "번째";
       else m.textContent = "「" + f.name + "」";
       it.append(m);
-      if (kind === "price"){ const d = el("span", "d"); d.textContent = f.detail; it.append(d); }
+      if (kind === "price"){ const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3);   // 358번. 「값」 줄과 「까닭」 줄을 나눈다
+        if (v){ const d = el("span", "d"); d.textContent = v; it.append(d); } const y = el("span", "why"); y.textContent = w; it.append(y); }
       const loc = el("span", "s"); loc.textContent = (L.some(x => x.pg !== f.pg) || MENU.sheets.length > 1 ? f.pg + "쪽 · " : "") + (f.sn || "이름 없는 분류"); it.append(loc);
       const pick = () => { aiSelect(f.key); aiMark(path); };
       it.onclick = pick; it.onkeydown = e => { if ((e.key === "Enter" || e.key === " ") && e.target === it){ e.preventDefault(); pick(); } };
