@@ -2019,11 +2019,13 @@ dialog .st-toprow .st-seg{margin:0}
 dialog button.st-drop{height:auto;min-height:64px;border-radius:12px;border:1.5px dashed #9c8a68;font-weight:500}
 .st-drop small{font-size:12px;font-weight:400;color:#5c4f3c}
 .st-drop.over{border-color:var(--ui-accent);background:#fff}
-.st-dropall{position:fixed;inset:14px;z-index:5;display:flex;align-items:center;justify-content:center;border:4px dashed var(--ui-accent);border-radius:18px;background:rgba(255,253,246,.93);pointer-events:none}   /* 362번. 파일을 끌고 오면 창 전체를 덮는다 */
+.st-dropall{position:fixed;inset:10px;z-index:5;border:3px dashed var(--ui-accent);border-radius:18px;background:transparent;pointer-events:none}   /* 362번. 파일을 끌고 오면 창 가장자리에 테두리만 — 안을 덮지 않는다(사용자: 너무 과하다). 놓는 상자가 크게 바뀐다 */
 .st-dropall[hidden]{display:none}
-.st-dropall div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:24px;font-weight:700;color:#241c12}
-.st-dropall b{font-size:44px;color:var(--ui-accent);line-height:1}
-.st-dropall small{font-size:14px;font-weight:400;color:#5c4f3c}
+.st-dropall div{display:none}
+.st-drop.drag{border-style:solid !important;border-color:var(--ui-accent) !important;background:#fff4e6 !important;box-shadow:0 0 0 5px rgba(160,50,30,.18);min-height:96px !important}
+.st-drop.drag .st-dtx{font-size:19px;font-weight:700;color:var(--ui-accent)}
+.st-drop.drag small{font-size:0 !important}
+.st-drop.drag small::after{content:"여기에 놓으세요 (화면 어디든 됩니다)";font-size:14px;font-weight:700;color:var(--ui-accent)}
 .st-drop .st-dtx::before{content:"＋ "}
 .panel button.st-drop{height:auto;min-height:0;border-radius:10px;border:1.5px dashed rgba(240,230,205,.34);background:transparent;color:#efe3c9;padding:8px 10px}   /* 지금 로고는 아래 모양 고르기에 보이므로 상자에는 글자만 */
 .panel .st-drop small{color:rgba(240,230,205,.6)}
@@ -10372,8 +10374,9 @@ dropTarget($("#st-pic"), null);
   /* 362번. 파일을 끌고 오면 창 전체가 놓는 자리 — 점선 상자 밖에 놓으면 브라우저가 파일을 새 창으로 열어 버렸다(사용자) */
   const dz = $("#st-dropall"), isFiles = e => !!e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files"), up = () => $("#start").open && !$("#st-read").hidden;
   let dzT = 0;
-  const dzHide = () => { dz.hidden = true; clearTimeout(dzT); };
-  document.addEventListener("dragover", e => { if (!isFiles(e) || !$("#start").open) return; e.preventDefault(); if (up()){ dz.hidden = false; e.dataTransfer.dropEffect = "copy"; clearTimeout(dzT); dzT = setTimeout(dzHide, 300); } });   // 끌고 있는 동안 계속 오는 dragover 가 끊기면(떠났거나 놓았거나) 숨긴다
+  const pb = $("#st-pic");
+  const dzHide = () => { dz.hidden = true; clearTimeout(dzT); pb.classList.remove("drag"); };
+  document.addEventListener("dragover", e => { if (!isFiles(e) || !$("#start").open) return; e.preventDefault(); if (up()){ dz.hidden = false; pb.classList.add("drag"); e.dataTransfer.dropEffect = "copy"; clearTimeout(dzT); dzT = setTimeout(dzHide, 300); } });   // 끌고 있는 동안 계속 오는 dragover 가 끊기면(떠났거나 놓았거나) 숨긴다
   document.addEventListener("drop", e => { if (!isFiles(e) || !$("#start").open) return; const handled = e.defaultPrevented; e.preventDefault(); const was = !dz.hidden; dzHide();
     if (handled || !up()) return; const f = e.dataTransfer.files[0]; if (f && (/^image\//.test(f.type) || isPdf(f))) takePic(f); else if (f) toast("사진(JPG · PNG) 이나 PDF 파일을 놓아 주세요", null); });
 $("#st-pic").addEventListener("click", () => { fileCb = null; picFor = true; }, true);
