@@ -1679,7 +1679,7 @@ def t62(b, f):
     out = {'err': []}
     src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
     open(D + 'p62_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
-    T = "가게: 행복한 그릇\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 #c8c860\n분류 제목: 띠\n띠 위치: 분류 제목\n그림: 라면\n[덮밥 Rice Bowl] 1\n가츠동 | 8000\n[우동 Udon] 1\n새우튀김 우동 | 7500\n"
+    T = "가게: 행복한 그릇\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 #c8c860 · 제목 #8a8a1e\n분류 제목: 띠\n띠 위치: 분류 제목\n그림: 라면\n[덮밥 Rice Bowl] 1\n가츠동 | 8000\n[우동 Udon] 1\n새우튀김 우동 | 7500\n"
     T0 = T.replace("분류 제목: 띠\n", "").replace("띠 위치: 분류 제목\n", "").replace("그림: 라면\n", "")
     png = open(D + 'tests_img.jpg', 'rb').read() if os.path.exists(D + 'tests_img.jpg') else None
     ctx = b.new_context(viewport={'width': 1400, 'height': 900}); pg = ctx.new_page()
@@ -1701,10 +1701,13 @@ def t62(b, f):
         pg.evaluate("()=>{const t=document.querySelector('[data-k=name]'); t.value='김치믹스동 (돈가츠 새우튀김 김치나베 덮밥) #Pork #Shrimp #Kimchi #Natto #Beef #Salmon #SliceRawFish'; t.dispatchEvent(new Event('input',{bubbles:true}))}"); pg.wait_for_timeout(200)
         pg.locator('[data-k=name]').first.click(); pg.keyboard.press('Enter'); pg.wait_for_timeout(100)
         out['wrap'] = pg.evaluate("()=>{const t=document.querySelector('[data-k=name]'); return [t.tagName === 'TEXTAREA', t.clientHeight > 30, t.scrollWidth <= t.clientWidth + 1, !/\\n/.test(t.value)]}")   # 363번. 긴 줄은 줄이 바뀌고 가로로 밀리지 않고 엔터는 막힌다
+        out['ckt'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-cshop')).color")   # 364번. 확인 화면 가게 이름에도 읽은 색
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
         out['preset'] = pg.evaluate("()=>[PRESETS.photo.sec, PRESETS.photo.art, PRESETS.photo.noren]")
         pg.click('#st-go'); pg.wait_for_timeout(900); pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(300)
         out['final'] = pg.evaluate("()=>[SETTINGS.secStyle, JSON.stringify(SETTINGS.pages[0].arts)]")
+        out['title'] = pg.evaluate("()=>[SETTINGS.pages[0].logoColor, SETTINGS.custom.logo, getComputedStyle(document.querySelector('.sheet .logo.txt')).color]")   # 364번. 읽은 가게 이름 색이 로고 색(직접)으로
+        out['artin'] = pg.evaluate("()=>{const a=document.querySelector('.sheet .art').getBoundingClientRect(), g=document.querySelector('.sheet .guide').getBoundingClientRect(); return [a.bottom <= g.bottom + 1, a.right <= g.right + 1, a.left >= g.left - 1]}")   # 364번. 그림은 여백선 안
         pg.goto(url('p62_' + f)); pg.wait_for_timeout(400); pg.click('#st-photo'); pg.wait_for_timeout(200); cur[0] = T0
         pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T0); pg.wait_for_timeout(300)
         out['none'] = pg.evaluate("()=>[stLook.sec || '', stLook.bandAt || '', stLook.art || '']")
@@ -2227,8 +2230,8 @@ def judge(t, r):
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
         if t == 't62':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and not r['err']
-            return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 363번 긴 줄 [칸 · 줄바뀜 · 가로 안 밀림 · 엔터 막힘] {r.get('wrap')} · 오류 {r['err'][:2]}"
+            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and not r['err']
+            return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 364번 [가게 이름 색 로고 색으로 · 확인 화면 색 · 그림 여백선 안] {r.get('title')} {r.get('ckt')} {r.get('artin')} · 363번 긴 줄 [칸 · 줄바뀜 · 가로 안 밀림 · 엔터 막힘] {r.get('wrap')} · 오류 {r['err'][:2]}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok_ck = r['ck_rows'] == 5 and r['ck_h'] >= 200 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
