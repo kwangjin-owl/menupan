@@ -1672,6 +1672,49 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t63(b, f):
+    """366번 — 위쪽 단추 [편집 · AI · 꾸미기 · 미리보기]는 이름이 안 바뀌고 색으로만 켜짐을 알린다(편집이 꺼진 때 붉지 않음 · 편집과 AI 동시 켜짐).
+    색 칸 나누기: 맨 위 띠 색 · 맨 위 글자색 · 분류 제목 띠 색 · 분류 제목 글자색 · 메뉴 이름 글자색이 따로 먹고 · 기본으로 돌리고 · 추천 조합을 고르면 지워지고 · 저장해 다시 열면 남는다"""
+    out = {'err': []}
+    ctx = b.new_context(viewport={'width': 1500, 'height': 1000}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    try:
+        pg.goto(url(f)); pg.wait_for_timeout(600)
+        B = "()=>['#b-edit','#b-ai','#b-style','#b-preview'].map(s=>{const e=document.querySelector(s); return [e.textContent.trim(), e.classList.contains('on'), getComputedStyle(e).backgroundColor]})"
+        a0 = pg.evaluate(B)
+        pg.click('#b-edit'); pg.wait_for_timeout(250); pg.click('#b-ai'); pg.wait_for_timeout(250)
+        a1 = pg.evaluate(B); a1p = pg.evaluate("()=>[document.querySelector('#b-edit').getAttribute('aria-pressed'), document.querySelector('#b-ai').getAttribute('aria-pressed')]")
+        out['btn'] = [[x[0] for x in a0], [x[1] for x in a0], [x[0] for x in a1][:2], [x[1] for x in a1][:2], a1p, a1[0][2] == a1[1][2] and a1[0][2] != a0[0][2], a0[0][2] == a0[1][2]]
+        pg.click('#b-ai'); pg.wait_for_timeout(250)
+        pg.click('#b-style'); pg.wait_for_timeout(300)
+        P = "()=>{const sh=document.querySelector('.sheet'), r=document.documentElement; return [sh.style.getPropertyValue('--nband'), r.style.getPropertyValue('--sband'), r.style.getPropertyValue('--stx'), r.style.getPropertyValue('--ntx')]}"
+        out['def'] = pg.evaluate(P)
+        pg.evaluate("()=>{const e=document.querySelector('#f-secstyle'); e.value='band'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(300)
+        n0 = pg.evaluate("()=>getComputedStyle(document.querySelector('.sheet .row .name')).color")
+        def setc(i, v): pg.evaluate("([i,v])=>{const e=document.querySelector('#c-'+i); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true}))}", [i, v])
+        for i, v in (('nband', '#2a6f3a'), ('sband', '#8a1c1c'), ('stx', '#ffee99'), ('ntx', '#1b3fa0')): setc(i, v)
+        pg.wait_for_timeout(300)
+        out['set'] = pg.evaluate("()=>[getComputedStyle(document.querySelector('.sheet .sec-head')).backgroundColor, getComputedStyle(document.querySelector('.sheet .sec-head h2')).color, getComputedStyle(document.querySelector('.sheet .row .name')).color, SETTINGS.pages[0].topBand, SETTINGS.secBand, SETTINGS.secText, SETTINGS.nameText]")
+        out['dis'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#b-'+i+'-r').disabled)")
+        pg.evaluate("()=>{['nband','sband','stx','ntx'].forEach(i=>document.querySelector('#b-'+i+'-r').click())}"); pg.wait_for_timeout(300)
+        out['n0'] = n0
+        out['reset'] = pg.evaluate("()=>[SETTINGS.pages[0].topBand, SETTINGS.secBand, SETTINGS.secText, SETTINGS.nameText, getComputedStyle(document.querySelector('.sheet .row .name')).color]")
+        for i, v in (('sband', '#8a1c1c'), ('ntx', '#1b3fa0'), ('nband', '#2a6f3a')): setc(i, v)
+        pg.wait_for_timeout(200)
+        pg.evaluate("()=>pickLook('p:'+visPresets()[1])"); pg.wait_for_timeout(500)
+        out['preset'] = pg.evaluate("()=>[SETTINGS.pages[0].topBand, SETTINGS.secBand, SETTINGS.secText, SETTINGS.nameText]")
+        for i, v in (('sband', '#8a1c1c'), ('ntx', '#1b3fa0'), ('nband', '#2a6f3a')): setc(i, v)
+        pg.wait_for_timeout(200)
+        st = pg.evaluate("()=>JSON.stringify({menu:MENU,settings:SETTINGS})")
+        pg.evaluate("(s)=>applyState(s)", st); pg.wait_for_timeout(400)
+        out['round'] = pg.evaluate("()=>[SETTINGS.pages[0].topBand, SETTINGS.secBand, SETTINGS.nameText, document.querySelector('#c-ntx').value]")
+        src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+        open(D + 'p63_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "secBand": "red;x", "nameText": "url(x)", "secText": "#ABCDEF",\n', 1))
+        pg.goto(url('p63_' + f)); pg.wait_for_timeout(600)
+        out['bad'] = pg.evaluate("()=>[SETTINGS.secBand, SETTINGS.nameText, SETTINGS.secText]")   # 망가진 값은 버리고 · 올바른 값은 남긴다
+    except Exception as e: out['fail'] = str(e)[:300]
+    ctx.close(); return out
+
 def t62(b, f):
     """362번 — 사진을 닮게: 읽기 글의 [분류 제목 · 띠 위치 · 그림]이 확인 화면 미리보기와 편집 화면의 띠 · 그림에 같이 반영되고, 줄이 없으면 기존 동작 그대로.
     사진 끌어놓기: 창 어디서나 끌면 안내 막이 뜨고 · 멈추면 사라지고 · 놓으면 기본 동작(새 탭)이 막히고 사진이 올라온다"""
@@ -2228,6 +2271,13 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't63':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            bt = r['btn']
+            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] \
+                 and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
+                 and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
+            return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
         if t == 't62':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and not r['err']
@@ -2275,10 +2325,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
