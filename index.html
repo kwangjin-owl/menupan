@@ -2019,13 +2019,12 @@ dialog .st-toprow .st-seg{margin:0}
 dialog button.st-drop{height:auto;min-height:64px;border-radius:12px;border:1.5px dashed #9c8a68;font-weight:500}
 .st-drop small{font-size:12px;font-weight:400;color:#5c4f3c}
 .st-drop.over{border-color:var(--ui-accent);background:#fff}
-.st-dropall{position:fixed;inset:10px;z-index:5;border:3px dashed var(--ui-accent);border-radius:18px;background:transparent;pointer-events:none}   /* 362번. 파일을 끌고 오면 창 가장자리에 테두리만 — 안을 덮지 않는다(사용자: 너무 과하다). 놓는 상자가 크게 바뀐다 */
+.st-dropall{position:fixed;inset:0;pointer-events:none;visibility:hidden}   /* 362번. 끌고 있는지 알리는 표시일 뿐 보이지 않는다(사용자: 가장자리 테두리도 과하다) */
 .st-dropall[hidden]{display:none}
 .st-dropall div{display:none}
-.st-drop.drag{border-style:solid !important;border-color:var(--ui-accent) !important;background:#fff4e6 !important;box-shadow:0 0 0 5px rgba(160,50,30,.18);min-height:96px !important}
-.st-drop.drag .st-dtx{font-size:19px;font-weight:700;color:var(--ui-accent)}
+.st-drop.drag{border-style:solid !important;border-color:var(--ui-accent) !important;background:#fff4e6 !important}
 .st-drop.drag small{font-size:0 !important}
-.st-drop.drag small::after{content:"여기에 놓으세요 (화면 어디든 됩니다)";font-size:14px;font-weight:700;color:var(--ui-accent)}
+.st-drop.drag small::after{content:"여기에 놓으세요";font-size:13px;font-weight:600;color:var(--ui-accent)}
 .st-drop .st-dtx::before{content:"＋ "}
 .panel button.st-drop{height:auto;min-height:0;border-radius:10px;border:1.5px dashed rgba(240,230,205,.34);background:transparent;color:#efe3c9;padding:8px 10px}   /* 지금 로고는 아래 모양 고르기에 보이므로 상자에는 글자만 */
 .panel .st-drop small{color:rgba(240,230,205,.6)}
@@ -2534,7 +2533,8 @@ dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
 .aipanel #ai-typo{width:100%}
 .aipanel #f-tr{width:100%}
 .aiflash{outline:3px solid #e0a020 !important;outline-offset:2px;background:#fff1b8 !important}
-dialog input.st-cin.flash{outline:3px solid #e0a020;outline-offset:1px;background:#fff1b8}
+textarea.st-cin{display:block;width:100%;resize:none;overflow:hidden;line-height:1.35;padding:3px 6px;white-space:pre-wrap;overflow-wrap:anywhere}
+dialog .st-cin.flash{outline:3px solid #e0a020;outline-offset:1px;background:#fff1b8}
 dialog .st-notes{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:#f3ead4;color:#241c12}
 dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
 dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
@@ -10281,19 +10281,19 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
     col.forEach(s => {
       const si = stParsed.indexOf(s); if (si < 0) return;   // 한쪽이 비어 splitCols 가 넣은 빈 분류는 그리지 않는다
       const sb = el("div", "st-csecbox");
-      const h = el("input", "st-cin st-csec" + (s.un ? " un" : "")); h.value = s.name; h.dataset.s = si; h.setAttribute("aria-label", "분류 이름");
+      const h = ckTa("st-cin st-csec" + (s.un ? " un" : "")); h.value = s.name; h.dataset.s = si; h.setAttribute("aria-label", "분류 이름");
       const hd = el("div", "st-chead"); hd.append(h); if (s.wine){ const wt = el("span", "st-wtag"); wt.textContent = "와인 카드"; wt.title = "와인 장으로 만들어집니다(원산지 · 품종 · 향 · 맛 칸 포함)"; hd.append(wt); } sb.append(hd);   // 341번   // 297번. [＋ 메뉴]는 분류 이름 줄 오른쪽 — 분류마다 한 줄을 따로 먹어 A4 비율 안에서 스크롤이 생겼다
       s.items.forEach((it, ii) => {
         const row = el("div", "st-crow");
-        const n = el("input", "st-cin" + (it.un ? " un" : "")); n.value = it.name; n.dataset.s = si; n.dataset.i = ii; n.dataset.k = "name"; n.setAttribute("aria-label", "메뉴 이름");
+        const n = ckTa("st-cin" + (it.un ? " un" : "")); n.value = it.name; n.dataset.s = si; n.dataset.i = ii; n.dataset.k = "name"; n.setAttribute("aria-label", "메뉴 이름");
         const p = el("input", "st-cin st-cp" + (it.unp ? " un" : "")); p.value = it.price === "" ? "" : money(it.price); p.dataset.s = si; p.dataset.i = ii; p.dataset.k = "price"; p.setAttribute("aria-label", "가격");
         const k = el("button", "st-cpk" + (it.pick ? " on" : "")); k.type = "button"; k.textContent = "★"; k.title = "추천 표시"; k.setAttribute("aria-pressed", it.pick ? "true" : "false");   /* 312번. 사진의 강조(밑줄 · ★)를 추천으로 — 누르면 켜고 끈다 */
         k.onclick = () => { it.pick = !it.pick; k.classList.toggle("on", !!it.pick); k.setAttribute("aria-pressed", it.pick ? "true" : "false"); };
         row.append(k, n, p); sb.append(row);
       });
-      (s.notes || []).forEach((t, ni) => { const x = el("input", "st-cin st-cnl" + (s.nun && s.nun[ni] ? " un" : "")); x.value = t; x.dataset.s = si; x.dataset.n = ni; x.placeholder = "※ 안내"; x.setAttribute("aria-label", "분류 안내"); sb.append(x); });   /* 312번. 분류 안내도 보고 고친다 */
+      (s.notes || []).forEach((t, ni) => { const x = ckTa("st-cin st-cnl" + (s.nun && s.nun[ni] ? " un" : "")); x.value = t; x.dataset.s = si; x.dataset.n = ni; x.placeholder = "※ 안내"; x.setAttribute("aria-label", "분류 안내"); sb.append(x); });   /* 312번. 분류 안내도 보고 고친다 */
       const add = el("button", "st-cadd"); add.type = "button"; add.textContent = "＋ 메뉴"; add.title = "빠진 메뉴를 이 분류에 넣습니다";   // 296번. 빠진 것을 여기서 채운다(280번에 미뤘던 것)
-      add.onclick = () => { syncCheck(); stParsed[si].items.push({ name:"", price:"" }); drawCheck(); const ins = $("#st-ctab").querySelectorAll('input[data-s="' + si + '"][data-k="name"]'); ins[ins.length - 1]?.focus(); };
+      add.onclick = () => { syncCheck(); stParsed[si].items.push({ name:"", price:"" }); drawCheck(); const ins = $("#st-ctab").querySelectorAll('[data-s="' + si + '"][data-k="name"]'); ins[ins.length - 1]?.focus(); };
       hd.append(add);
       c.append(sb);
     });
@@ -10303,17 +10303,22 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
     stHours.forEach((h, k) => { const r = el("div", "st-chrow");
       [["label", "구분", "st-chl"], ["time", "시간", "st-cht"]].forEach(([key, lab, cls]) => { const x = el("input", "st-cin " + cls + " un");   /* 313번. 영업시간은 늘 노랗게 — 작은 글씨라 두 번 다 지어냈다(「가든 주말 한정」 · 「라스트오더 23:00」), ? 도 안 붙였다 */ x.value = h[key] || ""; x.dataset.h = k; x.dataset.k = key; x.setAttribute("aria-label", "영업시간 " + lab); r.append(x); });
       hb.append(r); });
-    stFoot.forEach((t, k) => { const x = el("input", "st-cin st-cfl" + (stFootUn[k] ? " un" : "")); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", "바닥 글"); fb.append(x); });
+    stFoot.forEach((t, k) => { const x = ckTa("st-cin st-cfl" + (stFootUn[k] ? " un" : "")); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", "바닥 글"); fb.append(x); });
     hb.hidden = !stHours.length; fb.hidden = !stFoot.length; }
   $(".st-cpaper").querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
   stPgTabs(); drawCkNotes();   // 353번
   $(".st-legend").hidden = !$(".st-cpaper").querySelector(".un");
   requestAnimationFrame(fitCheck);   // 290번. 노란 칸이 없으면 설명도 없다   // 고치면 노란 표시를 뗀다
 }
+/* 363번. 확인 화면의 이름 · 안내 · 바닥 글 칸은 한 줄 칸(input)이 아니라 줄이 바뀌는 칸 — 긴 줄이 칸 끝에서 잘려 안 보였다(사용자). 줄바꿈 글자는 넣지 않고(엔터는 막는다) 위치는 편집 화면에서 정한다 */
+function ckTa(cls){ const x = el("textarea", cls); x.rows = 1; x.spellcheck = false; x.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+  x.addEventListener("input", () => { if (/[\r\n]/.test(x.value)){ const a = x.selectionStart; x.value = x.value.replace(/\s*[\r\n]+\s*/g, " "); x.selectionStart = x.selectionEnd = a; } ckFit(x); }); return x; }
+function ckFit(x){ x.style.height = "auto"; if (x.scrollHeight) x.style.height = x.scrollHeight + 2 + "px"; }
+new ResizeObserver(() => document.querySelectorAll("#st-ctab textarea, #st-cfoot textarea").forEach(ckFit)).observe(document.querySelector("#st-check"));
 function syncCheck(){ const keep = readCheck(false); keep.forEach((s, i) => { stParsed[i].name = s.name; stParsed[i].items = s.items; stParsed[i].notes = s.notes; }); readExtra(); }   // 296번. 칸에 고친 것을 그대로 담아 둔다(다시 그리기 전에)
 function readCheck(drop = true){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
   const secs = stParsed.map(s => ({ name:s.name, col:s.col, wine:s.wine, notes:(s.notes || []).slice(), items:s.items.map(it => ({ ...it })) }));   // 341번. wine
-  $("#st-ctab").querySelectorAll("input").forEach(x => {
+  $("#st-ctab").querySelectorAll("input, textarea").forEach(x => {
     const s = secs[+x.dataset.s]; if (!s) return;
     if (x.dataset.n !== undefined){ s.notes[+x.dataset.n] = x.value.trim(); return; }   // 312번
     if (x.dataset.i === undefined){ s.name = x.value.trim(); return; }
@@ -10331,7 +10336,7 @@ function cleanSecs(secs){   // 353번. 쪽마다 같은 정리(빈 이름 줄은
 function readExtra(){   // 312번. 확인 화면의 영업시간 · 바닥 글 칸 → stHours · stFoot(빈 줄은 뺀다)
   const H = []; $("#st-chours").querySelectorAll(".st-chrow").forEach(r => { const [a, b] = r.querySelectorAll("input"); const h = { label:a.value.trim(), time:b.value.trim() }; if (h.label || h.time) H.push(h); });
   if ($("#st-chours").childElementCount || !stHours.length) stHours = H;
-  if ($("#st-cfoot").childElementCount) stFoot = [...$("#st-cfoot").querySelectorAll("input")].map(x => x.value.trim()).filter(Boolean);
+  if ($("#st-cfoot").childElementCount) stFoot = [...$("#st-cfoot").querySelectorAll("textarea")].map(x => x.value.trim()).filter(Boolean);
 }
 const CHECK_ZOOM_MIN = 0.8;   // 312번. 이보다 작으면 칸 글자가 11px 밑 — 거기서부터는 스크롤
 function fitCheck(){   // 312번. 확인 화면 종이(A4 비율 그대로 — 297번)에 메뉴가 다 보이게 칸을 줄인다(사용자: 스크롤 없이 한눈에). 영업시간 · 메뉴 · 바닥 글을 같은 배율로
@@ -10440,7 +10445,7 @@ $("#st-check-go").onclick = () => {
   const secs = multi ? finals[0].secs : readCheck(); if (!secs.length){ toast("메뉴 이름이 한 줄도 없습니다", null); return; }
   { const nb = (multi ? finals.flatMap(f => f.secs) : secs).filter(x => !x.name).length;   /* 313번. 이름이 빈 분류가 남았으면 한 번 알린다 — 막지는 않는다(빈 채로 두면 메뉴판에 빈 제목 칸이 남았다) */
     if (nb && !stBlankWarned){ stBlankWarned = true; toast("이름이 빈 분류가 " + nb + "개 있습니다. 노란 칸에 적거나, 그대로 두려면 [다음]을 한 번 더 누르세요", null);
-      $("#st-ctab").querySelector("input.st-csec.un, input.st-csec[value='']")?.focus(); return; } }
+      [...$("#st-ctab").querySelectorAll(".st-csec")].find(x => x.classList.contains("un") || !x.value)?.focus(); return; } }
   if (!multi) readExtra();   // 312번
   stPgsFinal = multi && finals.length > 1 ? finals : null;   // 353번
   stParsed = secs; const keep = stParsed;
@@ -10513,7 +10518,7 @@ function ckPagesNow(){
   if (stPgs.length < 2) return [{ secs:cur, typos:stTypos, n:1 }];
   return stPgs.map((pg, k) => k === stPgI ? { secs:cur, typos:stTypos, n:pg.n } : { secs:copySecs(pg.parsed), typos:pg.typos, n:pg.n });
 }
-function ckInput(f){ return f.i < 0 ? $("#st-ctab").querySelector('input.st-csec[data-s="' + f.s + '"]') : $("#st-ctab").querySelector('input[data-s="' + f.s + '"][data-i="' + f.i + '"][data-k="name"]'); }
+function ckInput(f){ return f.i < 0 ? $("#st-ctab").querySelector('.st-csec[data-s="' + f.s + '"]') : $("#st-ctab").querySelector('[data-s="' + f.s + '"][data-i="' + f.i + '"][data-k="name"]'); }
 function ckGo(f){
   if (f.p !== stPgI){ syncCheck(); stPgSave(); stPgLoad(f.p); drawCheck(); }
   const x = f.kind === "price" ? $("#st-ctab").querySelector('input[data-s="' + f.s + '"][data-i="' + f.i + '"][data-k="price"]') : ckInput(f); if (!x) return;

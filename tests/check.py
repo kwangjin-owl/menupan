@@ -1339,7 +1339,7 @@ def t54(b, f):
     # 288번 — 다른 앱 길은 바로 읽기가 안 될 때만 나온다. 서버가 꺼 둔 경우로 연다
     pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
     pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', ANS54); pg.click('#st-appgo'); pg.wait_for_timeout(250)
-    out['check'] = c.js("()=>[!document.querySelector('#st-check').hidden, document.querySelectorAll('#st-ctab input').length, document.querySelectorAll('#st-ctab input.un').length]")
+    out['check'] = c.js("()=>[!document.querySelector('#st-check').hidden, document.querySelectorAll('#st-ctab :is(input,textarea)').length, document.querySelectorAll('#st-ctab :is(input,textarea).un').length]")
     pg.click('#st-check-go'); pg.wait_for_timeout(150); pg.click('#st-go'); pg.wait_for_timeout(700); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
     out['menu'] = c.js("()=>MENU.sheets[0].map(col=>col.map(s=>[s.name, s.items.map(i=>i.name+'='+i.price)]))")
     out['err'] = list(c.errs); c.close()
@@ -1424,7 +1424,7 @@ def t54(b, f):
           return [ r.top >= im.bottom - 1 && Math.abs((r.left + r.right) / 2 - (im.left + im.right) / 2) <= 3, !/[↺↻]/.test(t) && document.querySelector('#st-rotl').getAttribute('aria-label')==='왼쪽으로 돌리기' && document.querySelector('#st-rotr').getAttribute('aria-label')==='오른쪽으로 돌리기' && !!document.querySelector('#st-rotl').title, !!document.querySelector('#st-rotl svg') ] }""")   # 314번 → 316번. 돌리기는 사진 바로 밑 가운데 · 그린 그림 + 글자(읽어 주는 이름은 「왼쪽으로 돌리기」)
         pg.click('#st-rotl'); pg.wait_for_timeout(200)
         pg.click('#st-gemgo'); pg.wait_for_timeout(800)
-        q314 += c.js("""()=>{ const h=document.querySelectorAll('#st-chours input')[3], n=document.querySelector('#st-ctab input.st-cnl');
+        q314 += c.js("""()=>{ const h=document.querySelectorAll('#st-chours input')[3], n=document.querySelector('#st-ctab :is(input,textarea).st-cnl');
           return [ !!h && h.value==='17:00 - 24:00 (가끔 변동)', !!n && n.value==='곱빼기 가능' && n.classList.contains('un') ] }""")
         q314 += c.js("()=>{ const r=parseMenuText('[a]\\nx | 1\\n바닥: *포장 가능?'); return [ r.foot[0]==='*포장 가능' && r.footUn[0]===true ] }")
         r318['확인'] = c.js(RULE318, '#start')
@@ -1436,11 +1436,11 @@ def t54(b, f):
         pg.click('#st-check-go'); pg.wait_for_timeout(300)   # 313번. 이름 빈 분류가 남으면 한 번 알리고 머문다
         q313 += c.js("()=>[ !document.querySelector('#st-check').hidden, /이름이 빈 분류/.test(document.querySelector('#undo .t').textContent) ]")
         q = c.js("""()=>{ const H=document.querySelector('#st-chours'), F=document.querySelector('#st-cfoot'), T=document.querySelector('#st-ctab');
-          const sec=T.querySelector('input.st-csec'), k=T.querySelector('button.st-cpk');
+          const sec=T.querySelector('.st-csec'), k=T.querySelector('button.st-cpk');
           return [ document.querySelector('#st-cshop').placeholder==='가게 이름',   /* 313번. 못 찾은 안내는 칸 밖 붉은 줄로 옮겼다 */ !!H && H.querySelectorAll('input').length === 4, !!H && H.querySelectorAll('input.un').length === 4,
-                   !!sec && sec.value==='' && sec.classList.contains('un'), !!k && k.classList.contains('on'), [...T.querySelectorAll('input.st-cnl')].map(x=>x.value).join('|')==='곱빼기 가능',
-                   F ? [...F.querySelectorAll('input')].map(x=>x.value).join('|')==='모든 메뉴 포장 가능합니다' : false ] }""")
-        c.js("""()=>{ const t=document.querySelectorAll('#st-chours input')[3]; t.value='17:00 - 24:00 (가끔 변동)'; const s=document.querySelector('#st-ctab input.st-csec'); s.value='식사'; }""")
+                   !!sec && sec.value==='' && sec.classList.contains('un'), !!k && k.classList.contains('on'), [...T.querySelectorAll('.st-cnl')].map(x=>x.value).join('|')==='곱빼기 가능',
+                   F ? [...F.querySelectorAll('textarea')].map(x=>x.value).join('|')==='모든 메뉴 포장 가능합니다' : false ] }""")
+        c.js("""()=>{ const t=document.querySelectorAll('#st-chours input')[3]; t.value='17:00 - 24:00 (가끔 변동)'; const s=document.querySelector('#st-ctab :is(input,textarea).st-csec'); s.value='식사'; }""")
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
         q315 = [col315, len(orients) == 0]   # 315번. 직접 돌렸으면 방향을 묻지 않는다
         q315 += c.js("()=>{ const r=parseMenuText('[a]\\nx | 1\\n※ 가\\\\n나\\n바닥: 다\\\\n라'); return [ JSON.stringify(r[0].notes)==='[\"가\",\"나\"]' && JSON.stringify(r.foot)==='[\"다\",\"라\"]' ] }")
@@ -1525,14 +1525,14 @@ def t54(b, f):
         pg.click('#st-photo'); pg.wait_for_timeout(300)
         with pg.expect_file_chooser() as fc: pg.click('#st-pic')
         fc.value.set_files(png); pg.wait_for_timeout(500); pg.click('#st-gemgo'); pg.wait_for_timeout(900)
-        fit = c.js("()=>{ const p=document.querySelector('.st-cpaper'), t=document.querySelector('#st-ctab'); return [p.scrollHeight - p.clientHeight <= 1, +(t.style.zoom||1), document.querySelectorAll('#st-ctab input').length] }")
+        fit = c.js("()=>{ const p=document.querySelector('.st-cpaper'), t=document.querySelector('#st-ctab'); return [p.scrollHeight - p.clientHeight <= 1, +(t.style.zoom||1), document.querySelectorAll('#st-ctab :is(input,textarea)').length] }")
         out['fit312'] = fit
         # 313번. 방향 · 단 손잡이 — 세로를 누르면 종이가 세로, 1단을 누르면 한 단 · 그때도 창 자체에는 스크롤 없음(사진 칸 높이 여유)
         pw0 = c.js("()=>Math.round(document.querySelector('.st-cphoto').getBoundingClientRect().width)")
         pg.click('.st-cform [data-o="portrait"]'); pg.wait_for_timeout(300)
         o1 = c.js("()=>[ !document.querySelector('.st-cpaper').classList.contains('land'), document.querySelector('#start').scrollHeight - document.querySelector('#start').clientHeight <= 1, document.querySelector('.st-cform [data-o=\"portrait\"]').classList.contains('on') ]")
         pg.click('.st-cform [data-c="1"]'); pg.wait_for_timeout(300)
-        o1 += c.js("()=>[ document.querySelector('#st-ctab').style.gridTemplateColumns.startsWith('repeat(1'), document.querySelectorAll('#st-ctab input').length === 76 ]")
+        o1 += c.js("()=>[ document.querySelector('#st-ctab').style.gridTemplateColumns.startsWith('repeat(1'), document.querySelectorAll('#st-ctab :is(input,textarea)').length === 76 ]")
         out['form313'] = o1
         pw1 = c.js("()=>Math.round(document.querySelector('.st-cphoto').getBoundingClientRect().width)")
         pg.click('.st-cform [data-c="4"]'); pg.wait_for_timeout(300)
@@ -1698,6 +1698,9 @@ def t62(b, f):
         out['drag'] = [o1, o2, o3, o4]
         pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T); pg.wait_for_timeout(300)
         out['look'] = pg.evaluate("()=>[stLook.sec, stLook.bandAt, stLook.art, document.querySelector('.st-cpaper').classList.contains('secband'), document.querySelector('.st-cpaper').classList.contains('hasband')]")
+        pg.evaluate("()=>{const t=document.querySelector('[data-k=name]'); t.value='김치믹스동 (돈가츠 새우튀김 김치나베 덮밥) #Pork #Shrimp #Kimchi #Natto #Beef #Salmon #SliceRawFish'; t.dispatchEvent(new Event('input',{bubbles:true}))}"); pg.wait_for_timeout(200)
+        pg.locator('[data-k=name]').first.click(); pg.keyboard.press('Enter'); pg.wait_for_timeout(100)
+        out['wrap'] = pg.evaluate("()=>{const t=document.querySelector('[data-k=name]'); return [t.tagName === 'TEXTAREA', t.clientHeight > 30, t.scrollWidth <= t.clientWidth + 1, !/\\n/.test(t.value)]}")   # 363번. 긴 줄은 줄이 바뀌고 가로로 밀리지 않고 엔터는 막힌다
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
         out['preset'] = pg.evaluate("()=>[PRESETS.photo.sec, PRESETS.photo.art, PRESETS.photo.noren]")
         pg.click('#st-go'); pg.wait_for_timeout(900); pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(300)
@@ -1730,7 +1733,7 @@ def t61(b, f):
         out['ck_rows'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length"); out['ck_h'] = pg.evaluate("()=>Math.round(document.querySelector('#st-cnotes').clientHeight)")   # 356번. 5건이 3줄 넘게 보이는 높이
         out['look'] = pg.evaluate("()=>{const p=document.querySelector('.st-cpaper'), g=document.querySelector('#st-stage'); return [p.classList.contains('looked'), p.classList.contains('hasband'), getComputedStyle(p).backgroundColor, g&&g.offsetHeight>0&&/단계입니다/.test(g.textContent)]}")   # 361번. 읽은 종이색을 비추고(띠 없음이면 띠 없이) · 이 화면이 확인 단계라는 안내
         pg.evaluate("()=>document.querySelector('#st-cnotes .st-cnr .go').click()"); pg.wait_for_timeout(200)
-        out['ck_go'] = pg.evaluate("()=>document.querySelectorAll('#st-ctab input.flash').length")
+        out['ck_go'] = pg.evaluate("()=>document.querySelectorAll('#st-ctab .flash').length")
         pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr')].find(r=>/우동/.test(r.textContent)).querySelector('.ab:not(.ap)').click()"); pg.wait_for_timeout(100)
         out['ck_ign'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length")
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
@@ -2224,8 +2227,8 @@ def judge(t, r):
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
         if t == 't62':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and not r['err']
-            return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 오류 {r['err'][:2]}"
+            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and not r['err']
+            return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 363번 긴 줄 [칸 · 줄바뀜 · 가로 안 밀림 · 엔터 막힘] {r.get('wrap')} · 오류 {r['err'][:2]}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok_ck = r['ck_rows'] == 5 and r['ck_h'] >= 200 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
