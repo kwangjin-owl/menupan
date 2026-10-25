@@ -1684,11 +1684,17 @@ def t63(b, f):
         a0 = pg.evaluate(B)
         pg.click('#b-edit'); pg.wait_for_timeout(250); pg.click('#b-ai'); pg.wait_for_timeout(250)
         a1 = pg.evaluate(B); a1p = pg.evaluate("()=>[document.querySelector('#b-edit').getAttribute('aria-pressed'), document.querySelector('#b-ai').getAttribute('aria-pressed')]")
+        out['onbg'] = a1[0][2] + '|' + a1[1][2]
         out['btn'] = [[x[0] for x in a0], [x[1] for x in a0], [x[0] for x in a1][:2], [x[1] for x in a1][:2], a1p, a1[0][2] == a1[1][2] and a1[0][2] != a0[0][2], a0[0][2] == a0[1][2]]
         pg.click('#b-ai'); pg.wait_for_timeout(250)
         pg.click('#b-style'); pg.wait_for_timeout(300)
         P = "()=>{const sh=document.querySelector('.sheet'), r=document.documentElement; return [sh.style.getPropertyValue('--nband'), r.style.getPropertyValue('--sband'), r.style.getPropertyValue('--stx'), r.style.getPropertyValue('--ntx')]}"
         out['def'] = pg.evaluate(P)
+        pg.evaluate("()=>document.querySelector('#f-hours').click()"); pg.wait_for_timeout(200)
+        h1 = pg.evaluate("()=>[SETTINGS.pages[0].showHours, !!document.querySelector('.sheet .hours')]")
+        pg.evaluate("()=>document.querySelector('#f-hours').click()"); pg.wait_for_timeout(200)
+        out['hours'] = [h1, pg.evaluate("()=>[SETTINGS.pages[0].showHours, !!document.querySelector('.sheet .hours')]")]   # 367번. 영업시간 켜고 끄기
+        out['pcn'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#n-'+i).textContent.length>5)")   # 367번. 색 칸 아래 안내
         pg.evaluate("()=>{const e=document.querySelector('#f-secstyle'); e.value='band'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(300)
         n0 = pg.evaluate("()=>getComputedStyle(document.querySelector('.sheet .row .name')).color")
         def setc(i, v): pg.evaluate("([i,v])=>{const e=document.querySelector('#c-'+i); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true}))}", [i, v])
@@ -1749,6 +1755,7 @@ def t62(b, f):
         out['preset'] = pg.evaluate("()=>[PRESETS.photo.sec, PRESETS.photo.art, PRESETS.photo.noren]")
         pg.click('#st-go'); pg.wait_for_timeout(900); pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(300)
         out['final'] = pg.evaluate("()=>[SETTINGS.secStyle, JSON.stringify(SETTINGS.pages[0].arts)]")
+        out['start'] = pg.evaluate("()=>[SETTINGS.pages[0].showSub, SETTINGS.pages[0].showHours, !!document.querySelector('.sheet .hours')]")   # 367번. 사진에 없던 한 줄 소개 · 영업시간은 꺼서 시작
         out['title'] = pg.evaluate("()=>[SETTINGS.pages[0].logoColor, SETTINGS.custom.logo, getComputedStyle(document.querySelector('.sheet .logo.txt')).color]")   # 364번. 읽은 가게 이름 색이 로고 색(직접)으로
         out['artin'] = pg.evaluate("()=>{const a=document.querySelector('.sheet .art').getBoundingClientRect(), g=document.querySelector('.sheet .guide').getBoundingClientRect(); return [a.bottom <= g.bottom + 1, a.right <= g.right + 1, a.left >= g.left - 1]}")   # 364번. 그림은 여백선 안
         pg.goto(url('p62_' + f)); pg.wait_for_timeout(400); pg.click('#st-photo'); pg.wait_for_timeout(200); cur[0] = T0
@@ -2274,13 +2281,13 @@ def judge(t, r):
         if t == 't63':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             bt = r['btn']
-            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] \
+            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['pcn'] == [True] * 4 \
                  and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
                  and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
             return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
         if t == 't62':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and not r['err']
+            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and r.get('start') == [False, False, False] and not r['err']
             return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 364번 [가게 이름 색 로고 색으로 · 확인 화면 색 · 그림 여백선 안] {r.get('title')} {r.get('ckt')} {r.get('artin')} · 363번 긴 줄 [칸 · 줄바뀜 · 가로 안 밀림 · 엔터 막힘] {r.get('wrap')} · 오류 {r['err'][:2]}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
