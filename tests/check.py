@@ -1672,6 +1672,42 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t62(b, f):
+    """362번 — 사진을 닮게: 읽기 글의 [분류 제목 · 띠 위치 · 그림]이 확인 화면 미리보기와 편집 화면의 띠 · 그림에 같이 반영되고, 줄이 없으면 기존 동작 그대로.
+    사진 끌어놓기: 창 어디서나 끌면 안내 막이 뜨고 · 멈추면 사라지고 · 놓으면 기본 동작(새 탭)이 막히고 사진이 올라온다"""
+    import json as _j, base64 as _b
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p62_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    T = "가게: 행복한 그릇\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 #c8c860\n분류 제목: 띠\n띠 위치: 분류 제목\n그림: 라면\n[덮밥 Rice Bowl] 1\n가츠동 | 8000\n[우동 Udon] 1\n새우튀김 우동 | 7500\n"
+    T0 = T.replace("분류 제목: 띠\n", "").replace("띠 위치: 분류 제목\n", "").replace("그림: 라면\n", "")
+    png = open(D + 'tests_img.jpg', 'rb').read() if os.path.exists(D + 'tests_img.jpg') else None
+    ctx = b.new_context(viewport={'width': 1400, 'height': 900}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    cur = [T]
+    pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":true}') if r.request.method == 'GET' else r.fulfill(status=200, content_type='application/json', body=_j.dumps({'text': cur[0]})))
+    try:
+        pg.goto(url('p62_' + f)); pg.wait_for_timeout(500); pg.click('#st-photo'); pg.wait_for_timeout(200)
+        jpg = pg.evaluate("()=>{const c=document.createElement('canvas'); c.width=40; c.height=40; c.getContext('2d').fillRect(0,0,20,20); return c.toDataURL('image/jpeg').split(',')[1]}")
+        pg.evaluate("(d)=>{window.__dt=new DataTransfer(); const b=Uint8Array.from(atob(d),c=>c.charCodeAt(0)); __dt.items.add(new File([b],'m.jpg',{type:'image/jpeg'}));}", jpg)
+        pg.evaluate("()=>document.querySelector('.st-head').dispatchEvent(new DragEvent('dragover',{dataTransfer:__dt,bubbles:true,cancelable:true}))"); pg.wait_for_timeout(100)
+        o1 = pg.evaluate("()=>{const e=document.querySelector('#st-dropall'); return !e.hidden && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width >= innerWidth * 0.9}")
+        pg.wait_for_timeout(500); o2 = pg.evaluate("()=>document.querySelector('#st-dropall').hidden")
+        o3 = pg.evaluate("()=>{const e=new DragEvent('drop',{dataTransfer:__dt,bubbles:true,cancelable:true}); document.querySelector('.st-head').dispatchEvent(e); return e.defaultPrevented}"); pg.wait_for_timeout(900)
+        o4 = pg.evaluate("()=>{const i=document.querySelector('#st-picimg'); return i.src.slice(0,10) === 'data:image' && !i.hidden}")
+        out['drag'] = [o1, o2, o3, o4]
+        pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T); pg.wait_for_timeout(300)
+        out['look'] = pg.evaluate("()=>[stLook.sec, stLook.bandAt, stLook.art, document.querySelector('.st-cpaper').classList.contains('secband'), document.querySelector('.st-cpaper').classList.contains('hasband')]")
+        pg.click('#st-check-go'); pg.wait_for_timeout(300)
+        out['preset'] = pg.evaluate("()=>[PRESETS.photo.sec, PRESETS.photo.art, PRESETS.photo.noren]")
+        pg.click('#st-go'); pg.wait_for_timeout(900); pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(300)
+        out['final'] = pg.evaluate("()=>[SETTINGS.secStyle, JSON.stringify(SETTINGS.pages[0].arts)]")
+        pg.goto(url('p62_' + f)); pg.wait_for_timeout(400); pg.click('#st-photo'); pg.wait_for_timeout(200); cur[0] = T0
+        pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T0); pg.wait_for_timeout(300)
+        out['none'] = pg.evaluate("()=>[stLook.sec || '', stLook.bandAt || '', stLook.art || '']")
+    except Exception as e: out['fail'] = str(e)[:300]
+    ctx.close(); return out
+
 def t61(b, f):
     """354번 — 위쪽 [AI] 단추와 창: 점검 목록(중복 · 가격 · 맞춤법)을 누르면 종이의 그 줄로 가고 · [적용]으로 바로 고쳐지고(되돌리기) · [무시]가 되고 · 번역이 꾸미기 창이 아니라 이 창에 있고 ·
     [AI로 맞춤법 보기]가 이름 목록만 서버에 보내고(mode:typo) 종이에 있는 이름만 목록에 넣고 · 첫 화면에서 무시한 것이 넘어오고 · 서버가 맞춤법 모드를 갖는다. 353번 — PDF 여러 쪽(pdf.js 가 있을 때)이 쪽 탭 · 쪽마다 한 장으로"""
@@ -2186,6 +2222,10 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't62':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and not r['err']
+            return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 오류 {r['err'][:2]}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok_ck = r['ck_rows'] == 5 and r['ck_h'] >= 200 and r['ck_go'] == 1 and r['ck_ign'] == 4 and r['sum'][0] == '점검할 곳이 4건 남아 있습니다'
@@ -2229,10 +2269,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
