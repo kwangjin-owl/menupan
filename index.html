@@ -2533,6 +2533,14 @@ dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
 dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
 dialog .st-notes.ok .st-nhd{font-weight:600}
 dialog #st-readsum i.sw{display:inline-block;width:12px;height:12px;margin:0 3px -1px;border:1px solid rgba(0,0,0,.35);border-radius:2px}
+dialog b.st-stage{font-weight:700;color:var(--ui-accent)}   /* 361번 */
+.st-cpaper.looked{background-color:var(--ck-paper);color:var(--ck-ink)}   /* 361번. 읽은 종이색 */
+.st-cpaper.looked .st-cband{background:transparent;color:var(--ck-ink)}
+.st-cpaper.hasband .st-cband{background:var(--ck-band);color:var(--ck-bandtx)}
+.st-cpaper.hasband .st-cband input.st-cshopin{border-color:currentColor}
+.st-cpaper.looked .st-cin.st-csec{color:var(--ck-ink);border-bottom-color:var(--ck-ink)}
+.st-cpaper.hasband .st-cin.st-csec{background:var(--ck-band);color:var(--ck-bandtx);border-radius:6px;border-color:transparent;padding-left:12px}
+.st-cpaper.hasband .st-cin.st-csec.un{background:#fff1b8;color:#241c12}
 dialog p.st-ccount{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:#e8dcc2;color:#241c12;font-size:14px;line-height:1.5}
 dialog p.st-ccount b{font-weight:700;color:var(--ui-accent)}
 .st-cpaper .st-cin{height:26px;font-size:13.5px}
@@ -3262,7 +3270,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   </div>
   <div id="st-check" hidden>   <!-- 280번. 한 줄 목록 → 사진 옆에 실제 메뉴판처럼 두 단으로 · 창을 넓게 -->
     <div class="st-head"><button type="button" class="st-icon" id="st-check-back" aria-label="사진 다시 읽기" title="사진 다시 읽기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 tabindex="-1">읽은 메뉴 확인</h3><span class="st-pg stepdots" role="img" aria-label="3단계 중 2단계" title="3단계 중 2단계"><i class="past"></i><i class="on"></i><i></i></span></div>
-    <p class="sub">사진과 비교해 보고, 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요. 메뉴 이름을 지우면 그 줄은 빠집니다.</p>
+    <p class="sub st-stagep"><b class="st-stage" id="st-stage">지금은 글자 · 메뉴 구성 · 단 수를 확인하는 단계입니다 — 완성된 모양이 아닙니다(글꼴 · 꾸밈은 다음 화면에서 정하고, 색만 미리 보여 줍니다).</b> 사진과 비교해 틀린 곳이 있으면 그 칸을 눌러 고친 뒤 [다음]을 누르세요. 메뉴 이름을 지우면 그 줄은 빠집니다.</p>   <!-- 361번. 한 문단 — 따로 줄을 더하면 창이 스크롤된다(313번) -->
     <div class="st-ptabs" id="st-ptabs" role="tablist" aria-label="쪽" hidden></div>   <!-- 353번. 쪽이 둘 이상이면 쪽마다 확인 -->
     <p class="st-ccount" id="st-ccount"></p>   <!-- 296번. 몇 개를 읽었는지 · 어떤 모양으로 놓았는지 -->   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
     <p class="st-legend"><i></i>노랗게 칠한 칸은 AI가 잘못 읽었을 수 있는 곳입니다(영업시간처럼 작은 글씨는 늘). 먼저 사진과 맞춰 보세요.</p>   <!-- 313번 -->
@@ -10237,6 +10245,10 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   $(".st-cbody").classList.toggle("nopic", !stPic); $("#start").classList.add("wide");
   const money = v => typeof v === "number" ? v.toLocaleString("ko-KR") : String(v);   // 읽을 때 쉼표는 다시 뺀다(readCheck)
   const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
+  { const pp = $(".st-cpaper"), C = stLook.colors, bt = h => { const v = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)); return .299 * v[0] + .587 * v[1] + .114 * v[2] > 150 ? "#241c12" : "#ffffff"; };   // 361번. 사진에서 읽은 색만 먼저 비춘다(글꼴 · 꾸밈은 다음 화면에서)
+    pp.classList.toggle("looked", !!C); pp.classList.toggle("hasband", !!(C && stLook.band));
+    ["--ck-paper", "--ck-ink", "--ck-band", "--ck-bandtx"].forEach(k => pp.style.removeProperty(k));
+    if (C){ pp.style.setProperty("--ck-paper", C.paper); pp.style.setProperty("--ck-ink", C.ink); if (stLook.band){ pp.style.setProperty("--ck-band", C.band); pp.style.setProperty("--ck-bandtx", bt(C.band)); } } }
   $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))"; box.classList.toggle("tight", nc >= 3);   // 314번. 단이 많으면 가격 칸을 좁혀 이름 칸에 폭을
   const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
   $("#st-ccount").innerHTML = "<span>읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b>" + (stHours.length ? " · 영업시간 <b>" + stHours.length + "</b>줄" : "") + "</span>"

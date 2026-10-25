@@ -1692,6 +1692,7 @@ def t61(b, f):
         pg.goto(url('p61_' + f)); pg.wait_for_timeout(500); pg.click('#st-photo'); pg.wait_for_timeout(200)
         pg.evaluate("(t)=>toCheck(t, document.querySelector('#st-appmsg'))", T); pg.wait_for_timeout(300)
         out['ck_rows'] = pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr .go')].length"); out['ck_h'] = pg.evaluate("()=>Math.round(document.querySelector('#st-cnotes').clientHeight)")   # 356번. 5건이 3줄 넘게 보이는 높이
+        out['look'] = pg.evaluate("()=>{const p=document.querySelector('.st-cpaper'), g=document.querySelector('#st-stage'); return [p.classList.contains('looked'), p.classList.contains('hasband'), getComputedStyle(p).backgroundColor, g&&g.offsetHeight>0&&/단계입니다/.test(g.textContent)]}")   # 361번. 읽은 종이색을 비추고(띠 없음이면 띠 없이) · 이 화면이 확인 단계라는 안내
         pg.evaluate("()=>document.querySelector('#st-cnotes .st-cnr .go').click()"); pg.wait_for_timeout(200)
         out['ck_go'] = pg.evaluate("()=>document.querySelectorAll('#st-ctab input.flash').length")
         pg.evaluate("()=>[...document.querySelectorAll('#st-cnotes .st-cnr')].find(r=>/우동/.test(r.textContent)).querySelector('.ab:not(.ap)').click()"); pg.wait_for_timeout(100)
@@ -2196,10 +2197,11 @@ def judge(t, r):
             ok_ig = r['ign'] == [5, 4, 1] and r['lang'] == ['en', False]
             ok_st = r['stray'] == [1, '야끼소바dd', '야끼소바', True] and '아직 안 봤습니다' in r['empty'] and r['labels'] == ['틀린 곳', '이렇게', '이유']
             ok_sh = r['shoplike'] == [True, True, True, False, False, False, False, False, False, False] and r['sealsym'] == [False, True, True]
+            ok_lk = r['look'] == [True, False, 'rgb(245, 236, 215)', True]
             ok_sw = r['swap'] == [[True, False, 0], [False, True], [True, 0, False]] and r['print'] == 'none' and r['save'] == [True, '', 0]
             ok_nw = all(isinstance(v, list) and v[0] and v[1] and v[2] >= 4 and v[3] for v in r['narrow'].values()) and len(r['narrow']) == 3
             ok_sv = r['server'] is None or r['server'] == [True, True, True]
-            ok = ok_ck and ok_pl and ok_op and ok_se and ok_ai and ok_ap and ok_ig and ok_sw and ok_st and ok_sh and ok_nw and ok_sv and r['mem'] == [2, 2] and not r['err']
+            ok = ok_ck and ok_pl and ok_op and ok_se and ok_ai and ok_ap and ok_ig and ok_sw and ok_st and ok_sh and ok_lk and ok_nw and ok_sv and r['mem'] == [2, 2] and not r['err']
             return ok, f"확인 화면 점검 {ok_ck} {[r['ck_rows'], r['ck_go'], r['ck_ign'], r['sum']]} · 자리 {r['place']} · 열기 {ok_op} {r['open']} {r['gh']} {r['note']} {r['scroll']} · 고르면 {ok_se} {r['sel']} · AI {ok_ai} {len(r['rows'])} → {len(r['rows2'])} · 적용 {r['applied']} → 되돌림 {r['undone']} · 무시 {r['ign']} · 꾸미기와 한자리 {r['swap']} 인쇄 {r['print']} 저장 {r['save']} · 번역 {r['lang']} · 기억 {r['mem']} · 폰 폭(막대 단추 · 줄 안 넘침 · 줄 수 · 창이 화면 안) {r['narrow']} · 서버 {r['server']}"
         if t == 't60':
             if r.get('fail'): return False, f"실패: {r['fail']}"
