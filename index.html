@@ -2606,6 +2606,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .panel .pcrow input[type=color]{flex:0 0 auto}
 .panel .pcrow .tbtn{flex:0 0 auto}
 .panel .pcrow{flex-wrap:wrap}
+.panel .pcrow .pcn:empty{display:none}
 .panel .pcrow .pcn{flex:0 0 100%;font-size:11px;opacity:.75;margin:-2px 0 2px}   /* 367번. 어디 색을 따라가는지 · 왜 흐린지 */
 .panel .pcrow.off{opacity:.45}
 .panel .pcrow .tbtn:disabled{opacity:.4;cursor:default}
@@ -2901,7 +2902,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <label class="chk boldsw"><input type="checkbox" id="b-bold" class="m3sw"> 굵게</label>
   </span>
 
-  <div class="pgrp">기본 색 (모든 곳)</div>   <!-- 367번. 이 네 색이 전체의 기본이고, 맨 위 · 메뉴 탭의 색 칸은 그 자리만 따로 바꾼다(사용자: 둘이 무엇이 다른지 헷갈린다) -->
+  <div class="pgrp">기본 색</div>   <!-- 368번. 「모든 곳」은 무엇을 가리키는지 안 드러났다(사용자) -->
   <label for="f-theme">색 조합</label>
   <span class="grp">
     <select id="f-theme">
@@ -2923,7 +2924,6 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       <span class="pk"><input type="color" id="c-accent" title="포인트색"><b>포인트</b></span>
     </span>
   </span>
-  <div class="pnote">여기서 고른 네 색이 모든 곳의 기본입니다. [맨 위] · [메뉴] 탭의 색 칸은 그 자리 하나만 따로 바꿉니다(안 건드리면 이 색을 따라갑니다)</div>
 
   <!-- 179번. 분류 이름 정렬은 메뉴 장 · 와인 장 둘 다에 걸리므로 [모든 장] 이다(161번: 걸리는 곳이 두 장이면 공통) -->
   <!-- 273번. 모양만 바꾸는 손잡이 둘 — 칸의 자리 · 크기는 그대로(검사가 조합마다 늘지 않게. t51 이 0px 를 본다) -->
@@ -8063,7 +8063,9 @@ function autoSave(){
   clearTimeout(autoT); autoStatus("saving");
   autoT = setTimeout(() => { try { localStorage.setItem(AUTO_KEY, snapshot()); autoAt = new Date(); autoStatus("ok"); } catch(e){ autoStatus("fail"); } }, 400);
 }
+let newMenuAt = -1;   // 368번. 새 메뉴판으로 바꾼 직후의 되돌리기 깊이 — 그 한 걸음이 이전 메뉴판으로 가는 걸음이다
 function stepBack(){
+  const wasNew = newMenuAt >= 0 && undoStack.length === newMenuAt;
   const prev = undoStack.pop();
   if (prev === undefined){ toast("되돌릴 것이 없습니다", null); return; }
   redoStack.push(snapshot());   // 271번. 되돌리기 전 상태를 다시 하기로
@@ -8071,7 +8073,9 @@ function stepBack(){
   resetShown();                       // 182번. 되돌리기도 되돌릴 자격이 있다(91번)
   lastState = prev;
   dirty = true; document.body.classList.add("unsaved");
-  toast("되돌렸습니다", null); syncUndoBtns();
+  if (wasNew){ newMenuAt = -1; toast("새로 만들기 전의 메뉴판으로 돌아왔습니다 — 다시 하기로 새 메뉴판을 되살릴 수 있습니다", null, 6000); }
+  else toast("되돌렸습니다", null);
+  syncUndoBtns();
 }
 /* 271번. 다시 하기 — 되돌린 것을 다시. 되돌리기와 같은 방식(상태 한 벌을 통째로) */
 function stepFwd(){
@@ -8174,9 +8178,9 @@ const COLCTL = [
   { id:"stx", g:"secText", def:() => ["band", "pill"].includes(SETTINGS.secStyle) ? curTheme.paper : curTheme.ink },
   { id:"ntx", g:"nameText", def:() => curTheme.ink } ];
 function topBandVar(sh, pg){ if (pg.topBand) sh.style.setProperty("--nband", pg.topBand); else sh.style.removeProperty("--nband"); }
-const COLNOTE = { nband:["색 · 글꼴 탭의 띠 색을 따라갑니다", "띠가 없는 모양이라 쓰지 않습니다"], sband:["색 · 글꼴 탭의 띠 색을 따라갑니다(알약은 포인트색)", "분류 제목이 밑줄이라 쓰지 않습니다"], stx:["띠 · 알약이면 종이색, 밑줄이면 글자색을 따라갑니다", ""], ntx:["색 · 글꼴 탭의 글자색을 따라갑니다", ""] };   // 367번
+const COLNOTE = { nband:"띠가 없는 모양입니다", sband:"밑줄에는 띠가 없습니다" };   // 368번. 설명이 너무 많았다(사용자) — 흐린 칸에만 한 줄   // 367번
 function syncColorCtl(){ if (!curTheme) return;
-  COLCTL.forEach(c => { const row = $("#r-" + c.id); if (row){ let n = row.querySelector(".pcn"); if (!n){ n = el("small", "pcn"); n.id = "n-" + c.id; row.appendChild(n); } const v0 = c.page ? P(panelPage)[c.page] : SETTINGS[c.g]; n.textContent = c.off && c.off() ? COLNOTE[c.id][1] : v0 ? "이 자리만 따로 고른 색입니다" : COLNOTE[c.id][0]; }});
+  COLCTL.forEach(c => { const row = $("#r-" + c.id); if (row){ let n = row.querySelector(".pcn"); if (!n){ n = el("small", "pcn"); n.id = "n-" + c.id; row.appendChild(n); } const v0 = c.page ? P(panelPage)[c.page] : SETTINGS[c.g]; n.textContent = c.off && c.off() ? COLNOTE[c.id] || "" : ""; }});
   COLCTL.forEach(c => { const i = $("#c-" + c.id), r = $("#b-" + c.id + "-r"), v = c.page ? P(panelPage)[c.page] : SETTINGS[c.g]; if (!i) return;
     if (document.activeElement !== i) i.value = /^#[0-9a-f]{6}$/i.test(v || "") ? v : (/^#[0-9a-f]{6}$/i.test(c.def()) ? c.def() : "#000000"); r.disabled = !v; $("#r-" + c.id).classList.toggle("off", !!c.off && c.off()); }); }
 function pageColVars(sh, pg){ const v = (k, d) => !k ? d : COLVAR[k] || k;
@@ -8788,7 +8792,7 @@ function cleanForSave(root){
 }
 let undoTimer = null;
 function hideUndo(){ $("#undo").hidden = true; clearTimeout(undoTimer); }
-function toast(text, undoFn){
+function toast(text, undoFn, ms){
   const box = $("#undo"), btn = $("#undo-btn");
   box.querySelector(".t").textContent = text;
   btn.hidden = !undoFn;
@@ -8798,7 +8802,7 @@ function toast(text, undoFn){
   box.style.bottom = "24px";   // 283번. 막대가 위로 갔다 — 아래에는 가릴 것이 없다
   clearTimeout(undoTimer);
   // 9초는 길어서 화면을 계속 가린다. Ctrl+Z 가 뒤를 받쳐 주므로 5초면 된다
-  undoTimer = setTimeout(hideUndo, undoFn ? 5000 : 3500);
+  undoTimer = setTimeout(hideUndo, ms || (undoFn ? 5000 : 3500));
 }
 /* 메뉴 줄·안내 문구·바닥 한 줄·영업시간 모두 같은 방식으로 되돌린다.
    arr는 MENU 안의 살아있는 배열이라 splice로 원위치 복원된다 */
@@ -9859,8 +9863,8 @@ function startWith(menu, settings, msg){
   if (seen) SETTINGS.guideDone = true;
   aiClose(false); aiTypos = aiCarry.typos; aiIgnore = new Set(aiCarry.ign); aiCarry = { typos:[], ign:[] }; aiLast = null; aiTypoRan = false;   // 354번. 새 메뉴판이면 점검 기억도 새로
   resetShown(); syncControls(); applyLook(); render(); applyScale();
-  if (first){ undoStack.length = 0; redoStack.length = 0; syncUndoBtns(); lastState = snapshot(); autoSave(); dirty = true; document.body.classList.add("unsaved"); }   // 277번. 자동 저장
-  else { touch(); toast(msg, () => stepBack()); }
+  if (first){ newMenuAt = -1; undoStack.length = 0; redoStack.length = 0; syncUndoBtns(); lastState = snapshot(); autoSave(); dirty = true; document.body.classList.add("unsaved"); }   // 277번. 자동 저장
+  else { touch(); newMenuAt = undoStack.length; toast(msg + ". 이전 메뉴판은 [되돌리기]로 돌아갑니다", () => stepBack(), 10000); }   // 368번. 되돌리기가 켜지는 까닭을 말한다 — 이전 메뉴판 전체로 돌아간다(사용자 · 새로 만들자마자 켜져 있어 이상했다)
   if (SETTINGS.guideDone !== true) setTimeout(guideStart, 300);   // 269번. 길을 고른 직후에만 가이드
 }
 function stSheets(sec){   // 341번. 사진에서 읽은 분류 중 와인은 한 장(와인 장 — 두 단)으로 따로, 나머지는 메뉴 장으로
@@ -10068,7 +10072,7 @@ function readLook(lk){
   const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
   if (pa && ink && cr(pa, ink) >= 4.5){ L.colors = { paper:pa, ink, band: band || ink, accent: ac || band || ink };
     const ti = hex(col, "제목"), dist = (a, b) => Math.hypot(...[1, 3, 5].map(i => parseInt(a.substr(i, 2), 16) - parseInt(b.substr(i, 2), 16)));   // 364번. 맨 위 가게 이름의 색 — 글자색과 눈에 띄게 다르고 종이 위에서 읽힐 때만(큰 글자 기준 3 : 1)
-    if (ti && dist(ti, ink) > 60 && cr(pa, ti) >= 3) L.title = ti; }
+    if (ti && dist(ti, ink) > 60 && cr(pa, ti) >= 2) L.title = ti; }   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
   L.band = !/띠\s*없음/.test(col) && !!band;
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
     if (/알약/.test(sv)) L.sec = "pill"; else if (/띠/.test(sv)) L.sec = "band"; else if (/밑줄|선/.test(sv)) L.sec = "line";
@@ -10537,7 +10541,7 @@ function stReadInfo(){   // 352 · 353번. [이대로 시작] 화면 — 사진�
   if (lk.sec) bits.push("분류 제목 " + { line:"밑줄", band:"색 띠", pill:"알약" }[lk.sec]);   // 362번
   if (lk.cols) bits.push(lk.cols + "단"); if (lk.orient) bits.push(lk.orient === "landscape" ? "가로" : "세로"); if (lk.font) bits.push(FN[lk.font]);
   sm.textContent = "사진에서 읽은 것: " + bits.join(" · ");
-  if (lk.colors){ const sw = c => { const i = el("i"); i.className = "sw"; i.style.background = c; return i; }; sm.append(" · 종이", sw(lk.colors.paper), "글자", sw(lk.colors.ink)); }
+  if (lk.colors){ const sw = c => { const i = el("i"); i.className = "sw"; i.style.background = c; return i; }; sm.append(" · 종이", sw(lk.colors.paper), "글자", sw(lk.colors.ink)); if (lk.title) sm.append(" 제목", sw(lk.title)); }   // 368번. 읽은 제목 색도 보여 준다 — 읽혔는지 안 읽혔는지 알 수 없었다
   sm.append(stPreset === "photo" ? " — 이 모양으로 시작합니다. 아래 조합에서 바꿀 수 있습니다." : "");
   if (lk.art && stPreset === "photo"){ const nm = Object.keys(ART_KO).find(k => ART_KO[k] === lk.art); sm.append(" AI가 가게에 어울리는 그림(" + nm + ")을 더했습니다 — 사진에 있던 것이 아니며, 꾸미기에서 바꾸거나 뺄 수 있습니다."); }   // 362번. 사진에 없는 것을 더했다고 알린다
   sm.hidden = false;

@@ -1694,7 +1694,17 @@ def t63(b, f):
         h1 = pg.evaluate("()=>[SETTINGS.pages[0].showHours, !!document.querySelector('.sheet .hours')]")
         pg.evaluate("()=>document.querySelector('#f-hours').click()"); pg.wait_for_timeout(200)
         out['hours'] = [h1, pg.evaluate("()=>[SETTINGS.pages[0].showHours, !!document.querySelector('.sheet .hours')]")]   # 367번. 영업시간 켜고 끄기
-        out['pcn'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#n-'+i).textContent.length>5)")   # 367번. 색 칸 아래 안내
+        pg.evaluate("()=>{const e=document.querySelector('#f-noren'); e.value='line'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(300)
+        out['pcn2'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#n-'+i).textContent)")
+        pg.evaluate("()=>{const e=document.querySelector('#f-noren'); e.value='flat'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(200)
+        # 368번. 이미 메뉴판이 있을 때 새로 만들기 → 되돌리기가 켜지고 까닭을 말한다 · 되돌리면 이전 메뉴판 + 안내
+        nm0 = pg.evaluate("()=>$('#b-undo').disabled")
+        pg.evaluate("()=>{const d=JSON.parse(JSON.stringify(ALPS_EXAMPLE)); d.menu.brand.shop='새가게'; startWith(d.menu, d.settings, '새 메뉴판으로 바꿨습니다')}"); pg.wait_for_timeout(500)
+        t1 = pg.evaluate("()=>[$('#undo').hidden, $('#undo .t').textContent, $('#b-undo').disabled, MENU.brand.shop]")
+        pg.evaluate("()=>$('#undo-btn').click()"); pg.wait_for_timeout(400)
+        t2 = pg.evaluate("()=>[$('#undo .t').textContent, MENU.brand.shop]")
+        out['newmenu'] = [nm0, (not t1[0]), '이전 메뉴판은 [되돌리기]' in t1[1], (not t1[2]), '새로 만들기 전의 메뉴판으로 돌아왔습니다' in t2[0], t1[3] == '새가게' and t2[1] != '새가게', False]
+        out['pcn'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#n-'+i).textContent)")   # 368번. 색 칸 아래 안내는 흐린 칸에만
         pg.evaluate("()=>{const e=document.querySelector('#f-secstyle'); e.value='band'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(300)
         n0 = pg.evaluate("()=>getComputedStyle(document.querySelector('.sheet .row .name')).color")
         def setc(i, v): pg.evaluate("([i,v])=>{const e=document.querySelector('#c-'+i); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true}))}", [i, v])
@@ -2281,7 +2291,7 @@ def judge(t, r):
         if t == 't63':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             bt = r['btn']
-            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['pcn'] == [True] * 4 \
+            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
                  and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
                  and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
             return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
