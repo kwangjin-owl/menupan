@@ -2573,6 +2573,7 @@ dialog .st-notes{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:
 dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
 dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
 dialog .st-notes.ok .st-nhd{font-weight:600}
+dialog .st-notes .st-typo{margin:8px 0 0}
 dialog #st-readsum i.sw{display:inline-block;width:12px;height:12px;margin:0 3px -1px;border:1px solid rgba(0,0,0,.35);border-radius:2px}
 dialog b.st-stage{display:block;margin-bottom:2px;font-weight:700;color:var(--ui-accent)}   /* 361번 */   /* 365번. 붉은 단계 안내와 아래 설명을 다른 줄로(사용자 — 한 줄로 이어져 읽기 어려웠다) */
 .st-cpaper.looked{background-color:var(--ck-paper);color:var(--ck-ink)}   /* 361번. 읽은 종이색 */
@@ -3348,7 +3349,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <p class="sub st-cap">미리보기</p>   <!-- 293번 -->
     <div class="st-prev" id="st-prev"></div>
     <p class="sub st-note" id="st-readsum" hidden></p>   <!-- 352번. 사진에서 AI 가 읽어 낸 모양 한 줄 -->
-    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p></div>
+    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button><p class="sub st-note" id="st-typosub"></p></div>
     <label class="st-lbl" for="st-shop">파일 이름 <small>저장할 때 이름이 됩니다</small></label>   <!-- 293번. 아래 「저장하면 ○○.html 로 내려받아집니다」는 걷었다 — 배포 주소에서는 자동 저장이라 사실과 달랐고, 같은 말을 두 줄로 했다 -->
     <input type="text" id="st-shop" class="st-in" autocomplete="off" placeholder="예: 우리 식당">   <!-- 291번. 빈칸이 무엇을 받는지 -->
     <p class="sub st-help" id="st-fnprev"></p>   <!-- 373번. 저장되는 실제 파일 이름 -->
@@ -9851,7 +9852,7 @@ let stMode = "text", stTheme = "night", stPreset = "basic", stLogo = null, stAlt
 function stReset(){   // 창을 닫을 때 처음 마크업 그대로 — 저장본에 화면 상태가 박히지 않게(235번)
   $("#st-choose").hidden = false; $("#st-setup").hidden = true; $("#st-closerow").hidden = true;
   $("#st-other").hidden = true; $("#st-topfrom").hidden = true; $("#st-gemmsg").classList.remove("err"); $("#st-pg3").hidden = true; $("#st-pic small").textContent = "메뉴판 사진을 누르거나 끌어다 놓으세요"; stOther = false; stFromPhoto = false;   // 288번
-  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stShopAuto = ""; stTypos = []; stPgs = []; stPgsFinal = null; stCkIgnore = new Set(); stPdf = null; stPdfTxt = {}; $("#st-pdfrow").hidden = true; $("#st-ptabs").hidden = true; $("#st-cnotes").hidden = true; $("#st-readsum").hidden = true; $("#st-notes").hidden = true; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
+  $("#st-read").hidden = true; $("#st-check").hidden = true; $("#st-ctab").innerHTML = ""; $("#st-cshop").value = ""; stShopRead = ""; stShopAuto = ""; stTypos = []; stPgs = []; stPgsFinal = null; stTypoRan = false; stCkIgnore = new Set(); stPdf = null; stPdfTxt = {}; $("#st-pdfrow").hidden = true; $("#st-ptabs").hidden = true; $("#st-cnotes").hidden = true; $("#st-readsum").hidden = true; $("#st-notes").hidden = true; stHours = []; stLook = {}; stFoot = []; stFootUn = []; $("#st-chours").innerHTML = ""; $("#st-cfoot").innerHTML = ""; ["#st-chours", "#st-ctab", "#st-cfoot"].forEach(q => $(q).style.zoom = ""); delete PRESETS.photo; $("#st-zoom").hidden = true; $("#st-ccount").textContent = ""; $(".st-cpaper").classList.remove("land"); $("#st-ctab").removeAttribute("style"); $(".st-legend").hidden = false;   // 290번. 처음 마크업 그대로
   $("#start").classList.remove("wide"); $(".st-cbody").classList.remove("nopic"); $("#st-gemgo").hidden = false; $("#st-appgo").hidden = true;   // 280번
   $("#st-pic .st-dtx").textContent = "이미지 선택"; $(".st-picrow").classList.remove("has"); ["#st-picimg", "#st-cimg"].forEach(q => { const im = $(q); im.removeAttribute("src"); im.hidden = true; });   // 275번
   $("#st-textrow").hidden = false; $("#st-imgrow").hidden = true; $("#st-tiles").innerHTML = "";
@@ -9880,7 +9881,7 @@ function stSync(){
   const t = presetT(stPreset), pv = $("#st-prev"), nr = PRESETS[stPreset].noren, light = LIGHT_NOREN.includes(nr); pv.innerHTML = "";
   pv.style.background = light ? t.paper : t.band; pv.style.color = light ? (PRESETS[stPreset].title || t.ink) : t.paper;   /* 368번. 읽은 제목 색도 — 미리보기는 검정인데 결과는 초록이었다(사용자) */   // 290번. 띠 없는 모양이면 종이색 위에 글자 — 미리보기가 결과와 달랐다(사용자)
   pv.style.fontFamily = (FONTS[PRESETS[stPreset].font] || {}).kr || "";   // 291번. 미리보기가 뒤 메뉴판의 글꼴(궁서)을 따라갔다 — 고른 조합의 글꼴로
-  pv.style.boxShadow = !light ? "none" : nr === "frame" ? "inset 0 0 0 2px " + t.band : "inset 0 -2px 0 " + t.band;
+  pv.style.boxShadow = !light || nr === "none" ? "none" : nr === "frame" ? "inset 0 0 0 2px " + t.band : "inset 0 -2px 0 " + t.band;
   const ph = txt => { const s = el("span", "ph"); s.textContent = txt; pv.append(s); };
   if (stMode === "text"){ const v = $("#st-top").value.trim(); if (v) pv.textContent = v; else ph("가게 이름"); }
   else if (stLogo){ const m = el("span", "st-mask"); m.style.setProperty("--src", 'url("' + stLogo.src + '")'); m.style.background = light ? t.ink : t.paper; pv.append(m); }
@@ -9946,7 +9947,7 @@ function startWith(menu, settings, msg){
   Object.keys(SETTINGS).forEach(k => delete SETTINGS[k]); Object.assign(SETTINGS, settings);
   (SETTINGS.pages || []).forEach((p, i) => { if (p) normArts(p, pageDefaults(i).arts); });   // 302번. 옛 모양의 설정이 와도 칸 여섯으로
   if (seen) SETTINGS.guideDone = true;
-  aiClose(false); aiTypos = aiCarry.typos; aiIgnore = new Set(aiCarry.ign); aiCarry = { typos:[], ign:[] }; aiLast = null; aiTypoRan = false;   // 354번. 새 메뉴판이면 점검 기억도 새로
+  aiClose(false); aiTypos = aiCarry.typos; aiIgnore = new Set(aiCarry.ign); aiTypoRan = !!aiCarry.ran; aiCarry = { typos:[], ign:[] }; aiLast = null;   // 354번. 새 메뉴판이면 점검 기억도 새로
   resetShown(); syncControls(); applyLook(); render(); applyScale();
   if (first){ newMenuAt = -1; undoStack.length = 0; redoStack.length = 0; syncUndoBtns(); lastState = snapshot(); autoSave(); dirty = true; document.body.classList.add("unsaved"); }   // 277번. 자동 저장
   else { touch(); newMenuAt = undoStack.length; toast(msg + ". 이전 메뉴판은 [되돌리기]로 돌아갑니다", () => stepBack(), 10000); }   // 368번. 되돌리기가 켜지는 까닭을 말한다 — 이전 메뉴판 전체로 돌아간다(사용자 · 새로 만들자마자 켜져 있어 이상했다)
@@ -9982,8 +9983,11 @@ $("#st-go").onclick = () => {
   applyPresetTo(settings, menu, stPreset);
   menu.sheets.forEach((sh, i) => { if (sh.length && sh.every(col => col.every(sc => sc.wine))){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.arts = [{ cell:ART_CELL_OLD, art:"vine" }]; pp.showOrigin = false; if (i > 0) pp.showNotes = false; } });   // 341번. 와인 장은 포도나무 그림   // 273번. 추천 조합을 새 설정에 직접 건다
   if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages.forEach(pp => { pp.autofit = true; }); }   // 341번. 모든 장   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
+  if (text && stParsed && stLook.titleW && top){   // 376번. 제목 글자 크기 — 사진에서 제목이 종이 폭의 몇 분의 몇이었는지에 맞춘다(고정 크기라 사진보다 컸다)
+    const emw = [...top].reduce((a, ch) => a + (/[가-힣ㄱ-ㅎ一-鿿]/.test(ch) ? 1 : /\s/.test(ch) ? .3 : /[A-Z]/.test(ch) ? .68 : .55) + .06, 0), paperPx = stLook.orient === "landscape" ? 1123 : 794;
+    if (emw > 0) settings.pages[0].norenScale = Math.round(Math.min(1.2, Math.max(NSCALE_MIN, stLook.titleW * paperPx / emw / 62)) * 100) / 100; }
   if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
-  if (stParsed){ const seenT = new Set(); aiCarry = { typos:stFinalPages().flatMap(x => x.typos || []).filter(t => { const k = t.from + "→" + t.to; if (seenT.has(k)) return false; seenT.add(k); return true; }), ign:[...stCkIgnore] }; }   // 354번. 확인 화면에서 본 맞춤법 의견 · 무시한 것을 [AI] 창으로
+  if (stParsed){ const seenT = new Set(); aiCarry = { ran:stTypoRan, typos:stFinalPages().flatMap(x => x.typos || []).filter(t => { const k = t.from + "→" + t.to; if (seenT.has(k)) return false; seenT.add(k); return true; }), ign:[...stCkIgnore] }; }   // 354번. 확인 화면에서 본 맞춤법 의견 · 무시한 것을 [AI] 창으로
   const cn = stPreset === "photo" && stLook.concept && PRESETS[stLook.concept] ? PRESETS[stLook.concept].name : ""; const fromPic = !!stParsed; stParsed = null;   // 341번
   startWith(menu, settings, fromPic ? "사진에서 읽은 메뉴로 시작했습니다" + (stPgsFinal && stPgsFinal.length > 1 ? "(" + stPgsFinal.length + "쪽 → 한 파일의 여러 장)" : "") + (cn ? " — 「" + cn + "」 느낌으로 꾸몄습니다(꾸미기에서 바꿀 수 있습니다)" : "") : "빈 메뉴판을 만들었습니다");
   if (!editing) toggleEdit();
@@ -10177,7 +10181,8 @@ function readLook(lk, px){
     const ti = hex(col, "제목"), dist = (a, b) => Math.hypot(...[1, 3, 5].map(i => parseInt(a.substr(i, 2), 16) - parseInt(b.substr(i, 2), 16)));   // 364번. 맨 위 가게 이름의 색 — 글자색과 눈에 띄게 다르고 종이 위에서 읽힐 때만(큰 글자 기준 3 : 1)
     const bx = String(lk["제목 위치"] || "").match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/);   // 371번. AI 는 제목 글자의 자리(상자)만 말하고, 색은 사진 픽셀에서 읽는다
     const ts = bx && px ? titlePix(px, bx.slice(1, 5).map(Number)) : null, tc = ts || ti;
-    if (tc && dist(tc, ink) > 60 && cr(pa, tc) >= 2) L.title = tc; }   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
+    if (tc && dist(tc, ink) > 60 && cr(pa, tc) >= 2) L.title = tc;
+    if (bx){ const n4 = bx.slice(1, 5).map(Number), k = Math.max(...n4) > 100 ? 1000 : 100, w = Math.abs(n4[2] - n4[0]) / k; if (w >= .05 && w <= 1) L.titleW = w; } }   /* 376번. 제목 상자의 가로 폭(사진 폭의 몇 분의 몇) — 편집창 제목 크기를 사진에 맞춘다. 0~1000 으로 답해도 받는다 */   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
   { const bp = String(lk["띠 위치"] || ""); L.band = !!band && (bp ? !/없/.test(bp) : !/띠\s*없음/.test(col)); }   // 372번. 맨 위 띠 유무는 「띠 위치」 줄로 본다 — 색 줄에 「띠 없음」이 함께 적혀도(맨 위만 없다는 뜻) 분류 띠 색은 살린다
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
     if (/알약/.test(sv)) L.sec = "pill"; else if (/띠/.test(sv)) L.sec = "band"; else if (/밑줄|선/.test(sv)) L.sec = "line";
@@ -10187,6 +10192,7 @@ function readLook(lk, px){
   return L;
 }
 /* 사진 — 긴 쪽 1600px 안으로 줄여 JPEG 로(보내는 양을 줄인다) */
+var stTypoRan = false;   // 376번. 확인 화면에서 [AI로 맞춤법 보기]를 눌러 봤는지
 let stTypos = [];   // 352번. AI 가 적은 맞춤법 점검(원문 → 제안)
 let stShopAuto = "";   // 360번. 사진에서 읽어 상호명 칸에 넣은 글(사용자가 고치면 더는 덮지 않는다)
 const ART_KO = { "뚝배기":"ttuk", "밥수저":"bapsujeo", "비빔밥":"bibim", "전":"jeon", "커피":"coffee", "크루아상":"croissant", "케이크":"cake", "빙수":"bingsu", "찻주전자":"teapot", "떡":"tteok", "김밥":"gimbap", "어묵":"eomuk", "라면":"ramyeon", "치킨":"chicken", "감자튀김":"fries", "꼬치":"skewer", "초롱":"lantern", "맥주":"beer", "소주":"soju", "사케":"sake", "와인":"wine", "하이볼":"highball", "파스타":"pasta", "포도덩굴":"vine" };   // 362번. 서버가 고르는 그림 이름 → 그림 키(알프스 가게의 그림은 목록에 없다 — 규칙 A)
@@ -10397,7 +10403,7 @@ function toCheckPages(items, msgEl){
 function toCheck(txt, msgEl, px){
   const secs = parseMenuText(txt, px);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
-  stPgs = []; stPgsFinal = null; stCkIgnore = new Set();   // 353번. 한 쪽(사진 한 장)
+  stPgs = []; stPgsFinal = null; stTypoRan = false; stCkIgnore = new Set();   // 353번. 한 쪽(사진 한 장)
   stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stTypos = secs.typos || []; stHours = secs.hours || []; stFoot = secs.foot || []; stFootUn = secs.footUn || []; $("#st-cshop").value = stShopRead;
   $("#st-cshop").placeholder = "가게 이름";   /* 313번. 못 찾은 안내는 칸 안 흐린 글씨가 아니라 「읽은 메뉴」 줄의 붉은 경고로(사용자 — 일반 글과 구분이 안 됐고 칸이 좁으면 잘렸다) */   /* 312번. 비어 있는 까닭을 칸에 적는다(사용자). 「사진에 없다」고 단정하지 않는다 — 작아서 놓친 것과 가를 수 없다 */
   drawCheck();
@@ -10654,10 +10660,23 @@ function stReadInfo(){   // 352 · 353번. [이대로 시작] 화면 — 사진�
   const names = (k, fn) => { const a = [...new Set(L.filter(f => f.kind === k).map(fn))]; return a.slice(0, 3).join(" · ") + (a.length > 3 ? " 외 " + (a.length - 3) : ""); };
   const cnt = k => k === "dup" ? new Set(L.filter(f => f.kind === k).map(f => f.msg.match(/「(.*?)」/)[1])).size : L.filter(f => f.kind === k).length;
   [["dup", "같은 이름의 메뉴", f => f.msg.match(/「(.*?)」/)[1]], ["price", "가격 확인", f => f.msg.match(/「(.*?)」/)[1]], ["typo", "맞춤법 의견", f => f.from + " → " + f.to]].forEach(([k, lab, fn]) => { if (!cnt(k)) return; const li = el("li"); li.textContent = lab + " " + cnt(k) + "건 — " + names(k, fn); nl.append(li); });
-  box.classList.toggle("ok", !L.length); $("#st-nhd").textContent = L.length ? "점검할 곳이 " + L.length + "건 남아 있습니다" : "점검할 곳이 없습니다 (이름 중복 · 가격 형식 · 맞춤법을 봤습니다)";
+  box.classList.toggle("ok", !L.length); $("#st-nhd").textContent = L.length ? "점검할 곳이 " + L.length + "건 남아 있습니다" : stTypoRan ? "점검할 곳이 없습니다 (이름 중복 · 가격 형식 · 맞춤법을 봤습니다)" : "같은 이름 · 가격 형식은 문제가 없습니다";   // 376번. 맞춤법은 사진을 읽을 때 AI 가 확실한 것만 곁들여 적은 것 — 따로 본 것이 아니라서 「맞춤법을 봤다」고 쓰지 않는다
+  $("#st-typo").hidden = stTypoRan; if (!stTypoRan) $("#st-typosub").textContent = "맞춤법은 사진을 읽을 때 AI가 확실한 것만 적었습니다. 사진을 잘못 읽은 글자는 못 잡습니다. 전체를 보려면 아래 버튼을 누르세요."; $("#st-typosub").hidden = !$("#st-typosub").textContent;
   $("#st-nft").textContent = L.length ? "메뉴 이름 · 가격은 고치지 않았습니다. 시작한 뒤 위쪽 [AI] → 점검에서 항목을 누르면 종이의 그 줄로 가고, 맞춤법은 [적용]으로 바로 고칠 수 있습니다." : ""; $("#st-nft").hidden = !L.length;
   box.hidden = false;
 }
+$("#st-typo").onclick = async () => {   // 376번
+  const b = $("#st-typo"), sub = $("#st-typosub"); if (b.dataset.busy) return;
+  const P = stFinalPages(), names = []; P.forEach(x => (x.secs || []).forEach(sec => { if (sec.name) names.push(sec.name); (sec.items || []).forEach(it => { if (it.name) names.push(it.name); }); }));
+  const list = [...new Set(names.map(x => String(x).replace(/\s+/g, " ").trim()).filter(Boolean))];
+  if (!list.length){ sub.textContent = "메뉴 이름이 아직 없어 볼 것이 없습니다."; sub.hidden = false; return; }
+  const label = b.textContent; b.dataset.busy = "1"; b.textContent = "보는 중…"; b.disabled = true;
+  try { const found = await typoAsk(list); let add = 0;
+    found.forEach(t => P.forEach(x => { x.typos = x.typos || []; if (x.typos.some(u => u.from === t.from && u.to === t.to)) return; if ((x.secs || []).some(sec => (sec.name || "").includes(t.from) || (sec.items || []).some(it => (it.name || "").includes(t.from)))){ x.typos.push(t); add++; } }));
+    stTypoRan = true; stReadInfo(); drawCkNotes(); sub.hidden = false; sub.textContent = (list.length > 120 ? "앞의 120개 이름만 봤습니다. " : "") + (add ? "AI 의견 " + add + "건을 목록에 넣었습니다." : "맞춤법이 틀린 곳을 찾지 못했습니다."); }
+  catch(e){ sub.hidden = false; sub.textContent = e.message; }
+  finally { delete b.dataset.busy; b.textContent = label; b.disabled = false; }
+};
 /* 353번. 확인 화면의 점검 — 눌러서 그 칸으로 가고(표시) · [적용](맞춤법만 — 그 칸의 글이 바뀐다) · [무시](AI 의견이 틀릴 수 있다). 쪽이 여럿이면 다른 쪽 것은 쪽 탭을 바꿔서 간다 */
 let ckLast = null, ckT = 0;
 function ckPagesNow(){
@@ -10768,24 +10787,29 @@ function aiDraw(){
   const cur = L.find(f => f.key === aiSel); aiMark(cur ? aiPath(cur, map) : "");
 }
 function aiRefresh(){ clearTimeout(aiRefT); aiRefT = setTimeout(() => { if (!$("#aipanel").hidden) aiDraw(); }, 300); }
+async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확인 화면이 같이 쓴다. 이름 글만 보낸다. 틀린 곳은 [{from,to}], 실패하면 Error(쉬운 말)
+  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
+  let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.slice(0, 120) }) }); }
+  catch(e){ throw new Error("읽는 곳에 닿지 못했습니다. 인터넷 연결을 확인해 주세요."); }
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 눌러 주세요.");
+  if (r.status === 503 && j.code === "off") throw new Error(READ_OFF_MSG);
+  if (r.status === 403) throw new Error("이 메뉴판에서는 AI 를 쓸 수 없습니다.");
+  if (!r.ok || typeof j.text !== "string"){ console.warn("맞춤법 보기 실패", r.status, j); throw new Error("구글이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요."); }
+  const q = x => x.replace(/^[\s「『"'“‘]+|[\s」』"'”’]+$/g, ""), out = [];
+  j.text.split(/\r?\n/).forEach(l => { const m = l.replace(/^[-*•\s]*(?:점검\s*[:：])?\s*/, "").match(/^(.+?)\s*(?:→|->|=>)\s*(.+)$/); if (!m) return;
+    const a = q(m[1]), c = q(m[2]); if (!a || !c || a === c || out.some(t => t.from === a && t.to === c) || !list.some(x => x.includes(a))) return; out.push({ from:a, to:c }); });
+  return out;
+}
 async function aiTypoRun(){
   const b = $("#ai-typo"); if (b.dataset.busy) return;
   const names = []; MENU.sheets.forEach(sh => sh.forEach(col => col.forEach(sec => { if (sec.name) names.push(sec.name); (sec.items || []).forEach(it => { if (it.name) names.push(it.name); }); })));
   const list = [...new Set(names.map(x => String(x).replace(/\s+/g, " ").trim()).filter(Boolean))], sub = $("#ai-sub");
   if (!list.length){ sub.textContent = "메뉴 이름이 아직 없어 볼 것이 없습니다."; return; }
   const label = b.textContent; b.dataset.busy = "1"; b.classList.add("busy"); b.textContent = "보는 중…";
-  const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
   try {
-    let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.slice(0, 120) }) }); }
-    catch(e){ throw new Error("읽는 곳에 닿지 못했습니다. 인터넷 연결을 확인해 주세요."); }
-    const j = await r.json().catch(() => ({}));
-    if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 눌러 주세요.");
-    if (r.status === 503 && j.code === "off") throw new Error(READ_OFF_MSG);
-    if (r.status === 403) throw new Error("이 메뉴판에서는 AI 를 쓸 수 없습니다.");
-    if (!r.ok || typeof j.text !== "string"){ console.warn("맞춤법 보기 실패", r.status, j); throw new Error("구글이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요."); }
-    const q = x => x.replace(/^[\s「『"'“‘]+|[\s」』"'”’]+$/g, "");
-    let add = 0; j.text.split(/\r?\n/).forEach(l => { const m = l.replace(/^[-*•\s]*(?:점검\s*[:：])?\s*/, "").match(/^(.+?)\s*(?:→|->|=>)\s*(.+)$/); if (!m) return;
-      const a = q(m[1]), c = q(m[2]); if (!a || !c || a === c || aiTypos.some(t => t.from === a && t.to === c)) return; if (!list.some(x => x.includes(a))) return; aiTypos.push({ from:a, to:c }); add++; });
+    const found = await typoAsk(list); let add = 0;
+    found.forEach(t => { if (aiTypos.some(u => u.from === t.from && u.to === t.to)) return; aiTypos.push(t); add++; });
     aiTypoRan = true; sub.textContent = (list.length > 120 ? "앞의 120개 이름만 봤습니다. " : "") + (add ? "AI 의견 " + add + "건을 목록에 넣었습니다." : "맞춤법이 틀린 곳을 찾지 못했습니다.");
   } catch(e){ sub.textContent = e.message; }
   finally { delete b.dataset.busy; b.classList.remove("busy"); b.textContent = label; aiDraw(); }

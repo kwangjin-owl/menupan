@@ -1672,6 +1672,40 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t64(b, f):
+    """376번 — 읽은 메뉴 확인 화면: 맞춤법을 따로 안 봤으면 「맞춤법을 봤다」고 쓰지 않고 [AI로 맞춤법 보기]가 있고, 누르면 목록에 들어간다. 제목 상자 폭(제목 위치)에 맞춰 상단 크기가 정해진다(0~1000 으로 답해도 같다). 「없음」 미리보기에는 아래 선이 없다"""
+    import json as _j
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p64_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    T = "가게: 행복한 그릇\n제목 위치: 30 3 · 70 9\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 없음\n[덮밥]\n네이가츠동 | 9000\n에비동 | 9500\n"
+    ctx = b.new_context(viewport={'width': 1400, 'height': 900}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    cur = [T]
+    def h(r):
+        if r.request.method == 'GET': return r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
+        if (_j.loads(r.request.post_data or '{}')).get('mode') == 'typo': return r.fulfill(status=200, content_type='application/json', body=_j.dumps({'text': '네이가츠동 → 네기가츠동'}))
+        r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
+    try:
+        pg.goto(url('p64_' + f)); pg.wait_for_timeout(500); pg.route('**/api/read', h)
+        G = "()=>({hd:document.querySelector('#st-nhd').textContent, btn:!document.querySelector('#st-typo').hidden, nl:[...document.querySelectorAll('#st-nl li')].map(x=>x.textContent)})"
+        def run(txt):
+            pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', txt); pg.click('#st-appgo'); pg.wait_for_timeout(300)
+            if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
+            pg.wait_for_timeout(300)
+        run(T)
+        out['before'] = pg.evaluate(G)
+        pg.click('#st-typo'); pg.wait_for_timeout(500)
+        out['after'] = pg.evaluate(G)
+        out['shadow'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-prev')).boxShadow")
+        pg.click('#st-go'); pg.wait_for_timeout(900)
+        out['scale'] = pg.evaluate("()=>[SETTINGS.pages[0].norenScale, aiTypoRan, aiTypos.length]")
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
 def t63(b, f):
     """366번 — 위쪽 단추 [편집 · AI · 꾸미기 · 미리보기]는 이름이 안 바뀌고 색으로만 켜짐을 알린다(편집이 꺼진 때 붉지 않음 · 편집과 AI 동시 켜짐).
     색 칸 나누기: 맨 위 띠 색 · 맨 위 글자색 · 분류 제목 띠 색 · 분류 제목 글자색 · 메뉴 이름 글자색이 따로 먹고 · 기본으로 돌리고 · 추천 조합을 고르면 지워지고 · 저장해 다시 열면 남는다"""
@@ -2299,6 +2333,10 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't64':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            ok = r['before']['hd'] == '같은 이름 · 가격 형식은 문제가 없습니다' and r['before']['btn'] and r['after']['hd'] == '점검할 곳이 1건 남아 있습니다' and not r['after']['btn'] and r['after']['nl'] == ['맞춤법 의견 1건 — 네이가츠동 → 네기가츠동'] and r['shadow'] == 'none' and r['scale'] == [0.91, True, 1] and not r['err']
+            return ok, f"376번 누르기 전 {r['before']} · 누른 뒤 {r['after']} · 없음 미리보기 선 {r['shadow']} · [상단 크기, 맞춤법 봄, 의견 수] {r['scale']}"
         if t == 't63':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             bt = r['btn']
@@ -2355,10 +2393,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
