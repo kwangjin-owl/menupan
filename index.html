@@ -941,7 +941,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    틈을 지우고 위 여백을 조금 줄여 **실제 늘어나는 높이를 한 줄(18px)** 로 맞춘다.
    (바닥은 종이 아래에 붙어 위로 자라므로 밀리는 것 자체는 없앨 수 없다) */
 .origin{font-size:.56em;line-height:1.6;color:var(--ink-soft);opacity:.9;margin-top:-.55em;
-  padding-top:.32em;padding-right:calc(var(--sealw) + 1.1em);border-top:1px solid var(--rule)}
+  padding-top:.32em;border-top:1px solid var(--rule)}   /* 379번. 양옆 여백은 도장이 있는 쪽만(.seal-l · .seal-r) */
 .origin b{font-weight:inherit;color:var(--accent);opacity:.8;margin-right:.5em}
 .editing .origin .ov:empty::before{content:"돼지고기 국내산 · 쌀 국내산 · 배추김치 국내산 …";opacity:.45}
 /* 179번. **도장은 종이 오른쪽 맨 아래에 고정이다** — 하단 그림(`.art`)과 같은 방식으로
@@ -954,6 +954,7 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .seal{position:absolute;right:var(--mg);bottom:11mm;width:var(--sealw);height:var(--sealw);transform:rotate(-4deg);opacity:.92}
 .seal svg{width:100%;height:100%;display:block}
 .sealgap{width:3.3em;height:3.3em;flex:none}
+.sealgap.none{width:0;margin-left:-1.1em}   /* 379번. 폭 0 자리가 남기는 글 사이 틈(.footrow gap 1.1em)도 지운다 — 도장이 없으면 오른쪽 끝까지 */
 /* 오른쪽은 종이 끝까지(right:0). 2% 를 띄웠을 때는 전나무 · 달밤 · 산장의 뒷산처럼 옆으로
    이어지는 그림이 종이 끝 16px 앞에서 **세로 직선으로 잘려** 보였다(130번과 같은 인상, 136번).
    종이 끝에서 잘리면 프린터 여백과 겹쳐 자연스럽다 */
@@ -1293,6 +1294,10 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
 .editing .noren [contenteditable="true"]:empty{outline-color:rgba(255,255,255,.5)}
 .noren [contenteditable="true"]:hover{outline-color:rgba(255,255,255,.55)}
 .noren [contenteditable="true"]:focus{outline-color:var(--paper);background:rgba(255,255,255,.14)}
+/* 379번. 띠가 없는(밝은) 상단에서는 흰 점선이 종이 위에 안 보였다 — 업종 · 한 줄 소개 빈 칸의 점선이 사라져 보였다(사용자) */
+.editing .noren:is(.nr-plain,.nr-frame,.nr-line,.nr-none,.nr-unfill) [contenteditable="true"]:empty{outline-color:rgba(0,0,0,.32)}
+.noren:is(.nr-plain,.nr-frame,.nr-line,.nr-none,.nr-unfill) [contenteditable="true"]:hover{outline-color:rgba(0,0,0,.22)}
+.noren:is(.nr-plain,.nr-frame,.nr-line,.nr-none,.nr-unfill) [contenteditable="true"]:focus{outline-color:var(--accent);background:rgba(0,0,0,.05)}
 
 /* ── 미리보기 ─────────────────────────────────────────────────────── */
 /* 289번. 화면 위에 띄우던 띠(.prevbar)를 걷었다 — 283번에 막대가 위로 온 뒤 띠가 [파일] · [편집 끝]을 덮어 눌리지 않았다(사용자 · 재 봤다).
@@ -2573,6 +2578,9 @@ dialog .st-notes{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:
 dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
 dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
 dialog .st-notes.ok .st-nhd{font-weight:600}
+dialog .st-notes .st-typo{background:#5b4630;color:#fff8e6;border:1px solid #5b4630;font-weight:600}   /* 379번. 바탕과 같은 색이라 버튼으로 안 보였다(사용자) — 어두운 갈색 채움(붉은 주 버튼 [이대로 시작]과 겹치지 않게) */
+dialog .st-notes .st-typo:hover{background:#6f5740}
+dialog .st-notes .st-typo:disabled{opacity:.6}
 dialog .st-notes .st-typorow{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:13px}
 dialog #st-readsum{font-size:13px;margin-top:12px}
 dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
@@ -2674,9 +2682,9 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 /* 도장 자리 — 좌우는 여백선, 위아래는 11mm, 가운데 줄은 한가운데 높이. 기본은 오른쪽 아래(키 없음) */
 .seal.sx0{left:var(--mg);right:auto}
 .seal.sy0{top:calc(var(--topband, 0px) + 5mm);bottom:auto} .seal.sy1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px) - var(--sealw)) / 2);bottom:auto}   /* 303번. 상단 아래부터 */
-/* 바닥 글이 도장을 피하는 자리(179번 `.sealgap` · 원산지 오른쪽 여백)는 도장이 왼쪽 아래면 왼쪽으로. 그 밖에서는 전처럼 오른쪽에 남긴다(155번 — 빼면 바닥 높이가 변한다) */
-.sheet.seal-l .sealgap{order:-1}
-.sheet.seal-l .origin{padding-right:0;padding-left:calc(var(--sealw) + 1.1em)}
+/* 바닥 글이 도장을 피하는 자리(179번 `.sealgap` · 원산지 양옆 여백)는 도장이 있는 아래 칸 쪽만(379번 — QR 과 같은 취급). 도장이 없으면 좌우 끝까지 */
+.sheet.seal-l .origin{padding-left:calc(var(--sealw) + 1.1em)}
+.sheet.seal-r .origin{padding-right:calc(var(--sealw) + 1.1em)}
 /* 꾸미기 창의 격자 — 종이 모양(방향을 따른다). 303번. 맨 위에 그 장의 상단(고를 수 없는 자리 — 실제 높이 비율), 그 아래 2 × 3 칸. 칸마다 그 칸의 그림과 도장.
    고른 칸은 옅은 바탕 + 안쪽 테. 칸 이름은 글자로 안 적는다(302번 — 이름은 aria-label 에만) */
 .panel .pgrid{display:flex;flex-direction:column;width:110px;aspect-ratio:210 / 297;
@@ -2717,6 +2725,13 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .editing .sheet.sh-pill .sec-head.up .rowtools{padding-left:0}
 .editing .zone{outline-color:color-mix(in srgb, var(--ink) 30%, transparent)}
 .editing:not(.preview) .foot .zone::after{border-color:color-mix(in srgb, var(--ink) 30%, transparent)}
+/* 379번. 구역 틀(묶음 표시)은 마우스가 올라간 구역에만 — 바닥에서 틀 · 여백선 · 빈 칸 점선 · 도장이 한꺼번에 겹쳐 지저분했다(사용자). 마우스가 없는 화면(터치)에서는 전처럼 늘 보인다. 색은 바로 위 규칙(테마 글자색 30%)을 숨기고 올릴 때만 되살린다 */
+@media screen and (hover:hover){
+  .editing .zone{outline-color:transparent}
+  .editing .zone:hover, .editing .zone:focus-within{outline-color:color-mix(in srgb, var(--ink) 30%, transparent)}
+  .editing:not(.preview) .foot .zone::after{border-color:transparent}
+  .editing:not(.preview) .foot .zone:hover::after, .editing:not(.preview) .foot .zone:focus-within::after{border-color:color-mix(in srgb, var(--ink) 30%, transparent)}
+}
 .editing:not(.preview) .sheet :is(.hours, .body, .foot) [contenteditable="true"]:empty:not(:focus),
 .editing:not(.preview) .row:not(.wine) .vol:empty:not(:focus)::before,
 .editing:not(.preview) .sheet .zone:not(:has([contenteditable="true"])){background-color:var(--paper)}
@@ -7645,8 +7660,10 @@ function drawSheet(spec){
     const qIn = c => { const q = (PS.qrs || []).find(x => x.cell === c); return q && qrNode(q, "qr qf"); };
     const qL = qIn(4), qR = qIn(5);
     /* 340번. **QR 은 바닥 글 줄 하나가 아니라 바닥 전체(원산지 줄까지)의 옆에 선다** — 줄 안에 두었더니 원산지 줄이 생기면 QR 이 그 줄 위로 올라갔다(사용자: 「바닥글을 넣으니까 qr이 위로 올라가 버리는데」) */
-    if (!qL && qR && sealAt(PS, 4)) row.insertBefore(el("div","sealgap"), left);   // 왼쪽 아래 도장이 바닥 글을 안 가리게
-    if (!qR) row.appendChild(el("div","sealgap"));
+    /* 379번. 도장은 QR 과 같은 취급 — 아래 칸에 도장이 있는 쪽만 그 폭을 비운다(왼쪽 · 오른쪽 따로 · 둘 다). 아무것도 없으면 좌우 끝까지 채운다.
+       높이는 그대로 남긴다(155번 — 빼면 바닥이 낮아져 위 내용이 움직인다): 도장이 없는 쪽 자리는 폭 0 · 높이만(`.sealgap.none`). 전에는 오른쪽만 늘 비우고, 왼쪽은 도장이 왼쪽에만 있을 때만 옮겨서 양쪽 도장이 글을 가렸다(사용자) */
+    if (!qL && sealAt(PS, 4)) row.insertBefore(el("div","sealgap"), left);
+    if (!qR) row.appendChild(el("div","sealgap" + (sealAt(PS, 5) ? "" : " none")));
     const fm = (qL || qR) ? el("div","footmain") : foot;
     fm.appendChild(row);
     // 켜져 있어도 내용이 비었으면 안 그린다. 편집 중에는 빈 칸을 눌러 채울 수 있게 그린다
@@ -7673,7 +7690,7 @@ function drawSheet(spec){
   const sc = sealCellsOf(PS), sealOn = sc.length > 0;
   (sealOn ? PS.seals : [{ cell:SEAL_POS_DEF, seal:"word" }]).forEach(x => { const sp = x.cell, seal = el("div","seal sx" + (sp % 2) + " sy" + Math.floor(sp / 2) + (sealOn ? "" : " blank"));
     seal.dataset.cell = sp; seal.innerHTML = sealHTML(x); sheet.appendChild(seal); });   // 327번. 글자 도장은 적은 글자 · 상호명   // 323번. 칸마다 모양
-  sheet.classList.toggle("seal-l", sc.includes(4) && !sc.includes(5));
+  sheet.classList.toggle("seal-l", sc.includes(4)); sheet.classList.toggle("seal-r", sc.includes(5));   // 379번. 원산지 줄의 양옆 여백도 도장이 있는 쪽만
   (PS.qrs || []).forEach(q => { if (q.cell < 4 || spec.foot) return;   // 342번. 맨 위는 맨 위 영역 안에서 · 바닥은 바닥 글 옆에서 그린다 — 여기는 바닥 글이 없는 장의 바닥뿐
     const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy2"); if (n) sheet.appendChild(n); });   // 337 · 338 · 340번
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */

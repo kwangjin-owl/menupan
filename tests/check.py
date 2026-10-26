@@ -1672,6 +1672,39 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t65(b, f):
+    """379번 — 도장은 QR 과 같은 취급: 바닥 글 칸은 아래 칸에 도장이 있는 쪽만 비우고(왼쪽 · 오른쪽 · 둘 다) 아무것도 없으면 좌우 끝까지. 바닥 높이는 그대로.
+    띠 없는 상단의 빈 칸 점선은 흰색이 아니고, 구역 틀은 마우스가 없을 때 숨는다"""
+    import json as _j
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p65_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    ctx = b.new_context(viewport={'width': 1400, 'height': 900}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    try:
+        pg.goto(url('p65_' + f)); pg.wait_for_timeout(500); pg.click('#st-alps'); pg.wait_for_timeout(800); pg.keyboard.press('Escape')
+        pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{ guideEnd() }catch(e){} }")
+        if not pg.evaluate("()=>document.body.classList.contains('editing')"): pg.click('#b-edit')
+        pg.wait_for_timeout(300)
+        M = """(cells)=>{ const P0=SETTINGS.pages[0]; P0.seals=cells.map(c=>({cell:c,seal:'word'})); P0.showNotes=true; P0.showOrigin=true; MENU.feet=MENU.feet||[{}]; MENU.feet[0].notes=['돼지고기(국내산) 소고기(미국산) 닭고기(태국산) 연어(노르웨이산) 쌀(국내산) 김치(중국산) 고춧가루(국내산, 중국산)']; MENU.feet[0].origin='돼지고기 국내산 · 쌀 국내산'; syncControls(); applyLook(); render();
+          const sh=document.querySelector('.sheet'), sr=sh.getBoundingClientRect(), R=e=>{ if(!e) return null; const r=e.getBoundingClientRect(); return [Math.round(r.left-sr.left),Math.round(r.right-sr.left),Math.round(r.top-sr.top),Math.round(r.bottom-sr.top)] };
+          const seals={}; sh.querySelectorAll('.seal:not(.blank)').forEach(e=>{ seals[e.dataset.cell]=R(e) });
+          const o=sh.querySelector('.foot .origin'), cs=getComputedStyle(o), fr=R(sh.querySelector('.foot .footrow'));
+          return {seals, left:R(sh.querySelector('.foot .left')), row:fr, footH:R(sh.querySelector('.foot')), op:[parseFloat(cs.paddingLeft)>0, parseFloat(cs.paddingRight)>0], origin:R(o)} }"""
+        res = {}
+        for cells in ([], [5], [4], [4, 5]):
+            res[''.join(map(str, cells)) or 'none'] = pg.evaluate(M, cells); pg.wait_for_timeout(150)
+        out['res'] = res
+        pg.mouse.move(2, 2)
+        out['zone'] = pg.evaluate("()=>{ const z=document.querySelector('.sheet .foot .zone'), h=document.querySelector('.sheet > .zone'); return [getComputedStyle(h).outlineColor, getComputedStyle(z,'::after').borderTopColor] }")
+        pg.evaluate("()=>{ const P0=SETTINGS.pages[0]; P0.noren='plain'; P0.showTitle=true; P0.showSub=true; MENU.brand.title=''; MENU.brand.sub=''; render(); }"); pg.wait_for_timeout(200)
+        out['dash'] = pg.evaluate("()=>[...document.querySelector('.sheet').querySelectorAll('.noren [contenteditable]:empty')].map(e=>getComputedStyle(e).outlineColor)")
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
 def t64(b, f):
     """376번 — 읽은 메뉴 확인 화면: 맞춤법을 따로 안 봤으면 「맞춤법을 봤다」고 쓰지 않고 [AI로 맞춤법 보기]가 있고, 누르면 목록에 들어간다. 제목 상자 폭(제목 위치)에 맞춰 상단 크기가 정해진다(0~1000 으로 답해도 같다). 「없음」 미리보기에는 아래 선이 없다"""
     import json as _j
@@ -2333,6 +2366,13 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't65':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            R = r['res']; n, a, l, ab = R['none'], R['5'], R['4'], R['45']
+            ok = (n['left'][1] == n['row'][1] and a['left'][1] <= a['seals']['5'][0] and l['left'][0] >= l['seals']['4'][1] and ab['left'][0] >= ab['seals']['4'][1] and ab['left'][1] <= ab['seals']['5'][0]
+                  and len({tuple(x['footH']) for x in R.values()}) == 1 and n['op'] == [False, False] and a['op'] == [False, True] and l['op'] == [True, False] and ab['op'] == [True, True]
+                  and l['origin'][0] + 1 >= 0 and all(c in ('rgba(0, 0, 0, 0)', 'transparent') for c in r['zone']) and r['dash'] and all(c != 'rgba(255, 255, 255, 0.5)' for c in r['dash']) and not r['err'])
+            return ok, f"379번 바닥 글 칸 [없음 {n['left']} · 오른쪽 {a['left']} · 왼쪽 {l['left']} · 양쪽 {ab['left']}] 도장 {[x['seals'] for x in R.values()]} · 바닥 높이 같음 {len({tuple(x['footH']) for x in R.values()}) == 1} · 원산지 양옆 여백 {[x['op'] for x in R.values()]} · 구역 틀(마우스 없음) {r['zone']} · 빈 칸 점선(띠 없음) {r['dash']}"
         if t == 't64':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = r['before']['hd'] == '같은 이름 · 가격 형식은 문제가 없습니다' and r['before']['btn'] and r['after']['hd'] == '점검할 곳이 1건 남아 있습니다' and not r['after']['btn'] and r['after']['nl'] == ['맞춤법 의견 1건 — 네이가츠동 → 네기가츠동'] and r['shadow'] == 'none' and r['scale'] == [0.77, True, 1] and r['before']['sub'] == '맞춤법: 아직 안 봤습니다' and r['after']['sub'] == '맞춤법: AI 의견 1건' and r['before']['chips'][:2] == ['메뉴 2개', '분류 1개'] and '제목 색 못 읽음' in r['before']['chips'] and r['before']['why'] and not r['err']
@@ -2393,10 +2433,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
