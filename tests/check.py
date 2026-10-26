@@ -1672,6 +1672,40 @@ def t57(b, f):
     return out
 
 # ───────────────────────── 55. 자동 저장 · 불러오기(277번) — 이 폴더를 작은 웹 서버로 띄워 버셀 주소처럼(http) 연다
+def t66(b, f):
+    """380번 — 사진의 바닥 글 중 원산지 문구(…(국내산) · 원산지)는 확인 화면에서 따로 모여 이름이 붙고, 시작하면 원산지 칸으로 들어가 칸이 켜진다(없으면 칸은 꺼진 채).
+    QR 이 있어도 원산지 윗선이 마지막 바닥 글 줄을 가르지 않는다(.footmain 의 틈)"""
+    import json as _j
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p66_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    T1 = "가게: 행복한 그릇\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 없음\n[덮밥]\n가츠동 | 8000\n[우동]\n새우튀김 우동 | 7500\n바닥: •돼지고기(국내산) 소고기(미국산) 닭고기(태국산)\n바닥: •연어(노르웨이산) 쌀(국내산)\n바닥: 매주 월요일 휴무\n"
+    T2 = T1.replace("바닥: •돼지고기(국내산) 소고기(미국산) 닭고기(태국산)\n", "").replace("바닥: •연어(노르웨이산) 쌀(국내산)\n", "")
+    ctx = b.new_context(viewport={'width': 1400, 'height': 1000}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
+    try:
+        for key, T in (('with', T1), ('none', T2)):
+            pg.goto(url('p66_' + f)); pg.wait_for_timeout(500)
+            pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', T); pg.click('#st-appgo'); pg.wait_for_timeout(400)
+            if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
+            pg.wait_for_timeout(300)
+            conf = pg.evaluate("()=>[...document.querySelectorAll('#st-cfoot > *')].map(e=>e.tagName+':'+(e.getAttribute('aria-label')||e.className))")
+            pg.click('#st-go'); pg.wait_for_timeout(900)
+            out[key] = {'conf': conf, 'feet': pg.evaluate("()=>MENU.feet"), 'show': pg.evaluate("()=>SETTINGS.pages[0].showOrigin")}
+        pg.goto(url('p66_' + f)); pg.wait_for_timeout(500)
+        pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', T1); pg.click('#st-appgo'); pg.wait_for_timeout(400)
+        if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
+        pg.click('#st-go'); pg.wait_for_timeout(900)
+        pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{ guideEnd() }catch(e){} const P0=SETTINGS.pages[0]; P0.qrs=[{cell:4,kind:'url',url:'https://example.com'}]; P0.seals=[]; syncControls(); applyLook(); render(); }")
+        pg.wait_for_timeout(300)
+        out['qr'] = pg.evaluate("()=>{ const r=e=>e.getBoundingClientRect(); const row=document.querySelector('.sheet .foot .footrow'), o=document.querySelector('.sheet .foot .origin'); return [!!document.querySelector('.sheet .foot.hasqr'), Math.round(r(row).bottom), Math.round(r(o).top)] }")
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
 def t65(b, f):
     """379번 — 도장은 QR 과 같은 취급: 바닥 글 칸은 아래 칸에 도장이 있는 쪽만 비우고(왼쪽 · 오른쪽 · 둘 다) 아무것도 없으면 좌우 끝까지. 바닥 높이는 그대로.
     띠 없는 상단의 빈 칸 점선은 흰색이 아니고, 구역 틀은 마우스가 없을 때 숨는다"""
@@ -1690,7 +1724,7 @@ def t65(b, f):
           const sh=document.querySelector('.sheet'), sr=sh.getBoundingClientRect(), R=e=>{ if(!e) return null; const r=e.getBoundingClientRect(); return [Math.round(r.left-sr.left),Math.round(r.right-sr.left),Math.round(r.top-sr.top),Math.round(r.bottom-sr.top)] };
           const seals={}; sh.querySelectorAll('.seal:not(.blank)').forEach(e=>{ seals[e.dataset.cell]=R(e) });
           const o=sh.querySelector('.foot .origin'), cs=getComputedStyle(o), fr=R(sh.querySelector('.foot .footrow'));
-          return {seals, left:R(sh.querySelector('.foot .left')), row:fr, footH:R(sh.querySelector('.foot')), op:[parseFloat(cs.paddingLeft)>0, parseFloat(cs.paddingRight)>0], origin:R(o)} }"""
+          return {seals, left:R(sh.querySelector('.foot .left')), row:fr, footH:R(sh.querySelector('.foot')), op:[parseFloat(cs.marginLeft)>0, parseFloat(cs.marginRight)>0], origin:R(o)} }"""
         res = {}
         for cells in ([], [5], [4], [4, 5]):
             res[''.join(map(str, cells)) or 'none'] = pg.evaluate(M, cells); pg.wait_for_timeout(150)
@@ -2366,6 +2400,12 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't66':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            w, n = r['with'], r['none']
+            ok = (w['conf'] == ['TEXTAREA:바닥 글', 'DIV:st-corg', 'TEXTAREA:원산지', 'TEXTAREA:원산지'] and w['feet'][0]['notes'] == ['매주 월요일 휴무'] and w['feet'][0]['origin'] == '돼지고기(국내산) 소고기(미국산) 닭고기(태국산) · 연어(노르웨이산) 쌀(국내산)' and w['show'] is True
+                  and n['feet'][0]['origin'] == '' and n['show'] is False and r['qr'][0] and r['qr'][2] >= r['qr'][1] - 1 and not r['err'])
+            return ok, f"380번 확인 화면 {w['conf']} · 시작 뒤 {w['feet']} 켜짐 {w['show']} · 원산지 없는 사진 {n['feet']} 켜짐 {n['show']} · QR 있을 때 [QR, 바닥 글 줄 아래, 원산지 위] {r['qr']}"
         if t == 't65':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             R = r['res']; n, a, l, ab = R['none'], R['5'], R['4'], R['45']
@@ -2433,10 +2473,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

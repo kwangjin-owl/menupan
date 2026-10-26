@@ -2505,7 +2505,7 @@ dialog .st-picrow.has .st-picimg{height:220px;max-width:100%}
 .noren.hasqr{min-height:calc(var(--mt) + var(--qrh) + 5mm + var(--nr-fringe));padding-left:calc(var(--mg) + var(--qrw) + 4mm);padding-right:calc(var(--mg) + var(--qrw) + 4mm)}
 .qr.qf{position:relative;flex:none;align-self:flex-end}
 .foot.hasqr{display:flex;flex-direction:row;align-items:flex-end;gap:1.1em}   /* 340번. .foot 은 원래 세로로 쌓는다 — 방향을 안 정했더니 QR 이 바닥 글 옆이 아니라 아래에 쌓였다(재 보고 잡음) */
-.foot.hasqr > .footmain{flex:1 1 0;min-width:0}
+.foot.hasqr > .footmain{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:.55em}   /* 380번. .foot 은 세로 + gap .55em 인데 QR 이 있으면 바닥 글 줄 · 원산지를 .footmain 이 담아 그 틈이 없었다 → 원산지 윗선(margin-top -.55em)이 마지막 바닥 글 줄을 가로질렀다(사용자 화면). 같은 틈을 .footmain 에도 */
 .art{color:var(--art-col, var(--ink));opacity:var(--art-op, .07)}
 /* 299번 — 296번의 그림 키우기는 글자 단추로 바뀌어 걷었다 */   /* 296번. 단추 칸은 그대로 두고 그림만 키운다 — 칸을 키웠더니 가격과 겹쳐 줄 아래로 밀려나 영문 이름 칸을 덮었다(t30 · 238번 규칙) */
 
@@ -2683,8 +2683,8 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .seal.sx0{left:var(--mg);right:auto}
 .seal.sy0{top:calc(var(--topband, 0px) + 5mm);bottom:auto} .seal.sy1{top:calc(var(--topband, 0px) + (100% - var(--topband, 0px) - var(--sealw)) / 2);bottom:auto}   /* 303번. 상단 아래부터 */
 /* 바닥 글이 도장을 피하는 자리(179번 `.sealgap` · 원산지 양옆 여백)는 도장이 있는 아래 칸 쪽만(379번 — QR 과 같은 취급). 도장이 없으면 좌우 끝까지 */
-.sheet.seal-l .origin{padding-left:calc(var(--sealw) + 1.1em)}
-.sheet.seal-r .origin{padding-right:calc(var(--sealw) + 1.1em)}
+.sheet.seal-l .origin{margin-left:calc(4.4em / .56)}   /* 380번. 윗선도 바닥 글 줄과 같은 폭에서 멈추게 padding 이 아니라 margin(.sealgap 3.3em + 틈 1.1em = 바닥 글 em 4.4 → 원산지 글자 .56 으로 환산) */
+.sheet.seal-r .origin{margin-right:calc(4.4em / .56)}
 /* 꾸미기 창의 격자 — 종이 모양(방향을 따른다). 303번. 맨 위에 그 장의 상단(고를 수 없는 자리 — 실제 높이 비율), 그 아래 2 × 3 칸. 칸마다 그 칸의 그림과 도장.
    고른 칸은 옅은 바탕 + 안쪽 테. 칸 이름은 글자로 안 적는다(302번 — 이름은 aria-label 에만) */
 .panel .pgrid{display:flex;flex-direction:column;width:110px;aspect-ratio:210 / 297;
@@ -2767,6 +2767,7 @@ dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padd
 .st-cpaper .st-cin.st-chl{width:4.6em}
 .st-cpaper .st-cin.st-cht{width:13em}
 .st-cfoot{display:flex;flex-direction:column;gap:3px;padding:0 6% 5%}
+.st-cfoot .st-corg{margin-top:4px;font-size:10px;color:var(--ck-ink, #241c12);opacity:.6}   /* 380번 */
 .st-cpaper .st-cin.st-cfl,.st-cpaper .st-cin.st-cnl{font-size:12.5px;color:#5c4f3c}
 .st-cpaper .st-cin.st-cnl{margin-top:2px}
 .st-cpaper .st-cin.st-cfl,.st-cpaper .st-cin.st-cnl{height:22px}
@@ -9990,9 +9991,13 @@ function stAllFeet(){
   const P = stPgsFinal; if (!P) return stFeet(); const keep = [stParsed, stFoot, stWineTwo], out = [];
   P.forEach(f => { stParsed = f.secs; stFoot = f.foot; stWineTwo = !!f.wine2; out.push(...stFeet()); }); stParsed = keep[0]; stFoot = keep[1]; stWineTwo = keep[2]; return out;
 }
+/* 380번. 바닥 글 중 원산지 표시(…(국내산) · 원산지 …)는 원산지 칸으로 — 사진의 아래 문구가 원산지 안내인데 바닥 글로 들어가고 원산지 칸은 비어 있었다(사용자). 읽는 글(AI 답)은 안 바꾼다(Redeploy 필요 없음): 읽은 바닥 글을 이 규칙으로 가른다 */
+const ORIGIN_RE = /산\s*[)）,]|원산지|국내산|수입산|국산/;
+const isOriginNote = t => ORIGIN_RE.test(String(t || ""));
+const originOf = a => a.filter(isOriginNote).map(t => String(t).replace(/^[\s•·*※\-–]+/, "").trim()).filter(Boolean).join(" · ");
 var stWineTwo = false;   // 341번. 와인 가격이 「글라스 / 병」 두 값인지(와인 장 바닥 글에 순서를 적는다)
 function stFeet(){ const hasW = !!stParsed && stParsed.some(s => s.wine), hasM = !stParsed || stParsed.some(s => !s.wine) || !hasW, n = (hasM ? 1 : 0) + (hasW ? 1 : 0);
-  return Array.from({ length:n }, (_, i) => { const notes = i === 0 && stParsed ? stFoot.slice(0, NOTES_MAX) : []; if (hasW && i === n - 1 && stWineTwo && !notes.some(t => /글라스/.test(t))) notes.push("가격은 글라스 / 병 순서입니다"); return { notes:notes.slice(0, NOTES_MAX), origin:"" }; }); }
+  return Array.from({ length:n }, (_, i) => { const notes = i === 0 && stParsed ? stFoot.filter(t => !isOriginNote(t)).slice(0, NOTES_MAX) : []; if (hasW && i === n - 1 && stWineTwo && !notes.some(t => /글라스/.test(t))) notes.push("가격은 글라스 / 병 순서입니다"); return { notes:notes.slice(0, NOTES_MAX), origin: i === 0 && stParsed ? originOf(stFoot) : "" }; }); }
 $("#st-go").onclick = () => {
   const shop = $("#st-shop").value.trim(), top = $("#st-top").value.trim(), text = stMode === "text" || !stLogo;
   const sec = () => ({ name:"", items:[{ name:"", price:"" }] });
@@ -10004,6 +10009,7 @@ $("#st-go").onclick = () => {
   const settings = { font:"gothic", theme:stTheme, custom:{}, orient:"portrait", mark:"★", lang2:"", pageno:"none", bold:false, pages:[pg] };
   applyPresetTo(settings, menu, stPreset);
   menu.sheets.forEach((sh, i) => { if (sh.length && sh.every(col => col.every(sc => sc.wine))){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.arts = [{ cell:ART_CELL_OLD, art:"vine" }]; pp.showOrigin = false; if (i > 0) pp.showNotes = false; } });   // 341번. 와인 장은 포도나무 그림   // 273번. 추천 조합을 새 설정에 직접 건다
+  if (stParsed) menu.feet.forEach((f, i) => { if (String(f.origin || "").trim()){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.showOrigin = true; } });   // 380번. 사진에 원산지 문구가 있으면 원산지 칸을 켠다(기본은 꺼짐 — pageDefaults). 없으면 그대로 꺼 둔다
   if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages.forEach(pp => { pp.autofit = true; }); }   // 341번. 모든 장   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text && stParsed && stLook.titleW && top){   // 376번. 제목 글자 크기 — 사진에서 제목이 종이 폭의 몇 분의 몇이었는지에 맞춘다(고정 크기라 사진보다 컸다)
     const emw = [...top].reduce((a, ch) => a + (/[가-힣ㄱ-ㅎ一-鿿]/.test(ch) ? 1 : /\s/.test(ch) ? .3 : /[A-Z]/.test(ch) ? .68 : .55) + .06, 0), paperPx = stLook.orient === "landscape" ? 1123 : 794;
@@ -10479,7 +10485,9 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
     stHours.forEach((h, k) => { const r = el("div", "st-chrow");
       [["label", "구분", "st-chl"], ["time", "시간", "st-cht"]].forEach(([key, lab, cls]) => { const x = el("input", "st-cin " + cls + " un");   /* 313번. 영업시간은 늘 노랗게 — 작은 글씨라 두 번 다 지어냈다(「가든 주말 한정」 · 「라스트오더 23:00」), ? 도 안 붙였다 */ x.value = h[key] || ""; x.dataset.h = k; x.dataset.k = key; x.setAttribute("aria-label", "영업시간 " + lab); r.append(x); });
       hb.append(r); });
-    stFoot.forEach((t, k) => { const x = ckTa("st-cin st-cfl" + (stFootUn[k] ? " un" : "")); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", "바닥 글"); fb.append(x); });
+    const addF = k => { const t = stFoot[k], x = ckTa("st-cin st-cfl" + (stFootUn[k] ? " un" : "")); x.value = t; x.dataset.f = k; x.setAttribute("aria-label", isOriginNote(t) ? "원산지" : "바닥 글"); fb.append(x); };
+    stFoot.forEach((t, k) => { if (!isOriginNote(t)) addF(k); });   // 380번. 원산지 문구는 따로 모아 이름을 붙인다 — 시작하면 원산지 칸으로 들어간다
+    if (stFoot.some(isOriginNote)){ const lb = el("div", "st-corg"); lb.textContent = "원산지 (원산지 칸으로 들어갑니다)"; fb.append(lb); stFoot.forEach((t, k) => { if (isOriginNote(t)) addF(k); }); }
     hb.hidden = !stHours.length; fb.hidden = !stFoot.length; }
   $(".st-cpaper").querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
   stPgTabs(); drawCkNotes();   // 353번
