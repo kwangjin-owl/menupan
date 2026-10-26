@@ -10013,7 +10013,8 @@ const READ_PROMPT = [
   "방향: 글자를 바로 세워 읽었을 때 메뉴판 종이의 방향 — 세로 또는 가로 (사진이 누워 있거나 뒤집혀 있어도 종이 기준)",
   "단: 메뉴가 세로로 나뉜 칸 수(1~4)",
   "글꼴: 명조 · 고딕 · 궁서 · 손글씨 · 둥근 · 붓 중 가장 가까운 것",
-  "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB · 제목 #RRGGBB (조명 · 그림자는 빼고 종이와 글자의 원래 색. 맨 위에 색 띠가 없으면 「띠 없음」. 제목은 맨 위 가게 이름 글자의 색이며, 메뉴 글자색과 다를 때만 씁니다. 제목이 띠와 같은 색으로 보이면 띠와 같은 값을 쓰고, 조명에 따라 색을 바꿔 짐작하지 말고 글자 그대로의 색을 쓴다)",
+  "색: 종이 #RRGGBB · 글자 #RRGGBB · 띠 #RRGGBB · 포인트 #RRGGBB (조명 · 그림자는 빼고 종이와 글자의 원래 색. 맨 위에 색 띠가 없으면 「띠 없음」)",
+  "제목 위치: 맨 위 가게 이름 글자를 감싸는 상자 — 왼쪽 위 x y · 오른쪽 아래 x y (사진의 가로 · 세로를 각각 0~100으로 본 숫자. 예: 제목 위치: 28 3 · 72 10). 가게 이름이 없으면 이 줄을 쓰지 않습니다",
   "분류 제목: 밑줄 · 띠 · 알약 중 가장 가까운 것 (분류 이름 자리에 색을 칠한 띠가 있으면 띠, 둥근 알약 모양이면 알약, 글자와 선만 있으면 밑줄)",
   "띠 위치: 맨 위 · 분류 제목 · 둘 다 · 없음 중 하나 (색 띠가 놓인 자리)",
   "그림: 이 가게에 어울리는 그림 하나 — 뚝배기 · 밥수저 · 비빔밥 · 전 · 커피 · 크루아상 · 케이크 · 빙수 · 찻주전자 · 떡 · 김밥 · 어묵 · 라면 · 치킨 · 감자튀김 · 꼬치 · 초롱 · 맥주 · 소주 · 사케 · 와인 · 하이볼 · 파스타 · 포도덩굴 중에서만 고릅니다 (어울리는 것이 없으면 이 줄을 쓰지 않습니다)",
@@ -10021,7 +10022,7 @@ const READ_PROMPT = [
   "- 분류 이름 뒤에 그 분류가 놓인 칸 번호를 적습니다. 예: [식사] 1"
 ].join("\n");   // 290번. 사진의 가게 이름을 상호명 · 맨 위 글자로(사용자). api/read.js 의 PROMPT 도 같이 · 304번. 영업시간 줄
 const wineKind = n => /스파클링|sparkling|샴페인|champagne|prosecco|프로세코/i.test(n) ? "sparkling" : /로제|ros[eé]/i.test(n) ? "rose" : /화이트|white|오렌지|orange/i.test(n) ? "white" : "red";   // 341번. 와인 분류의 종류(병 그림)
-function parseMenuText(txt){
+function parseMenuText(txt, px){
   const secs = []; let cur = null; const foot = [];
   const unq = v => { v = String(v || "").trim(); const Q = /\s*[?？](?=\s*(?:[(（]|$))/g; const u = Q.test(v); return [v.replace(Q, "").replace(/\s{2,}/g, " ").trim(), u]; };   /* 314번. AI 가 붙인 「?」는 값 끝만이 아니라 괄호 앞에서도 뗀다 — 「24:00? (가끔변동)」이 그대로 남았다(사용자 화면) */
   const footUn = [], addFoot = t => { const [v, u] = unq(t); foot.push(v); footUn.push(u); };
@@ -10038,7 +10039,7 @@ function parseMenuText(txt){
     if (hr){ secs.hours = hr[1].split(/\s+[·•\/|]\s+/).map(x => x.trim()).filter(Boolean).slice(0, HOURS_MAX).map(x0 => { const [x, u] = unq(x0), m = x.match(/^(\D*?)\s*(\d.*)$/); const o = m ? { label:m[1].trim(), time:m[2].trim() } : { label:"", time:x }; if (u) o.un = true; return o; }); return; }   /* 312번. 영업시간도 ? 면 노란 칸(확실하면 키 없음 — 304번 모양 그대로) */
     const ty = l.match(/^점검\s*[:：]\s*(.+?)\s*(?:→|->|=>)\s*(.+)$/);   /* 352번. 맞춤법 점검 — 「원문 → 제안」. 모양이 다르면 버린다(읽기를 깨지 않게) */
     if (ty){ const a = unq(ty[1])[0], b = unq(ty[2])[0]; if (a && b && a !== b) (secs.typos = secs.typos || []).push({ from:a, to:b }); return; }
-    const lk = l.match(/^(방향|단|글꼴|색|콘셉트|분류 제목|띠 위치|그림)\s*[:：]\s*(.+)$/);   /* 362번. 분류 제목 · 띠 위치 · 그림 */   /* 341번. 콘셉트 */ if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
+    const lk = l.match(/^(방향|단|글꼴|색|콘셉트|제목 위치|분류 제목|띠 위치|그림)\s*[:：]\s*(.+)$/);   /* 362번. 분류 제목 · 띠 위치 · 그림 */   /* 341번. 콘셉트 */ if (lk){ (secs.lk = secs.lk || {})[lk[1]] = lk[2].trim(); return; }   // 296번. 메뉴판의 모양
     const hc = l.match(/^\[(.*?)\]\s*([1-4])?\s*(와인)?\s*$/), h = hc || l.match(/^#{1,4}\s*(.+)$/);   /* 341번. 줄 끝 「와인」 — 와인 분류 */   /* 312번. [] — 이름 없는 묶음도 분류로 */
     if (h){ const [n, u] = unq(h[1]); cur = { name:n, un:u || !n, items:[] }; if (hc && hc[2]) cur.col = +hc[2]; if (hc && hc[3]) cur.wine = wineKind(n); secs.push(cur); return; }   /* 312번. 이름이 비면 노란 칸 — 지어 넣지 않고 사장님이 채운다 */
     if (cur && cur.wine && l.includes("|")){   /* 341번. 와인 줄 — 이름 | 글라스 | 병 | 원산지 | 품종 | 향 | 맛 */
@@ -10059,12 +10060,29 @@ function parseMenuText(txt){
     cur.items.push(Object.assign({ name:n, price:p, un:un1, unp:un2 }, pick ? { pick:true } : {}));
   });
   const out = secs.filter(s => s.items.length); out.forEach(s => { if (s.notes) s.notes = s.notes.slice(0, SECNOTE_MAX); });
-  out.typos = (secs.typos || []).slice(0, 5); out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}); return out;
+  out.typos = (secs.typos || []).slice(0, 5); out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}, px); return out;
+}
+/* 371번. 제목 글자 색 읽기. 사용자: 「맨 위 글자색이 사진과 전혀 안 비슷하다」. AI 에게 색을 말하게 하면 회색(#555555)을 돌려줬다 — 사진의 가장 진한 글자색은 올리브(#6c6740).
+   그래서 AI 에게는 제목 글자가 놓인 상자만 받고, 그 안의 사진 픽셀에서 색을 읽는다. 상자 안 색의 가운데 값을 바탕으로 보고, 바탕에서 가장 먼 4분의 1(글자 쪽)의 평균을 쓴다.
+   상자가 틀렸거나 글자가 안 잡히면(바탕과 먼 점이 30개 밑) 쓰지 않는다 → 제목 색은 글자색 그대로 */
+function pixOf(src){   // 사진 → 작게 줄인 픽셀(가로 최대 700). 못 읽으면 null
+  return new Promise(ok => { const im = new Image(); im.onload = () => { try { const k = Math.min(1, 700 / im.naturalWidth), w = Math.max(1, Math.round(im.naturalWidth * k)), h = Math.max(1, Math.round(im.naturalHeight * k)), c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0, w, h); ok({ w, h, d:g.getImageData(0, 0, w, h).data }); } catch(e){ ok(null); } }; im.onerror = () => ok(null); im.src = src; });
+}
+function titlePix(px, b){   // b = [x1, y1, x2, y2] (0~100). 헥스 · 못 읽으면 null
+  let [x1, y1, x2, y2] = b; if (![x1, y1, x2, y2].every(v => isFinite(v) && v >= 0 && v <= 100) || x2 - x1 < 3 || y2 - y1 < 1) return null;
+  const X1 = Math.floor(px.w * x1 / 100), X2 = Math.ceil(px.w * x2 / 100), Y1 = Math.floor(px.h * y1 / 100), Y2 = Math.ceil(px.h * y2 / 100), P = [];
+  for (let y = Y1; y < Y2; y++) for (let x = X1; x < X2; x++){ const i = (y * px.w + x) * 4; P.push([px.d[i], px.d[i + 1], px.d[i + 2]]); }
+  if (P.length < 60) return null;
+  const med = k => { const a = P.map(p => p[k]).sort((m, n) => m - n); return a[a.length >> 1]; }, bg = [med(0), med(1), med(2)];
+  const D = P.map(p => ({ p, v:Math.hypot(p[0] - bg[0], p[1] - bg[1], p[2] - bg[2]) })).filter(o => o.v > 40).sort((m, n) => n.v - m.v);
+  if (D.length < 30) return null;
+  const top = D.slice(0, Math.max(30, Math.floor(D.length / 4))), m = [0, 1, 2].map(k => Math.round(top.reduce((a, o) => a + o.p[k], 0) / top.length));
+  return "#" + m.map(v => v.toString(16).padStart(2, "0")).join("");
 }
 /* 296번. 사진의 모양 → 메뉴판(사용자: "AI 를 쓰는 거면 처음 찍은 사진과 가장 비슷한 형태로 — 글자 크기든 구성이든 색깔이든").
    방향 · 단 수 · 분류가 놓인 칸 · 글꼴 · 색(종이 · 글자 · 띠 · 포인트). 못 읽은 것은 비워 두고 지금 기본값을 쓴다.
    색은 글자와 종이의 대비가 4.5 : 1 밑이면 쓰지 않는다(읽을 수 없는 메뉴판을 만들지 않게 — WCAG 본문 기준) */
-function readLook(lk){
+function readLook(lk, px){
   const L = {}, hex = (t, k) => { const m = String(t || "").match(new RegExp(k + "\\s*(#[0-9a-fA-F]{6})")); return m ? m[1].toLowerCase() : null; };
   if (/가로/.test(lk["방향"] || "")) L.orient = "landscape"; else if (/세로/.test(lk["방향"] || "")) L.orient = "portrait";
   const c = +(String(lk["단"] || "").match(/[1-4]/) || [])[0]; if (c) L.cols = c;
@@ -10075,7 +10093,9 @@ function readLook(lk){
   const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
   if (pa && ink && cr(pa, ink) >= 4.5){ L.colors = { paper:pa, ink, band: band || ink, accent: ac || band || ink };
     const ti = hex(col, "제목"), dist = (a, b) => Math.hypot(...[1, 3, 5].map(i => parseInt(a.substr(i, 2), 16) - parseInt(b.substr(i, 2), 16)));   // 364번. 맨 위 가게 이름의 색 — 글자색과 눈에 띄게 다르고 종이 위에서 읽힐 때만(큰 글자 기준 3 : 1)
-    if (ti && dist(ti, ink) > 60 && cr(pa, ti) >= 2) L.title = ti; }   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
+    const bx = String(lk["제목 위치"] || "").match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/);   // 371번. AI 는 제목 글자의 자리(상자)만 말하고, 색은 사진 픽셀에서 읽는다
+    const ts = bx && px ? titlePix(px, bx.slice(1, 5).map(Number)) : null, tc = ts || ti;
+    if (tc && dist(tc, ink) > 60 && cr(pa, tc) >= 2) L.title = tc; }   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
   L.band = !/띠\s*없음/.test(col) && !!band;
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
     if (/알약/.test(sv)) L.sec = "pill"; else if (/띠/.test(sv)) L.sec = "band"; else if (/밑줄|선/.test(sv)) L.sec = "line";
@@ -10285,15 +10305,15 @@ function stPgTabs(){
 }
 function toCheckPages(items, msgEl){
   const pages = [], skipped = [];
-  items.forEach(it => { const secs = parseMenuText(it.text); if (!secs.length){ skipped.push(it.n); return; }
+  items.forEach(it => { const secs = parseMenuText(it.text, it.px); if (!secs.length){ skipped.push(it.n); return; }
     pages.push({ n:it.n, pic:it.pic, parsed:secs, look:secs.look || {}, shop:secs.shop || "", typos:secs.typos || [], hours:secs.hours || [], foot:secs.foot || [], footUn:secs.footUn || [] }); });
   if (!pages.length){ msgEl.textContent = "고른 쪽에서 메뉴를 한 줄도 읽지 못했습니다. 다른 쪽을 고르거나 더 선명한 PDF로 올려 주세요."; return; }
   stPgs = pages; stCkIgnore = new Set(); stPgI = 0; stPgLoad(0); drawCheck();
   $("#st-read").hidden = true; $("#st-check").hidden = false; $("#start").scrollTop = 0; footShade($("#start"));
   if (skipped.length) toast(skipped.join(" · ") + "쪽에서는 메뉴를 찾지 못해 뺐습니다", null);
 }
-function toCheck(txt, msgEl){
-  const secs = parseMenuText(txt);
+function toCheck(txt, msgEl, px){
+  const secs = parseMenuText(txt, px);
   if (!secs.length){ msgEl.textContent = "메뉴를 한 줄도 읽지 못했습니다. 답이 '[분류]' · '이름 | 가격' 모양인지 확인해 주세요."; return; }
   stPgs = []; stPgsFinal = null; stCkIgnore = new Set();   // 353번. 한 쪽(사진 한 장)
   stParsed = secs; stLook = secs.look || {}; stShopRead = secs.shop || ""; stTypos = secs.typos || []; stHours = secs.hours || []; stFoot = secs.foot || []; stFootUn = secs.footUn || []; $("#st-cshop").value = stShopRead;
@@ -10307,11 +10327,11 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   $(".st-cbody").classList.toggle("nopic", !stPic); $("#start").classList.add("wide");
   const money = v => typeof v === "number" ? v.toLocaleString("ko-KR") : String(v);   // 읽을 때 쉼표는 다시 뺀다(readCheck)
   const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
-  { const pp = $(".st-cpaper"), C = stLook.colors, bt = h => { const v = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)); return .299 * v[0] + .587 * v[1] + .114 * v[2] > 150 ? "#241c12" : "#ffffff"; };   // 361번. 사진에서 읽은 색만 먼저 비춘다(글꼴 · 꾸밈은 다음 화면에서)
+  { const pp = $(".st-cpaper"), C = stLook.colors;   // 361번. 사진에서 읽은 색만 먼저 비춘다(글꼴 · 꾸밈은 다음 화면에서)
     const Cc = PRESETS[stLook.concept] || PRESETS.basic, secv = stLook.sec || (stLook.bandAt === "sec" || stLook.bandAt === "both" ? "band" : Cc.sec), topb = !!C && (stLook.bandAt ? stLook.bandAt === "top" || stLook.bandAt === "both" : !!stLook.band);   // 362번. 완성본(「사진처럼」 조합)과 같은 규칙 — 분류 제목 모양 · 맨 위 띠
     pp.classList.toggle("looked", !!C); pp.classList.toggle("hasband", topb); pp.classList.toggle("secband", !!C && !!stLook.band && secv !== "line"); pp.classList.toggle("secpill", secv === "pill");
     ["--ck-paper", "--ck-ink", "--ck-band", "--ck-bandtx", "--ck-title"].forEach(k => pp.style.removeProperty(k));
-    if (C){ pp.style.setProperty("--ck-paper", C.paper); pp.style.setProperty("--ck-ink", C.ink); if (stLook.title) pp.style.setProperty("--ck-title", stLook.title); if (stLook.band){ pp.style.setProperty("--ck-band", C.band); pp.style.setProperty("--ck-bandtx", bt(C.band)); } } }
+    if (C){ pp.style.setProperty("--ck-paper", C.paper); pp.style.setProperty("--ck-ink", C.ink); if (stLook.title) pp.style.setProperty("--ck-title", stLook.title); if (stLook.band){ pp.style.setProperty("--ck-band", C.band); pp.style.setProperty("--ck-bandtx", C.paper); } } }
   $(".st-cpaper").classList.toggle("land", land); box.style.gridTemplateColumns = "repeat(" + nc + ", minmax(0,1fr))"; box.classList.toggle("tight", nc >= 3);   // 314번. 단이 많으면 가격 칸을 좁혀 이름 칸에 폭을
   const nItems = stParsed.reduce((a, s) => a + s.items.filter(it => it.name).length, 0);
   $("#st-ccount").innerHTML = "<span>읽은 메뉴 — 분류 <b>" + stParsed.length + "</b> · 메뉴 <b>" + nItems + "</b>" + (stHours.length ? " · 영업시간 <b>" + stHours.length + "</b>줄" : "") + "</span>"
@@ -10457,10 +10477,10 @@ $("#st-gemgo").onclick = async () => {
       for (let n = a; n <= b; n++){
         stage = (cnt > 1 ? (n - a + 1) + "/" + cnt + " · " : "") + n + "쪽을 읽는 중…"; tick();
         if (!stPdfTxt[n]){ try { const pic = await pdfRender(n); stPdfTxt[n] = { text:await geminiRead(pic), pic }; } catch(e){ throw new Error((cnt > 1 ? n + "쪽: " : "") + e.message + (cnt > 1 && n > a ? " (읽은 쪽은 기억해 두었으니 [읽기]를 다시 누르면 이어서 읽습니다)" : "")); } }
-        items.push({ n, text:stPdfTxt[n].text, pic:stPdfTxt[n].pic });
+        items.push({ n, text:stPdfTxt[n].text, pic:stPdfTxt[n].pic, px:await pixOf(stPdfTxt[n].pic) });
       }
       if (items.length === 1) toCheck(items[0].text, msg); else toCheckPages(items, msg);
-    } else { const t = await geminiRead(stPic); toCheck(t, msg); }
+    } else { const t = await geminiRead(stPic); toCheck(t, msg, await pixOf(stPic)); }
     if (turned && !$("#st-check").hidden) toast("사진을 글자가 바로 서게 " + (turned === 180 ? "거꾸로" : turned === 90 ? "오른쪽으로" : "왼쪽으로") + " 돌려서 읽었습니다. 틀렸으면 [←]로 돌아가 돌려 주세요", null);
   }
   catch(e){ msg.textContent = e.message; stOther = true; msg.classList.add("err"); }
