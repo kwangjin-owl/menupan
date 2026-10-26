@@ -306,6 +306,50 @@ body{transition:padding-right .18s ease}
 .noren.nr-plain .ko,.noren.nr-frame .ko,.noren.nr-line .ko{color:var(--ink-soft);opacity:.85}
 .noren.nr-plain [contenteditable]:hover,.noren.nr-frame [contenteditable]:hover,.noren.nr-line [contenteditable]:hover{outline-color:rgba(0,0,0,.22)}
 .noren.nr-plain [contenteditable]:focus,.noren.nr-frame [contenteditable]:focus,.noren.nr-line [contenteditable]:focus{outline-color:var(--ink);background:rgba(0,0,0,.06)}
+/* 374번. 모양 넷 더 — 계단 · 잔물결 · 깃발 · 점선 가장자리. 전부 `::after`(술 자리) 안에서 끝나 상자 크기(37 · 93 · 131번)는 안 건드린다 */
+.noren.nr-stair{--nr-fringe:2.2em; --nr-gap:.7em}
+.noren.nr-stair::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 100% 0%, 100% 40%, 80% 40%, 80% 70%, 60% 70%, 60% 100%, 40% 100%, 40% 70%, 20% 70%, 20% 40%, 0% 40%)}
+.noren.nr-ripple{--nr-fringe:1.9em; --nr-gap:.6em}
+.noren.nr-ripple::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 100% 0%, 100% 55%, 99.167% 62.765%, 98.333% 70%, 97.5% 76.213%, 96.667% 80.981%, 95.833% 83.978%, 95% 85%, 94.167% 83.978%, 93.333% 80.981%, 92.5% 76.213%, 91.667% 70%, 90.833% 62.765%, 90% 55%, 89.167% 47.235%, 88.333% 40%, 87.5% 33.787%, 86.667% 29.019%, 85.833% 26.022%, 85% 25%, 84.167% 26.022%, 83.333% 29.019%, 82.5% 33.787%, 81.667% 40%, 80.833% 47.235%, 80% 55%, 79.167% 62.765%, 78.333% 70%, 77.5% 76.213%, 76.667% 80.981%, 75.833% 83.978%, 75% 85%, 74.167% 83.978%, 73.333% 80.981%, 72.5% 76.213%, 71.667% 70%, 70.833% 62.765%, 70% 55%, 69.167% 47.235%, 68.333% 40%, 67.5% 33.787%, 66.667% 29.019%, 65.833% 26.022%, 65% 25%, 64.167% 26.022%, 63.333% 29.019%, 62.5% 33.787%, 61.667% 40%, 60.833% 47.235%, 60% 55%, 59.167% 62.765%, 58.333% 70%, 57.5% 76.213%, 56.667% 80.981%, 55.833% 83.978%, 55% 85%, 54.167% 83.978%, 53.333% 80.981%, 52.5% 76.213%, 51.667% 70%, 50.833% 62.765%, 50% 55%, 49.167% 47.235%, 48.333% 40%, 47.5% 33.787%, 46.667% 29.019%, 45.833% 26.022%, 45% 25%, 44.167% 26.022%, 43.333% 29.019%, 42.5% 33.787%, 41.667% 40%, 40.833% 47.235%, 40% 55%, 39.167% 62.765%, 38.333% 70%, 37.5% 76.213%, 36.667% 80.981%, 35.833% 83.978%, 35% 85%, 34.167% 83.978%, 33.333% 80.981%, 32.5% 76.213%, 31.667% 70%, 30.833% 62.765%, 30% 55%, 29.167% 47.235%, 28.333% 40%, 27.5% 33.787%, 26.667% 29.019%, 25.833% 26.022%, 25% 25%, 24.167% 26.022%, 23.333% 29.019%, 22.5% 33.787%, 21.667% 40%, 20.833% 47.235%, 20% 55%, 19.167% 62.765%, 18.333% 70%, 17.5% 76.213%, 16.667% 80.981%, 15.833% 83.978%, 15% 85%, 14.167% 83.978%, 13.333% 80.981%, 12.5% 76.213%, 11.667% 70%, 10.833% 62.765%, 10% 55%, 9.167% 47.235%, 8.333% 40%, 7.5% 33.787%, 6.667% 29.019%, 5.833% 26.022%, 5% 25%, 4.167% 26.022%, 3.333% 29.019%, 2.5% 33.787%, 1.667% 40%, 0.833% 47.235%, 0% 55%)}
+.sheet.land .noren.nr-ripple::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 100% 0%, 100% 55%, 99.405% 62.765%, 98.81% 70%, 98.214% 76.213%, 97.619% 80.981%, 97.024% 83.978%, 96.429% 85%, 95.833% 83.978%, 95.238% 80.981%, 94.643% 76.213%, 94.048% 70%, 93.452% 62.765%, 92.857% 55%, 92.262% 47.235%, 91.667% 40%, 91.071% 33.787%, 90.476% 29.019%, 89.881% 26.022%, 89.286% 25%, 88.69% 26.022%, 88.095% 29.019%, 87.5% 33.787%, 86.905% 40%, 86.31% 47.235%, 85.714% 55%, 85.119% 62.765%, 84.524% 70%, 83.929% 76.213%, 83.333% 80.981%, 82.738% 83.978%, 82.143% 85%, 81.548% 83.978%, 80.952% 80.981%, 80.357% 76.213%, 79.762% 70%, 79.167% 62.765%, 78.571% 55%, 77.976% 47.235%, 77.381% 40%, 76.786% 33.787%, 76.19% 29.019%, 75.595% 26.022%, 75% 25%, 74.405% 26.022%, 73.81% 29.019%, 73.214% 33.787%, 72.619% 40%, 72.024% 47.235%, 71.429% 55%, 70.833% 62.765%, 70.238% 70%, 69.643% 76.213%, 69.048% 80.981%, 68.452% 83.978%, 67.857% 85%, 67.262% 83.978%, 66.667% 80.981%, 66.071% 76.213%, 65.476% 70%, 64.881% 62.765%, 64.286% 55%, 63.69% 47.235%, 63.095% 40%, 62.5% 33.787%, 61.905% 29.019%, 61.31% 26.022%, 60.714% 25%, 60.119% 26.022%, 59.524% 29.019%, 58.929% 33.787%, 58.333% 40%, 57.738% 47.235%, 57.143% 55%, 56.548% 62.765%, 55.952% 70%, 55.357% 76.213%, 54.762% 80.981%, 54.167% 83.978%, 53.571% 85%, 52.976% 83.978%, 52.381% 80.981%, 51.786% 76.213%, 51.19% 70%, 50.595% 62.765%, 50% 55%, 49.405% 47.235%, 48.81% 40%, 48.214% 33.787%, 47.619% 29.019%, 47.024% 26.022%, 46.429% 25%, 45.833% 26.022%, 45.238% 29.019%, 44.643% 33.787%, 44.048% 40%, 43.452% 47.235%, 42.857% 55%, 42.262% 62.765%, 41.667% 70%, 41.071% 76.213%, 40.476% 80.981%, 39.881% 83.978%, 39.286% 85%, 38.69% 83.978%, 38.095% 80.981%, 37.5% 76.213%, 36.905% 70%, 36.31% 62.765%, 35.714% 55%, 35.119% 47.235%, 34.524% 40%, 33.929% 33.787%, 33.333% 29.019%, 32.738% 26.022%, 32.143% 25%, 31.548% 26.022%, 30.952% 29.019%, 30.357% 33.787%, 29.762% 40%, 29.167% 47.235%, 28.571% 55%, 27.976% 62.765%, 27.381% 70%, 26.786% 76.213%, 26.19% 80.981%, 25.595% 83.978%, 25% 85%, 24.405% 83.978%, 23.81% 80.981%, 23.214% 76.213%, 22.619% 70%, 22.024% 62.765%, 21.429% 55%, 20.833% 47.235%, 20.238% 40%, 19.643% 33.787%, 19.048% 29.019%, 18.452% 26.022%, 17.857% 25%, 17.262% 26.022%, 16.667% 29.019%, 16.071% 33.787%, 15.476% 40%, 14.881% 47.235%, 14.286% 55%, 13.69% 62.765%, 13.095% 70%, 12.5% 76.213%, 11.905% 80.981%, 11.31% 83.978%, 10.714% 85%, 10.119% 83.978%, 9.524% 80.981%, 8.929% 76.213%, 8.333% 70%, 7.738% 62.765%, 7.143% 55%, 6.548% 47.235%, 5.952% 40%, 5.357% 33.787%, 4.762% 29.019%, 4.167% 26.022%, 3.571% 25%, 2.976% 26.022%, 2.381% 29.019%, 1.786% 33.787%, 1.19% 40%, 0.595% 47.235%, 0% 55%)}
+.noren.nr-bunting{--nr-fringe:2.8em; --nr-gap:.7em}
+.noren.nr-bunting::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 3.2% 0%, 10% 100%, 16.8% 0%, 23.2% 0%, 30% 100%, 36.8% 0%, 43.2% 0%, 50% 100%, 56.8% 0%, 63.2% 0%, 70% 100%, 76.8% 0%, 83.2% 0%, 90% 100%, 96.8% 0%, 100% 0%)}
+.sheet.land .noren.nr-bunting::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 2.286% 0%, 7.143% 100%, 12% 0%, 16.571% 0%, 21.429% 100%, 26.286% 0%, 30.857% 0%, 35.714% 100%, 40.571% 0%, 45.143% 0%, 50% 100%, 54.857% 0%, 59.429% 0%, 64.286% 100%, 69.143% 0%, 73.714% 0%, 78.571% 100%, 83.429% 0%, 88% 0%, 92.857% 100%, 97.714% 0%, 100% 0%)}
+.noren.nr-stitch{--nr-fringe:.9em; --nr-gap:.9em}
+.noren.nr-stitch::after{background:repeating-linear-gradient(90deg, var(--nband, var(--band)) 0 1.1em, transparent 1.1em 1.7em) 0 100%/100% 55% no-repeat}
+/* 없음 — 띠도 선도 없이 종이 위에 글자만 얹힌다. 「띠 없음」(nr-plain)에는 밑줄이 있었다 */
+.noren.nr-none{--nr-fringe:0em; --nr-gap:1em; color:var(--ink)}
+.noren.nr-none::before,.noren.nr-none::after{display:none}
+.noren.nr-none .ko{color:var(--ink-soft);opacity:.85}
+.noren.nr-none [contenteditable]:hover{outline-color:rgba(0,0,0,.22)}
+.noren.nr-none [contenteditable]:focus{outline-color:var(--ink);background:rgba(0,0,0,.06)}
+/* 채우기 끔 — 모양의 가장자리만 선으로 남는다(먹색 · 글자와 로고도 먹색으로 — norenLight). 선 그림(--edge)은 모양마다 아래에 */
+.noren.nr-unfill{color:var(--ink)}
+.noren.nr-unfill::before{display:none}
+.sheet .noren.nr-unfill::after{background:var(--ink); clip-path:none; -webkit-mask:var(--edge) 0 0/100% 100% no-repeat; mask:var(--edge) 0 0/100% 100% no-repeat}
+.noren.nr-unfill .ko{color:var(--ink-soft);opacity:.85}
+.noren.nr-unfill [contenteditable]:hover{outline-color:rgba(0,0,0,.22)}
+.noren.nr-unfill [contenteditable]:focus{outline-color:var(--ink);background:rgba(0,0,0,.06)}
+.sheet .noren.nr-unfill.nr-fade::after{background:linear-gradient(90deg, transparent, var(--ink) 25% 75%, transparent) 0 100%/100% 1.6px no-repeat; -webkit-mask:none; mask:none}
+.sheet .noren.nr-unfill.nr-stitch::after{background:repeating-linear-gradient(90deg, var(--ink) 0 1.1em, transparent 1.1em 1.7em) 0 100%/100% 1.6px no-repeat; -webkit-mask:none; mask:none}
+.noren.nr-unfill.nr-ridge{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 40 L90 76.1 L80 2 L70 91.3 L60 2 L50 97 L40 2 L30 91.3 L20 2 L10 76.1 L0 40' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-ridge{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 35.25 L92.857 68.5 L85.714 2 L78.571 83.7 L71.429 2 L64.286 93.2 L57.143 2 L50 97 L42.857 2 L35.714 93.2 L28.571 2 L21.429 83.7 L14.286 2 L7.143 68.5 L0 35.25' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-saw{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 30.5 L10 97 L20 30.5 L30 97 L40 30.5 L50 97 L60 30.5 L70 97 L80 30.5 L90 97 L100 30.5' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-saw{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 30.5 L7.143 97 L14.286 30.5 L21.429 97 L28.571 30.5 L35.714 97 L42.857 30.5 L50 97 L57.143 30.5 L64.286 97 L71.429 30.5 L78.571 97 L85.714 30.5 L92.857 97 L100 30.5' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-ribbon{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 97 L50 41.9 L100 97' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-arch{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M-2 2 L-1.84 9.454 L-1.36 16.861 L-0.563 24.177 L0.545 31.357 L1.958 38.355 L3.668 45.129 L5.663 51.637 L7.931 57.84 L10.459 63.698 L13.23 69.175 L16.229 74.239 L19.435 78.857 L22.83 83.001 L26.392 86.646 L30.1 89.769 L33.931 92.35 L37.861 94.375 L41.865 95.83 L45.92 96.707 L50 97 L54.08 96.707 L58.135 95.83 L62.139 94.375 L66.069 92.35 L69.9 89.769 L73.608 86.646 L77.17 83.001 L80.565 78.857 L83.771 74.239 L86.77 69.175 L89.541 63.698 L92.069 57.84 L94.337 51.637 L96.332 45.129 L98.042 38.355 L99.455 31.357 L100.563 24.177 L101.36 16.861 L101.84 9.454 L102 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-wave{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 2 L0.192 20.534 L0.761 38.355 L1.685 54.779 L2.929 69.175 L4.444 80.99 L6.173 89.769 L8.049 95.175 L10 97 L11.951 95.175 L13.827 89.769 L15.556 80.99 L17.071 69.175 L18.315 54.779 L19.239 38.355 L19.808 20.534 L20 2 M20 2 L20.192 20.534 L20.761 38.355 L21.685 54.779 L22.929 69.175 L24.444 80.99 L26.173 89.769 L28.049 95.175 L30 97 L31.951 95.175 L33.827 89.769 L35.556 80.99 L37.071 69.175 L38.315 54.779 L39.239 38.355 L39.808 20.534 L40 2 M40 2 L40.192 20.534 L40.761 38.355 L41.685 54.779 L42.929 69.175 L44.444 80.99 L46.173 89.769 L48.049 95.175 L50 97 L51.951 95.175 L53.827 89.769 L55.556 80.99 L57.071 69.175 L58.315 54.779 L59.239 38.355 L59.808 20.534 L60 2 M60 2 L60.192 20.534 L60.761 38.355 L61.685 54.779 L62.929 69.175 L64.444 80.99 L66.173 89.769 L68.049 95.175 L70 97 L71.951 95.175 L73.827 89.769 L75.556 80.99 L77.071 69.175 L78.315 54.779 L79.239 38.355 L79.808 20.534 L80 2 M80 2 L80.192 20.534 L80.761 38.355 L81.685 54.779 L82.929 69.175 L84.444 80.99 L86.173 89.769 L88.049 95.175 L90 97 L91.951 95.175 L93.827 89.769 L95.556 80.99 L97.071 69.175 L98.315 54.779 L99.239 38.355 L99.808 20.534 L100 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-wave{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 2 L0.137 20.534 L0.544 38.355 L1.204 54.779 L2.092 69.175 L3.174 80.99 L4.409 89.769 L5.749 95.175 L7.143 97 L8.536 95.175 L9.876 89.769 L11.111 80.99 L12.194 69.175 L13.082 54.779 L13.742 38.355 L14.148 20.534 L14.286 2 M14.286 2 L14.423 20.534 L14.829 38.355 L15.49 54.779 L16.378 69.175 L17.46 80.99 L18.695 89.769 L20.035 95.175 L21.429 97 L22.822 95.175 L24.162 89.769 L25.397 80.99 L26.479 69.175 L27.368 54.779 L28.028 38.355 L28.434 20.534 L28.571 2 M28.571 2 L28.709 20.534 L29.115 38.355 L29.775 54.779 L30.664 69.175 L31.746 80.99 L32.981 89.769 L34.321 95.175 L35.714 97 L37.108 95.175 L38.448 89.769 L39.683 80.99 L40.765 69.175 L41.653 54.779 L42.313 38.355 L42.72 20.534 L42.857 2 M42.857 2 L42.994 20.534 L43.401 38.355 L44.061 54.779 L44.949 69.175 L46.032 80.99 L47.267 89.769 L48.606 95.175 L50 97 L51.394 95.175 L52.733 89.769 L53.968 80.99 L55.051 69.175 L55.939 54.779 L56.599 38.355 L57.006 20.534 L57.143 2 M57.143 2 L57.28 20.534 L57.687 38.355 L58.347 54.779 L59.235 69.175 L60.317 80.99 L61.552 89.769 L62.892 95.175 L64.286 97 L65.679 95.175 L67.019 89.769 L68.254 80.99 L69.336 69.175 L70.225 54.779 L70.885 38.355 L71.291 20.534 L71.429 2 M71.429 2 L71.566 20.534 L71.972 38.355 L72.632 54.779 L73.521 69.175 L74.603 80.99 L75.838 89.769 L77.178 95.175 L78.571 97 L79.965 95.175 L81.305 89.769 L82.54 80.99 L83.622 69.175 L84.51 54.779 L85.171 38.355 L85.577 20.534 L85.714 2 M85.714 2 L85.852 20.534 L86.258 38.355 L86.918 54.779 L87.806 69.175 L88.889 80.99 L90.124 89.769 L91.464 95.175 L92.857 97 L94.251 95.175 L95.591 89.769 L96.826 80.99 L97.908 69.175 L98.796 54.779 L99.456 38.355 L99.863 20.534 L100 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-scallop{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 97 L0.192 78.466 L0.761 60.645 L1.685 44.221 L2.929 29.825 L4.444 18.01 L6.173 9.231 L8.049 3.825 L10 2 L11.951 3.825 L13.827 9.231 L15.556 18.01 L17.071 29.825 L18.315 44.221 L19.239 60.645 L19.808 78.466 L20 97 M20 97 L20.192 78.466 L20.761 60.645 L21.685 44.221 L22.929 29.825 L24.444 18.01 L26.173 9.231 L28.049 3.825 L30 2 L31.951 3.825 L33.827 9.231 L35.556 18.01 L37.071 29.825 L38.315 44.221 L39.239 60.645 L39.808 78.466 L40 97 M40 97 L40.192 78.466 L40.761 60.645 L41.685 44.221 L42.929 29.825 L44.444 18.01 L46.173 9.231 L48.049 3.825 L50 2 L51.951 3.825 L53.827 9.231 L55.556 18.01 L57.071 29.825 L58.315 44.221 L59.239 60.645 L59.808 78.466 L60 97 M60 97 L60.192 78.466 L60.761 60.645 L61.685 44.221 L62.929 29.825 L64.444 18.01 L66.173 9.231 L68.049 3.825 L70 2 L71.951 3.825 L73.827 9.231 L75.556 18.01 L77.071 29.825 L78.315 44.221 L79.239 60.645 L79.808 78.466 L80 97 M80 97 L80.192 78.466 L80.761 60.645 L81.685 44.221 L82.929 29.825 L84.444 18.01 L86.173 9.231 L88.049 3.825 L90 2 L91.951 3.825 L93.827 9.231 L95.556 18.01 L97.071 29.825 L98.315 44.221 L99.239 60.645 L99.808 78.466 L100 97' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-scallop{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 97 L0.137 78.466 L0.544 60.645 L1.204 44.221 L2.092 29.825 L3.174 18.01 L4.409 9.231 L5.749 3.825 L7.143 2 L8.536 3.825 L9.876 9.231 L11.111 18.01 L12.194 29.825 L13.082 44.221 L13.742 60.645 L14.148 78.466 L14.286 97 M14.286 97 L14.423 78.466 L14.829 60.645 L15.49 44.221 L16.378 29.825 L17.46 18.01 L18.695 9.231 L20.035 3.825 L21.429 2 L22.822 3.825 L24.162 9.231 L25.397 18.01 L26.479 29.825 L27.368 44.221 L28.028 60.645 L28.434 78.466 L28.571 97 M28.571 97 L28.709 78.466 L29.115 60.645 L29.775 44.221 L30.664 29.825 L31.746 18.01 L32.981 9.231 L34.321 3.825 L35.714 2 L37.108 3.825 L38.448 9.231 L39.683 18.01 L40.765 29.825 L41.653 44.221 L42.313 60.645 L42.72 78.466 L42.857 97 M42.857 97 L42.994 78.466 L43.401 60.645 L44.061 44.221 L44.949 29.825 L46.032 18.01 L47.267 9.231 L48.606 3.825 L50 2 L51.394 3.825 L52.733 9.231 L53.968 18.01 L55.051 29.825 L55.939 44.221 L56.599 60.645 L57.006 78.466 L57.143 97 M57.143 97 L57.28 78.466 L57.687 60.645 L58.347 44.221 L59.235 29.825 L60.317 18.01 L61.552 9.231 L62.892 3.825 L64.286 2 L65.679 3.825 L67.019 9.231 L68.254 18.01 L69.336 29.825 L70.225 44.221 L70.885 60.645 L71.291 78.466 L71.429 97 M71.429 97 L71.566 78.466 L71.972 60.645 L72.632 44.221 L73.521 29.825 L74.603 18.01 L75.838 9.231 L77.178 3.825 L78.571 2 L79.965 3.825 L81.305 9.231 L82.54 18.01 L83.622 29.825 L84.51 44.221 L85.171 60.645 L85.577 78.466 L85.714 97 M85.714 97 L85.852 78.466 L86.258 60.645 L86.918 44.221 L87.806 29.825 L88.889 18.01 L90.124 9.231 L91.464 3.825 L92.857 2 L94.251 3.825 L95.591 9.231 L96.826 18.01 L97.908 29.825 L98.796 44.221 L99.456 60.645 L99.863 78.466 L100 97' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-twin{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 54.25 L100 54.25 M0 96.05 L100 96.05' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-full{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 2 L0 97 L19.3 97 L19.3 2 M20.7 2 L20.7 97 L39.3 97 L39.3 2 M40.7 2 L40.7 97 L59.3 97 L59.3 2 M60.7 2 L60.7 97 L79.3 97 L79.3 2 M80.7 2 L80.7 97 L100 97 L100 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-full{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 2 L0 97 L13.586 97 L13.586 2 M14.986 2 L14.986 97 L27.871 97 L27.871 2 M29.271 2 L29.271 97 L42.157 97 L42.157 2 M43.557 2 L43.557 97 L56.443 97 L56.443 2 M57.843 2 L57.843 97 L70.729 97 L70.729 2 M72.129 2 L72.129 97 L85.014 97 L85.014 2 M86.414 2 L86.414 97 L100 97 L100 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-stair{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 40 L20 40 L20 68.5 L40 68.5 L40 97 L60 97 L60 68.5 L80 68.5 L80 40 L100 40' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-bunting{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M3.2 2 L10 97 L16.8 2 M23.2 2 L30 97 L36.8 2 M43.2 2 L50 97 L56.8 2 M63.2 2 L70 97 L76.8 2 M83.2 2 L90 97 L96.8 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-bunting{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M2.286 2 L7.143 97 L12 2 M16.571 2 L21.429 97 L26.286 2 M30.857 2 L35.714 97 L40.571 2 M45.143 2 L50 97 L54.857 2 M59.429 2 L64.286 97 L69.143 2 M73.714 2 L78.571 97 L83.429 2 M88 2 L92.857 97 L97.714 2' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.noren.nr-unfill.nr-ripple{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 54.25 L0.833 46.874 L1.667 40 L2.5 34.097 L3.333 29.568 L4.167 26.721 L5 25.75 L5.833 26.721 L6.667 29.568 L7.5 34.097 L8.333 40 L9.167 46.874 L10 54.25 L10.833 61.626 L11.667 68.5 L12.5 74.403 L13.333 78.932 L14.167 81.779 L15 82.75 L15.833 81.779 L16.667 78.932 L17.5 74.403 L18.333 68.5 L19.167 61.626 L20 54.25 L20.833 46.874 L21.667 40 L22.5 34.097 L23.333 29.568 L24.167 26.721 L25 25.75 L25.833 26.721 L26.667 29.568 L27.5 34.097 L28.333 40 L29.167 46.874 L30 54.25 L30.833 61.626 L31.667 68.5 L32.5 74.403 L33.333 78.932 L34.167 81.779 L35 82.75 L35.833 81.779 L36.667 78.932 L37.5 74.403 L38.333 68.5 L39.167 61.626 L40 54.25 L40.833 46.874 L41.667 40 L42.5 34.097 L43.333 29.568 L44.167 26.721 L45 25.75 L45.833 26.721 L46.667 29.568 L47.5 34.097 L48.333 40 L49.167 46.874 L50 54.25 L50.833 61.626 L51.667 68.5 L52.5 74.403 L53.333 78.932 L54.167 81.779 L55 82.75 L55.833 81.779 L56.667 78.932 L57.5 74.403 L58.333 68.5 L59.167 61.626 L60 54.25 L60.833 46.874 L61.667 40 L62.5 34.097 L63.333 29.568 L64.167 26.721 L65 25.75 L65.833 26.721 L66.667 29.568 L67.5 34.097 L68.333 40 L69.167 46.874 L70 54.25 L70.833 61.626 L71.667 68.5 L72.5 74.403 L73.333 78.932 L74.167 81.779 L75 82.75 L75.833 81.779 L76.667 78.932 L77.5 74.403 L78.333 68.5 L79.167 61.626 L80 54.25 L80.833 46.874 L81.667 40 L82.5 34.097 L83.333 29.568 L84.167 26.721 L85 25.75 L85.833 26.721 L86.667 29.568 L87.5 34.097 L88.333 40 L89.167 46.874 L90 54.25 L90.833 61.626 L91.667 68.5 L92.5 74.403 L93.333 78.932 L94.167 81.779 L95 82.75 L95.833 81.779 L96.667 78.932 L97.5 74.403 L98.333 68.5 L99.167 61.626 L100 54.25' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.sheet.land .noren.nr-unfill.nr-ripple{--edge:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 54.25 L0.595 46.874 L1.19 40 L1.786 34.097 L2.381 29.568 L2.976 26.721 L3.571 25.75 L4.167 26.721 L4.762 29.568 L5.357 34.097 L5.952 40 L6.548 46.874 L7.143 54.25 L7.738 61.626 L8.333 68.5 L8.929 74.403 L9.524 78.932 L10.119 81.779 L10.714 82.75 L11.31 81.779 L11.905 78.932 L12.5 74.403 L13.095 68.5 L13.69 61.626 L14.286 54.25 L14.881 46.874 L15.476 40 L16.071 34.097 L16.667 29.568 L17.262 26.721 L17.857 25.75 L18.452 26.721 L19.048 29.568 L19.643 34.097 L20.238 40 L20.833 46.874 L21.429 54.25 L22.024 61.626 L22.619 68.5 L23.214 74.403 L23.81 78.932 L24.405 81.779 L25 82.75 L25.595 81.779 L26.19 78.932 L26.786 74.403 L27.381 68.5 L27.976 61.626 L28.571 54.25 L29.167 46.874 L29.762 40 L30.357 34.097 L30.952 29.568 L31.548 26.721 L32.143 25.75 L32.738 26.721 L33.333 29.568 L33.929 34.097 L34.524 40 L35.119 46.874 L35.714 54.25 L36.31 61.626 L36.905 68.5 L37.5 74.403 L38.095 78.932 L38.69 81.779 L39.286 82.75 L39.881 81.779 L40.476 78.932 L41.071 74.403 L41.667 68.5 L42.262 61.626 L42.857 54.25 L43.452 46.874 L44.048 40 L44.643 34.097 L45.238 29.568 L45.833 26.721 L46.429 25.75 L47.024 26.721 L47.619 29.568 L48.214 34.097 L48.81 40 L49.405 46.874 L50 54.25 L50.595 61.626 L51.19 68.5 L51.786 74.403 L52.381 78.932 L52.976 81.779 L53.571 82.75 L54.167 81.779 L54.762 78.932 L55.357 74.403 L55.952 68.5 L56.548 61.626 L57.143 54.25 L57.738 46.874 L58.333 40 L58.929 34.097 L59.524 29.568 L60.119 26.721 L60.714 25.75 L61.31 26.721 L61.905 29.568 L62.5 34.097 L63.095 40 L63.69 46.874 L64.286 54.25 L64.881 61.626 L65.476 68.5 L66.071 74.403 L66.667 78.932 L67.262 81.779 L67.857 82.75 L68.452 81.779 L69.048 78.932 L69.643 74.403 L70.238 68.5 L70.833 61.626 L71.429 54.25 L72.024 46.874 L72.619 40 L73.214 34.097 L73.81 29.568 L74.405 26.721 L75 25.75 L75.595 26.721 L76.19 29.568 L76.786 34.097 L77.381 40 L77.976 46.874 L78.571 54.25 L79.167 61.626 L79.762 68.5 L80.357 74.403 L80.952 78.932 L81.548 81.779 L82.143 82.75 L82.738 81.779 L83.333 78.932 L83.929 74.403 L84.524 68.5 L85.119 61.626 L85.714 54.25 L86.31 46.874 L86.905 40 L87.5 34.097 L88.095 29.568 L88.69 26.721 L89.286 25.75 L89.881 26.721 L90.476 29.568 L91.071 34.097 L91.667 40 L92.262 46.874 L92.857 54.25 L93.452 61.626 L94.048 68.5 L94.643 74.403 L95.238 78.932 L95.833 81.779 L96.429 82.75 L97.024 81.779 L97.619 78.932 L98.214 74.403 L98.81 68.5 L99.405 61.626 L100 54.25' fill='none' stroke='black' stroke-width='1.6' vector-effect='non-scaling-stroke' stroke-linejoin='round'/%3E%3C/svg%3E")}
 /* 다 지우면 누를 대상이 사라져 되돌릴 수 없으므로 편집 중에는 빈 자리를 보여준다 */
 .editing .noren .jp .bv:empty::before{content:"업종";opacity:.5}
 .editing .noren .ko .bv:empty::before{content:"한 줄 소개";opacity:.5}
@@ -2946,26 +2990,27 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <label class="chk" id="f-hours-l"><input type="checkbox" class="m3sw" id="f-hours"> 영업시간</label>   <!-- 367번. 영업시간도 같은 켜고 끄기 — 1쪽에만 있다 -->
   </span>
   <div class="pgrp">띠 · 글자색 · 크기 <small class="pgonly">이 장만</small></div>
-  <label for="f-noren">띠 모양</label>
+  <label for="f-noren">상단 모양</label>   <!-- 374번. 모양과 채우기를 따로 — 「띠」는 색을 채운 바탕뿐 아니라 선만 있는 것도 있다 -->
   <select id="f-noren">
-    <!-- "노렌"(暖簾)도 "술"(천 끝 가닥)도 가게 주인이 알 이유가 없는 말이다.
-         보이는 그대로 적는다.
-         89번. 전에는 "아래가 갈라진 띠 · 낮게"가 **종류 안에 섞여** 있어서, 곧은 띠나
-         띠 없음은 낮게 할 방법이 아예 없었다. 종류와 높이를 갈랐다 -->
-    <option value="flat">곧은 띠 (기본)</option>
-    <option value="full">아래가 갈라진 띠</option>
-    <option value="wave">물결 띠</option>
-    <option value="scallop">부채 띠</option>
-    <option value="ridge">산 능선 띠</option>
-    <option value="saw">톱니 띠</option>
-    <option value="arch">아치 띠</option>
-    <option value="ribbon">리본 띠</option>
-    <option value="twin">두 겹 띠</option>
-    <option value="fade">스며드는 띠</option>
+    <option value="flat">곧은 (기본)</option>
+    <option value="full">아래가 갈라진</option>
+    <option value="wave">물결</option>
+    <option value="ripple">잔물결</option>
+    <option value="scallop">부채</option>
+    <option value="ridge">산 능선</option>
+    <option value="saw">톱니</option>
+    <option value="arch">아치</option>
+    <option value="ribbon">리본</option>
+    <option value="twin">두 겹</option>
+    <option value="stair">계단</option>
+    <option value="bunting">깃발</option>
+    <option value="stitch">점선 가장자리</option>
+    <option value="fade">스며드는</option>
     <option value="frame">가는 액자</option>
     <option value="line">가는 두 줄</option>
-    <option value="plain">띠 없음</option>
+    <option value="none">없음</option>
   </select>
+  <label class="chk" id="f-nfill-l"><input type="checkbox" class="m3sw" id="f-nfill"> 색으로 채우기</label>
   <div class="pcrow" id="r-nband"><label for="c-nband">맨 위 띠 색</label><input type="color" id="c-nband" title="맨 위 띠 색"><button type="button" class="tbtn" id="b-nband-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
   <label for="f-logo">맨 위 글자색</label>   <!-- 366번. 띠 색과 따로 — 「맨 위 색」이면 띠인지 글자인지 알 수 없었다(사용자). 글자 · 로고 어느 쪽이든 맨 위에 쓰는 색 -->
   <span class="grp">
@@ -5839,8 +5884,9 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAMdCAYAAAAI/FxO
 /* ── 글꼴 / 색 ─────────────────────────────────────────────────────── */
 /* 상단 모양. **한 곳에서만 센다** — 목록 검사(122번)와 로고색 뒤집기가 이걸 본다.
    LIGHT_NOREN 은 종이색 바탕이라 글자·로고를 먹색으로 뒤집어야 하는 것들이다(32 · 131번) */
-const NOREN_KINDS = ["full","flat","wave","scallop","ridge","saw","arch","ribbon","twin","fade","frame","line","plain"];
-const LIGHT_NOREN = ["plain","frame","line"];
+const NOREN_KINDS = ["full","flat","wave","scallop","ridge","saw","arch","ribbon","twin","fade","stair","ripple","bunting","stitch","frame","line","plain","none"];   // 374번. 계단 · 잔물결 · 깃발 · 점선 · 없음
+const LIGHT_NOREN = ["plain","frame","line","none"];
+const norenLight = (noren, fill) => LIGHT_NOREN.includes(noren) || fill === false;   // 374번. 종이색 바탕(글자 · 로고를 먹색으로) — 띠 없는 모양이거나, 모양은 있어도 색으로 채우지 않을 때
 
 /* 349번. 그림 좌우 쏠림 · 끝 잘림 바로잡기(사용자 — 「산장은 좌측이 많이 잘려 보인다」 · 「쏠리게 한 건 의도가 아니야」). 33개를 재서(칠해진 부분의 왼쪽 · 오른쪽 여백, 폭 880 기준) 가운데에서 25 넘게 벗어나거나 여백이 60 미만인 열넷(산장 · 파스타 · 맥주+파스타 · 말 · 얼룩말 · 알프스 산 · 전 · 찻주전자 · 에델바이스 · 맥주 · 소주 · 사케 · 와인 · 하이볼)을 그림 전체를 감싼 <g transform> 으로 가운데로 옮기고(바닥선 491 은 그대로), 폭이 740 을 넘는 것(말 · 얼룩말 · 알프스 산 · 전)은 바닥 가운데 기준으로 줄였다(말 · 얼룩말은 viewBox 가 `60 89 …` 라 기준점이 사용자 좌표 500 · 580 이다 — 처음에 491 을 써 아래끝이 8 올라갔다). 전은 줄이면 높이가 300 밑이 돼 0.985 만 줄였다 */
 const ART = {
@@ -6724,6 +6770,8 @@ MENU.sheets.forEach((_, i) => {
   normSeals(pg, pageDefaults(i).seals);   // 323번. 옛 장 단위 도장 → 칸마다
   normQrs(pg);   // 337번
   pg.noren = pickIn(pg.noren, NOREN_KINDS, "flat");   // 180번. 기본은 곧은 띠
+  if (pg.norenFill === false && pg.noren === "flat") pg.noren = "plain";   // 374번. 곧은 모양 + 채우기 끔 = 예전의 「띠 없음」(밑줄) 한 가지로만 적는다
+  if (pg.norenFill !== false || LIGHT_NOREN.includes(pg.noren)) delete pg.norenFill;   // 374번. 채우기 끔(false)만 적는다 — 기본(채움)은 키가 없어 옛 파일과 같다
   pg.logoColor = pickIn(pg.logoColor, ["paper","white","ink","accent","custom"], "paper");
   if (pg.topBand !== undefined && !/^#[0-9a-f]{6}$/i.test(String(pg.topBand))) delete pg.topBand;   // 366번. 맨 위 띠 색(직접 고른 것만)
   /* 296번의 도장 색 검사는 323번에 normSeals() 로(칸마다) */   // 302번. 그림 색 · 진하기는 normArts() 가 칸마다 본다
@@ -7417,7 +7465,7 @@ function drawSheet(spec){
   sheet.style.setProperty("--nscale", PS.norenScale ?? NSCALE_DEFAULT);
   sheet.style.setProperty("--logo", logoColorOf(PS)); pageColVars(sheet, PS); topBandVar(sheet, PS);   // 296번 · 366번
 
-  const noren = el("header","noren nr-" + (PS.noren || "flat"));
+  const noren = el("header","noren nr-" + (PS.noren || "flat") + (PS.norenFill === false && !LIGHT_NOREN.includes(PS.noren) ? " nr-unfill" : ""));
   // 다른 편집 자리와 같은 모양으로 맞춘다. div 에 직접 걸면 테두리가 줄 전체로 퍼진다
   const brand = (cls, key) => {
     const box = el("div", cls), v = el("span","bv");
@@ -8177,7 +8225,7 @@ const COLVAR = { ink:"var(--ink)", accent:"var(--accent)", band:"var(--band)" },
 /* ══ 366번. 색은 자리마다 따로 — 맨 위(띠 색 · 글자색) · 분류 제목(띠 색 · 글자색) · 메뉴 이름(글자색). 안 고르면 예전 모양 그대로(띠 = 조합의 띠색, 알약 = 포인트색, 글자 = 종이색 · 먹색).
    맨 위 띠 색은 장마다(`pages[].topBand`), 나머지는 공통(`SETTINGS.secBand` · `secText` · `nameText`). 「색 · 글꼴」 탭의 종이 · 글자 · 띠 · 포인트는 조합의 바탕 색으로 그대로 */
 const COLCTL = [
-  { id:"nband", page:"topBand", def:() => curTheme.band, off:() => LIGHT_NOREN.includes(P(panelPage).noren) },
+  { id:"nband", page:"topBand", def:() => curTheme.band, off:() => norenLight(P(panelPage).noren, P(panelPage).norenFill) },
   { id:"sband", g:"secBand", def:() => SETTINGS.secStyle === "pill" ? curTheme.accent : curTheme.band, off:() => !["band", "pill"].includes(SETTINGS.secStyle) },
   { id:"stx", g:"secText", def:() => ["band", "pill"].includes(SETTINGS.secStyle) ? curTheme.paper : curTheme.ink },
   { id:"ntx", g:"nameText", def:() => curTheme.ink } ];
@@ -8195,7 +8243,7 @@ function cssHex(c){ const m = String(c).match(/\d+(\.\d+)?/g); if (!m) return "#
 function logoColorOf(pg){
   if (!curTheme) return "#efe3c9";
   const lc = pg.logoColor || "paper";   // 273번. 값이 없어도 종이색과 같게 — 띠 없는 상단에서 종이 위 종이색 글자가 됐다
-  return (LIGHT_NOREN.includes(pg.noren) && lc === "paper") ? curTheme.ink : (curLC[lc] || curTheme.paper);
+  return (norenLight(pg.noren, pg.norenFill) && lc === "paper") ? curTheme.ink : (curLC[lc] || curTheme.paper);
 }
 let fontHref = "";   // 223번
 function applyLook(){
@@ -9104,12 +9152,20 @@ $("#b-nreset").onclick = () => setNScale(NSCALE_DEFAULT);   // 198번. 기본은
 $("#nsz-range").oninput  = e => { P(panelPage).norenScale = Math.round(+e.target.value)/100;
   applyLook(); render(); $("#nsz-val").textContent = Math.round(P(panelPage).norenScale*100) + "%"; nszNote(); };
 $("#nsz-range").onchange = () => touch();
+const norenSet = (shape, fill) => {   // 374번. 모양 + 채우기 → 저장하는 값(곧은 + 끔 = 「plain」, 나머지 + 끔 = norenFill:false, 선만인 모양은 채우기 키 없음)
+  const p = P(panelPage); delete p.norenFill;
+  if (shape === "flat") p.noren = fill ? "flat" : "plain";
+  else { p.noren = shape; if (!fill && !LIGHT_NOREN.includes(shape)) p.norenFill = false; }
+};
+const norenView = p => { const n = p.noren || "flat", lt = LIGHT_NOREN.includes(n); return { shape: n === "plain" ? "flat" : n, fill: !lt && p.norenFill !== false, fixed: n === "frame" || n === "line" || n === "none" }; };
 $("#f-noren").onchange  = e => {
-  P(panelPage).noren = e.target.value;
-  applyLook(); syncColorCtl();          // 띠 없음 <-> 있음 사이에서 로고색이 뒤집힌다
+  const v = norenView(P(panelPage)); norenSet(e.target.value, v.fill || (P(panelPage).noren === "none" || P(panelPage).noren === "frame" || P(panelPage).noren === "line"));
+  syncNoren(); applyLook(); syncColorCtl();          // 띠 없음 <-> 있음 사이에서 로고색이 뒤집힌다
   render();
   touch();
 };
+$("#f-nfill").onchange = e => { const v = norenView(P(panelPage)); norenSet(v.shape, e.target.checked); syncNoren(); applyLook(); syncColorCtl(); render(); touch(); };   // 374번
+function syncNoren(){ const v = norenView(P(panelPage)); $("#f-noren").value = v.shape; const c = $("#f-nfill"); c.checked = v.fill; c.disabled = v.fixed; $("#f-nfill-l").title = v.fixed ? "이 모양은 색을 채우지 않습니다" : ""; }   // 374번
 COLCTL.forEach(c => {
   $("#c-" + c.id).oninput = e => { if (c.page) P(panelPage)[c.page] = e.target.value; else setKey(c.g, e.target.value); applyLook(); touchLater(); };   // 366번
   $("#b-" + c.id + "-r").onclick = () => { if (c.page) delete P(panelPage)[c.page]; else delete SETTINGS[c.g]; applyLook(); touch(); }; });
@@ -9293,7 +9349,7 @@ function syncPage(){
   const pg = P(panelPage);
   $("#pg-title").textContent = (panelPage+1) + "쪽 · " + sheetKindName(panelPage) + " 장";
   $("#f-logo").value   = pg.logoColor || "paper";
-  $("#f-noren").value  = pg.noren || "flat";   // 234번. 기본은 곧은 띠(180번)
+  syncNoren();   // 234번. 기본은 곧은 띠(180번) · 374번. 모양 + 채우기
   { const hx = /^#/, sh = document.querySelector('.sheet[data-pi="' + panelPage + '"]');   // 296번
     /* 301번. 따라가기 칩(글자색 · 띠색 · 포인트색)을 걷었다 — 색 상자는 지금 칠해진 색을 보여 준다 */
     /* 302번. 죽은 함수 chipOld(301번에 남김)를 걷었다 */
@@ -10525,7 +10581,7 @@ $("#st-check-go").onclick = () => {
     const B = PRESETS.basic, C = PRESETS[stLook.concept] || B, ph = !!(stLook.font || stLook.colors), col = !!stLook.colors;
     PRESETS.photo = Object.assign({}, C, { name: ph ? "사진처럼" : "추천 · " + C.name, hidden:true,
       font: stLook.font || (C.font === "gungseo" ? "gothic" : C.font), art: stLook.art || (C.art === null ? "lantern" : C.art), sec: stLook.sec || (stLook.bandAt === "sec" || stLook.bandAt === "both" ? "band" : C.sec),   // 362번. 읽은 그림 · 분류 제목 모양   // 궁서 · 알프스 그림은 알프스 사장님 것(규칙 A) — 다른 가게에는 본고딕 · 초롱
-      custom: stLook.colors || null, title: stLook.title || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? ((stLook.bandAt ? stLook.bandAt === "top" || stLook.bandAt === "both" : stLook.band) ? (C.noren !== "plain" ? C.noren : "flat") : "plain") : C.noren });   // 362번. 띠가 분류 제목에만 있으면 맨 위는 띠 없이
+      custom: stLook.colors || null, title: stLook.title || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? ((stLook.bandAt ? stLook.bandAt === "top" || stLook.bandAt === "both" : stLook.band) ? (C.noren !== "plain" ? C.noren : "flat") : "none") : C.noren });   // 362번. 띠가 분류 제목에만 있으면 맨 위는 띠 없이
     stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(), tf = $("#st-topfrom"); if (nm) $("#st-top").value = nm;
     { const sh = $("#st-shop"), want = nm && stShopLike(nm) ? nm : ""; if (!sh.value.trim() || sh.value === stShopAuto){ sh.value = want; stShopAuto = want; stSync(); } }   // 360번. 읽은 맨 위 글자가 가게 이름이면 상호명에도(「메뉴」 · 「안주」 같은 분류 말이면 넣지 않는다). 사용자가 직접 적은 상호명은 안 덮는다
@@ -10734,7 +10790,7 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
   if (q.leader === "none"){ S.showDots = false; delete S.leader; } else { delete S.showDots; if (q.leader === "dots") delete S.leader; else S.leader = q.leader; }
   const ex = ALPS_EXAMPLE.settings.pages || []; S.pages = S.pages || [];
   (M.sheets || []).forEach((_, i) => { const pp = S.pages[i] || (S.pages[i] = pageDefaults(i)), e = ex[i] || ex[0] || {};
-    pp.noren = q.noren; delete pp.topBand; { const sk = q.seal ?? (e.seal || "none"); pp.seals = sk && sk !== "none" ? [{ cell:SEAL_POS_DEF, seal:sk }] : []; } pp.logoColor = q.title && LIGHT_NOREN.includes(q.noren) ? "custom" : "paper"; if (pp.logoColor === "custom") S.custom.logo = q.title;   /* 364번. 읽은 가게 이름 색(띠 없는 맨 위일 때) — 로고 색 「직접 고르기」로 */   /* 323번. 조합의 도장은 오른쪽 아래 하나(칸마다 형식) */   // 296번. 조합은 색도 처음으로 · 303번. 도장 칸도
+    pp.noren = q.noren; delete pp.norenFill; delete pp.topBand; { const sk = q.seal ?? (e.seal || "none"); pp.seals = sk && sk !== "none" ? [{ cell:SEAL_POS_DEF, seal:sk }] : []; } pp.logoColor = q.title && LIGHT_NOREN.includes(q.noren) ? "custom" : "paper"; if (pp.logoColor === "custom") S.custom.logo = q.title;   /* 364번. 읽은 가게 이름 색(띠 없는 맨 위일 때) — 로고 색 「직접 고르기」로 */   /* 323번. 조합의 도장은 오른쪽 아래 하나(칸마다 형식) */   // 296번. 조합은 색도 처음으로 · 303번. 도장 칸도
     pp.arts = q.art ? (q.art === "none" ? [] : [{ cell:ART_CELL_OLD, art:q.art }]) : JSON.parse(JSON.stringify(e.arts || [])); delete pp.art; delete pp.artColor; delete pp.artOp; });   // 302번. 그림 칸 · 도장 자리도 처음으로
   const old = S.mark; S.mark = q.mark;
   if (old && old !== q.mark && markIsSym(old) && markIsSym(q.mark)){ const sw = a => a.map(t => t.split(old).join(q.mark)); (M.feet || []).forEach(f => { f.line = sw(f.line || []); f.notes = sw(f.notes || []); }); }
@@ -10743,7 +10799,7 @@ function applyPresetTo(S, M, k){   // 설정 S · 메뉴 M 에 건다 — 정하
    · 조합이 바꾸는 값(LOOK_KEYS · 장마다 PAGE_LOOK)이 곧 「모양 한 벌」이다. 지금 모양이 어느 추천 조합과 같으면 그 타일이 켜지고, 아니면 「내 조합」이 켜진다
    · 지금 모양이 어느 조합과도 다르면 그것이 내 조합이다 — 고칠 때마다(touch) SETTINGS.myLook 에 그대로 적어 둔다. 그래서 다른 조합을 눌러 봐도 내 조합은 남는다
    · 글자 크기 · 내용 · 맨 위는 조합이 안 건드린다(273번 그대로) */
-const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark","secBand","secText","nameText"], PAGE_LOOK = ["noren","arts","seals","logoColor","topBand"];   /* 366번 */   // 323번   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
+const LOOK_KEYS = ["font","bold","theme","custom","paper","secStyle","secAlign","showDots","leader","mark","secBand","secText","nameText"], PAGE_LOOK = ["noren","norenFill","arts","seals","logoColor","topBand"];   /* 366번 */   // 323번   // 296번 → 302번. 그림 칸 여섯 · 도장 자리
 function lookOf(S){ const o = {}; LOOK_KEYS.forEach(k => { if (S[k] !== undefined) o[k] = JSON.parse(JSON.stringify(S[k])); });
   o.pages = (S.pages || []).map(p => { const q = {}; PAGE_LOOK.forEach(k => { if (p && p[k] !== undefined) q[k] = JSON.parse(JSON.stringify(p[k])); }); return q; }); return o; }   // 302번. 목록(arts)은 떼어서 담는다 — 같은 목록을 가리키면 종이를 고칠 때 담아 둔 조합까지 바뀐다
 function sameLook(a, b){ const n = x => { const c = JSON.parse(JSON.stringify(x)); if (c.theme !== "custom") delete c.custom;   /* applyLook() 이 프리셋 색도 custom 에 늘 채운다(239번) — 직접 고른 색일 때만 비교 */ if (c.secAlign === "left") delete c.secAlign; if (!c.bold) delete c.bold; return JSON.stringify(c, Object.keys(c).sort()); };
@@ -10773,7 +10829,7 @@ function trackLook(){
 }
 /* 290번. 타일의 윗부분 — 띠를 쓰는 모양이면 띠 색, 종이색 상단(LIGHT_NOREN)이면 종이색에 선(액자는 테두리). 색만 칠해 「내 조합」과 「카페」가 똑같아 보였다 */
 function tileBand(i, t, noren){ const light = LIGHT_NOREN.includes(noren || "flat");
-  i.style.background = light ? t.paper : t.band; i.style.boxShadow = !light ? "none" : noren === "frame" ? "inset 0 0 0 1.5px " + t.band : "inset 0 -1.5px 0 " + t.band; }
+  i.style.background = light ? t.paper : t.band; i.style.boxShadow = !light ? "none" : noren === "frame" ? "inset 0 0 0 1.5px " + t.band : noren === "none" ? "none" : "inset 0 -1.5px 0 " + t.band; }
 function lookTile(key, name, theme, on, del, noren){
   const b = el("button", "pl-tile" + (on ? " on" : "")); b.type = "button"; b.dataset.p = key; b.title = name; b.setAttribute("aria-pressed", on ? "true" : "false");
   const t = THEMES[theme] || THEMES.night, c = el("span", "c"), band = el("i"), dot = el("em");
