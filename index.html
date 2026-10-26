@@ -2301,7 +2301,7 @@ dialog:focus-visible{outline:none}
    · 모든 창 폭 560 하나 · 위 끝은 고정(가운데 정렬이면 단계마다 위 끝이 오르내렸다) · 읽은 메뉴 확인만 화면 가득 찬 창 */
 dialog{width:min(560px, calc(100vw - 32px));margin:72px auto 16px;max-height:calc(100vh - 88px)}
 dialog#start{width:min(560px, calc(100vw - 32px))}
-dialog#start.wide{width:calc(100vw - 32px);max-width:1440px}
+dialog#start.wide{width:calc(100vw - 32px);max-width:1100px}   /* 370번. 1440 → 1100 : 처음 고르는 창(560)과 덜 벌어지게 — ② 확인 화면의 사진 · 미리보기가 나란히 들어가는 폭(사용자) */
 dialog h4{margin:18px 0 6px;font-size:15px;font-weight:700}
 dialog h3 + h4{margin-top:4px}
 dialog ul{margin:0 0 4px 18px;padding:0}
@@ -2829,11 +2829,15 @@ dialog p.st-ccount .st-seg button{padding:0 14px}
 .panel #art-opts select:disabled{opacity:.45}
 /* 325번. 사진 흐름의 넓은 틀 — ① 사진 · ③ 정하기는 머리 · 바닥 줄만 틀 폭으로, 내용은 가운데 560 기둥(늘어지지 않게). ② 확인 화면은 그대로 넓게 */
 dialog#start.wide #st-read > :not(.st-head):not(.foot2),
-dialog#start.wide #st-setup > :not(.st-head):not(.foot2){max-width:512px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+dialog#start.wide #st-setup > :not(.st-head):not(.foot2){max-width:720px;margin-left:auto;margin-right:auto;box-sizing:border-box}   /* 370번. 512 → 720 : 틀에 비해 기둥이 너무 좁았다 */
 dialog#start.wide #st-setup > input.st-in{display:block}   /* 상호명 칸만 — 처음엔 input 전부라 숨긴 파일 고르기 둘(「Choose File」)이 드러났다(찍어 보고 잡음) */
 dialog#start.wide #st-read > :not(.st-head):not(.foot2),dialog#start.wide #st-setup > :not(.st-head):not(.foot2){width:100%}
 /* 325번. 주 단추도 단계마다 같은 높이 — 넓은 틀은 높이를 고정하고 바닥 줄을 늘 바닥에(전에는 창 길이가 내용 따라 달라 673 / 923 / 736px 로 오르내렸다) */
 dialog#start.wide{height:calc(100vh - 88px)}
+/* 370번. ① 사진 올리는 칸을 크게 · 올린 사진도 크게(전에는 칸 높이 70px · 사진 240px 이고 그 아래가 통째로 비었다) */
+dialog#start.wide .st-picrow:not(.has) button.st-drop{min-height:min(260px, 34vh)}
+dialog#start.wide .st-picrow.has .st-picbox .st-picimg{width:min(440px, 52vh);height:min(440px, 52vh)}
+.st-picrow.has .st-picbox .st-rot{align-self:center}   /* 370번. 사진이 돌리기 줄보다 넓어지자 316번 때부터 숨어 있던 `align-self:end`(314번 격자 때 것)가 드러나 돌리기가 오른쪽으로 쏠렸다 */
 dialog#start.wide > .in{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column}
 dialog#start.wide > .in > div:not([hidden]){flex:1 0 auto;display:flex;flex-direction:column}
 dialog#start.wide .row2.foot2{margin-top:auto}
