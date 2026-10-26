@@ -2287,6 +2287,8 @@ dialog button:disabled,.bar button:disabled,.panel button:disabled{opacity:.38;c
 dialog button.bt-fill:disabled:hover{background:var(--ui-accent);border-color:var(--ui-accent)}
 dialog button.bt-out:disabled:hover{background:transparent}
 .pl-presets{display:grid;gap:6px}
+.noren-tiles .nthumb{display:block;width:62px;height:30px;border-radius:6px;border:1px solid rgba(240,230,205,.25);box-sizing:border-box;overflow:hidden}
+.noren-tiles .nthumb svg{display:block;width:100%;height:100%}
 .panel button.pl-tile{display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;min-height:0;padding:6px 2px;border:1px solid transparent;border-radius:10px;
   background:transparent;color:#efe3c9;line-height:1.25;text-align:center;word-break:keep-all}
 .panel button.pl-tile:hover{background:rgba(240,230,205,.08)}
@@ -2983,7 +2985,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   </span>
   <div class="pgrp">띠 · 글자색 · 크기 <small class="pgonly">이 장만</small></div>
   <label for="f-noren">상단 모양</label>   <!-- 374번. 모양과 채우기를 따로 — 「띠」는 색을 채운 바탕뿐 아니라 선만 있는 것도 있다 -->
-  <select id="f-noren">
+  <div class="pl-presets noren-tiles" id="g-noren" role="group" aria-label="상단 모양"></div>   <!-- 375번. 이름만으로는 어떤 모양인지 알 수 없다(사용자) — 그림으로 고른다. 아래 select 는 같은 값을 쥔다(검사 · 접근성) -->
+  <select id="f-noren" hidden>
     <option value="flat">곧은 (기본)</option>
     <option value="full">아래가 갈라진</option>
     <option value="wave">물결</option>
@@ -8813,7 +8816,7 @@ function cleanForSave(root){
   q(".gd-block, .gd-hole, .gd-tip").forEach(n => n.remove());   // 269번. 가이드 중에 저장해도 안 남게
   q("#f-presets, #f-mine").forEach(n => { n.textContent = ""; n.removeAttribute("data-keys"); });   // 284 · 286번
   q("#f-shop").forEach(n => n.removeAttribute("style"));   // 290번. 글자 길이로 잰 폭
-  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles, #g-art").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다) · 355번. #g-art(그림 격자)도 — 꾸미기 창을 한 번 열면 칸마다 그림 코드(data-h)가 단추에 붙어 저장본이 2만 바이트쯤 커졌다(t24 가 늘 실패하던 까닭 — 302번 격자부터). 열 때 syncPage 가 다시 만든다
+  q("#ptabs, #pgpick, #f-wfields, #btpick, #f-bottle, #lay-info, #nsz-val, #sz-val, #ow-msg, #ow-sub, #f-tiles, #st-tiles, #g-art, #g-noren").forEach(n => { n.textContent = ""; });   // 268번 모양 고르기(이미지가 든다) · 355번. #g-art(그림 격자)도 — 꾸미기 창을 한 번 열면 칸마다 그림 코드(data-h)가 단추에 붙어 저장본이 2만 바이트쯤 커졌다(t24 가 늘 실패하던 까닭 — 302번 격자부터). 열 때 syncPage 가 다시 만든다
   q("#aipanel").forEach(n => n.setAttribute("hidden", ""));   // 357번. [AI] 창은 열 때 JS 가 채운다 — 닫힌 채 · 빈 채로
   q("#ai-list, #ai-sub, #ai-count").forEach(n => { n.textContent = ""; });
   q(".pcn").forEach(n => { n.textContent = ""; });
@@ -9155,7 +9158,38 @@ $("#f-noren").onchange  = e => {
   touch();
 };
 $("#f-nfill").onchange = e => { const v = norenView(P(panelPage)); norenSet(v.shape, e.target.checked); syncNoren(); applyLook(); syncColorCtl(); render(); touch(); };   // 374번
-function syncNoren(){ const v = norenView(P(panelPage)); $("#f-noren").value = v.shape; const c = $("#f-nfill"); c.checked = v.fill; c.disabled = v.fixed; $("#f-nfill-l").title = v.fixed ? "이 모양은 색을 채우지 않습니다" : ""; }   // 374번
+const ntProf = {   // 375번. 그림으로 고르는 칸 — 아래 가장자리의 모양(x · 깊이%). 실제 상단 CSS 와 같은 점이다
+  ridge:[[0,40],[10,78],[20,0],[30,94],[40,0],[50,100],[60,0],[70,94],[80,0],[90,78],[100,40]],
+  saw:[[0,30],[10,100],[20,30],[30,100],[40,30],[50,100],[60,30],[70,100],[80,30],[90,100],[100,30]],
+  ribbon:[[0,100],[50,42],[100,100]],
+  arch:Array.from({ length:21 }, (_, k) => [50 + 52 * Math.cos(Math.PI - k * Math.PI / 20), 100 * Math.sin(k * Math.PI / 20)]),
+  wave:[0, 1, 2, 3, 4].flatMap(i => Array.from({ length:9 }, (_, k) => [i * 20 + 10 - 10 * Math.cos(Math.PI * k / 8), 100 * Math.sin(Math.PI * k / 8)])),
+  scallop:[0, 1, 2, 3, 4].flatMap(i => Array.from({ length:9 }, (_, k) => [i * 20 + 10 - 10 * Math.cos(Math.PI * k / 8), 100 - 100 * Math.sin(Math.PI * k / 8)])),
+  ripple:Array.from({ length:121 }, (_, k) => [k * 100 / 120, 55 - 30 * Math.sin(2 * Math.PI * k / 24)]) };
+function ntSvg(kind, fill){   // 100 × 36 의 작은 그림 — 채우기를 끄면 가장자리 선만
+  const th = curTheme || {}, band = th.band || "#335", ink = th.ink || "#222", paper = th.paper || "#fff", f1 = v => Math.round(v * 10) / 10, Y = v => f1(22 + 14 * v / 100);
+  const path = (d, a) => '<path d="' + d + '" ' + a + '/>', line = d => path(d, 'fill="none" stroke="' + ink + '" stroke-width="1.6" stroke-linejoin="round"');
+  const prof = ntProf[kind], pd = prof ? prof.map(p => f1(p[0]) + " " + Y(p[1])).join("L") : "";
+  const fixed = ["frame", "line", "none"].includes(kind), on = fill && !fixed; let g = "";
+  if (kind === "frame") g = '<rect x="6" y="6" width="88" height="24" fill="none" stroke="' + ink + '" stroke-width="1.2" opacity=".7"/>';
+  else if (kind === "line") g = line("M0 28H100") + line("M0 32H100");
+  else if (kind === "none") g = "";
+  else if (kind === "flat") g = on ? path("M0 0H100V30H0Z", 'fill="' + band + '"') : line("M0 30H100");
+  else if (kind === "full") g = on ? '<rect width="100" height="22" fill="' + band + '"/>' + [0, 1, 2, 3, 4].map(i => '<rect x="' + (i * 20 + (i ? .8 : 0)) + '" y="22" width="' + (20 - (i ? .8 : 0) - (i < 4 ? .8 : 0)) + '" height="14" fill="' + band + '"/>').join("") : [0, 1, 2, 3, 4].map(i => line("M" + (i * 20 + (i ? .8 : 0)) + " 22V35H" + ((i + 1) * 20 - (i < 4 ? .8 : 0)) + "V22")).join("");
+  else if (kind === "twin") g = on ? '<rect width="100" height="20" fill="' + band + '"/><rect y="26" width="100" height="6" fill="' + band + '"/>' : line("M0 20H100") + line("M0 31H100");
+  else if (kind === "fade") g = on ? '<defs><linearGradient id="ntf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + band + '"/><stop offset="1" stop-color="' + band + '" stop-opacity="0"/></linearGradient></defs><rect width="100" height="22" fill="' + band + '"/><rect y="22" width="100" height="14" fill="url(#ntf)"/>' : '<defs><linearGradient id="ntl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + ink + '" stop-opacity="0"/><stop offset=".3" stop-color="' + ink + '"/><stop offset=".7" stop-color="' + ink + '"/><stop offset="1" stop-color="' + ink + '" stop-opacity="0"/></linearGradient></defs><rect y="30" width="100" height="2" fill="url(#ntl)"/>';
+  else if (kind === "stitch") g = (on ? '<rect width="100" height="22" fill="' + band + '"/>' : "") + Array.from({ length:12 }, (_, i) => '<rect x="' + (i * 8.4 + 1) + '" y="' + (on ? 27 : 30) + '" width="5" height="' + (on ? 5 : 2) + '" fill="' + (on ? band : ink) + '"/>').join("");
+  else g = on ? path("M0 0H100L" + prof.slice().reverse().map(p => f1(p[0]) + " " + Y(p[1])).join("L") + "Z", 'fill="' + band + '"') : line("M" + pd);
+  const tc = on ? paper : ink;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 36" preserveAspectRatio="none">' + g + '<rect x="32" y="9" width="36" height="4" rx="2" fill="' + tc + '" opacity=".85"/><rect x="40" y="16" width="20" height="2.4" rx="1.2" fill="' + tc + '" opacity=".5"/></svg>';
+}
+function noren_tiles(v){   // 375번. 상단 모양을 그림으로 고른다
+  const box = $("#g-noren"); if (!box) return; box.innerHTML = "";
+  [...$("#f-noren").options].forEach(o => { const b = el("button", "pl-tile" + (o.value === v.shape ? " on" : "")); b.type = "button"; b.dataset.k = o.value; b.title = o.textContent; b.setAttribute("aria-pressed", o.value === v.shape ? "true" : "false");
+    const c = el("span", "nthumb"); c.style.background = (curTheme || {}).paper || "#fff"; c.innerHTML = ntSvg(o.value, v.fill); b.append(c, document.createTextNode(o.textContent.replace(" (기본)", "")));
+    b.onclick = () => { const sel = $("#f-noren"); sel.value = o.value; sel.dispatchEvent(new Event("change", { bubbles:true })); }; box.append(b); });
+}
+function syncNoren(){ const v = norenView(P(panelPage)); $("#f-noren").value = v.shape; const c = $("#f-nfill"); c.checked = v.fill; c.disabled = v.fixed; $("#f-nfill-l").title = v.fixed ? "이 모양은 색을 채우지 않습니다" : ""; noren_tiles(v); }   // 374번
 COLCTL.forEach(c => {
   $("#c-" + c.id).oninput = e => { if (c.page) P(panelPage)[c.page] = e.target.value; else setKey(c.g, e.target.value); applyLook(); touchLater(); };   // 366번
   $("#b-" + c.id + "-r").onclick = () => { if (c.page) delete P(panelPage)[c.page]; else delete SETTINGS[c.g]; applyLook(); touch(); }; });
