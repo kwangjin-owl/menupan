@@ -10096,7 +10096,7 @@ function readLook(lk, px){
     const bx = String(lk["제목 위치"] || "").match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/);   // 371번. AI 는 제목 글자의 자리(상자)만 말하고, 색은 사진 픽셀에서 읽는다
     const ts = bx && px ? titlePix(px, bx.slice(1, 5).map(Number)) : null, tc = ts || ti;
     if (tc && dist(tc, ink) > 60 && cr(pa, tc) >= 2) L.title = tc; }   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
-  L.band = !/띠\s*없음/.test(col) && !!band;
+  { const bp = String(lk["띠 위치"] || ""); L.band = !!band && (bp ? !/없/.test(bp) : !/띠\s*없음/.test(col)); }   // 372번. 맨 위 띠 유무는 「띠 위치」 줄로 본다 — 색 줄에 「띠 없음」이 함께 적혀도(맨 위만 없다는 뜻) 분류 띠 색은 살린다
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
     if (/알약/.test(sv)) L.sec = "pill"; else if (/띠/.test(sv)) L.sec = "band"; else if (/밑줄|선/.test(sv)) L.sec = "line";
     if (/둘/.test(bv)) L.bandAt = "both"; else if (/분류/.test(bv)) L.bandAt = "sec"; else if (/맨\s*위|상단/.test(bv)) L.bandAt = "top"; else if (/없/.test(bv)) L.bandAt = "none";
