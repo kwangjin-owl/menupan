@@ -1688,7 +1688,7 @@ def t64(b, f):
         r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
     try:
         pg.goto(url('p64_' + f)); pg.wait_for_timeout(500); pg.route('**/api/read', h)
-        G = "()=>({hd:document.querySelector('#st-nhd').textContent, btn:!document.querySelector('#st-typo').hidden, nl:[...document.querySelectorAll('#st-nl li')].map(x=>x.textContent)})"
+        G = "()=>({chips:[...document.querySelectorAll('#st-readsum .chip')].map(x=>x.textContent), why:(document.querySelector('#st-readsum .why')||{}).textContent, sub:document.querySelector('#st-typosub').textContent, hd:document.querySelector('#st-nhd').textContent, btn:!document.querySelector('#st-typo').hidden, nl:[...document.querySelectorAll('#st-nl li')].map(x=>x.textContent)})"
         def run(txt):
             pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', txt); pg.click('#st-appgo'); pg.wait_for_timeout(300)
             if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
@@ -2335,7 +2335,7 @@ def judge(t, r):
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
         if t == 't64':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = r['before']['hd'] == '같은 이름 · 가격 형식은 문제가 없습니다' and r['before']['btn'] and r['after']['hd'] == '점검할 곳이 1건 남아 있습니다' and not r['after']['btn'] and r['after']['nl'] == ['맞춤법 의견 1건 — 네이가츠동 → 네기가츠동'] and r['shadow'] == 'none' and r['scale'] == [0.91, True, 1] and not r['err']
+            ok = r['before']['hd'] == '같은 이름 · 가격 형식은 문제가 없습니다' and r['before']['btn'] and r['after']['hd'] == '점검할 곳이 1건 남아 있습니다' and not r['after']['btn'] and r['after']['nl'] == ['맞춤법 의견 1건 — 네이가츠동 → 네기가츠동'] and r['shadow'] == 'none' and r['scale'] == [0.77, True, 1] and r['before']['sub'] == '맞춤법: 아직 안 봤습니다' and r['after']['sub'] == '맞춤법: AI 의견 1건' and r['before']['chips'][:2] == ['메뉴 2개', '분류 1개'] and '제목 색 못 읽음' in r['before']['chips'] and r['before']['why'] and not r['err']
             return ok, f"376번 누르기 전 {r['before']} · 누른 뒤 {r['after']} · 없음 미리보기 선 {r['shadow']} · [상단 크기, 맞춤법 봄, 의견 수] {r['scale']}"
         if t == 't63':
             if r.get('fail'): return False, f"실패: {r['fail']}"

@@ -2573,7 +2573,12 @@ dialog .st-notes{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:
 dialog .st-notes .st-nhd{margin:0;font-size:14px;font-weight:700}
 dialog .st-notes ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.55}
 dialog .st-notes.ok .st-nhd{font-weight:600}
-dialog .st-notes .st-typo{margin:8px 0 0}
+dialog .st-notes .st-typorow{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:13px}
+dialog #st-readsum{font-size:13px;margin-top:12px}
+dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
+dialog #st-readsum .chip{display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:999px;background:#f3ead4;color:#241c12;font-size:12.5px;line-height:1.6}
+dialog #st-readsum .chip.warn{background:#f6d9d3;color:#8a2a1c}
+dialog #st-readsum small.why{display:block;margin:0 0 4px;font-size:12px;color:#6b5d48}
 dialog #st-readsum i.sw{display:inline-block;width:12px;height:12px;margin:0 3px -1px;border:1px solid rgba(0,0,0,.35);border-radius:2px}
 dialog b.st-stage{display:block;margin-bottom:2px;font-weight:700;color:var(--ui-accent)}   /* 361번 */   /* 365번. 붉은 단계 안내와 아래 설명을 다른 줄로(사용자 — 한 줄로 이어져 읽기 어려웠다) */
 .st-cpaper.looked{background-color:var(--ck-paper);color:var(--ck-ink)}   /* 361번. 읽은 종이색 */
@@ -3349,7 +3354,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <p class="sub st-cap">미리보기</p>   <!-- 293번 -->
     <div class="st-prev" id="st-prev"></div>
     <p class="sub st-note" id="st-readsum" hidden></p>   <!-- 352번. 사진에서 AI 가 읽어 낸 모양 한 줄 -->
-    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button><p class="sub st-note" id="st-typosub"></p></div>
+    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p><div class="st-typorow"><span id="st-typosub"></span><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button></div></div>
     <label class="st-lbl" for="st-shop">파일 이름 <small>저장할 때 이름이 됩니다</small></label>   <!-- 293번. 아래 「저장하면 ○○.html 로 내려받아집니다」는 걷었다 — 배포 주소에서는 자동 저장이라 사실과 달랐고, 같은 말을 두 줄로 했다 -->
     <input type="text" id="st-shop" class="st-in" autocomplete="off" placeholder="예: 우리 식당">   <!-- 291번. 빈칸이 무엇을 받는지 -->
     <p class="sub st-help" id="st-fnprev"></p>   <!-- 373번. 저장되는 실제 파일 이름 -->
@@ -9985,7 +9990,7 @@ $("#st-go").onclick = () => {
   if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages.forEach(pp => { pp.autofit = true; }); }   // 341번. 모든 장   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text && stParsed && stLook.titleW && top){   // 376번. 제목 글자 크기 — 사진에서 제목이 종이 폭의 몇 분의 몇이었는지에 맞춘다(고정 크기라 사진보다 컸다)
     const emw = [...top].reduce((a, ch) => a + (/[가-힣ㄱ-ㅎ一-鿿]/.test(ch) ? 1 : /\s/.test(ch) ? .3 : /[A-Z]/.test(ch) ? .68 : .55) + .06, 0), paperPx = stLook.orient === "landscape" ? 1123 : 794;
-    if (emw > 0) settings.pages[0].norenScale = Math.round(Math.min(1.2, Math.max(NSCALE_MIN, stLook.titleW * paperPx / emw / 62)) * 100) / 100; }
+    if (emw > 0) settings.pages[0].norenScale = Math.round(Math.min(1.2, Math.max(NSCALE_MIN, stLook.titleW * .85 * paperPx / emw / 62)) * 100) / 100; }
   if (text) settings.topMode = "text"; else { settings.logoImg = stLogo.src; settings.logoAR = stLogo.ar; }
   if (stParsed){ const seenT = new Set(); aiCarry = { ran:stTypoRan, typos:stFinalPages().flatMap(x => x.typos || []).filter(t => { const k = t.from + "→" + t.to; if (seenT.has(k)) return false; seenT.add(k); return true; }), ign:[...stCkIgnore] }; }   // 354번. 확인 화면에서 본 맞춤법 의견 · 무시한 것을 [AI] 창으로
   const cn = stPreset === "photo" && stLook.concept && PRESETS[stLook.concept] ? PRESETS[stLook.concept].name : ""; const fromPic = !!stParsed; stParsed = null;   // 341번
@@ -10182,6 +10187,7 @@ function readLook(lk, px){
     const bx = String(lk["제목 위치"] || "").match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/);   // 371번. AI 는 제목 글자의 자리(상자)만 말하고, 색은 사진 픽셀에서 읽는다
     const ts = bx && px ? titlePix(px, bx.slice(1, 5).map(Number)) : null, tc = ts || ti;
     if (tc && dist(tc, ink) > 60 && cr(pa, tc) >= 2) L.title = tc;
+    if (!L.title) L.titleWhy = !bx ? "제목 위치를 받지 못함" : !px ? "사진 픽셀이 없음" : !ts ? "제목 상자 안에서 색을 못 찾음 (상자 " + bx.slice(1, 5).join(" ") + ")" : "찾은 색 " + ts + " 이 종이 · 글자와 비슷해 뺌";   // 377번. 제목 색을 못 읽은 까닭 — 확인 화면에 한 줄
     if (bx){ const n4 = bx.slice(1, 5).map(Number), k = Math.max(...n4) > 100 ? 1000 : 100, w = Math.abs(n4[2] - n4[0]) / k; if (w >= .05 && w <= 1) L.titleW = w; } }   /* 376번. 제목 상자의 가로 폭(사진 폭의 몇 분의 몇) — 편집창 제목 크기를 사진에 맞춘다. 0~1000 으로 답해도 받는다 */   /* 368번. 3 → 2 : 사진의 금색 제목(흰 종이 위 약 2:1)이 버려졌다(사용자). 더 연한 색은 여전히 버린다 */
   { const bp = String(lk["띠 위치"] || ""); L.band = !!band && (bp ? !/없/.test(bp) : !/띠\s*없음/.test(col)); }   // 372번. 맨 위 띠 유무는 「띠 위치」 줄로 본다 — 색 줄에 「띠 없음」이 함께 적혀도(맨 위만 없다는 뜻) 분류 띠 색은 살린다
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
@@ -10646,23 +10652,26 @@ function menuFindings(pages){   // 354번. 무시 열쇠(key)에는 「N쪽 · �
 function stFinalPages(){ return stPgsFinal || [{ secs:stParsed || [], typos:stTypos, n:1, look:stLook }]; }
 function stReadInfo(){   // 352 · 353번. [이대로 시작] 화면 — 사진에서 읽어 낸 모양 한 줄 + 점검을 종류별로 간추려(어디서 고치는지 함께)
   const lk = stLook || {}, FN = { myeongjo:"명조", gothic:"고딕", hand:"손글씨", round:"둥근 글꼴", gungseo:"붓 · 궁서" }, sm = $("#st-readsum"), box = $("#st-notes"), P = stFinalPages();
-  const nsec = P.reduce((a, x) => a + x.secs.length, 0), n = P.reduce((a, x) => a + x.secs.reduce((b, y) => b + y.items.length, 0), 0), bits = [];
-  bits.push((P.length > 1 ? P.length + "쪽 · " : "") + "메뉴 " + n + "개 · 분류 " + nsec + "개");
-  if (lk.concept && PRESETS[lk.concept]) bits.push(PRESETS[lk.concept].name);
-  if (lk.sec) bits.push("분류 제목 " + { line:"밑줄", band:"색 띠", pill:"알약" }[lk.sec]);   // 362번
-  if (lk.cols) bits.push(lk.cols + "단"); if (lk.orient) bits.push(lk.orient === "landscape" ? "가로" : "세로"); if (lk.font) bits.push(FN[lk.font]);
-  sm.textContent = "사진에서 읽은 것: " + bits.join(" · ");
-  if (lk.colors){ const sw = c => { const i = el("i"); i.className = "sw"; i.style.background = c; return i; }; sm.append(" · 종이", sw(lk.colors.paper), "글자", sw(lk.colors.ink)); if (lk.title) sm.append(" 제목", sw(lk.title)); }   // 368번. 읽은 제목 색도 보여 준다 — 읽혔는지 안 읽혔는지 알 수 없었다
-  sm.append(stPreset === "photo" ? " — 이 모양으로 시작합니다. 아래 조합에서 바꿀 수 있습니다." : "");
-  if (lk.art && stPreset === "photo"){ const nm = Object.keys(ART_KO).find(k => ART_KO[k] === lk.art); sm.append(" AI가 가게에 어울리는 그림(" + nm + ")을 더했습니다 — 사진에 있던 것이 아니며, 꾸미기에서 바꾸거나 뺄 수 있습니다."); }   // 362번. 사진에 없는 것을 더했다고 알린다
+  const nsec = P.reduce((a, x) => a + x.secs.length, 0), n = P.reduce((a, x) => a + x.secs.reduce((b, y) => b + y.items.length, 0), 0);
+  sm.textContent = "";   // 377번. 긴 줄글 대신 짧은 칩으로 — 무엇을 읽었는지 한눈에
+  const lab = el("b", "lab"); lab.textContent = "사진에서 읽은 것"; sm.append(lab);
+  const chip = (t, cls) => { const c = el("span", "chip" + (cls ? " " + cls : "")); c.append(t); sm.append(c); return c; }, sw = c => { const i = el("i"); i.className = "sw"; i.style.background = c; return i; };
+  if (P.length > 1) chip(P.length + "쪽");
+  chip("메뉴 " + n + "개"); chip("분류 " + nsec + "개");
+  if (lk.concept && PRESETS[lk.concept]) chip(PRESETS[lk.concept].name);
+  if (lk.sec) chip("분류 제목 " + { line:"밑줄", band:"색 띠", pill:"알약" }[lk.sec]);   // 362번
+  if (lk.cols) chip(lk.cols + "단"); if (lk.orient) chip(lk.orient === "landscape" ? "가로" : "세로"); if (lk.font) chip(FN[lk.font]);
+  if (lk.colors){ chip("종이", null).append(sw(lk.colors.paper)); chip("글자", null).append(sw(lk.colors.ink)); if (lk.title) chip("제목", null).append(sw(lk.title)); else chip("제목 색 못 읽음", "warn"); }   // 368번. 읽은 제목 색도 보여 준다 · 377번. 못 읽었으면 그렇다고
+  if (lk.art && stPreset === "photo"){ const nm = Object.keys(ART_KO).find(k => ART_KO[k] === lk.art); chip("AI가 더한 그림: " + nm).title = "사진에 있던 것이 아닙니다. 꾸미기에서 바꾸거나 뺄 수 있습니다"; }   // 362번. 사진에 없는 것을 더했다고 알린다
+  if (lk.colors && !lk.title && lk.titleWhy){ const w = el("small", "why"); w.textContent = "제목 색: " + lk.titleWhy; sm.append(w); }
   sm.hidden = false;
   const L = menuFindings(P).filter(f => !stCkIgnore.has(f.key)), nl = $("#st-nl"); nl.innerHTML = "";
   const names = (k, fn) => { const a = [...new Set(L.filter(f => f.kind === k).map(fn))]; return a.slice(0, 3).join(" · ") + (a.length > 3 ? " 외 " + (a.length - 3) : ""); };
   const cnt = k => k === "dup" ? new Set(L.filter(f => f.kind === k).map(f => f.msg.match(/「(.*?)」/)[1])).size : L.filter(f => f.kind === k).length;
   [["dup", "같은 이름의 메뉴", f => f.msg.match(/「(.*?)」/)[1]], ["price", "가격 확인", f => f.msg.match(/「(.*?)」/)[1]], ["typo", "맞춤법 의견", f => f.from + " → " + f.to]].forEach(([k, lab, fn]) => { if (!cnt(k)) return; const li = el("li"); li.textContent = lab + " " + cnt(k) + "건 — " + names(k, fn); nl.append(li); });
-  box.classList.toggle("ok", !L.length); $("#st-nhd").textContent = L.length ? "점검할 곳이 " + L.length + "건 남아 있습니다" : stTypoRan ? "점검할 곳이 없습니다 (이름 중복 · 가격 형식 · 맞춤법을 봤습니다)" : "같은 이름 · 가격 형식은 문제가 없습니다";   // 376번. 맞춤법은 사진을 읽을 때 AI 가 확실한 것만 곁들여 적은 것 — 따로 본 것이 아니라서 「맞춤법을 봤다」고 쓰지 않는다
-  $("#st-typo").hidden = stTypoRan; if (!stTypoRan) $("#st-typosub").textContent = "맞춤법은 사진을 읽을 때 AI가 확실한 것만 적었습니다. 사진을 잘못 읽은 글자는 못 잡습니다. 전체를 보려면 아래 버튼을 누르세요."; $("#st-typosub").hidden = !$("#st-typosub").textContent;
-  $("#st-nft").textContent = L.length ? "메뉴 이름 · 가격은 고치지 않았습니다. 시작한 뒤 위쪽 [AI] → 점검에서 항목을 누르면 종이의 그 줄로 가고, 맞춤법은 [적용]으로 바로 고칠 수 있습니다." : ""; $("#st-nft").hidden = !L.length;
+  box.classList.toggle("ok", !L.length); $("#st-nhd").textContent = L.length ? "점검할 곳이 " + L.length + "건 남아 있습니다" : stTypoRan ? "점검할 곳이 없습니다" : "같은 이름 · 가격 형식은 문제가 없습니다";   // 376번. 맞춤법은 사진을 읽을 때 AI 가 확실한 것만 곁들여 적은 것 — 따로 본 것이 아니라서 「맞춤법을 봤다」고 쓰지 않는다
+  $("#st-typo").hidden = stTypoRan; if (!stTypoRan) $("#st-typosub").textContent = "맞춤법: 아직 안 봤습니다";   // 377번. 긴 설명 대신 한 줄 — 사진을 잘못 읽은 글자는 어차피 못 잡는다는 말은 문서에
+  $("#st-nft").textContent = L.length ? "이름 · 가격은 그대로입니다. 시작한 뒤 위쪽 [AI]에서 항목을 눌러 확인하세요." : ""; $("#st-nft").hidden = !L.length;
   box.hidden = false;
 }
 $("#st-typo").onclick = async () => {   // 376번
@@ -10673,7 +10682,7 @@ $("#st-typo").onclick = async () => {   // 376번
   const label = b.textContent; b.dataset.busy = "1"; b.textContent = "보는 중…"; b.disabled = true;
   try { const found = await typoAsk(list); let add = 0;
     found.forEach(t => P.forEach(x => { x.typos = x.typos || []; if (x.typos.some(u => u.from === t.from && u.to === t.to)) return; if ((x.secs || []).some(sec => (sec.name || "").includes(t.from) || (sec.items || []).some(it => (it.name || "").includes(t.from)))){ x.typos.push(t); add++; } }));
-    stTypoRan = true; stReadInfo(); drawCkNotes(); sub.hidden = false; sub.textContent = (list.length > 120 ? "앞의 120개 이름만 봤습니다. " : "") + (add ? "AI 의견 " + add + "건을 목록에 넣었습니다." : "맞춤법이 틀린 곳을 찾지 못했습니다."); }
+    stTypoRan = true; stReadInfo(); drawCkNotes(); sub.hidden = false; sub.textContent = "맞춤법: " + (add ? "AI 의견 " + add + "건" : "틀린 곳 없음") + (list.length > 120 ? " (앞 120개만 봄)" : ""); }
   catch(e){ sub.hidden = false; sub.textContent = e.message; }
   finally { delete b.dataset.busy; b.textContent = label; b.disabled = false; }
 };
