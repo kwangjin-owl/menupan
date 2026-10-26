@@ -1704,6 +1704,7 @@ def t63(b, f):
         pg.evaluate("()=>$('#undo-btn').click()"); pg.wait_for_timeout(400)
         t2 = pg.evaluate("()=>[$('#undo .t').textContent, MENU.brand.shop]")
         out['newmenu'] = [nm0, (not t1[0]), '이전 메뉴판은 [되돌리기]' in t1[1], (not t1[2]), '새로 만들기 전의 메뉴판으로 돌아왔습니다' in t2[0], t1[3] == '새가게' and t2[1] != '새가게', False]
+        out['txt'] = pg.evaluate("()=>[!/Enter 를 누르면 줄이 바뀝니다/.test(document.querySelector('#panel').textContent), document.querySelector('#panel').lastElementChild.classList.contains('pzoom'), document.querySelector('#f-shop').placeholder, /상호명/.test(document.body.innerText), /메뉴명과/.test(document.querySelector('#panel').textContent)]")   # 368번
         out['pcn'] = pg.evaluate("()=>['nband','sband','stx','ntx'].map(i=>document.querySelector('#n-'+i).textContent)")   # 368번. 색 칸 아래 안내는 흐린 칸에만
         pg.evaluate("()=>{const e=document.querySelector('#f-secstyle'); e.value='band'; e.dispatchEvent(new Event('change',{bubbles:true}))}"); pg.wait_for_timeout(300)
         n0 = pg.evaluate("()=>getComputedStyle(document.querySelector('.sheet .row .name')).color")
@@ -1762,6 +1763,7 @@ def t62(b, f):
         out['wrap'] = pg.evaluate("()=>{const t=document.querySelector('[data-k=name]'); return [t.tagName === 'TEXTAREA', t.clientHeight > 30, t.scrollWidth <= t.clientWidth + 1, !/\\n/.test(t.value)]}")   # 363번. 긴 줄은 줄이 바뀌고 가로로 밀리지 않고 엔터는 막힌다
         out['ckt'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-cshop')).color")   # 364번. 확인 화면 가게 이름에도 읽은 색
         pg.click('#st-check-go'); pg.wait_for_timeout(300)
+        out['prev'] = pg.evaluate("()=>[getComputedStyle(document.querySelector('#st-prev')).color, document.querySelector('label[for=st-shop]').textContent.trim().slice(0, 5)]")   # 368번. 정하기 미리보기도 읽은 제목 색 · 칸 이름은 「파일 이름」
         out['preset'] = pg.evaluate("()=>[PRESETS.photo.sec, PRESETS.photo.art, PRESETS.photo.noren]")
         pg.click('#st-go'); pg.wait_for_timeout(900); pg.evaluate("()=>document.querySelectorAll('.gd-x,.gd-skip').forEach(x=>x.click())"); pg.wait_for_timeout(300)
         out['final'] = pg.evaluate("()=>[SETTINGS.secStyle, JSON.stringify(SETTINGS.pages[0].arts)]")
@@ -2291,13 +2293,13 @@ def judge(t, r):
         if t == 't63':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             bt = r['btn']
-            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
+            ok = bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['txt'] == [True, True, '파일 이름', False, False] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
                  and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
                  and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
             return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
         if t == 't62':
             if r.get('fail'): return False, f"실패: {r['fail']}"
-            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and r.get('start') == [False, False, False] and not r['err']
+            ok = r.get('drag') == [True, True, True, True] and r['look'] == ['band', 'sec', 'ramyeon', True, False] and r['preset'][0] == 'band' and r['preset'][1] == 'ramyeon' and r['final'][0] == 'band' and 'ramyeon' in r['final'][1] and r['none'] == ['', '', ''] and r.get('wrap') == [True] * 4 and r.get('title') == ['custom', '#8a8a1e', 'rgb(138, 138, 30)'] and r.get('ckt') == 'rgb(138, 138, 30)' and r.get('artin') == [True] * 3 and r.get('start') == [False, False, False] and r.get('prev') == ['rgb(138, 138, 30)', '파일 이름'] and not r['err']
             return ok, f"362번 [끌기 막 · 멈추면 사라짐 · 놓으면 새 탭 막힘 · 사진 올라옴] {r.get('drag')} · 읽은 모양 [분류 제목, 띠 위치, 그림, 미리보기 띠] {r.get('look')} · 정한 값 {r.get('preset')} · 편집 화면 {r.get('final')} · 줄 없으면 {r.get('none')} · 364번 [가게 이름 색 로고 색으로 · 확인 화면 색 · 그림 여백선 안] {r.get('title')} {r.get('ckt')} {r.get('artin')} · 363번 긴 줄 [칸 · 줄바뀜 · 가로 안 밀림 · 엔터 막힘] {r.get('wrap')} · 오류 {r['err'][:2]}"
         if t == 't61':
             if r.get('fail'): return False, f"실패: {r['fail']}"
