@@ -1773,6 +1773,39 @@ def t64(b, f):
         ctx.close()
     return out
 
+def t67(b, f):
+    """381번 — 사진에서 시작: 맨 위 색 띠는 「띠 위치」가 맨 위 · 둘 다 일 때만 채운다(줄이 없거나 분류 제목 · 없음이면 맨 위는 띠 없이). 칩 · 점검 박스는 두 줄(결과 · 맞춤법+버튼 오른쪽)."""
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p67_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    base = "가게: 행복한 그릇\n제목 위치: 30 3 · 70 9\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 #8a3b2a\n"
+    body = "[덮밥]\n네이가츠동 | 9000\n에비동 | 9500\n"
+    ctx = b.new_context(viewport={'width': 1400, 'height': 900}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    def h(r):
+        r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
+    try:
+        pg.goto(url('p67_' + f)); pg.wait_for_timeout(500); pg.route('**/api/read', h)
+        for name, extra in [('none_line', ''), ('top', '띠 위치: 맨 위\n'), ('both', '띠 위치: 둘 다\n'), ('sec', '띠 위치: 분류 제목\n'), ('no', '띠 위치: 없음\n')]:
+            pg.goto(url('p67_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
+            pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', base + extra + body); pg.click('#st-appgo'); pg.wait_for_timeout(300)
+            if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
+            pg.wait_for_timeout(300)
+            chips = pg.evaluate("()=>[...document.querySelectorAll('#st-readsum .chip')].map(x=>x.textContent).filter(t=>t.includes('맨 위'))")
+            hasband = pg.evaluate("()=>document.querySelector('.st-cpaper').classList.contains('hasband')")
+            pg.click('#st-go'); pg.wait_for_timeout(700)
+            out[name] = [chips, hasband, pg.evaluate("()=>SETTINGS.pages[0].noren")]
+        pg.goto(url('p67_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
+        pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', base + body); pg.click('#st-appgo'); pg.wait_for_timeout(300)
+        if pg.is_visible('#st-check-go'): pg.click('#st-check-go')
+        pg.wait_for_timeout(300)
+        out['rows'] = pg.evaluate("()=>{const r=[...document.querySelectorAll('#st-notes .st-nrow')], bt=document.querySelector('#st-typo').getBoundingClientRect(), box=document.querySelector('#st-notes').getBoundingClientRect(); return [r.length, bt.right > box.right - 20, r[1].contains(document.querySelector('#st-typo')), document.querySelector('#st-typosub').textContent]}")
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
 def t63(b, f):
     """366번 — 위쪽 단추 [편집 · AI · 꾸미기 · 미리보기]는 이름이 안 바뀌고 색으로만 켜짐을 알린다(편집이 꺼진 때 붉지 않음 · 편집과 AI 동시 켜짐).
     색 칸 나누기: 맨 위 띠 색 · 맨 위 글자색 · 분류 제목 띠 색 · 분류 제목 글자색 · 메뉴 이름 글자색이 따로 먹고 · 기본으로 돌리고 · 추천 조합을 고르면 지워지고 · 저장해 다시 열면 남는다"""
@@ -2400,6 +2433,15 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't67':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            ok = (r['none_line'][0] == ['맨 위 색 띠 없음 (못 읽음)'] and r['none_line'][1] is False and r['none_line'][2] == 'none'
+                  and r['top'][0] == ['맨 위 색 띠 있음'] and r['top'][1] is True and r['top'][2] != 'none'
+                  and r['both'][1] is True and r['both'][2] != 'none'
+                  and r['sec'][0] == ['맨 위 색 띠 없음'] and r['sec'][1] is False and r['sec'][2] == 'none'
+                  and r['no'][1] is False and r['no'][2] == 'none'
+                  and r['rows'][0] == 2 and r['rows'][1] and r['rows'][2] and not r['err'])
+            return ok, f"381번 맨 위 띠 [줄 없음 {r['none_line']} · 맨 위 {r['top']} · 둘 다 {r['both']} · 분류 {r['sec']} · 없음 {r['no']}] · 점검 박스 {r['rows']}"
         if t == 't66':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             w, n = r['with'], r['none']
@@ -2473,10 +2515,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

@@ -2581,7 +2581,10 @@ dialog .st-notes.ok .st-nhd{font-weight:600}
 dialog .st-notes .st-typo{background:#5b4630;color:#fff8e6;border:1px solid #5b4630;font-weight:600}   /* 379번. 바탕과 같은 색이라 버튼으로 안 보였다(사용자) — 어두운 갈색 채움(붉은 주 버튼 [이대로 시작]과 겹치지 않게) */
 dialog .st-notes .st-typo:hover{background:#6f5740}
 dialog .st-notes .st-typo:disabled{opacity:.6}
-dialog .st-notes .st-typorow{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:13px}
+dialog .st-notes .st-nrow{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;min-height:30px;font-size:13px}
+dialog .st-notes .st-nrow2{border-top:1px solid #cbb98f;margin-top:6px;padding-top:6px}
+dialog .st-notes .st-nrow > span{flex:1;min-width:0}
+dialog .st-notes #st-typo{flex:none}   /* 381번. 한 줄에 하나씩 — 점검 결과 · 맞춤법, 버튼은 오른쪽 끝 */
 dialog #st-readsum{font-size:13px;margin-top:12px}
 dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
 dialog #st-readsum .chip{display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:999px;background:#e8dcc0;color:#241c12;font-size:12.5px;line-height:1.6}
@@ -3370,7 +3373,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <p class="sub st-cap">미리보기</p>   <!-- 293번 -->
     <div class="st-prev" id="st-prev"></div>
     <p class="sub st-note" id="st-readsum" hidden></p>   <!-- 352번. 사진에서 AI 가 읽어 낸 모양 한 줄 -->
-    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><p class="st-nhd" id="st-nhd"></p><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p><div class="st-typorow"><span id="st-typosub"></span><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button></div></div>
+    <div class="st-notes" id="st-notes" hidden><!-- 352번. 점검 — 중복 · 가격 형식(코드로) · 맞춤법(AI 제안) --><div class="st-nrow"><span class="st-nhd" id="st-nhd"></span></div><ul id="st-nl"></ul><p class="sub st-note" id="st-nft"></p><div class="st-nrow st-nrow2"><span id="st-typosub"></span><button type="button" id="st-typo" class="st-typo">AI로 보기</button></div></div>
     <label class="st-lbl" for="st-shop">파일 이름 <small>저장할 때 이름이 됩니다</small></label>   <!-- 293번. 아래 「저장하면 ○○.html 로 내려받아집니다」는 걷었다 — 배포 주소에서는 자동 저장이라 사실과 달랐고, 같은 말을 두 줄로 했다 -->
     <input type="text" id="st-shop" class="st-in" autocomplete="off" placeholder="예: 우리 식당">   <!-- 291번. 빈칸이 무엇을 받는지 -->
     <p class="sub st-help" id="st-fnprev"></p>   <!-- 373번. 저장되는 실제 파일 이름 -->
@@ -10216,6 +10219,7 @@ function readLook(lk, px){
   { const sv = lk["분류 제목"] || "", bv = lk["띠 위치"] || "", av = lk["그림"] || "";   // 362번. 분류 제목 모양 · 띠 자리 · 어울리는 그림 — 못 읽은 것은 쓰지 않는다(콘셉트 기본값)
     if (/알약/.test(sv)) L.sec = "pill"; else if (/띠/.test(sv)) L.sec = "band"; else if (/밑줄|선/.test(sv)) L.sec = "line";
     if (/둘/.test(bv)) L.bandAt = "both"; else if (/분류/.test(bv)) L.bandAt = "sec"; else if (/맨\s*위|상단/.test(bv)) L.bandAt = "top"; else if (/없/.test(bv)) L.bandAt = "none";
+    L.topBand = L.bandAt === "top" || L.bandAt === "both";   // 381번. 맨 위를 색으로 채우는 것은 사진에 그렇다고 분명히 적힌 때만 — 「띠 위치」 줄을 못 읽으면 채우지 않는다(사진에 없는 띠를 만들지 않는다)
     const hit = Object.keys(ART_KO).sort((x, y) => y.length - x.length).find(k => av.trim() === k) || Object.keys(ART_KO).sort((x, y) => y.length - x.length).find(k => av.includes(k)); if (hit) L.art = ART_KO[hit]; }
   const cc = String(lk["콘셉트"] || ""); const ck = /와인/.test(cc) ? "wine" : /한식|국밥|백반|찌개|고깃집/.test(cc) ? "hansik" : /카페|커피|베이커리|디저트/.test(cc) ? "cafe" : /분식|김밥|떡볶이/.test(cc) ? "bunsik" : /호프|치킨|맥주|펍/.test(cc) ? "hof" : /주점|이자카야|요리|바$/.test(cc) ? "alps" : null; if (ck) L.concept = ck;   // 341번. 가게 콘셉트 — 처음 모양을 거기에 맞춘다
   return L;
@@ -10445,7 +10449,7 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   const money = v => typeof v === "number" ? v.toLocaleString("ko-KR") : String(v);   // 읽을 때 쉼표는 다시 뺀다(readCheck)
   const nc = stLook.cols || 2, land = stLook.orient === "landscape";   // 296번. 사진의 방향 · 단 수로
   { const pp = $(".st-cpaper"), C = stLook.colors;   // 361번. 사진에서 읽은 색만 먼저 비춘다(글꼴 · 꾸밈은 다음 화면에서)
-    const Cc = PRESETS[stLook.concept] || PRESETS.basic, secv = stLook.sec || (stLook.bandAt === "sec" || stLook.bandAt === "both" ? "band" : Cc.sec), topb = !!C && (stLook.bandAt ? stLook.bandAt === "top" || stLook.bandAt === "both" : !!stLook.band);   // 362번. 완성본(「사진처럼」 조합)과 같은 규칙 — 분류 제목 모양 · 맨 위 띠
+    const Cc = PRESETS[stLook.concept] || PRESETS.basic, secv = stLook.sec || (stLook.bandAt === "sec" || stLook.bandAt === "both" ? "band" : Cc.sec), topb = !!C && !!stLook.topBand;   // 362번. 완성본(「사진처럼」 조합)과 같은 규칙 — 분류 제목 모양 · 맨 위 띠
     pp.classList.toggle("looked", !!C); pp.classList.toggle("hasband", topb); pp.classList.toggle("secband", !!C && !!stLook.band && secv !== "line"); pp.classList.toggle("secpill", secv === "pill");
     ["--ck-paper", "--ck-ink", "--ck-band", "--ck-bandtx", "--ck-title"].forEach(k => pp.style.removeProperty(k));
     if (C){ pp.style.setProperty("--ck-paper", C.paper); pp.style.setProperty("--ck-ink", C.ink); if (stLook.title) pp.style.setProperty("--ck-title", stLook.title); if (stLook.band){ pp.style.setProperty("--ck-band", C.band); pp.style.setProperty("--ck-bandtx", C.paper); } } }
@@ -10642,7 +10646,7 @@ $("#st-check-go").onclick = () => {
     const B = PRESETS.basic, C = PRESETS[stLook.concept] || B, ph = !!(stLook.font || stLook.colors), col = !!stLook.colors;
     PRESETS.photo = Object.assign({}, C, { name: ph ? "사진처럼" : "추천 · " + C.name, hidden:true,
       font: stLook.font || (C.font === "gungseo" ? "gothic" : C.font), art: stLook.art || (C.art === null ? "lantern" : C.art), sec: stLook.sec || (stLook.bandAt === "sec" || stLook.bandAt === "both" ? "band" : C.sec),   // 362번. 읽은 그림 · 분류 제목 모양   // 궁서 · 알프스 그림은 알프스 사장님 것(규칙 A) — 다른 가게에는 본고딕 · 초롱
-      custom: stLook.colors || null, title: stLook.title || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? ((stLook.bandAt ? stLook.bandAt === "top" || stLook.bandAt === "both" : stLook.band) ? (C.noren !== "plain" ? C.noren : "flat") : "none") : C.noren });   // 362번. 띠가 분류 제목에만 있으면 맨 위는 띠 없이
+      custom: stLook.colors || null, title: stLook.title || null, theme: col ? "custom" : C.theme, paper: col ? "plain" : C.paper, noren: col ? (stLook.topBand ? (C.noren !== "plain" ? C.noren : "flat") : "none") : C.noren });   // 362번. 띠가 분류 제목에만 있으면 맨 위는 띠 없이
     stPreset = "photo"; stSwatches(); }
   { const nm = $("#st-cshop").value.trim(), tf = $("#st-topfrom"); if (nm) $("#st-top").value = nm;
     { const sh = $("#st-shop"), want = nm && stShopLike(nm) ? nm : ""; if (!sh.value.trim() || sh.value === stShopAuto){ sh.value = want; stShopAuto = want; stSync(); } }   // 360번. 읽은 맨 위 글자가 가게 이름이면 상호명에도(「메뉴」 · 「안주」 같은 분류 말이면 넣지 않는다). 사용자가 직접 적은 상호명은 안 덮는다
@@ -10686,7 +10690,8 @@ function stReadInfo(){   // 352 · 353번. [이대로 시작] 화면 — 사진�
   if (lk.concept && PRESETS[lk.concept]) chip(PRESETS[lk.concept].name);
   if (lk.sec) chip("분류 제목 " + { line:"밑줄", band:"색 띠", pill:"알약" }[lk.sec]);   // 362번
   if (lk.cols) chip(lk.cols + "단"); if (lk.orient) chip(lk.orient === "landscape" ? "가로" : "세로"); if (lk.font) chip(FN[lk.font]);
-  if (lk.colors){ chip("종이", null).append(sw(lk.colors.paper)); chip("글자", null).append(sw(lk.colors.ink)); if (lk.title) chip("제목", null).append(sw(lk.title)); else chip("제목 색 못 읽음", "warn"); }   // 368번. 읽은 제목 색도 보여 준다 · 377번. 못 읽었으면 그렇다고
+  if (lk.colors){ chip("종이", null).append(sw(lk.colors.paper)); chip("글자", null).append(sw(lk.colors.ink)); if (lk.title) chip("제목", null).append(sw(lk.title)); else chip("제목 색 못 읽음", "warn");
+    if (lk.topBand) chip("맨 위 색 띠 있음"); else chip(lk.bandAt ? "맨 위 색 띠 없음" : "맨 위 색 띠 없음 (못 읽음)", lk.bandAt ? "" : "warn"); }   // 368번. 읽은 제목 색도 보여 준다 · 377번. 못 읽었으면 그렇다고
   if (lk.art && stPreset === "photo"){ const nm = Object.keys(ART_KO).find(k => ART_KO[k] === lk.art); chip("AI가 더한 그림: " + nm).title = "사진에 있던 것이 아닙니다. 꾸미기에서 바꾸거나 뺄 수 있습니다"; }   // 362번. 사진에 없는 것을 더했다고 알린다
   if (lk.colors && !lk.title && lk.titleWhy){ const w = el("small", "why"); w.textContent = "제목 색: " + lk.titleWhy; sm.append(w); }
   sm.hidden = false;
