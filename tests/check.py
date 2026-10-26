@@ -4,7 +4,7 @@
        quick 은 매 작업마다, 전부는 크기 · 배치 · 맞춤 규칙을 건드렸을 때와 동결 전에(인수인계 8장). 결과는 ./_check/ 에 쌓이고 마지막에 표로 나온다.
 필요:  pip install playwright pillow --break-system-packages && playwright install chromium ;  poppler-utils(pdftotext · pdftoppm) ; node(있으면 문법 검사)
 주의:  -j 를 크게 주면 전환 도중에 찍혀 헛차이가 난다(235번). 차이가 나면 그 검사만 -j 1 로 다시 돌릴 것"""
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright  # type: ignore  # 편집기 파이썬에 playwright 가 없어도 경고 안 뜨게(검사는 설치된 곳에서 돈다)
 import json, sys, os, re, subprocess, io, time
 from PIL import Image, ImageChops
 
@@ -1953,7 +1953,7 @@ def t58(b, f):
     """만든 QR 을 읽는 도구(zxing-cpp)로 **다시 읽어** 넣은 값 그대로인지 · **자리**(위 칸 = 그 단 맨 위 · 아래 칸 = 바닥 글 옆 · 가운데 칸은 못 둔다) · 글자와 안 겹침 ·
     「한 장에 맞춤」이 QR 자리를 피함 · 20 ~ 30mm · 한 칸에 도장과 QR 하나만 · 꾸미기 창(도장 · QR 한 줄) · 저장했다 열어도 남는지 · 망가진 값 정리"""
     out = {'err': []}
-    try: import zxingcpp
+    try: import zxingcpp  # type: ignore
     except Exception: out['no_reader'] = True; return out
     ctx = b.new_context(viewport={'width': 1400, 'height': 1300}, device_scale_factor=3, accept_downloads=True); pg = ctx.new_page()
     pg.on('pageerror', lambda e: out['err'].append(str(e)))
@@ -2123,7 +2123,7 @@ def t60(b, f):
     out = {'err': []}
     src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
     open(D + 'start_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))   # 341번 — t47 이 만들어 둔 것에 기대지 않는다(안 돌았거나 옛 것이면 옛 코드로 읽는다)
-    try: import zxingcpp
+    try: import zxingcpp  # type: ignore
     except Exception: zxingcpp = None
     ctx = b.new_context(viewport={'width': 1400, 'height': 1000}, device_scale_factor=3); pg = ctx.new_page()
     pg.on('pageerror', lambda e: out['err'].append(str(e)))
