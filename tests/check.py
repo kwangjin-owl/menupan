@@ -1402,7 +1402,7 @@ def t54(b, f):
           if (parseFloat(cs.fontSize) < 12 && !b.closest('.wfrow')) bad.push(nm+' '+cs.fontSize);
           if (b.matches('.ptab-btn')){ H(b, 40, nm, r); return; }   // 탭 40
           if (b.matches('.pl-tile, .aip-it, .tbtn') || b.closest('.pgrid, .pcells, .pl-presets, .bottles, .bpick') || b.tagName === 'SELECT' && b.closest('.wfrow')) return;   // 타일 · 칸 그림 · 병 고르기(카드) · 글자 단추(규칙 I 335번 ⑤)는 높이 규칙 밖
-          const grp = b.closest('.st-pseg, #pgpick, .stepg');
+          const grp = b.closest('.st-pseg, #pgpick, .stepg, .pwtabs');   // 390번. 창 머리 탭도 나뉜 고르기
           if (grp){ H(grp, 32, nm+'(묶음)', grp.getBoundingClientRect()); return; }   // 나뉜 고르기 · [− | +] 는 묶음 바깥이 32
           H(b, 32, nm, r);
         }
@@ -1902,6 +1902,51 @@ def t69(b, f):
         ctx.close()
     return out
 
+def t70(b, f):
+    """390번 — 맞춤법 줄에 메뉴 이름 · 점검 박스 스크롤 없음(창 스크롤 하나) · 적용한 줄이 목록에 남고 줄마다 되돌림(확인 화면 · AI 창) · 안내창 테두리 단추 크림 바탕 · 회색 제목 색 버림 · 오른쪽 창 머리 탭 [꾸미기 | AI] · 켜짐 한 가지."""
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p70_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    body = "가게: 행복한 그릇\n방향: 세로\n단: 1\n[덮밥]\n가츠동 | 8000\n네기가츠동 | 8500\n김치가츠동 | 9000\n[사이드]\n타코야끼 | 3500\n오코노미야끼 | 7500\n"
+    ctx = b.new_context(viewport={'width': 1500, 'height': 1000}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    def h(r): r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
+    try:
+        pg.goto(url('p70_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
+        out['title'] = pg.evaluate("""()=>{ const a=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #c7c5c3'}, null), b=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #8f8a2e'}, null); return [a.title||null, /회색/.test(a.titleWhy||''), b.title||null] }""")
+        pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', body); pg.click('#st-appgo'); pg.wait_for_timeout(500)
+        pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'돈카츠동'},{from:'타코야끼',to:'타코야키'}); stTypoRan=true; drawCkNotes(); }"); pg.wait_for_timeout(150)
+        R = "()=>[...document.querySelectorAll('#st-cl-typo .st-cnr')].map(r=>r.querySelector('.go').textContent)"
+        out['rows'] = pg.evaluate(R)
+        out['box'] = pg.evaluate("()=>{ const b=document.querySelector('#st-cnotes'); return [getComputedStyle(b).overflowY, b.scrollHeight - b.clientHeight] }")
+        out['btbg'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-typo')).backgroundColor")
+        pg.evaluate("()=>{ [...document.querySelectorAll('#st-cl-typo .st-cnr')].find(r=>/타코야끼/.test(r.textContent)).querySelector('button.ab').click() }"); pg.wait_for_timeout(200)
+        out['applied'] = [pg.evaluate(R), pg.evaluate("()=>[...document.querySelectorAll('#st-ctab [data-k=name]')].map(x=>x.value)")]
+        pg.evaluate("()=>{ document.querySelector('#st-cl-typo .st-cnr.done button.ab').click() }"); pg.wait_for_timeout(200)
+        out['undone'] = [pg.evaluate(R), pg.evaluate("()=>[...document.querySelectorAll('#st-ctab [data-k=name]')].map(x=>x.value)")]
+        pg.click('#st-check-go'); pg.wait_for_timeout(300); pg.click('#st-go'); pg.wait_for_timeout(1200)
+        pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{guideEnd()}catch(e){} }"); pg.wait_for_timeout(300)
+        if not pg.evaluate("()=>editing"): pg.click('#b-edit'); pg.wait_for_timeout(300)
+        if pg.evaluate("()=>document.querySelector('#panel').hidden"): pg.click('#b-style'); pg.wait_for_timeout(300)
+        ST = "()=>({panel:!document.querySelector('#panel').hidden, ai:!document.querySelector('#aipanel').hidden, bs:document.querySelector('#b-style').classList.contains('on'), ba:document.querySelector('#b-ai').classList.contains('on'), ed:editing})"
+        pg.evaluate("()=>document.querySelector('#panel .pwtab[data-w=ai]').click()"); pg.wait_for_timeout(300); out['toAI'] = pg.evaluate(ST)
+        pg.mouse.move(2, 990); pg.wait_for_timeout(100)
+        out['onbg'] = pg.evaluate("()=>[getComputedStyle(document.querySelector('#b-ai')).backgroundColor, getComputedStyle(document.querySelector('#b-edit')).backgroundColor]")
+        out['ailoc'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it .s')].map(x=>x.textContent)")
+        pg.evaluate("()=>{ [...document.querySelectorAll('#ai-list .aip-it')].find(x=>/타코야끼/.test(x.textContent)).click() }"); pg.wait_for_timeout(200)
+        pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.on .aip-btns button').click() }"); pg.wait_for_timeout(300)
+        out['aidone'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate("()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name)).includes('타코야키')")]
+        pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.done button').click() }"); pg.wait_for_timeout(300)
+        out['aiundo'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate("()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name)).includes('타코야끼')")]
+        pg.evaluate("()=>document.querySelector('#aipanel .pwtab[data-w=style]').click()"); pg.wait_for_timeout(300); out['toStyle'] = pg.evaluate(ST)
+        pg.click('#b-edit'); pg.wait_for_timeout(300); pg.click('#b-ai'); pg.wait_for_timeout(300)
+        pg.evaluate("()=>document.querySelector('#aipanel .pwtab[data-w=style]').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
 def t63(b, f):
     """366번 — 위쪽 단추 [편집 · AI · 꾸미기 · 미리보기]는 이름이 안 바뀌고 색으로만 켜짐을 알린다(편집이 꺼진 때 붉지 않음 · 편집과 AI 동시 켜짐).
     색 칸 나누기: 맨 위 띠 색 · 맨 위 글자색 · 분류 제목 띠 색 · 분류 제목 글자색 · 메뉴 이름 글자색이 따로 먹고 · 기본으로 돌리고 · 추천 조합을 고르면 지워지고 · 저장해 다시 열면 남는다"""
@@ -2062,7 +2107,7 @@ def t61(b, f):
         out['btn_only'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-btns')].map(b=>b.closest('.aip-it').textContent.includes('돈까스'))")
         pg.evaluate("()=>document.querySelector('#ai-list .aip-btns .ap').click()"); pg.wait_for_timeout(300)
         out['applied'] = pg.evaluate("()=>[MENU.sheets[0][0][0].items[0].name, [...document.querySelectorAll('.sheet [data-path$=\"items.0.name\"]')].map(x=>x.textContent)[0], undoStack.length>0, document.querySelectorAll('#ai-list .aip-it.on').length]")
-        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-undo button')].find(b=>b.textContent==='되돌리기').click()"); pg.wait_for_timeout(300)
+        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it.done button')].find(b=>b.textContent==='되돌리기').click()"); pg.wait_for_timeout(300)   # 390번. 적용한 줄의 [되돌리기]
         out['undone'] = pg.evaluate("()=>MENU.sheets[0][0][0].items[0].name")
         # 무시 — 고른 줄만 빠지고 다음 줄이 골라진다
         n0 = len(rows()); pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it')[1].click()"); pg.wait_for_timeout(100)
@@ -2529,6 +2574,16 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't70':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            rw = r['rows']; ap, ud = r['applied'], r['undone']
+            ok = (r['title'] == [None, True, '#8f8a2e'] and len(rw) == 4 and len(set(rw)) == 4 and any('네기가츠동' in x for x in rw) and any('김치가츠동' in x for x in rw)
+                  and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
+                  and any(x.startswith('✓ 적용함') and '타코야키' in x for x in ap[0]) and '타코야키' in ap[1] and not any(x.startswith('✓') for x in ud[0]) and '타코야끼' in ud[1]
+                  and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': True} and r['onbg'][0] == r['onbg'][1] == 'rgb(239, 227, 201)'
+                  and any('네기가츠동' in x for x in r['ailoc']) and r['aidone'] == [1, True] and r['aiundo'] == [0, True]
+                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
+            return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 맞춤법 줄 {rw} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 적용 {ap} · 되돌림 {ud} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · AI 줄 자리 {r['ailoc']} · AI 적용/되돌림 {r['aidone']}/{r['aiundo']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
         if t == 't69':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             Z = r['hours_geo']
@@ -2577,7 +2632,7 @@ def judge(t, r):
             bt = r['btn']
             n4 = r.get('nfill374') or {}
             nf_ok = bool(n4) and n4['flat']['n'] == 'flat' and n4['flat'].get('f') is None and n4['flat']['chk'] and n4['flatOff']['n'] == 'flat' and n4['flatOff'].get('f') is False and 'nr-none' in n4['flatOff']['cls'] and not n4['flatOff']['chk'] and n4['flatOn']['n'] == 'flat' and n4['flatOn'].get('f') is None and n4['waveOff']['n'] == 'wave' and n4['waveOff'].get('f') is False and 'nr-unfill' in n4['waveOff']['cls'] and not n4['waveOff']['chk'] and n4['ridgeKeep']['n'] == 'ridge' and n4['ridgeKeep'].get('f') is False and n4['none']['n'] == 'flat' and 'nr-none' in n4['none']['cls'] and not n4['none']['dis'] and n4['rule']['n'] == 'rule' and 'nr-rule' in n4['rule']['cls'] and n4['rule']['chk'] and n4['ruleOff']['n'] == 'plain' and 'nr-plain' in n4['ruleOff']['cls'] and not n4['ruleOff']['chk'] and n4['stair']['n'] == 'ripple' and n4['stair'].get('f') is None and n4['stair']['chk'] and not n4['stair']['dis'] and n4['frame']['n'] == 'frame' and 'nr-frame' in n4['frame']['cls'] and not n4['frame']['dis'] and n4['frameOn']['n'] == 'frame' and n4['frameOn'].get('f') is True and 'nr-framefill' in n4['frameOn']['cls'] and n4['frameOn']['chk'] and n4['waveOff']['lg'] == n4['none']['lg'] and n4['waveOff']['lg'] != n4['flat']['lg'] and n4['opts'] == 14 and n4['tiles'] == [14, ['flat'], True] and n4['tileClick'] == ['arch', 1]   # 374번 · 375번 · 385번(모든 모양에서 채우기 켜고 끔)
-            ok = nf_ok and bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and not bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgba(0, 0, 0, 0)' and r['hours'] == [[False, False], [None, True]] and r['txt'] == [True, True, '파일 이름', False, False] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
+            ok = nf_ok and bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['txt'] == [True, True, '파일 이름', False, False] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
                  and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
                  and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
             return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
@@ -2628,10 +2683,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
