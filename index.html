@@ -2381,10 +2381,6 @@ body.editing .topbar .editbar{display:flex}
   .topbar .bar button{padding:0 12px} .topbar .tb-right{gap:6px} .topbar .bar #b-help{width:36px;padding:0}
   .topbar .bar #b-edit{min-width:0}
 }
-@media screen and (max-width:440px){   /* 392번. [꾸미기]가 막대에 올라와 360 · 390 폭에서 [?]가 화면 밖으로 나갔다 — 단추 여백 · 틈 · 글자를 한 단계 줄인다 */
-  .topbar .bar{gap:4px;padding:8px 6px} .topbar .tb-right{gap:4px}
-  .topbar .bar button{padding:0 8px;font-size:13px} .topbar .bar #b-help{width:32px}
-  .topbar .tb-name{max-width:64px}
 }
 /* 366번. 위쪽 켜고 끄는 단추 넷([편집] · [AI] · [꾸미기] · [미리보기])은 켜졌을 때만 같은 색 — 전에는 [편집]만 늘 붉어 켜진 것으로 읽혔고, [AI]는 붉고 [꾸미기]는 회색이라 둘이 켜지면 붉은 단추가 둘이었다(사용자 · 규칙 I) */
 .topbar #b-style.on,.topbar #b-preview.on{color:#efe3c9}   /* 289번. [미리보기 끝]도 — [편집 끝]과 빨간 단추 둘이 됐다(규칙 I) */   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
@@ -3442,7 +3438,6 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <button id="b-file" type="button" aria-haspopup="menu" aria-expanded="false">파일 ▾</button>   <!-- 283번. 새로 만들기 · 불러오기 · 파일로 저장 -->
   <span class="sep"></span>
   <span class="tb-right">
-    <button id="b-style" type="button" title="색 · 글꼴 · 맨 위 · 바닥 · 그림을 고르는 오른쪽 창 — 편집이 꺼져 있으면 같이 켭니다">꾸미기</button>   <!-- 392번. AI 와 같은 줄 — 둘 다 오른쪽 창을 연다(같은 자리에 하나만). 편집 막대에서 올렸다 -->
     <button id="b-ai" type="button" title="이름 중복 · 가격 형식 · 맞춤법 점검과 번역 — 지금 메뉴판을 AI 가 봅니다">AI</button>   <!-- 354번. 늘 보이는 위쪽 줄(첫 화면에서 한 점검을 시작한 뒤에도 쓸 수 있게) -->
     <button id="b-edit" type="button" aria-pressed="false" title="글자를 눌러 고칩니다 — 다시 누르면 끝납니다">편집</button>   <!-- 366번. 글자는 늘 「편집」 — 켜졌는지는 색으로만(AI · 꾸미기 · 미리보기와 같게) -->
     <button id="b-print" type="button">인쇄</button>
@@ -3452,6 +3447,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
 <nav class="bar tb-edit" id="editbar" aria-label="편집 도구">   <!-- 285번. 편집 도구는 둘째 줄 가운데 — 편집 중에만 보이고, 자리는 늘 비워 둔다(보였다 안 보였다 해도 종이가 안 움직인다) -->
     <button id="b-undo" type="button" class="ib" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)" disabled>↶</button><button id="b-redo" type="button" class="ib" aria-label="다시 하기" title="다시 하기 (Ctrl+Y)" disabled>↷</button>   <!-- 271번. ◀ ▶ 는 분류 옮기기 모양이라 쓰지 않는다(규칙 H) -->
     <span class="sep"></span>
+    <button id="b-style" type="button">꾸미기</button>   <!-- 393번. 편집 막대로 되돌림 — 꾸미기는 편집 안의 창(392번에 위쪽 막대로 올린 것은 위계가 어긋났다) -->
     <button id="b-preview" type="button" aria-pressed="false" title="인쇄되는 모습 보기 — 이때는 글자가 고쳐지지 않습니다. 다시 누르면 끝납니다">미리보기</button>   <!-- 289번 -->
     <span class="sep"></span>
     <button id="b-bulk" type="button">가격 일괄</button>
@@ -9202,7 +9198,6 @@ window.addEventListener("resize", () => {
 // 사람이 시선을 화면 아래까지 옮겨야 한다
 $("#p-close").onclick   = () => $("#b-style").click();
 $("#b-style").onclick   = () => {
-  if (!editing){ aiClose(false); toggleEdit(); const q = $("#panel"); q.hidden = false; $("#b-style").classList.add("on"); placePanel(); return; }   // 392번. 위쪽 막대로 올라와 편집이 꺼져 있을 때도 보인다 — 누르면 편집을 같이 켠다
   const p=$("#panel"); if (!$("#aipanel").hidden){ aiClose(false); p.hidden = false; } else p.hidden=!p.hidden;   // 357번. [AI] 창이 열려 있으면 그것을 닫고 꾸미기를 연다(둘은 같은 자리)
   $("#b-style").classList.toggle("on",!p.hidden);
   placePanel();
@@ -9692,7 +9687,7 @@ function syncWineFields(){
   });
 }
 $("#b-bold").onchange   = e => { SETTINGS.bold = e.target.checked; applyLook(); render(); touch(); };   // 335번
-$("#b-edit").onclick    = toggleEdit;
+$("#b-edit").onclick    = () => { if (!editing) aiClose(false); toggleEdit(); };   // 393번. [AI]와 [편집]은 하나만 켜진다 — 편집을 켜면 AI 창을 닫는다(사용자: 하나 켜면 다른 하나는 꺼지게)
 $("#b-save").onclick    = saveFile;
 function doPrint(){ if (editing) toggleEdit(); setTimeout(() => window.print(), 80); }
 /* 190번. 넘친 채로 인쇄하면 **아래가 잘린 종이**가 나온다. 크기를 저절로 안 줄이기로 했으므로
@@ -10234,7 +10229,7 @@ function parseMenuText(txt, px){
     cur.items.push(Object.assign({ name:n, price:p, un:un1, unp:un2 }, pick ? { pick:true } : {}));
   });
   const out = secs.filter(s => s.items.length); out.forEach(s => { if (s.notes) s.notes = s.notes.slice(0, SECNOTE_MAX); });
-  out.typos = (secs.typos || []).slice(0, 5); out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}, px); return out;
+  out.typos = typoClean(secs.typos || []).slice(0, 5);   /* 393번. 사진 읽기의 점검 줄도 같은 걸러내기 */ out.shop = secs.shop || ""; out.hours = secs.hours || []; out.foot = foot.slice(0, NOTES_MAX); out.footUn = footUn.slice(0, NOTES_MAX); out.look = readLook(secs.lk || {}, px); return out;
 }
 /* 371번. 제목 글자 색 읽기. 사용자: 「맨 위 글자색이 사진과 전혀 안 비슷하다」. AI 에게 색을 말하게 하면 회색(#555555)을 돌려줬다 — 사진의 가장 진한 글자색은 올리브(#6c6740).
    그래서 AI 에게는 제목 글자가 놓인 상자만 받고, 그 안의 사진 픽셀에서 색을 읽는다. 상자 안 색의 가운데 값을 바탕으로 보고, 바탕에서 가장 먼 4분의 1(글자 쪽)의 평균을 쓴다.
@@ -10587,8 +10582,16 @@ function readExtra(){   // 312번. 확인 화면의 영업시간 · 바닥 글 �
 const CHECK_ZOOM_MIN = 0.5;   // 312번 · 392번. 0.8 → 0.5 — 한 장이 늘 다 보이게(사용자: 「새로 만들어진 메뉴판은 스크롤 없이 A4 비율 다 보이게」). 메뉴가 아주 많으면 칸 글자가 작아진다(0.5 = 약 7px). 그 밑에서만 종이 안 스크롤
 function fitCheck(){   // 312번. 확인 화면 종이(A4 비율 그대로 — 297번)에 메뉴가 다 보이게 칸을 줄인다(사용자: 스크롤 없이 한눈에). 영업시간 · 메뉴 · 바닥 글을 같은 배율로
   const p = $(".st-cpaper"); if (!p || $("#st-check").hidden) return;
-  { const im = $("#st-cimg"), photo = im && im.offsetHeight > 40 && !p.classList.contains("land") && innerWidth > 820;   // 392번. 세로 종이는 사진과 같은 높이(A4 비율이라 폭이 따라온다) — 사진이 없거나 가로 · 좁은 화면이면 CSS 그대로
-    p.style.height = photo ? im.offsetHeight + "px" : ""; p.style.minHeight = photo ? "0" : ""; }
+  { const im = $("#st-cimg"), ph = $(".st-cphoto"), body = $(".st-cbody"), dlg = $("#start"), ft = document.querySelector("#st-check .foot2");
+    const photo = im && !im.hidden && im.naturalWidth > 0 && innerWidth > 820 && body && !body.classList.contains("nopic"), land = p.classList.contains("land");
+    im.style.height = im.style.width = im.style.maxWidth = im.style.maxHeight = ""; if (ph) ph.style.width = ""; p.style.height = p.style.minHeight = p.style.width = "";
+    if (photo){   /* 393번. 사진과 종이를 창 바닥까지 남는 높이로 함께 키운다 — 392번은 종이를 사진 높이에 묶어, 사진 칸 폭에서 멈춘 높이 아래가 비어 있었다(사용자: 아래 여백 충분한데 왜 작게) */
+      const top = body.getBoundingClientRect().top - dlg.getBoundingClientRect().top + dlg.scrollTop, cap = ph && ph.querySelector(".st-czoomhint") ? 28 : 0;
+      const avail = Math.round(Math.max(440, Math.min(1100, dlg.clientHeight - top - (ft ? ft.offsetHeight : 0) - cap - 20)));
+      const capW = Math.round(Math.max(200, Math.min(body.clientWidth * .5, body.clientWidth - avail / 1.414 - 40))), asp = im.naturalHeight / im.naturalWidth, ih = Math.round(Math.min(avail, capW * asp));   /* 사진 폭 상한은 방향과 상관없이 같게(314번) — 폭에 걸리면 사진 비율대로 높이를 낮춘다(흰 띠가 생겼다) */
+      if (ph) ph.style.width = "auto"; im.style.maxHeight = "none"; im.style.height = ih + "px"; im.style.width = Math.round(ih / asp) + "px"; im.style.maxWidth = "none";
+      if (!land){ p.style.height = avail + "px"; p.style.minHeight = "0"; }   /* 사진 크기는 방향과 상관없이 같다(314번) — 가로 종이는 남는 폭에 맞춘다 */
+      else { const w = Math.round(Math.min(body.clientWidth - im.offsetWidth - 40, avail * 1.414)); p.style.width = w + "px"; p.style.height = Math.round(w / 1.414) + "px"; p.style.minHeight = "0"; } } }
   const parts = ["#st-chours", "#st-ctab", "#st-cfoot"].map(q => $(q)).filter(n => n && !n.hidden);
   parts.forEach(n => n.style.zoom = "");
   for (let k = 0; k < 8; k++){
@@ -10724,6 +10727,20 @@ function typoParts(a, b){
   const A = String(a).split(/\s+/), B = String(b).split(/\s+/); if (A.length !== B.length) return [[a, b]];
   const r = []; A.forEach((w, i) => { if (w !== B[i]) r.push([w.replace(/^[(\[「]+|[)\]」,.]+$/g, ""), B[i].replace(/^[(\[「]+|[)\]」,.]+$/g, "")]); });
   return r.length ? r : [[a, b]];
+}
+/* 393번. 맞춤법 의견 걸러내기 — 애매하거나 헷갈리게 할 것은 뺀다(사용자: 「애매하거나 헷갈리게 할 수 있는 거 빼고 제대로」).
+   ① 해시태그(#Pork)는 떼고 본다(AI 가 빼고 돌려준 것을 「바꿀 것」으로 읽어 [적용]하면 해시태그가 지워졌다)
+   ② 낱말 수가 다르면(띄어쓰기만 고친 것 · 짝이 안 맞는 것) 뺀다 ③ 영문이 든 낱말은 뺀다(한국어 맞춤법이 아니다)
+   ④ 외래어 표기만 다른 것(끼/키 · 까/가 · 츠/쓰/스 …)은 뺀다 — 가게마다 쓰는 표기라 틀렸다고 할 수 없다
+   남는 것은 「바뀐 낱말 하나 → 하나」 짝으로 돌려준다 — 적용도 그 낱말만 바꾼다 */
+const LOAN_SWAP = [["까","가"],["까","카"],["끼","기"],["끼","키"],["꼬","고"],["꼬","코"],["께","게"],["께","케"],["깨","캐"],["꾸","쿠"],["츠","쓰"],["츠","스"],["쓰","스"],["쯔","츠"],["쯔","쓰"],["따","타"],["또","토"],["뚜","투"],["떼","테"],["빠","파"],["뽀","포"],["삐","피"],["뻬","페"],["빵","팡"],["쨩","짱"],["쟈","자"],["쥬","주"],["쵸","초"],["슈","수"]];
+const loanOnly = (a, b) => a.length === b.length && [...a].every((c, k) => c === b[k] || LOAN_SWAP.some(([x, y]) => (c === x && b[k] === y) || (c === y && b[k] === x)));
+function typoClean(list){
+  const out = [], strip = t => String(t || "").replace(/#\S+/g, " ").replace(/\s+/g, " ").trim(), core = w => w.replace(/^[(\[「『"'“‘]+|[)\]」』"'”’,.!?:;]+$/g, "");
+  (list || []).forEach(t => { const A = strip(t.from).split(" "), B = strip(t.to).split(" "); if (!A[0] || !B[0] || A.length !== B.length) return;
+    A.forEach((w, k) => { const a = core(w), b = core(B[k]); if (!a || !b || a === b || /[A-Za-z]/.test(a + b) || loanOnly(a, b)) return;
+      if (!out.some(u => u.from === a && u.to === b)) out.push({ from:a, to:b, rule:t.rule }); }); });
+  return out;
 }
 const typoLabel = (a, b) => typoParts(a, b).map(([x, y]) => "「" + x + "」 → 「" + y + "」").join(" · ");
 function menuFindings(pages){   // 354번. 무시 열쇠(key)에는 「N쪽 · 」 머리를 넣지 않는다(확인 화면에서 무시한 것이 종이에서도 무시되게)
@@ -10906,7 +10923,7 @@ function aiDraw(){
 function aiRefresh(){ clearTimeout(aiRefT); aiRefT = setTimeout(() => { if (!$("#aipanel").hidden) aiDraw(); }, 300); }
 async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확인 화면이 같이 쓴다. 이름 글만 보낸다. 틀린 곳은 [{from,to}], 실패하면 Error(쉬운 말)
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
-  let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.slice(0, 120) }) }); }
+  let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.map(x => String(x).replace(/#\S+/g, " ").replace(/\s+/g, " ").trim()).filter(Boolean).slice(0, 120) })   /* 393번. 해시태그를 떼고 보낸다 — 서버가 40자에서 잘라 「…#Kim」처럼 반쪽 이름이 돌아왔다 */ }); }
   catch(e){ throw new Error("읽는 곳에 닿지 못했습니다. 인터넷 연결을 확인해 주세요."); }
   const j = await r.json().catch(() => ({}));
   if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 눌러 주세요.");
@@ -10915,8 +10932,8 @@ async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확�
   if (!r.ok || typeof j.text !== "string"){ console.warn("맞춤법 보기 실패", r.status, j); throw new Error("구글이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요."); }
   const q = x => x.replace(/^[\s「『"'“‘]+|[\s」』"'”’]+$/g, ""), out = [];
   j.text.split(/\r?\n/).forEach(l => { const m = l.replace(/^[-*•\s]*(?:점검\s*[:：])?\s*/, "").match(/^(.+?)\s*(?:→|->|=>)\s*(.+)$/); if (!m) return;
-    const a = q(m[1]), c = q(m[2]); if (!a || !c || a === c || out.some(t => t.from === a && t.to === c) || !list.some(x => x.includes(a))) return; out.push({ from:a, to:c }); });
-  return out;
+    const a = q(m[1]), c = q(m[2]); if (!a || !c || a === c || out.some(t => t.from === a && t.to === c)) return; out.push({ from:a, to:c }); });
+  return typoClean(out).filter(t => list.some(x => x.includes(t.from)));   // 393번
 }
 async function aiTypoRun(){
   const b = $("#ai-typo"); if (b.dataset.busy) return;
@@ -10931,7 +10948,7 @@ async function aiTypoRun(){
   } catch(e){ sub.textContent = e.message; }
   finally { delete b.dataset.busy; b.classList.remove("busy"); b.textContent = label; aiDraw(); }
 }
-$("#b-ai").onclick = () => { if ($("#aipanel").hidden) aiOpen(); else aiClose(true); };
+$("#b-ai").onclick = () => { if ($("#aipanel").hidden){ if (editing) toggleEdit(); aiOpen(); } else aiClose(false); };   // 393번. AI 를 켜면 편집을 끈다 — 둘이 같이 켜져 창이 하나만 보이는 것이 헷갈렸다. [적용]은 편집이 꺼져 있어도 종이 글자를 고친다(확인함)
 $("#ai-close").onclick = () => aiClose(true);
 $("#ai-typo").onclick = aiTypoRun;
 $("#st-ctab").addEventListener("input", () => { clearTimeout(ckT); ckT = setTimeout(() => { if (!$("#st-check").hidden) drawCkNotes(); }, 300); });

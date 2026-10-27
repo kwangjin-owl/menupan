@@ -1346,14 +1346,14 @@ def t54(b, f):
     # 352번 — [이대로 시작] 화면: 사진에서 읽은 것 한 줄 + 점검(중복 · 가격 형식은 코드, 맞춤법은 AI 가 적은 「원문 → 제안」). 메뉴 이름은 안 고친다. 모양이 틀린 점검 줄은 버린다
     c = Ctx(b, 'p_' + f); pg = c.pg
     pg.route('**/api/read', lambda r: r.fulfill(status=200, content_type='application/json', body='{"enabled":false}'))
-    ANS352 = "가게: 시험 식당\n콘셉트: 한식\n방향: 세로\n단: 2\n글꼴: 명조\n색: 종이 #f5ecd7 · 글자 #2b2218 · 띠 없음\n점검: 돈까스 → 돈가스\n점검: 엉터리 문장\n[식사] 1\n돈까스 | 9000\n된장찌개 | 8000\n된장찌개 | 8000\n김치찌개 | 90000\n비빔밥 | 8000\n냉면 | 시가\n우동 | 얼마\n"
+    ANS352 = "가게: 시험 식당\n콘셉트: 한식\n방향: 세로\n단: 2\n글꼴: 명조\n색: 종이 #f5ecd7 · 글자 #2b2218 · 띠 없음\n점검: 육계장 → 육개장\n점검: 엉터리 문장\n[식사] 1\n육계장 | 9000\n된장찌개 | 8000\n된장찌개 | 8000\n김치찌개 | 90000\n비빔밥 | 8000\n냉면 | 시가\n우동 | 얼마\n"
     pg.click('#st-photo'); pg.wait_for_timeout(400); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', ANS352); pg.click('#st-appgo'); pg.wait_for_timeout(250)
     out['p352c'] = c.js("()=>({hd:[...document.querySelectorAll('#st-cnotes .st-ck .tx')].map(x=>x.textContent).join(' / '), rows:[...document.querySelectorAll('#st-cnotes .st-cnr .go')].map(x=>x.textContent), sub:document.querySelector('#st-typosub').textContent, btn:!document.querySelector('#st-typo').hidden, vis:document.querySelector('#st-cnotes').offsetHeight>0})")   # 382번. 점검은 이 화면에서
     pg.click('#st-check-go'); pg.wait_for_timeout(300)
     v = c.js("()=>({sum:document.querySelector('#st-readsum').textContent, shown:!document.querySelector('#st-readsum').hidden && !document.querySelector('#st-notes').hidden, hd:document.querySelector('#st-notes').textContent, names:stParsed[0].items.map(i=>i.name), typos:stTypos.length})")
     C = out['p352c']; L = ' / '.join(C['rows'])
-    out['p352'] = [v['shown'], all(k in v['sum'] for k in ['한식 식당', '2단', '세로', '명조', '메뉴 7개']), '된장찌개' in L and '같은' in L, '김치찌개' in L and '우동' in L, '돈까스' in L and '돈가스' in L, C['hd'] == '같은 이름: 2건 / 가격 형식: 2건 / 맞춤법: 1건 · AI로는 아직 안 봤습니다' and len(C['rows']) == 5,
-                   '냉면' not in L, v['hd'].startswith('점검할 곳이 5건 남아 있습니다') and '앞 화면' in v['hd'], v['typos'] == 1 and C['btn'] and C['sub'] == '맞춤법: 1건 · AI로는 아직 안 봤습니다' and C['vis'], v['names'][0] == '돈까스']   # 382번. 점검 목록 · 맞춤법 단추는 읽은 메뉴 확인 화면, 다음 화면에는 남은 건수 한 줄
+    out['p352'] = [v['shown'], all(k in v['sum'] for k in ['한식 식당', '2단', '세로', '명조', '메뉴 7개']), '된장찌개' in L and '같은' in L, '김치찌개' in L and '우동' in L, '육계장' in L and '육개장' in L, C['hd'] == '같은 이름: 2건 / 가격 형식: 2건 / 맞춤법: 1건 · AI로는 아직 안 봤습니다' and len(C['rows']) == 5,
+                   '냉면' not in L, v['hd'].startswith('점검할 곳이 5건 남아 있습니다') and '앞 화면' in v['hd'], v['typos'] == 1 and C['btn'] and C['sub'] == '맞춤법: 1건 · AI로는 아직 안 봤습니다' and C['vis'], v['names'][0] == '육계장']   # 382번. 점검 목록 · 맞춤법 단추는 읽은 메뉴 확인 화면, 다음 화면에는 남은 건수 한 줄
     out['p352v'] = v
     out['err352'] = list(c.errs); c.close()
     c = Ctx(b, 'p_' + f); pg = c.pg; reqs = []
@@ -1915,6 +1915,7 @@ def t70(b, f):
         pg.goto(url('p70_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
         out['title'] = pg.evaluate("""()=>{ const a=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #c7c5c3'}, null), b=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #8f8a2e'}, null); return [a.title||null, /회색/.test(a.titleWhy||''), b.title||null] }""")
         pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', body); pg.click('#st-appgo'); pg.wait_for_timeout(500)
+        out['clean'] = pg.evaluate("()=>typoClean([{from:'가츠동 (돈가츠 덮밥) #Pork',to:'가쓰동 (돈가스 덮밥)'},{from:'에비후라이 (새우튀김 두마리) #Shrimp',to:'에비후라이 (새우튀김 두 마리)'},{from:'김치찌게 #Kimchi',to:'김치찌개'},{from:'타코야끼',to:'타코야키'},{from:'Salmon',to:'Salman'}]).map(t=>({from:t.from,to:t.to}))")   # 393번. 외래어 · 띄어쓰기 · 해시태그 · 영문은 거르고 틀린 낱말만
         out['parts'] = pg.evaluate("()=>[typoLabel('가츠동 (돈가츠 덮밥) #Pork','가쓰동 (돈가스 덮밥) #Pork'), typoLabel('타코야끼','타코야키'), typoLabel('김치 우동','김치우동')]")   # 392번. 바뀐 낱말만
         pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'돈카츠동'},{from:'타코야끼',to:'타코야키'}); stTypoRan=true; drawCkNotes(); }"); pg.wait_for_timeout(150)
         R = "()=>[...document.querySelectorAll('#st-cl-typo .st-cnr')].map(r=>r.querySelector('.go').textContent)"
@@ -1941,10 +1942,10 @@ def t70(b, f):
         pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.done button').click() }"); pg.wait_for_timeout(300)
         out['aiundo'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate("()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name)).includes('타코야끼')")]
         out['aist'] = pg.evaluate("()=>{ aiIgnore = new Set(aiList().L.map(f=>f.key)); aiDraw(); const r=[...document.querySelectorAll('#ai-list .aip-st')].map(x=>[x.dataset.s, x.textContent]); aiIgnore = new Set(); aiDraw(); return r }")   # 391번. 점검할 것이 없으면 줄글 대신 세 줄
-        pg.evaluate("()=>document.querySelector('#b-style').click()"); pg.wait_for_timeout(300); out['toStyle'] = pg.evaluate(ST)
+        pg.evaluate("()=>document.querySelector('#b-edit').click()"); pg.wait_for_timeout(300); out['toStyle'] = pg.evaluate(ST)   # 393번. 편집을 켜면 AI 창이 닫히고 꾸미기 창
         out['pw392'] = pg.evaluate("()=>Math.round(document.querySelector('#panel').getBoundingClientRect().width)")
         pg.click('#b-edit'); pg.wait_for_timeout(300); pg.click('#b-ai'); pg.wait_for_timeout(300)
-        pg.evaluate("()=>document.querySelector('#b-style').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)   # 392번. 편집이 꺼진 채 [꾸미기] — 편집을 같이 켠다
+        pg.evaluate("()=>document.querySelector('#b-edit').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)   # 393번
     except Exception as e:
         out['fail'] = str(e)[:200]
     finally:
@@ -1966,7 +1967,7 @@ def t63(b, f):
         out['onbg'] = a1[0][2] + '|' + a1[1][2]
         out['btn'] = [[x[0] for x in a0], [x[1] for x in a0], [x[0] for x in a1][:2], [x[1] for x in a1][:2], a1p, a1[0][2] == a1[1][2] and a1[0][2] != a0[0][2], a0[0][2] == a0[1][2]]
         pg.click('#b-ai'); pg.wait_for_timeout(250)
-        pg.click('#b-style'); pg.wait_for_timeout(300)
+        pg.click('#b-edit'); pg.wait_for_timeout(300)   # 393번. AI 를 켜면 편집이 꺼진다 — 편집을 다시 켜면 꾸미기 창이 같이 열린다
         P = "()=>{const sh=document.querySelector('.sheet'), r=document.documentElement; return [sh.style.getPropertyValue('--nband'), r.style.getPropertyValue('--sband'), r.style.getPropertyValue('--stx'), r.style.getPropertyValue('--ntx')]}"
         out['def'] = pg.evaluate(P)
         pg.evaluate("()=>document.querySelector('#f-hours').click()"); pg.wait_for_timeout(200)
@@ -2071,7 +2072,7 @@ def t61(b, f):
     out = {'err': []}
     src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
     open(D + 'p61_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
-    T = "가게: 시험 식당\n콘셉트: 한식\n방향: 세로\n단: 2\n글꼴: 명조\n색: 종이 #f5ecd7 · 글자 #2b2218 · 띠 없음\n점검: 돈까스 → 돈가스\n[식사] 1\n돈까스 | 9000\n된장찌개 | 8000\n된장찌개 | 8000\n김치찌개 | 90000\n비빔밥 | 8000\n냉면 | 시가\n우동 | 얼마\n"
+    T = "가게: 시험 식당\n콘셉트: 한식\n방향: 세로\n단: 2\n글꼴: 명조\n색: 종이 #f5ecd7 · 글자 #2b2218 · 띠 없음\n점검: 육계장 → 육개장\n[식사] 1\n육계장 | 9000\n된장찌개 | 8000\n된장찌개 | 8000\n김치찌개 | 90000\n비빔밥 | 8000\n냉면 | 시가\n우동 | 얼마\n"
     ctx = b.new_context(viewport={'width': 1400, 'height': 1000}); pg = ctx.new_page()
     pg.on('pageerror', lambda e: out['err'].append(str(e))); sent = []
     def rd(r):
@@ -2106,9 +2107,9 @@ def t61(b, f):
         out['sel'] = pg.evaluate("()=>[document.querySelectorAll('#ai-list .aip-btns').length, document.querySelectorAll('#ai-list .aip-it.on').length, document.querySelectorAll('.aiflash').length, document.querySelectorAll('#ai-list .aip-btns button').length]")
         pg.click('#ai-typo'); pg.wait_for_timeout(600)
         out['sent'] = sent[-1]; out['rows2'] = rows(); out['sub'] = pg.inner_text('#ai-sub')
-        # 적용(돈까스) — 그 줄을 고르면 [적용] [무시]가 거기에만 뜬다
-        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it')].find(r=>/돈까스/.test(r.textContent)).click()"); pg.wait_for_timeout(150)
-        out['btn_only'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-btns')].map(b=>b.closest('.aip-it').textContent.includes('돈까스'))")
+        # 적용(육계장) — 393번. 돈까스 → 돈가스는 외래어 표기라 걸러진다 — 그 줄을 고르면 [적용] [무시]가 거기에만 뜬다
+        pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it')].find(r=>/육계장/.test(r.textContent)).click()"); pg.wait_for_timeout(150)
+        out['btn_only'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-btns')].map(b=>b.closest('.aip-it').textContent.includes('육계장'))")
         pg.evaluate("()=>document.querySelector('#ai-list .aip-btns .ap').click()"); pg.wait_for_timeout(300)
         out['applied'] = pg.evaluate("()=>[MENU.sheets[0][0][0].items[0].name, [...document.querySelectorAll('.sheet [data-path$=\"items.0.name\"]')].map(x=>x.textContent)[0], undoStack.length>0, document.querySelectorAll('#ai-list .aip-it.on').length]")
         pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it.done button')].find(b=>b.textContent==='되돌리기').click()"); pg.wait_for_timeout(300)   # 390번. 적용한 줄의 [되돌리기]
@@ -2118,7 +2119,7 @@ def t61(b, f):
         pg.evaluate("()=>document.querySelector('#ai-list .aip-btns button:last-child').click()"); pg.wait_for_timeout(200)
         out['ign'] = [n0, len(rows()), pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.on').length")]
         # 꾸미기 창과 한자리 — 서로 열면 다른 쪽이 닫힌다 · 닫은 뒤 표시도 없다
-        pg.click('#b-style'); pg.wait_for_timeout(150); st1 = pg.evaluate("()=>[document.querySelector('#aipanel').hidden, document.querySelector('#panel').hidden, document.querySelectorAll('.aiflash').length]")
+        pg.click('#b-edit'); pg.wait_for_timeout(150); st1 = pg.evaluate("()=>[document.querySelector('#aipanel').hidden, document.querySelector('#panel').hidden, document.querySelectorAll('.aiflash').length]")
         pg.click('#b-ai'); pg.wait_for_timeout(150); st2 = pg.evaluate("()=>[document.querySelector('#aipanel').hidden, document.querySelector('#panel').hidden]")
         pg.click('#ai-close'); pg.wait_for_timeout(150); st3 = pg.evaluate("()=>[document.querySelector('#aipanel').hidden, document.querySelectorAll('.aiflash').length, document.querySelector('#b-ai').classList.contains('on')]")
         out['swap'] = [st1, st2, st3]
@@ -2517,7 +2518,7 @@ def judge(t, r):
             return ok, f"웹 처음 [첫 화면, 저장본 없음] {r['first']} · 고친 뒤 [상태, 저장본, 불 꺼짐] {r['saved']} · 다시 열기 [첫 화면 없음, 이어짐, 알림] {r['reopen']} · 받은 파일에 [웹 표시 없음, 상태 글자 없음] {r['file_clean']} · 불러오기 [장, 첫 화면 없음, 알림, 되돌리기] {r['import']} · 컴퓨터 파일 [자동 저장 안 됨, 저장본 안 씀, 불] {r['file']} · 오류 {r['err'][:2]}"
         if t == 't54':
             want = [[['식사', ['단호박 크림 파스타=14000', '고사리 들깨 크림 파스타=14000', '오징어 페코리노 파스타=14000']]], [['안주', ['生 연어구이=10000', '국물바지락=11000', '피망=시가']], ['음료', ['콜라 · 사이다=3000']]]]
-            ok = r.get('p352') == [True] * 10 and not r.get('err352') and r.get('p329') == [True] * 3 and r.get('p327') == [True] * 6 and r.get('p326') == [True] * 3 and r.get('p325') == [True] * 4 and r.get('p323') == [True] * 7 and r.get('p322') == [True] * 2 and r.get('p320') == [True] * 3 and r.get('p319') == [True, True] and r.get('seg319') is True and isinstance(r.get('rule318'), dict) and len(r['rule318']) == 6 and not any(r['rule318'].values()) and r.get('p317') == [True] * 4 and r.get('busy316') == [True, True] and r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.8 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
+            ok = r.get('p352') == [True] * 10 and not r.get('err352') and r.get('p329') == [True] * 3 and r.get('p327') == [True] * 6 and r.get('p326') == [True] * 3 and r.get('p325') == [True] * 4 and r.get('p323') == [True] * 7 and r.get('p322') == [True] * 2 and r.get('p320') == [True] * 3 and r.get('p319') == [True, True] and r.get('seg319') is True and isinstance(r.get('rule318'), dict) and len(r['rule318']) == 6 and not any(r['rule318'].values()) and r.get('p317') == [True] * 4 and r.get('busy316') == [True, True] and r.get('p315') == [True] * 3 and r.get('orient315') == [True] * 5 and r.get('p314') == [True] * 7 and r.get('form314') == [True, True] and r.get('p313') == [True] * 7 and r.get('form313') == [True] * 5 and r.get('p312') == [True] * 15 and isinstance(r.get('fit312'), list) and r['fit312'][0] and r['fit312'][1] >= 0.5 and r['fit312'][2] == 76 and r['check'] == [True, 17, 2] and r['menu'] == want and all(r['gem']) and r['no_key_box'] and r['limit_msg'] and all(r.get('off', [False])) and r.get('prompt_same') is not False and r.get('other') == [True, True] and not r['err']
             return ok, f"352번 [읽은 것 줄 · 종류별 요약(중복 · 가격 · 맞춤법) · 어디서 보는지 안내 · 시가는 통과 · 5건 · 이름 그대로] {r.get('p352')} · 329번 [그림 묶음 여섯, 목록 = 정의, 새 그림 그려짐] {r.get('p329')} · 327번 [비우면 상호명, 적은 글자, 기호 도장 글자 없음, 정리, 영문 가로, 알프스 박힘 없음] {r.get('p327')} · 326번 [두 묶음 제목, 도장이 밑 · 구분선, 손잡이가 제 묶음 안] {r.get('p326')} · 325번 [← 같은 자리, 제목 같은 자리, 주 단추 같은 자리, 숨긴 파일 칸 안 보임] {r.get('p325')} · 323번 [두 칸 다른 모양, 격자에 보임, 종이에 그 칸만, 색 그 칸만, 없음이면 그 칸만 · 색 흐림, 칸 바꿔도 길이 같음, 칸 이름] {r.get('p323')} · 322번 [그림 칸 바꿔도 길이 같음, 그림 손잡이 흐림] {r.get('p322')} · 320번 [맞춤 스위치, 격자 하나, 다른 장에 격자 밑] {r.get('p320')} · 319번 [격자 빈 칸 ＋, 흐린 까닭] {r.get('p319')} · 고르기 폭 {r.get('seg319')} · 318번 단추 규칙 어긋남(사진 · 확인 · 정하기 · 꾸미기 창) {r.get('rule318')} · 317번 [아이콘 한 쌍, 사진 폭 안, 사진 가운데, 확인 화면 같은 높이] {r.get('p317')} · 316번 진행 막 [방향 → 돌렸습니다 → 읽는 중, 끝나면 사라짐] {r.get('busy316')} · 315번 [돌리기 · 사진 바꾸기 한 열, 직접 돌리면 안 물음, 글자 \\n 나눔] {r.get('p315')} · 방향 묻기 [한 번, 작은 사진, 돌린 사진으로 읽기, 확인 화면 사진, 알림] {r.get('orient315')} · 314번 [돌려도 단추 제자리, 돌리기 사진 옆, 글자 · 그림 기호 없음, 그린 그림, 가운데 ? 뗌, ※ * 뗌 · 노랑, 바닥 ? ] {r.get('p314')} · [사진 폭 같음, 4단 좁은 가격] {r.get('form314')} · 313번 [돌리기 창 안 염, 돌린 크기, 경고 줄, 진한 노랑, 빈 분류 알림 머묾, 알림 글, 정하기 경고] {r.get('p313')} · 방향 · 단 손잡이 [세로, 창 스크롤 없음, 표시, 1단, 칸 그대로] {r.get('form313')} · 312번 [이름 칸 안내, 영업 칸 4, 노란 2, 빈 분류 노랑, ★, 분류 안내, 바닥 글, 사진처럼 표시, 못 찾음 안내, 미리보기 종이색, 영업 고친 값, 추천, 안내, 바닥, 궁서] {r.get('p312')} · 스크롤 없음 [들어감, 배율, 칸] {r.get('fit312')} · 다른 앱 길 [처음엔 숨김, 실패 뒤 보임] {r.get('other')} · 붙여 넣기 → 확인 화면 [보임, 칸, 노란 칸] {r['check']} · 시작 뒤 메뉴 맞음 {r['menu'] == want} · 서버 함수 [주소, 사진, 사진만 보냄, 키 머리글 없음, 확인 화면, 가게 이름] {r['gem']} · 키 칸 없음 {r['no_key_box']} · 한도 안내 {r['limit_msg']} · 두 요청 글 같음 {r.get('prompt_same')} · 꺼 두면 [흐림, 읽기 흐림, 다른 앱으로, 안내] {r.get('off')} · 오류 {r['err'][:2]}"
         if t == 't51':
             bad = {k: v for k, v in r['diff'].items() if v > 0}
@@ -2584,9 +2585,9 @@ def judge(t, r):
             ok = (r.get('parts') == ['「가츠동」 → 「가쓰동」 · 「돈가츠」 → 「돈가스」', '「타코야끼」 → 「타코야키」', '「김치 우동」 → 「김치우동」'] and r['title'] == [None, True, '#8f8a2e'] and len(rw) == 4 and len(set(rw)) == 4 and any('네기가츠동' in x for x in rw) and any('김치가츠동' in x for x in rw)
                   and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
                   and any(x.startswith('✓ 적용함') and '타코야키' in x for x in ap[0]) and '타코야키' in ap[1] and not any(x.startswith('✓') for x in ud[0]) and '타코야끼' in ud[1]
-                  and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': True} and r['onbg'][0] == r['onbg'][1] == 'rgb(239, 227, 201)'
+                  and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [{'from': '김치찌게', 'to': '김치찌개'}]
                   and any('네기가츠동' in x for x in r['ailoc']) and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'ok'] and len(r['aist']) == 3 and r['aidone'] == [1, True] and r['aiundo'] == [0, True]
-                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [False, True, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
+                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
             return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 맞춤법 줄 {rw} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 적용 {ap} · 되돌림 {ud} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · AI 줄 자리 {r['ailoc']} · AI 적용/되돌림 {r['aidone']}/{r['aiundo']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
         if t == 't69':
             if r.get('fail'): return False, f"실패: {r['fail']}"
@@ -2636,7 +2637,7 @@ def judge(t, r):
             bt = r['btn']
             n4 = r.get('nfill374') or {}
             nf_ok = bool(n4) and n4['flat']['n'] == 'flat' and n4['flat'].get('f') is None and n4['flat']['chk'] and n4['flatOff']['n'] == 'flat' and n4['flatOff'].get('f') is False and 'nr-none' in n4['flatOff']['cls'] and not n4['flatOff']['chk'] and n4['flatOn']['n'] == 'flat' and n4['flatOn'].get('f') is None and n4['waveOff']['n'] == 'wave' and n4['waveOff'].get('f') is False and 'nr-unfill' in n4['waveOff']['cls'] and not n4['waveOff']['chk'] and n4['ridgeKeep']['n'] == 'ridge' and n4['ridgeKeep'].get('f') is False and n4['none']['n'] == 'flat' and 'nr-none' in n4['none']['cls'] and not n4['none']['dis'] and n4['rule']['n'] == 'rule' and 'nr-rule' in n4['rule']['cls'] and n4['rule']['chk'] and n4['ruleOff']['n'] == 'plain' and 'nr-plain' in n4['ruleOff']['cls'] and not n4['ruleOff']['chk'] and n4['stair']['n'] == 'ripple' and n4['stair'].get('f') is None and n4['stair']['chk'] and not n4['stair']['dis'] and n4['frame']['n'] == 'frame' and 'nr-frame' in n4['frame']['cls'] and not n4['frame']['dis'] and n4['frameOn']['n'] == 'frame' and n4['frameOn'].get('f') is True and 'nr-framefill' in n4['frameOn']['cls'] and n4['frameOn']['chk'] and n4['waveOff']['lg'] == n4['none']['lg'] and n4['waveOff']['lg'] != n4['flat']['lg'] and n4['opts'] == 14 and n4['tiles'] == [14, ['flat'], True] and n4['tileClick'] == ['arch', 1]   # 374번 · 375번 · 385번(모든 모양에서 채우기 켜고 끔)
-            ok = nf_ok and bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [True, True] and bt[4] == ['true', 'true'] and bt[5] and bt[6] and r['onbg'] == 'rgb(239, 227, 201)|rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['txt'] == [True, True, '파일 이름', False, False] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
+            ok = nf_ok and bt[0] == ['편집', 'AI', '꾸미기', '미리보기'] and bt[1] == [False] * 4 and bt[2] == ['편집', 'AI'] and bt[3] == [False, True] and bt[4] == ['false', 'true'] and bt[6] and r['onbg'].split('|')[1] == 'rgb(239, 227, 201)' and r['onbg'].split('|')[0] != 'rgb(239, 227, 201)' and r['hours'] == [[False, False], [None, True]] and r['txt'] == [True, True, '파일 이름', False, False] and r['pcn'] == ['', '밑줄에는 띠가 없습니다', '', ''] and r['pcn2'] == ['띠가 없는 모양입니다', '밑줄에는 띠가 없습니다', '', ''] and r['newmenu'] == [False, True, True, True, True, True, False] \
                  and r['def'] == ['', '', '', ''] and r['set'] == ['rgb(138, 28, 28)', 'rgb(255, 238, 153)', 'rgb(27, 63, 160)', '#2a6f3a', '#8a1c1c', '#ffee99', '#1b3fa0'] and r['dis'] == [False] * 4 \
                  and r['reset'][:4] == [None] * 4 and r['reset'][4] == r['n0'] and r['preset'] == [None, None, None, None] and r['round'] == ['#2a6f3a', '#8a1c1c', '#1b3fa0', '#1b3fa0'] and r['bad'] == [None, None, '#ABCDEF'] and not r['err']
             return ok, f"366번 단추 [이름, 꺼짐, 편집 · AI 이름, 동시에 켜짐, aria, 켜진 색 같음, 꺼진 색 같음] {bt} · 처음 값 {r['def']} · 칠한 뒤 [분류 띠, 분류 글자, 메뉴 이름, 저장 값 4] {r['set']} · 기본으로 단추 켜짐 {r['dis']} · 되돌림 {r['reset']} · 추천 조합 뒤 {r['preset']} · 저장 왕복 {r['round']} · 나쁜 값 {r.get('bad')} · 오류 {r['err'][:2]}"
@@ -2650,8 +2651,8 @@ def judge(t, r):
             ok_pl = r['place'] == [False, True, True, True, True, True, True]
             ok_op = r['open'] == [False, True, True, 0, 0, True] and r['gh'] == ['맞춤법 1건', '가격 1건', '같은 이름 2건'] and len(r['rows']) == 4 and r['note'] == [1, 0] and r['scroll'] == [True, True]
             ok_se = r['sel'] == [1, 1, 1, 2] and r['btn_only'].count(True) == 1 and len(r['btn_only']) == 1
-            ok_ai = r['sent']['mode'] == 'typo' and '돈까스' in r['sent']['names'] and len(r['rows2']) == 5 and any('비빈밥' in x for x in r['rows2']) and not any('없는이름' in x for x in r['rows2'])
-            ok_ap = r['applied'][0] == '돈가스' and r['applied'][1] == '돈가스' and r['applied'][2] and r['undone'] == '돈까스'
+            ok_ai = r['sent']['mode'] == 'typo' and '육계장' in r['sent']['names'] and len(r['rows2']) == 5 and any('비빈밥' in x for x in r['rows2']) and not any('없는이름' in x for x in r['rows2'])
+            ok_ap = r['applied'][0] == '육개장' and r['applied'][1] == '육개장' and r['applied'][2] and r['undone'] == '육계장'
             ok_ig = r['ign'] == [5, 4, 1] and r['lang'] == ['en', False]
             ok_st = r['stray'] == [1, '야끼소바dd', '야끼소바', True] and '아직 안 봤습니다' in r['empty'] and r['labels'] == ['틀린 곳', '이렇게', '이유']
             ok_sh = r['shoplike'] == [True, True, True, False, False, False, False, False, False, False] and r['sealsym'] == [False, True, True]
