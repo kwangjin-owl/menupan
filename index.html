@@ -312,6 +312,10 @@ body{transition:padding-right .18s ease}
 .sheet.land .noren.nr-ripple::after{background:var(--nband, var(--band)); clip-path:polygon(0% 0%, 100% 0%, 100% 55%, 99.405% 62.765%, 98.81% 70%, 98.214% 76.213%, 97.619% 80.981%, 97.024% 83.978%, 96.429% 85%, 95.833% 83.978%, 95.238% 80.981%, 94.643% 76.213%, 94.048% 70%, 93.452% 62.765%, 92.857% 55%, 92.262% 47.235%, 91.667% 40%, 91.071% 33.787%, 90.476% 29.019%, 89.881% 26.022%, 89.286% 25%, 88.69% 26.022%, 88.095% 29.019%, 87.5% 33.787%, 86.905% 40%, 86.31% 47.235%, 85.714% 55%, 85.119% 62.765%, 84.524% 70%, 83.929% 76.213%, 83.333% 80.981%, 82.738% 83.978%, 82.143% 85%, 81.548% 83.978%, 80.952% 80.981%, 80.357% 76.213%, 79.762% 70%, 79.167% 62.765%, 78.571% 55%, 77.976% 47.235%, 77.381% 40%, 76.786% 33.787%, 76.19% 29.019%, 75.595% 26.022%, 75% 25%, 74.405% 26.022%, 73.81% 29.019%, 73.214% 33.787%, 72.619% 40%, 72.024% 47.235%, 71.429% 55%, 70.833% 62.765%, 70.238% 70%, 69.643% 76.213%, 69.048% 80.981%, 68.452% 83.978%, 67.857% 85%, 67.262% 83.978%, 66.667% 80.981%, 66.071% 76.213%, 65.476% 70%, 64.881% 62.765%, 64.286% 55%, 63.69% 47.235%, 63.095% 40%, 62.5% 33.787%, 61.905% 29.019%, 61.31% 26.022%, 60.714% 25%, 60.119% 26.022%, 59.524% 29.019%, 58.929% 33.787%, 58.333% 40%, 57.738% 47.235%, 57.143% 55%, 56.548% 62.765%, 55.952% 70%, 55.357% 76.213%, 54.762% 80.981%, 54.167% 83.978%, 53.571% 85%, 52.976% 83.978%, 52.381% 80.981%, 51.786% 76.213%, 51.19% 70%, 50.595% 62.765%, 50% 55%, 49.405% 47.235%, 48.81% 40%, 48.214% 33.787%, 47.619% 29.019%, 47.024% 26.022%, 46.429% 25%, 45.833% 26.022%, 45.238% 29.019%, 44.643% 33.787%, 44.048% 40%, 43.452% 47.235%, 42.857% 55%, 42.262% 62.765%, 41.667% 70%, 41.071% 76.213%, 40.476% 80.981%, 39.881% 83.978%, 39.286% 85%, 38.69% 83.978%, 38.095% 80.981%, 37.5% 76.213%, 36.905% 70%, 36.31% 62.765%, 35.714% 55%, 35.119% 47.235%, 34.524% 40%, 33.929% 33.787%, 33.333% 29.019%, 32.738% 26.022%, 32.143% 25%, 31.548% 26.022%, 30.952% 29.019%, 30.357% 33.787%, 29.762% 40%, 29.167% 47.235%, 28.571% 55%, 27.976% 62.765%, 27.381% 70%, 26.786% 76.213%, 26.19% 80.981%, 25.595% 83.978%, 25% 85%, 24.405% 83.978%, 23.81% 80.981%, 23.214% 76.213%, 22.619% 70%, 22.024% 62.765%, 21.429% 55%, 20.833% 47.235%, 20.238% 40%, 19.643% 33.787%, 19.048% 29.019%, 18.452% 26.022%, 17.857% 25%, 17.262% 26.022%, 16.667% 29.019%, 16.071% 33.787%, 15.476% 40%, 14.881% 47.235%, 14.286% 55%, 13.69% 62.765%, 13.095% 70%, 12.5% 76.213%, 11.905% 80.981%, 11.31% 83.978%, 10.714% 85%, 10.119% 83.978%, 9.524% 80.981%, 8.929% 76.213%, 8.333% 70%, 7.738% 62.765%, 7.143% 55%, 6.548% 47.235%, 5.952% 40%, 5.357% 33.787%, 4.762% 29.019%, 4.167% 26.022%, 3.571% 25%, 2.976% 26.022%, 2.381% 29.019%, 1.786% 33.787%, 1.19% 40%, 0.595% 47.235%, 0% 55%)}
 .noren.nr-stitch{--nr-fringe:.9em; --nr-gap:.9em}
 .noren.nr-stitch::after{background:repeating-linear-gradient(90deg, var(--nband, var(--band)) 0 1.1em, transparent 1.1em 1.7em) 0 100%/100% 55% no-repeat}
+/* 385번. 아래 한 줄 + 채움 = 색 띠 바로 아래에 먹색 선 한 줄 · 액자 + 채움 = 색 띠 안에 종이색 액자 선(::after 를 테두리로 쓴다) */
+.noren.nr-flat.nr-rule{border-bottom:1.6px solid var(--ink)}
+.noren.nr-flat.nr-framefill::after{display:block;inset:calc(var(--nogo) + 6px) 9mm 6px;height:auto;background:none;clip-path:none;border:1.1px solid var(--paper);opacity:.8}
+.sheet.land .noren.nr-flat.nr-framefill::after{inset:calc(var(--nogo) + 6px) 14mm 6px}
 /* 없음 — 띠도 선도 없이 종이 위에 글자만 얹힌다. 「띠 없음」(nr-plain)에는 밑줄이 있었다 */
 .noren.nr-none{--nr-fringe:0em; --nr-gap:1em; color:var(--ink)}
 .noren.nr-none::before,.noren.nr-none::after{display:none}
@@ -3019,7 +3023,10 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <label for="f-noren">상단 모양</label>   <!-- 374번. 모양과 채우기를 따로 — 「띠」는 색을 채운 바탕뿐 아니라 선만 있는 것도 있다 -->
   <div class="pl-presets noren-tiles" id="g-noren" role="group" aria-label="상단 모양"></div>   <!-- 375번. 이름만으로는 어떤 모양인지 알 수 없다(사용자) — 그림으로 고른다. 아래 select 는 같은 값을 쥔다(검사 · 접근성) -->
   <select id="f-noren" hidden>
-    <option value="flat">곧은 (기본)</option>
+    <option value="flat">선 없음 (기본)</option>
+    <option value="rule">아래 한 줄</option>
+    <option value="twin">아래 두 줄</option>
+    <option value="frame">액자</option>
     <option value="full">아래가 갈라진</option>
     <option value="wave">물결</option>
     <option value="ripple">잔물결</option>
@@ -3028,12 +3035,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <option value="saw">톱니</option>
     <option value="arch">아치</option>
     <option value="ribbon">리본</option>
-    <option value="twin">두 겹</option>
     <option value="stitch">점선 가장자리</option>
     <option value="fade">스며드는</option>
-    <option value="frame">가는 액자</option>
-    <option value="line">가는 두 줄</option>
-    <option value="none">없음</option>
   </select>
   <label class="chk" id="f-nfill-l"><input type="checkbox" class="m3sw" id="f-nfill"> 색으로 채우기</label>
   <div class="pcrow" id="r-nband"><label for="c-nband">맨 위 띠 색</label><input type="color" id="c-nband" title="맨 위 띠 색"><button type="button" class="tbtn" id="b-nband-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
@@ -5909,9 +5912,19 @@ const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAMdCAYAAAAI/FxO
 /* ── 글꼴 / 색 ─────────────────────────────────────────────────────── */
 /* 상단 모양. **한 곳에서만 센다** — 목록 검사(122번)와 로고색 뒤집기가 이걸 본다.
    LIGHT_NOREN 은 종이색 바탕이라 글자·로고를 먹색으로 뒤집어야 하는 것들이다(32 · 131번) */
-const NOREN_KINDS = ["full","flat","wave","scallop","ridge","saw","arch","ribbon","twin","fade","ripple","stitch","frame","line","plain","none"];   // 374번. 잔물결 · 점선 · 없음
+const NOREN_KINDS = ["full","flat","rule","wave","scallop","ridge","saw","arch","ribbon","twin","fade","ripple","stitch","frame","line","plain","none"];   // 374번. 잔물결 · 점선 · 없음
 const LIGHT_NOREN = ["plain","frame","line","none"];
-const norenLight = (noren, fill) => LIGHT_NOREN.includes(noren) || fill === false;   // 374번. 종이색 바탕(글자 · 로고를 먹색으로) — 띠 없는 모양이거나, 모양은 있어도 색으로 채우지 않을 때
+/* 385번. 상단 모양 = 선 모양 × 색으로 채우기(모든 모양에서 켜고 끈다). 저장 값은 옛 이름을 그대로 쓴다 — plain(아래 한 줄 · 끔) · none(선 없음 · 끔) · line(아래 두 줄 · 끔)은 「채우기 끔」이 기본인 별칭이고,
+   norenFill 은 기본과 다를 때만 적는다. 선 없음(flat): 켬 = 선 없는 색 띠 · 끔 = 아무것도 없음 / 아래 한 줄(rule): 켬 = 색 띠 + 아래 한 줄 · 끔 = 밑줄 / 액자(frame): 켬 = 색 띠 안에 액자 선 · 끔 = 액자 선만 */
+const NOREN_ALIAS = { plain:"rule", none:"flat", line:"twin" };
+const norenShapeOf = n => NOREN_ALIAS[n] || n;
+const norenFillOf = (n, key) => typeof key === "boolean" ? key : !LIGHT_NOREN.includes(n);
+const norenClass = (n, key) => { const sh = norenShapeOf(n), f = norenFillOf(n, key);
+  if (sh === "flat") return f ? "nr-flat" : "nr-none";
+  if (sh === "rule") return f ? "nr-flat nr-rule" : "nr-plain";
+  if (sh === "frame") return f ? "nr-flat nr-framefill" : "nr-frame";
+  return "nr-" + sh + (f ? "" : " nr-unfill"); };
+const norenLight = (noren, fill) => !norenFillOf(noren, fill);   // 374번. 종이색 바탕(글자 · 로고를 먹색으로) — 띠 없는 모양이거나, 모양은 있어도 색으로 채우지 않을 때
 
 /* 349번. 그림 좌우 쏠림 · 끝 잘림 바로잡기(사용자 — 「산장은 좌측이 많이 잘려 보인다」 · 「쏠리게 한 건 의도가 아니야」). 33개를 재서(칠해진 부분의 왼쪽 · 오른쪽 여백, 폭 880 기준) 가운데에서 25 넘게 벗어나거나 여백이 60 미만인 열넷(산장 · 파스타 · 맥주+파스타 · 말 · 얼룩말 · 알프스 산 · 전 · 찻주전자 · 에델바이스 · 맥주 · 소주 · 사케 · 와인 · 하이볼)을 그림 전체를 감싼 <g transform> 으로 가운데로 옮기고(바닥선 491 은 그대로), 폭이 740 을 넘는 것(말 · 얼룩말 · 알프스 산 · 전)은 바닥 가운데 기준으로 줄였다(말 · 얼룩말은 viewBox 가 `60 89 …` 라 기준점이 사용자 좌표 500 · 580 이다 — 처음에 491 을 써 아래끝이 8 올라갔다). 전은 줄이면 높이가 300 밑이 돼 0.985 만 줄였다 */
 const ART = {
@@ -6795,8 +6808,7 @@ MENU.sheets.forEach((_, i) => {
   normSeals(pg, pageDefaults(i).seals);   // 323번. 옛 장 단위 도장 → 칸마다
   normQrs(pg);   // 337번
   pg.noren = pickIn(pg.noren, NOREN_KINDS, "flat");   // 180번. 기본은 곧은 띠
-  if (pg.norenFill === false && pg.noren === "flat") pg.noren = "plain";   // 374번. 곧은 모양 + 채우기 끔 = 예전의 「띠 없음」(밑줄) 한 가지로만 적는다
-  if (pg.norenFill !== false || LIGHT_NOREN.includes(pg.noren)) delete pg.norenFill;   // 374번. 채우기 끔(false)만 적는다 — 기본(채움)은 키가 없어 옛 파일과 같다
+  if (typeof pg.norenFill !== "boolean" || pg.norenFill === !LIGHT_NOREN.includes(pg.noren)) delete pg.norenFill;   // 374번 · 385번. 기본과 다를 때만 적는다
   pg.logoColor = pickIn(pg.logoColor, ["paper","white","ink","accent","custom"], "paper");
   if (pg.topBand !== undefined && !/^#[0-9a-f]{6}$/i.test(String(pg.topBand))) delete pg.topBand;   // 366번. 맨 위 띠 색(직접 고른 것만)
   /* 296번의 도장 색 검사는 323번에 normSeals() 로(칸마다) */   // 302번. 그림 색 · 진하기는 normArts() 가 칸마다 본다
@@ -7490,7 +7502,7 @@ function drawSheet(spec){
   sheet.style.setProperty("--nscale", PS.norenScale ?? NSCALE_DEFAULT);
   sheet.style.setProperty("--logo", logoColorOf(PS)); pageColVars(sheet, PS); topBandVar(sheet, PS);   // 296번 · 366번
 
-  const noren = el("header","noren nr-" + (PS.noren || "flat") + (PS.norenFill === false && !LIGHT_NOREN.includes(PS.noren) ? " nr-unfill" : ""));
+  const noren = el("header","noren " + norenClass(PS.noren || "flat", PS.norenFill));   // 385번
   // 다른 편집 자리와 같은 모양으로 맞춘다. div 에 직접 걸면 테두리가 줄 전체로 퍼진다
   const brand = (cls, key) => {
     const box = el("div", cls), v = el("span","bv");
@@ -9196,14 +9208,14 @@ $("#b-nreset").onclick = () => setNScale(NSCALE_DEFAULT);   // 198번. 기본은
 $("#nsz-range").oninput  = e => { P(panelPage).norenScale = Math.round(+e.target.value)/100;
   applyLook(); render(); $("#nsz-val").textContent = Math.round(P(panelPage).norenScale*100) + "%"; nszNote(); };
 $("#nsz-range").onchange = () => touch();
-const norenSet = (shape, fill) => {   // 374번. 모양 + 채우기 → 저장하는 값(곧은 + 끔 = 「plain」, 나머지 + 끔 = norenFill:false, 선만인 모양은 채우기 키 없음)
+const norenSet = (shape, fill) => {   // 374번 · 385번. 모양 + 채우기 → 저장하는 값(별칭 규칙은 norenFillOf 옆 설명)
   const p = P(panelPage); delete p.norenFill;
-  if (shape === "flat") p.noren = fill ? "flat" : "plain";
-  else { p.noren = shape; if (!fill && !LIGHT_NOREN.includes(shape)) p.norenFill = false; }
+  const n = shape === "rule" ? (fill ? "rule" : "plain") : shape; p.noren = n;
+  if (fill !== !LIGHT_NOREN.includes(n)) p.norenFill = fill;
 };
-const norenView = p => { const n = p.noren || "flat", lt = LIGHT_NOREN.includes(n); return { shape: n === "plain" ? "flat" : n, fill: !lt && p.norenFill !== false, fixed: n === "frame" || n === "line" || n === "none" }; };
+const norenView = p => { const n = p.noren || "flat"; return { shape: norenShapeOf(n), fill: norenFillOf(n, p.norenFill) }; };
 $("#f-noren").onchange  = e => {
-  const v = norenView(P(panelPage)); norenSet(e.target.value, v.fill || (P(panelPage).noren === "none" || P(panelPage).noren === "frame" || P(panelPage).noren === "line"));
+  const v = norenView(P(panelPage)); norenSet(e.target.value, v.fill);
   syncNoren(); applyLook(); syncColorCtl();          // 띠 없음 <-> 있음 사이에서 로고색이 뒤집힌다
   render();
   touch();
@@ -9221,11 +9233,10 @@ function ntSvg(kind, fill){   // 100 × 36 의 작은 그림 — 채우기를 �
   const th = curTheme || {}, band = th.band || "#335", ink = th.ink || "#222", paper = th.paper || "#fff", f1 = v => Math.round(v * 10) / 10, Y = v => f1(22 + 14 * v / 100);
   const path = (d, a) => '<path d="' + d + '" ' + a + '/>', line = d => path(d, 'fill="none" stroke="' + ink + '" stroke-width="1.6" stroke-linejoin="round"');
   const prof = ntProf[kind], pd = prof ? prof.map(p => f1(p[0]) + " " + Y(p[1])).join("L") : "";
-  const fixed = ["frame", "line", "none"].includes(kind), on = fill && !fixed; let g = "";
-  if (kind === "frame") g = '<rect x="6" y="6" width="88" height="24" fill="none" stroke="' + ink + '" stroke-width="1.2" opacity=".7"/>';
-  else if (kind === "line") g = line("M0 28H100") + line("M0 32H100");
-  else if (kind === "none") g = "";
-  else if (kind === "flat") g = on ? path("M0 0H100V30H0Z", 'fill="' + band + '"') : line("M0 30H100");
+  const on = !!fill; let g = "";
+  if (kind === "frame") g = on ? '<rect width="100" height="36" fill="' + band + '"/><rect x="6" y="6" width="88" height="24" fill="none" stroke="' + paper + '" stroke-width="1.2" opacity=".8"/>' : '<rect x="6" y="6" width="88" height="24" fill="none" stroke="' + ink + '" stroke-width="1.2" opacity=".7"/>';
+  else if (kind === "flat") g = on ? path("M0 0H100V32H0Z", 'fill="' + band + '"') : "";   // 385번. 선 없음 — 켬 = 색 띠 · 끔 = 아무것도 없음
+  else if (kind === "rule") g = (on ? path("M0 0H100V29H0Z", 'fill="' + band + '"') : "") + line("M0 31H100");
   else if (kind === "full") g = on ? '<rect width="100" height="22" fill="' + band + '"/>' + [0, 1, 2, 3, 4].map(i => '<rect x="' + (i * 20 + (i ? .8 : 0)) + '" y="22" width="' + (20 - (i ? .8 : 0) - (i < 4 ? .8 : 0)) + '" height="14" fill="' + band + '"/>').join("") : [0, 1, 2, 3, 4].map(i => line("M" + (i * 20 + (i ? .8 : 0)) + " 22V35H" + ((i + 1) * 20 - (i < 4 ? .8 : 0)) + "V22")).join("");
   else if (kind === "twin") g = on ? '<rect width="100" height="20" fill="' + band + '"/><rect y="26" width="100" height="6" fill="' + band + '"/>' : line("M0 20H100") + line("M0 31H100");
   else if (kind === "fade") g = on ? '<defs><linearGradient id="ntf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + band + '"/><stop offset="1" stop-color="' + band + '" stop-opacity="0"/></linearGradient></defs><rect width="100" height="22" fill="' + band + '"/><rect y="22" width="100" height="14" fill="url(#ntf)"/>' : '<defs><linearGradient id="ntl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + ink + '" stop-opacity="0"/><stop offset=".3" stop-color="' + ink + '"/><stop offset=".7" stop-color="' + ink + '"/><stop offset="1" stop-color="' + ink + '" stop-opacity="0"/></linearGradient></defs><rect y="30" width="100" height="2" fill="url(#ntl)"/>';
@@ -9240,7 +9251,7 @@ function noren_tiles(v){   // 375번. 상단 모양을 그림으로 고른다
     const c = el("span", "nthumb"); c.style.background = (curTheme || {}).paper || "#fff"; c.innerHTML = ntSvg(o.value, v.fill); b.append(c, document.createTextNode(o.textContent.replace(" (기본)", "")));
     b.onclick = () => { const sel = $("#f-noren"); sel.value = o.value; sel.dispatchEvent(new Event("change", { bubbles:true })); }; box.append(b); });
 }
-function syncNoren(){ const v = norenView(P(panelPage)); $("#f-noren").value = v.shape; const c = $("#f-nfill"); c.checked = v.fill; c.disabled = v.fixed; $("#f-nfill-l").title = v.fixed ? "이 모양은 색을 채우지 않습니다" : ""; noren_tiles(v); }   // 374번
+function syncNoren(){ const v = norenView(P(panelPage)); $("#f-noren").value = v.shape; const c = $("#f-nfill"); c.checked = v.fill; c.disabled = false; $("#f-nfill-l").title = ""; noren_tiles(v); }   // 385번. 모든 모양에서 켜고 끈다   // 374번
 COLCTL.forEach(c => {
   $("#c-" + c.id).oninput = e => { if (c.page) P(panelPage)[c.page] = e.target.value; else setKey(c.g, e.target.value); applyLook(); touchLater(); };   // 366번
   $("#b-" + c.id + "-r").onclick = () => { if (c.page) delete P(panelPage)[c.page]; else delete SETTINGS[c.g]; applyLook(); touch(); }; });
