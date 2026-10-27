@@ -1799,7 +1799,33 @@ def t67(b, f):
             out[name] = [chips, hasband, pg.evaluate("()=>SETTINGS.pages[0].noren")]
         pg.goto(url('p67_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
         pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', base + body); pg.click('#st-appgo'); pg.wait_for_timeout(300)
-        out['rows'] = pg.evaluate("()=>{const r=[...document.querySelectorAll('#st-cnotes .st-nrow')], bt=document.querySelector('#st-typo').getBoundingClientRect(), box=document.querySelector('#st-cnotes').getBoundingClientRect(); return [r.length, bt.right > box.right - 20, r[1].contains(document.querySelector('#st-typo')), document.querySelector('#st-typosub').textContent]}")
+        out['rows'] = pg.evaluate("()=>{const r=[...document.querySelectorAll('#st-cnotes .st-nrow')], bt=document.querySelector('#st-typo').getBoundingClientRect(), box=document.querySelector('#st-cnotes').getBoundingClientRect(); return [r.length, Math.round(bt.left - document.querySelector('#st-typosub').getBoundingClientRect().right) < 30, r[1].contains(document.querySelector('#st-typo')), document.querySelector('#st-typosub').textContent]}")
+    except Exception as e:
+        out['fail'] = str(e)[:200]
+    finally:
+        ctx.close()
+    return out
+
+def t68(b, f):
+    """383번 — 사진으로 시작: 바닥 글이 없으면 바닥 글 칸이 꺼져 있고, 원산지 줄이 있으면 본문 마지막 줄이 원산지 줄 위에서 끝난다(원산지도 맞춤이 재는 장애물). 원산지 없는 같은 메뉴는 전처럼 더 크게 들어간다."""
+    import json as _j
+    out = {'err': []}
+    src = open(D + f, encoding='utf-8').read(); k = 'const SETTINGS = {\n'
+    open(D + 'p68_' + f, 'w', encoding='utf-8').write(src.replace(k, k + '  "startScreen": true,\n', 1))
+    items = "".join(f"메뉴 이름 {i} 설명이 조금 긴 덮밥 #Pork | {8000 + i * 500}\n" for i in range(12))
+    base = "가게: 행복한 그릇\n콘셉트: 기타\n방향: 세로\n단: 1\n글꼴: 둥근\n색: 종이 #ffffff · 글자 #2b2218 · 띠 #c8b560\n띠 위치: 분류 제목\n[덮밥]\n" + items + "[우동]\n새우튀김 우동 | 7500\n김치우동 | 7500\n[사이드]\n에비후라이 | 3500\n마지막 줄 메뉴 | 15000\n"
+    ori = "바닥: •돼지고기(국내산) 소고기(미국산) 닭고기(태국산) •연어(노르웨이산) 쌀(국내산) 김치(중국산) •고춧가루(국내산,중국산)\n"
+    ctx = b.new_context(viewport={'width': 1500, 'height': 1000}); pg = ctx.new_page()
+    pg.on('pageerror', lambda e: out['err'].append(str(e)))
+    def h(r): r.fulfill(status=200, content_type='application/json', body='{"enabled":false}')
+    R = "()=>{const s=document.querySelector('.sheet'), o=s.querySelector('.origin'), sr=s.getBoundingClientRect(); const e=[...s.querySelectorAll('*')].filter(x=>x.children.length===0 && x.textContent.trim().startsWith('마지막 줄 메뉴')).pop(); return {last:e?Math.round(e.getBoundingClientRect().bottom-sr.top):null, origin:o&&o.getBoundingClientRect().height>0?Math.round(o.getBoundingClientRect().top-sr.top):null, notes:SETTINGS.pages[0].showNotes, show:SETTINGS.pages[0].showOrigin, scale:SETTINGS.pages[0].scale}}"
+    try:
+        for name, txt in [('with', base + ori), ('none', base)]:
+            pg.goto(url('p68_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
+            pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', txt); pg.click('#st-appgo'); pg.wait_for_timeout(400)
+            pg.click('#st-check-go'); pg.wait_for_timeout(300); pg.click('#st-go'); pg.wait_for_timeout(1200)
+            pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{guideEnd()}catch(e){} }"); pg.wait_for_timeout(400)
+            out[name] = pg.evaluate(R)
     except Exception as e:
         out['fail'] = str(e)[:200]
     finally:
@@ -2433,6 +2459,12 @@ def judge(t, r):
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = not r['bottom_bad'] and not r['flat'] and not r['wide'] and not r['side_bad'] and r['n'][0] >= 33 and not r['err']
             return ok, f"그림 {r['n'][0]}개(콘셉트 묶음 {r['n'][1]}) · 아래끝이 488 ~ 500 밖 {r['bottom_bad'] or '없음'} · 높이 300 밑 {r['flat'] or '없음'} · 폭 880 넘음 {r['wide'] or '없음'} · 좌우 여백 50 밑 · 가운데서 25 넘게 벗어남 {r['side_bad'] or '없음'}"
+        if t == 't68':
+            if r.get('fail'): return False, f"실패: {r['fail']}"
+            w, n = r['with'], r['none']
+            ok = (w['notes'] is False and w['show'] is True and w['origin'] is not None and w['last'] is not None and w['last'] <= w['origin'] - 2
+                  and n['notes'] is False and n['show'] is not True and n['origin'] is None and n['scale'] >= w['scale'] and not r['err'])
+            return ok, f"383번 원산지 있음 {w} · 없음 {n}"
         if t == 't67':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             ok = (r['none_line'][0] == ['맨 위 색 띠 없음 (못 읽음)'] and r['none_line'][1] is False and r['none_line'][2] == 'none'
@@ -2518,10 +2550,10 @@ def judge(t, r):
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

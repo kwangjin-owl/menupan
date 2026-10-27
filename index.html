@@ -2577,10 +2577,10 @@ dialog .st-cin.flash{outline:3px solid #e0a020;outline-offset:1px;background:#ff
 dialog .st-cnotes .st-typo{background:#5b4630;color:#fff8e6;border:1px solid #5b4630;font-weight:600}   /* 379번. 바탕과 같은 색이라 버튼으로 안 보였다(사용자) — 어두운 갈색 채움(붉은 주 버튼 [이대로 시작]과 겹치지 않게) */
 dialog .st-cnotes .st-typo:hover{background:#6f5740}
 dialog .st-cnotes .st-typo:disabled{opacity:.6}
-dialog .st-cnotes .st-nrow{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;min-height:30px;font-size:13px}
+dialog .st-cnotes .st-nrow{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px 12px;min-height:30px;font-size:13px}
 dialog .st-cnotes .st-nrow2{border-top:1px solid #cbb98f;margin-top:6px;padding-top:6px}
-dialog .st-cnotes .st-nrow > span{flex:1;min-width:0}
-dialog .st-cnotes #st-typo{flex:none}   /* 381번. 한 줄에 하나씩 — 점검 결과 · 맞춤법, 버튼은 오른쪽 끝 */
+dialog .st-cnotes .st-nrow > span{flex:0 1 auto;min-width:0}   /* 383번. 글과 단추가 한 문장처럼 붙어 있게 — 양끝으로 벌리면 따로 노는 것처럼 보였다(사용자) */
+dialog .st-cnotes #st-typo{flex:none}
 dialog #st-readsum{font-size:13px;margin-top:12px}
 dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
 dialog #st-readsum .chip{display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:999px;background:#e8dcc0;color:#241c12;font-size:12.5px;line-height:1.6}
@@ -8470,6 +8470,7 @@ function colReach(sh){
   const obs = [...sh.querySelectorAll(".foot .left > *, .foot .left p")].filter(e => !e.querySelector("p")).map(e => ["바닥 글", inkBox(e)])   // 줄(p)을 담은 틀(.zone)은 빼고 줄만 — 틀의 Range 는 안의 블록 줄 상자(종이 폭)를 품는다
     .filter(([, k]) => k.height > 0 && k.width > 0);
   [...sh.querySelectorAll(".foot .qr.qf")].forEach(q => { const k = q.getBoundingClientRect(); if (k.width > 0 && k.height > 0) obs.push(["QR", k]); });   // 339번. 바닥 줄 안 QR 은 흰 바탕이라 글자가 닿으면 안 된다 — 도장(장식)과 달리 장애물. 맞춤이 QR 자리를 몰라 글자가 QR 위로 넘어갔다(사용자 화면 · 알프스 아래 오른쪽 칸 + 한 장에 맞춤)
+  [...sh.querySelectorAll(".foot .origin")].forEach(o => { if (o.classList.contains("blank")) return; const k = o.getBoundingClientRect(); if (k.width > 0 && k.height > 0) obs.push(["원산지", k]); });   // 383번. 원산지 줄도 바닥에 있는 것이다 — 빠져 있어서 본문이 원산지 위로 내려와도 「들어간다」고 했다(사용자: 원산지가 본문과 겹침). 줄 상자(윗선 포함)로 잰다
   /* 255번. **도장을 끄면 도장은 장애물이 아니다.** 끈 도장은 `.seal.blank`(visibility:hidden)로 자리만 남아 있어 상자 크기가 그대로였고,
      254번까지는 그 **안 보이는 도장**에 겹쳐도 넘침이라 했다("도장을 없애면 안 겹쳐야지"). 보이는 것만 센다 */
   for (let i = obs.length - 1; i >= 0; i--) if (obs[i][0] === "도장" && [...sh.querySelectorAll(".seal")].every(e => e.classList.contains("blank") || getComputedStyle(e).visibility === "hidden" || getComputedStyle(e).display === "none")) obs.splice(i, 1);
@@ -10009,6 +10010,7 @@ $("#st-go").onclick = () => {
   applyPresetTo(settings, menu, stPreset);
   menu.sheets.forEach((sh, i) => { if (sh.length && sh.every(col => col.every(sc => sc.wine))){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.arts = [{ cell:ART_CELL_OLD, art:"vine" }]; pp.showOrigin = false; if (i > 0) pp.showNotes = false; } });   // 341번. 와인 장은 포도나무 그림   // 273번. 추천 조합을 새 설정에 직접 건다
   if (stParsed) menu.feet.forEach((f, i) => { if (String(f.origin || "").trim()){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.showOrigin = true; } });   // 380번. 사진에 원산지 문구가 있으면 원산지 칸을 켠다(기본은 꺼짐 — pageDefaults). 없으면 그대로 꺼 둔다
+  if (stParsed) menu.feet.forEach((f, i) => { if (!(f.notes || []).some(n => String(n).trim())){ const pp = settings.pages[i] || (settings.pages[i] = pageDefaults(i)); pp.showNotes = false; } });   // 383번. 사진에 바닥 글이 없으면 바닥 글 칸을 꺼 둔다(켜 두면 빈 칸이 자리만 차지한다) — 필요하면 꾸미기 [바닥]에서 켠다
   if (stParsed){ if (stLook.orient) settings.orient = stLook.orient; settings.pages.forEach(pp => { pp.autofit = true; }); }   // 341번. 모든 장   // 296번. 사진의 방향 · 사진처럼 종이를 채우는 글자 크기([한 장에 맞춤] 켬 — 끄면 그 크기로 멈춘다)
   if (text && stParsed && stLook.titleW && top){   // 376번. 제목 글자 크기 — 사진에서 제목이 종이 폭의 몇 분의 몇이었는지에 맞춘다(고정 크기라 사진보다 컸다)
     const emw = [...top].reduce((a, ch) => a + (/[가-힣ㄱ-ㅎ一-鿿]/.test(ch) ? 1 : /\s/.test(ch) ? .3 : /[A-Z]/.test(ch) ? .68 : .55) + .06, 0), paperPx = stLook.orient === "landscape" ? 1123 : 794;
