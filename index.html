@@ -10596,10 +10596,13 @@ function fitCheck(){   // 312번. 확인 화면 종이(A4 비율 그대로 — 2
   /* 396번. 칸 줄이기를 한 곳에서 — 글 칸(textarea) 높이를 이 안에서 다시 재고(전에는 따로 도는 ResizeObserver 가 나중에 키워 1920 × 1080 에서 종이 안 스크롤이 남았다),
      줄이기만 하던 것을 「꽉 차게」로: 0.5 ~ 1.4 사이에서 넘치지 않는 가장 큰 배율을 찾는다(사용자: 스크롤 없이 A4 비율에 꽉 차게) */
   const parts = ["#st-chours", "#st-ctab", "#st-cfoot"].map(q => $(q)).filter(n => n && !n.hidden), tas = p.querySelectorAll("textarea");
-  const fits = z => { parts.forEach(n => n.style.zoom = z.toFixed(3)); tas.forEach(ckFit); return p.scrollHeight <= p.clientHeight; };   // 1px 넘침도 스크롤 막대가 생긴다
+  /* 397번. 재는 동안은 스크롤 막대를 끈다 — 윈도우는 막대가 폭을 차지해, 막대가 생기는 순간 칸이 좁아져 줄이 더 바뀌었다(사용자 화면: 꽉 찬 종이에 ▲▼). 끝에 4px 여유(소수점 넘침) */
+  p.style.overflowY = "hidden";
+  const fits = z => { parts.forEach(n => n.style.zoom = z.toFixed(3)); tas.forEach(ckFit); const pr = p.getBoundingClientRect(), lim = pr.top + p.clientTop + p.clientHeight - 4;   // scrollHeight 는 clientHeight 밑으로 안 내려가 여유를 못 잰다 — 마지막 칸의 아래 끝으로 잰다
+    return p.scrollHeight <= p.clientHeight && [...p.children].every(c => c.hidden || c.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(c).marginBottom) || 0) <= lim); };
   let lo = CHECK_ZOOM_MIN, hi = CHECK_ZOOM_MAX;
   if (fits(hi)) lo = hi; else if (!fits(lo)) hi = lo; else for (let k = 0; k < 9; k++){ const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
-  fits(lo); fitCheck.z = lo;
+  const ok = fits(lo); fitCheck.z = lo; p.style.overflowY = ok ? "hidden" : "";   // 가장 작게 해도 넘칠 때만 스크롤
 }
 let fitCkT = 0; const fitCheckSoon = () => { cancelAnimationFrame(fitCkT); fitCkT = requestAnimationFrame(() => { fitCkT = 0; fitCheck(); }); };   // 396번. 부르는 곳(그리기 · 사진 · 창 크기 · 글 고침)은 모두 이 하나로
 addEventListener("resize", () => { if (!$("#st-check").hidden) fitCheckSoon(); });
@@ -10883,7 +10886,7 @@ function aiUndo(n){   // 390번 · 395번. 묶음마다 되돌린다 — 그 뒤
   const u = aiDone.splice(n, 1)[0]; if (!u) return; u.ch.forEach(c => { const cur = String(getDeep(c.path) || ""); setDeep(c.path, cur === c.after ? c.before : cur.split(u.to).join(u.from)); }); touch(); render(); applyScale(); aiDraw();
 }
 const aiGroupKey = f => f.kind === "typo" ? "g|" + f.from + "→" + f.to : f.key;   // 395번. 맞춤법은 같은 고침끼리 한 묶음
-const aiNoTag = t => String(t || "").replace(/#\S+/g, " ").replace(/\s+/g, " ").trim();   // 395번. 해시태그는 줄에서 뺀다
+const aiNoTag = t => String(t || "").replace(/\s*#.*$/, "").replace(/\s+/g, " ").trim();   // 395번 · 397번. 해시태그는 이름 뒤에 붙으니 첫 #부터 끝까지 뺀다(「#Japanese Style」의 Style 이 남았다)
 /* 고른 점검을 처리한 뒤(적용 · 무시) 같은 자리의 다음 점검을 고른다 */
 function aiNext(oldKey){
   const prev = aiDraw.keys || [], k = prev.indexOf(oldKey); aiSel = ""; aiDraw();
@@ -10915,7 +10918,7 @@ function aiDraw(){
         const names = el("span", "nm");   /* 395번 · 396번. 「메뉴」 이름표 + 그 메뉴 이름(해시태그 뺌)을 한 줄에 하나씩 — 틀린 부분에 밑줄. 곳 수는 [모두 적용 (N곳)]에(「메뉴 3곳」으로 두 줄에 걸치면 다른 말처럼 읽혔다 — 사용자) */
         c.fs.forEach(x => { const r = el("span", "nmi"), nm = aiNoTag(x.i < 0 ? x.sn : x.name) || x.from, parts = nm.split(x.from);
           if (pg(x)) r.append(pg(x)); parts.forEach((t, q) => { if (q){ const u = el("u"); u.textContent = x.from; r.append(u); } r.append(t); }); names.append(r); });
-        ln(f.i < 0 ? "분류" : "메뉴", names, "nmline");
+        ln("위치", names, "nmline");   // 397번. 고침이 들어가는 자리(메뉴 이름 · 분류 이름) — 「메뉴」는 대상처럼 읽혔다(사용자)
       }
       else if (kind === "dup"){ ln("메뉴", aiNoTag(f.name)); ln("이유", "같은 이름이 " + f.n + "번 있습니다(" + f.j + "번째)", "why"); const loc = el("span", "s"); loc.textContent = pg(f) + (f.sn || "이름 없는 분류"); it.append(loc); }
       else { const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3); ln("메뉴", aiNoTag(f.name)); if (v) ln("가격", v, "to"); ln("이유", w, "why"); const loc = el("span", "s"); loc.textContent = pg(f) + (f.sn || "이름 없는 분류"); it.append(loc); }
@@ -10934,7 +10937,7 @@ function aiDraw(){
   if (aiDone.length){ const gh = el("div", "aip-gh"); gh.textContent = "적용함"; const sm = el("small"); sm.textContent = aiDone.length + "건"; gh.append(" ", sm); box.append(gh);   // 390번 · 395번. 고친 것도 묶음으로 남긴다 — 묶음마다 되돌리기
     aiDone.forEach((u, n) => { const it = el("div", "aip-it done");
       const ln = (lab, txt, cls) => { const r = el("span", "ln" + (cls ? " " + cls : "")), l = el("b"), v = el("span", "v"); l.textContent = lab; if (txt instanceof Node) v.append(txt); else v.textContent = txt; r.append(l, v); it.append(r); };
-      ln("고친 곳", u.from, "fr"); ln("이렇게", u.to, "to"); { const nm = el("span", "nm"); u.names.map(aiNoTag).filter(Boolean).forEach(t => { const r = el("span", "nmi"); r.textContent = t; nm.append(r); }); ln("메뉴", nm, "nmline"); }   // 396번. 한 줄에 하나
+      ln("고친 곳", u.from, "fr"); ln("이렇게", u.to, "to"); { const nm = el("span", "nm"); u.names.map(aiNoTag).filter(Boolean).forEach(t => { const r = el("span", "nmi"); r.textContent = t; nm.append(r); }); ln("위치", nm, "nmline"); }   // 396번. 한 줄에 하나 · 397번. 「위치」
       const bt = el("div", "aip-btns"), b = el("button"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = e => { e.stopPropagation(); aiUndo(n); }; bt.append(b); it.append(bt); it.onclick = () => aiMark(u.ch.map(c => c.path)); box.append(it); }); }
   if (hid){ const u = el("div", "aip-undo"); u.append("무시한 " + hid + "건"); const b = el("button"); b.type = "button"; b.textContent = "다시 보기"; b.onclick = () => { aiIgnore = new Set(); aiDraw(); }; u.append(b); box.append(u); }
   const cur = cards.find(c => c.key === aiSel); aiMark(cur ? cur.fs.map(f => aiPath(f, map)) : "");   // 396번
@@ -10942,7 +10945,7 @@ function aiDraw(){
 function aiRefresh(){ clearTimeout(aiRefT); aiRefT = setTimeout(() => { if (!$("#aipanel").hidden) aiDraw(); }, 300); }
 async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확인 화면이 같이 쓴다. 이름 글만 보낸다. 틀린 곳은 [{from,to}], 실패하면 Error(쉬운 말)
   const url = /^https?:$/.test(location.protocol) ? "/api/read" : READ_API;
-  let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.map(x => String(x).replace(/#\S+/g, " ").replace(/\s+/g, " ").trim()).filter(Boolean).slice(0, 120) })   /* 393번. 해시태그를 떼고 보낸다 — 서버가 40자에서 잘라 「…#Kim」처럼 반쪽 이름이 돌아왔다 */ }); }
+  let r; try { r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ mode:"typo", names:list.map(x => aiNoTag(x)).filter(Boolean).slice(0, 120) })   /* 393번. 해시태그를 떼고 보낸다 — 서버가 40자에서 잘라 「…#Kim」처럼 반쪽 이름이 돌아왔다 */ }); }
   catch(e){ throw new Error("읽는 곳에 닿지 못했습니다. 인터넷 연결을 확인해 주세요."); }
   const j = await r.json().catch(() => ({}));
   if (r.status === 429) throw new Error("지금 많이 붐벼 무료 한도에 걸렸습니다. 1분쯤 뒤에 다시 눌러 주세요.");
@@ -10965,7 +10968,9 @@ async function aiTypoRun(){
     found.forEach(t => { if (aiTypos.some(u => u.from === t.from && u.to === t.to)) return; aiTypos.push(t); add++; });
     aiTypoRan = true; sub.textContent = (list.length > 120 ? "앞의 120개 이름만 봤습니다. " : "") + (add ? "AI 의견 " + add + "건을 목록에 넣었습니다." : "맞춤법이 틀린 곳을 찾지 못했습니다.");
   } catch(e){ sub.textContent = e.message; }
-  finally { delete b.dataset.busy; b.classList.remove("busy"); b.textContent = label; aiDraw(); }
+  finally { delete b.dataset.busy; b.classList.remove("busy"); b.textContent = label; aiDraw();
+    const n = (aiDraw.keys || []).filter(k => k.startsWith("g|")).length; if (/^(앞의|AI 의견)/.test(sub.textContent) && n) sub.textContent = (list.length > 120 ? "앞의 120개 이름만 봤습니다. " : "") + "맞춤법 의견이 " + n + "건 있습니다.";   // 397번. 받은 줄 수가 아니라 카드 수(겹친 고침을 빼면 줄어든다 — 「9건을 넣었습니다」 아래 카드가 7개였다)
+  }
 }
 $("#b-ai").onclick = () => { if ($("#aipanel").hidden){ if (editing) toggleEdit(); aiOpen(); } else aiClose(false); };   // 393번. AI 를 켜면 편집을 끈다 — 둘이 같이 켜져 창이 하나만 보이는 것이 헷갈렸다. [적용]은 편집이 꺼져 있어도 종이 글자를 고친다(확인함)
 $("#ai-close").onclick = () => aiClose(true);

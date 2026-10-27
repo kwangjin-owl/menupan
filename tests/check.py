@@ -1930,7 +1930,8 @@ def t70(b, f):
         pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'가쓰동'}); drawCkNotes(); }"); pg.wait_for_timeout(150)
         out['ck395'] = pg.evaluate("()=>[!!document.querySelector('#st-ck-typo'), !!document.querySelector('#st-cl-typo'), !!document.querySelector('#st-typo'), document.querySelectorAll('#st-cnotes .st-ck').length, /맞춤법/.test(document.querySelector('#st-cnotes').textContent)]")   # 395번. 확인 화면에는 같은 이름 · 가격 형식 두 줄만
         out['box'] = pg.evaluate("()=>{ const b=document.querySelector('#st-cnotes'); return [getComputedStyle(b).overflowY, b.scrollHeight - b.clientHeight] }")
-        out['fill396'] = pg.evaluate("()=>{ const p=document.querySelector('.st-cpaper'), h=document.querySelector('.st-chead'), b=h.querySelector('.st-cadd'), t=h.querySelector('.st-csec'), R=e=>e.getBoundingClientRect(); return [p.scrollHeight <= p.clientHeight, +(document.querySelector('#st-ctab').style.zoom||1) > 1, R(b).top >= R(t).top - 0.5 && R(b).bottom <= R(t).bottom + 0.5 && R(b).right <= R(t).right + 0.5] }")   # 396번. 메뉴가 적으면 키워 종이를 채우고(스크롤 없음) · [＋ 메뉴]는 분류 띠 안
+        out['notag'] = pg.evaluate("()=>['오코노미야끼 #Japanese Style #Pancake', '가츠동 (돈가츠 덮밥) #Pork', '김치우동'].map(aiNoTag)")   # 397번. 첫 #부터 끝까지
+        out['fill396'] = pg.evaluate("()=>{ const p=document.querySelector('.st-cpaper'), h=document.querySelector('.st-chead'), b=h.querySelector('.st-cadd'), t=h.querySelector('.st-csec'), R=e=>e.getBoundingClientRect(); return [p.scrollHeight <= p.clientHeight && getComputedStyle(p).overflowY === 'hidden', +(document.querySelector('#st-ctab').style.zoom||1) > 1, R(b).top >= R(t).top - 0.5 && R(b).bottom <= R(t).bottom + 0.5 && R(b).right <= R(t).right + 0.5] }")   # 396번. 메뉴가 적으면 키워 종이를 채우고(스크롤 없음) · [＋ 메뉴]는 분류 띠 안
         out['btbg'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-copy')).backgroundColor")
         pg.click('#st-check-go'); pg.wait_for_timeout(300); pg.click('#st-go'); pg.wait_for_timeout(1200)
         pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{guideEnd()}catch(e){} }"); pg.wait_for_timeout(300)
@@ -2601,9 +2602,9 @@ def judge(t, r):
             ok = (r.get('parts') == ['「가츠동」 → 「가쓰동」 · 「돈가츠」 → 「돈가스」', '「타코야끼」 → 「타코야키」', '「김치 우동」 → 「김치우동」'] and r['title'] == [None, True, '#8f8a2e']
                   and r.get('ck395') == [False, False, False, 2, False] and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
                   and r.get('far') == ['케익', '함박스텍', '육계장'] and r.get('fill396') == [True, True, True]
-                  and cd[0] == [['가츠동', '가쓰동', '메뉴', '가츠동|네기가츠동|김치가츠동', '가츠동,가츠동,가츠동'], ['타코야끼', '타코야키', '메뉴', '타코야끼', '타코야끼']] and cd[1] == '2건'
+                  and cd[0] == [['가츠동', '가쓰동', '위치', '가츠동|네기가츠동|김치가츠동', '가츠동,가츠동,가츠동'], ['타코야끼', '타코야키', '위치', '타코야끼', '타코야끼']] and cd[1] == '2건'
                   and r.get('frto', [''])[0] == 'line-through' and r['frto'][1] == '700' and r.get('allbtn') == '모두 적용 (3곳)' and r.get('flash') == 3
-                  and r['aidone'] == [1, ['가쓰동', '네기가쓰동', '김치가쓰동'], '메뉴'] and r['aiundo'] == [0, ['가츠동', '네기가츠동', '김치가츠동']] and r.get('aiign') == [3, '1건']
+                  and r['aidone'] == [1, ['가쓰동', '네기가쓰동', '김치가쓰동'], '위치'] and r.get('notag') == ['오코노미야끼', '가츠동 (돈가츠 덮밥)', '김치우동'] and r['aiundo'] == [0, ['가츠동', '네기가츠동', '김치가츠동']] and r.get('aiign') == [3, '1건']
                   and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [['가츠동', '가쓰동', ''], ['돈가츠', '돈가스', ''], ['두마리', '두 마리', '띄어쓰기'], ['김치찌게', '김치찌개', ''], ['타코야끼', '타코야키', '외래어 표기'], ['여섯개', '여섯 개', '띄어쓰기']] and r.get('aikind') == ['돈까스', '돈가스', '외래어 표기']
                   and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'idle'] and len(r['aist']) == 3
                   and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
@@ -2673,7 +2674,7 @@ def judge(t, r):
             ok_ai = r['sent']['mode'] == 'typo' and '육계장' in r['sent']['names'] and len(r['rows2']) == 5 and any('비빈밥' in x for x in r['rows2']) and not any('없는이름' in x for x in r['rows2'])
             ok_ap = r['applied'][0] == '육개장' and r['applied'][1] == '육개장' and r['applied'][2] and r['undone'] == '육계장'
             ok_ig = r['ign'] == [5, 4, 1] and r['lang'] == ['en', False]
-            ok_st = r['stray'] == [1, '야끼소바dd', '야끼소바', True] and '아직 안 봤습니다' in r['empty'] and r['labels'] == ['틀린 곳', '이렇게', '이유', '메뉴']
+            ok_st = r['stray'] == [1, '야끼소바dd', '야끼소바', True] and '아직 안 봤습니다' in r['empty'] and r['labels'] == ['틀린 곳', '이렇게', '이유', '위치']
             ok_sh = r['shoplike'] == [True, True, True, False, False, False, False, False, False, False] and r['sealsym'] == [False, True, True]
             ok_lk = r['look'] == [True, False, 'rgb(245, 236, 215)', True]
             ok_sw = r['swap'] == [[True, False, 0], [False, True], [True, 0, False]] and r['print'] == 'none' and r['save'] == [True, '', 0]
