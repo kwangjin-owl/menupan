@@ -1091,7 +1091,9 @@ body:not(.editing) .row:not(.wine) .name > span:first-child:empty::before{conten
    · 바닥 구역은 왼쪽 · 아래가 여백선과 2px 차이로 겹쳤다 → **위 · 오른쪽 선만 긋고 왼쪽 · 아래는 여백선이 대신한다**
      (여러 줄이면 윗구역의 아래는 아랫구역의 윗선이 된다). 흐름에는 영향 없음 — 선만 바뀐다 */
 .editing .sheet > .zone:has(> .hours){align-self:center;width:fit-content}
-.editing .sheet > .zone:has(> .hours)::before{margin-right:16px}
+.editing .sheet > .zone:has(> .hours)::before{margin-right:14px;top:50%;transform:translateY(-50%)}   /* 384번. 이름표를 시간 줄 높이의 가운데에 — 위쪽 여백(1em)까지 구역에 들어 있어 이름표가 줄보다 한참 위에 떠 있었다(사용자) */
+.editing:not(.preview) .sheet > .zone:has(> .hours){margin-top:1em;outline-offset:4px}   /* 384번. 위 여백은 구역 밖으로(점선 틀이 시간 줄에 붙게) — 완성본(.zone 이 display:contents)과 간격은 같다 */
+.editing:not(.preview) .zone > .hours{margin-top:0}   /* 완성본(preview)은 구역이 display:contents 라 구역의 margin 이 안 먹는다 — 그때는 시간 줄의 margin 을 그대로 둔다 */
 .editing .foot .zone{outline:none}
 .editing:not(.preview) .foot .zone::after{content:"";position:absolute;left:0;top:-2px;right:-2px;bottom:0;pointer-events:none;
   border-top:1px dashed rgba(0,0,0,.18);border-right:1px dashed rgba(0,0,0,.18)}
@@ -2280,7 +2282,7 @@ dialog .st-picrow.has button.st-drop{flex:0 0 auto;min-height:0;background:trans
    막힌 단추는 어디서나 흐리게(사용자: 막힌 [읽기]가 눌리는 것처럼 보였다) */
 dialog::backdrop{background:transparent}
 dialog{box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.12)}
-dialog#start.first::backdrop{background:#141009}
+dialog#start::backdrop{background:#141009}   /* 384번. 첫 화면만이 아니라 늘 뒤를 가린다 — 사진 읽기 중에 뒤의 메뉴가 비쳐 보였다(사용자) */
 dialog .in{position:relative}
 dialog button.dlg-x{position:absolute;top:20px;right:20px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e7dac0;color:#241c12;display:inline-flex;align-items:center;justify-content:center;z-index:2}
 dialog button.dlg-x:hover{background:#dccca9}
@@ -2537,7 +2539,19 @@ dialog .st-ptabs button[aria-selected="true"]{background:#e0cfa8;border-color:#8
 dialog .st-cnotes{margin:10px 0 0;padding:8px 10px;border-radius:8px;background-color:#f3ead4;color:#241c12;max-height:min(42vh,290px);overflow:auto;   /* 356번. 9.6em(2줄)이라 5건 중 2줄만 보였다 — 높이를 늘리고, 더 있으면 위 · 아래에 그늘로 알린다 */
   background-image:linear-gradient(#f3ead4 30%,rgba(243,234,212,0)),linear-gradient(rgba(243,234,212,0),#f3ead4 70%),radial-gradient(farthest-side at 50% 0,rgba(0,0,0,.22),rgba(0,0,0,0)),radial-gradient(farthest-side at 50% 100%,rgba(0,0,0,.22),rgba(0,0,0,0));
   background-position:0 0,0 100%,0 0,0 100%;background-repeat:no-repeat;background-size:100% 16px,100% 16px,100% 8px,100% 8px;background-attachment:local,local,scroll,scroll}
-dialog .st-cnotes .st-cnh{font-size:13px;font-weight:700}
+dialog .st-cnotes .st-ck{display:flex;align-items:center;gap:8px;min-height:26px;font-size:13px}   /* 384번. 점검 세 가지(같은 이름 · 가격 형식 · 맞춤법)를 한 줄씩 — 앞의 표시(✓ · ! · –)로 상태가 보이고, 맞춤법 단추는 글 바로 옆에 둔다(사용자) */
+dialog .st-cnotes .st-ck + .st-cl + .st-ck{border-top:1px solid rgba(0,0,0,.1)}
+dialog .st-cnotes .st-ck .tx{flex:0 1 auto;min-width:0}
+dialog .st-cnotes .st-ck .mk{flex:none;width:18px;height:18px;border-radius:50%;display:inline-block;text-align:center;font:700 12px/18px sans-serif;font-style:normal;color:#fff}
+dialog .st-cnotes .st-ck[data-s="ok"] .mk{background:#3f7d3a}
+dialog .st-cnotes .st-ck[data-s="ok"] .mk::before{content:"✓"}
+dialog .st-cnotes .st-ck[data-s="warn"] .mk{background:#c2570f}
+dialog .st-cnotes .st-ck[data-s="warn"] .mk::before{content:"!"}
+dialog .st-cnotes .st-ck[data-s="idle"] .mk{background:#9a8b70}
+dialog .st-cnotes .st-ck[data-s="idle"] .mk::before{content:"–"}
+dialog .st-cnotes .st-ck[data-s="warn"] .tx{font-weight:700}
+dialog .st-cnotes .st-cl:empty{display:none}
+dialog .st-cnotes .st-cl{margin:0 0 4px 26px}
 dialog .st-cnotes .st-cnr{display:flex;gap:6px;align-items:center;padding:3px 0;border-top:1px solid rgba(0,0,0,.08);font-size:13px;line-height:1.45}
 dialog .st-cnotes .st-cnr .go{flex:1 1 auto;text-align:left;background:none;border:0;padding:4px 6px;height:auto;min-height:32px;white-space:normal;overflow-wrap:anywhere;border-radius:0;   /* 356번. 안내창 단추 규칙(높이 40px)이 걸려 긴 줄(폰 폭)이 다음 줄과 겹쳤다 */ color:#241c12;font:inherit;cursor:pointer;text-decoration:underline dotted}
 dialog .st-cnotes .st-cnr button.ab{flex:0 0 auto;height:30px;padding:0 10px;border:1px solid #b9a98a;border-radius:6px;background:#fffdf6;color:#241c12;font:inherit;font-size:13px}
@@ -2577,9 +2591,6 @@ dialog .st-cin.flash{outline:3px solid #e0a020;outline-offset:1px;background:#ff
 dialog .st-cnotes .st-typo{background:#5b4630;color:#fff8e6;border:1px solid #5b4630;font-weight:600}   /* 379번. 바탕과 같은 색이라 버튼으로 안 보였다(사용자) — 어두운 갈색 채움(붉은 주 버튼 [이대로 시작]과 겹치지 않게) */
 dialog .st-cnotes .st-typo:hover{background:#6f5740}
 dialog .st-cnotes .st-typo:disabled{opacity:.6}
-dialog .st-cnotes .st-nrow{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px 12px;min-height:30px;font-size:13px}
-dialog .st-cnotes .st-nrow2{border-top:1px solid #cbb98f;margin-top:6px;padding-top:6px}
-dialog .st-cnotes .st-nrow > span{flex:0 1 auto;min-width:0}   /* 383번. 글과 단추가 한 문장처럼 붙어 있게 — 양끝으로 벌리면 따로 노는 것처럼 보였다(사용자) */
 dialog .st-cnotes #st-typo{flex:none}
 dialog #st-readsum{font-size:13px;margin-top:12px}
 dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
@@ -2850,7 +2861,7 @@ dialog .st-crow button.st-cpk{height:26px}
 .panel .btpick .bpick{font-size:12px}
 .panel button.pl-tile{font-size:12px}
 /* 318번. [세로 | 가로] · [1단 ~ 4단]이 40 이 되며 「읽은 메뉴」 줄이 58px 로 커져 창 자체가 9px 넘쳤다(스크롤 둘 — 313번에 사용자가 짚은 것, 재 보고 잡음) → 종이 · 사진 높이 여유 376 → 386 */
-.st-cpaper{height:min(calc(100vh - 502px), 860px);min-height:min(440px, calc(100vh - 502px))}
+.st-cpaper{height:min(calc(100vh - 526px), 860px);min-height:min(440px, calc(100vh - 526px))}
 .st-cphoto img{max-height:min(calc(100vh - 386px), 860px)}
 .st-cpaper.land{width:min(calc(min(1440px, 100vw - 32px) - 72px - min(22vw, 360px)), calc((100vh - 386px) * 1.414))}
 /* 319번. 사용 점검(사용자 — 꾸밈이 직관적이지 않다)에서 확실한 것만.
@@ -3140,7 +3151,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   <!-- 111번. 켜고 끄는 것은 전부 체크다(드롭다운이었다). 체크 = 표시. 263번에서 설정 하나를 켜고 끄는 것은 스위치(m3sw)로 바뀌었다 -->
   <span class="chkrow">
     <label class="chk"><input type="checkbox" class="m3sw" id="f-notes"> 바닥 글</label>
-    <label class="chk"><input type="checkbox" class="m3sw" id="f-origin"> 식재료 원산지</label>
+    <label class="chk"><input type="checkbox" class="m3sw" id="f-origin"> 원산지</label>
   </span>
   <div class="pgrp">쪽 번호</div>
       <select id="f-pageno" aria-label="쪽 번호">
@@ -3358,7 +3369,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <div class="st-ptabs" id="st-ptabs" role="tablist" aria-label="쪽" hidden></div>   <!-- 353번. 쪽이 둘 이상이면 쪽마다 확인 -->
     <p class="st-ccount" id="st-ccount"></p>   <!-- 296번. 몇 개를 읽었는지 · 어떤 모양으로 놓았는지 -->   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
     <p class="st-legend"><i></i>노랗게 칠한 칸은 AI가 잘못 읽었을 수 있는 곳입니다(영업시간처럼 작은 글씨는 늘). 먼저 사진과 맞춰 보세요.</p>   <!-- 313번 -->
-    <div class="st-cnotes" id="st-cnotes"><div class="st-nrow"><b class="st-cnh" id="st-cnh"></b></div><div class="st-nrow st-nrow2"><span id="st-typosub">맞춤법: 아직 안 봤습니다</span><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button></div><div id="st-cnlist"></div></div>   <!-- 353번. 점검 — 눌러서 그 칸으로 가고 · [적용] · [무시] -->
+    <div class="st-cnotes" id="st-cnotes"><div class="st-ck" id="st-ck-dup"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-dup"></div><div class="st-ck" id="st-ck-price"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-price"></div><div class="st-ck" id="st-ck-typo"><i class="mk"></i><span class="tx" id="st-typosub">맞춤법: 아직 안 봤습니다</span><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button></div><div class="st-cl" id="st-cl-typo"></div><div id="st-cnlist"></div></div>   <!-- 353번. 점검 — 눌러서 그 칸으로 가고 · [적용] · [무시] -->
     <div class="st-cbody"><div class="st-cphoto"><img id="st-cimg" alt="올린 메뉴판 사진" title="누르면 크게 봅니다"><p class="st-note st-czoomhint">사진을 누르면 크게 봅니다</p></div>
       <div class="st-cpaper"><div class="st-cband"><input type="text" id="st-cshop" class="st-cshopin" placeholder="가게 이름" aria-label="가게 이름" autocomplete="off"></div>   <!-- 290번. 읽은 가게 이름 — 고칠 수 있다 --><div id="st-chours" class="st-chours" hidden></div><div id="st-ctab" class="st-ctab"></div><div id="st-cfoot" class="st-cfoot" hidden></div>   <!-- 312번. 영업시간 · 바닥 글 칸 --></div></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
@@ -7668,7 +7679,7 @@ function drawSheet(spec){
     fm.appendChild(row);
     // 켜져 있어도 내용이 비었으면 안 그린다. 편집 중에는 빈 칸을 눌러 채울 수 있게 그린다
     if (PS.showOrigin !== false && (editing || String(FT.origin || "").trim())){
-      const oz = el("div","zone"); oz.dataset.t = "식재료 원산지";   // 152번. 와인의 "원산지" 줄과 이름이 겹쳐 바꿨다
+      const oz = el("div","zone"); oz.dataset.t = "원산지";   // 152번 · 384번. 한때 「식재료 원산지」로 늘렸으나(와인의 원산지 줄과 겹침) 짧게 되돌렸다(사용자)
       const og = el("p","origin"), lb = el("b"), ov = el("span","ov");
       lb.textContent = "원산지"; ov.textContent = FT.origin || ""; ov.dataset.path = fp + "origin";
       // 비어 있으면 인쇄에 안 나오므로 미리보기에서도 감춘다
@@ -8174,6 +8185,7 @@ document.addEventListener("input", e => {
   dirty = true; document.body.classList.add("unsaved");
   // 타이핑은 글자마다 쌓지 않는다. 손을 멈췄을 때 한 번만 묶어서 쌓는다
   clearTimeout(typeTimer); typeTimer = setTimeout(pushHistory, 900);
+  clearTimeout(recheckT); recheckT = setTimeout(recheckOver, 700);   // 384번
 });
 document.addEventListener("keydown", e => {
   if (!(e.ctrlKey || e.metaKey)) return;
@@ -8657,6 +8669,11 @@ function applyScale(){
   spread(); syncSize(); fitSecTools();   // 304번
   /* 190번. 넘친 장에 표시를 남긴다 — 화면에만 보이고 인쇄에는 안 나온다.
      198번. **띠는 세로로 넘쳤을 때만** 단다 — 가로(점선 자리) 문제는 여백선과 무관하다 */
+  paintOver(full, true);
+}
+/* 384번. 넘침 표시(붉은 띠 · 쪽 탭 줄 · 검은 알림)를 그리는 일을 떼어 냈다 — 배율을 맞추는 applyScale() 과, 글을 치고 난 뒤 다시 재는 recheckOver() 가 같이 쓴다.
+   notify = false 면 검은 알림(toast)은 띄우지 않는다(타이핑 중에 알림이 계속 뜨지 않게) */
+function paintOver(full, notify){
   const why = {};
   full.forEach(n => why[n] = overWhy(n - 1));
   document.querySelectorAll(".sheet").forEach(sh => {
@@ -8684,11 +8701,21 @@ function applyScale(){
     wide.forEach(n => pstat(n, "가로가 좁습니다",  "이름과 가격 사이 점선이 사라졌습니다. 글자를 한두 눈금 줄여 주세요."));
     /* 253번. **검은 알림 상자는 되살린다.** "검은색 상자 없애고 위로 올리니까 더 안 보여" — 쪽 탭 줄은 종이 맨 위라 아래를 보고 있으면
        화면 밖이다. 알림은 눈앞에 떠야 한다. 쪽 탭 줄의 붉은 글씨는 그대로 둔다(스크롤해도 그 쪽에 남는 기록) */
-    if (tall.length){ const e = document.querySelector(".sheet[data-pi='" + (tall[0]-1) + "'] .pagebar .pstat");
+    if (!notify){} else if (tall.length){ const e = document.querySelector(".sheet[data-pi='" + (tall[0]-1) + "'] .pagebar .pstat");
       toast(tall.join(" · ") + "쪽이 넘쳤습니다. " + (e && e.title || ""), null); }
     else if (wide.length)
       toast(wide.join(" · ") + "쪽은 가로가 좁습니다 — 이름과 가격 사이 점선이 사라졌습니다. 글자를 한두 눈금 줄여 주세요.", null);
   }
+}
+/* 384번. **글을 친 뒤에도 넘침을 다시 잰다**(사용자: 와인 장에서 카드가 바닥 글을 덮는데 넘침 표시가 안 떴다).
+   전에는 applyScale() 이 그리기(render) 때만 돌아, 한 번 맞춘 장에 글을 더 쳐 넣으면 다음 그리기까지 표시가 그대로였다.
+   손을 멈춘 뒤 한 번만 잰다. [한 장에 맞춤]이 켜진 장은 건드리지 않고(크기는 그리기 때 다시 맞춘다 — 190번), 켜지 않은 장만 표시를 갱신한다. 크기 · 알림은 그대로 */
+let recheckT = 0;
+function recheckOver(){
+  if (!editing || document.body.classList.contains("preview")) return;
+  const keep = overPages.filter(n => P(n - 1).autofit === true), full = keep.slice();
+  MENU.sheets.forEach((_, i) => { if (P(i).autofit === true) return; if (overA4(i)) full.push(i + 1); });
+  full.sort((x, y) => x - y); paintOver(full, false);
 }
 let overPages = [];
 let overReason = {};   // 234번. {쪽 번호: "tall" | "wide" | null}
@@ -9776,7 +9803,12 @@ const brandToggle = (key, field, focusSel) => e => {
 };
 $("#f-title").onchange = brandToggle("showTitle", "title", ".noren .jp .bv");
 $("#f-sub").onchange   = brandToggle("showSub",   "sub",   ".noren .ko .bv");
-$("#f-hours").onchange = e => { const pg = P(panelPage); if (e.target.checked) delete pg.showHours; else pg.showHours = false; touch(); render(); };   // 367번
+$("#f-hours").onchange = e => {   // 367번 · 384번. 켰는데 시간이 하나도 없으면 빈 줄 하나를 넣고 커서를 놓는다 — 다른 토글(제목 · 한 줄 소개)과 같게(사용자: 켠 뒤에 [＋ 시간 추가]를 또 눌러야 했다)
+  const pg = P(panelPage); if (e.target.checked) delete pg.showHours; else pg.showHours = false;
+  const on = pg.showHours !== false, empty = !(MENU.hours || []).some(h => String(h.label || "").trim() || String(h.time || "").trim());
+  if (on && empty && (MENU.hours || []).length < HOURS_MAX){ if (!(MENU.hours || []).length) MENU.hours.push({ label:"", time:"" }); touch(); if (!editing) toggleEdit(); else render(); focusLast('.sheet[data-pi="' + panelPage + '"] .hours b'); return; }
+  touch(); render();
+};
 $("#f-align").onchange = e => {   // 309번. 켜면 true · 끄면 키를 지운다(15번 — 기본값은 저장본에 남기지 않는다)
   const pg = P(panelPage); if (e.target.checked) pg.alignRows = true; else delete pg.alignRows;
   touch(); render();
@@ -10724,14 +10756,18 @@ function ckGo(f){
 function drawCkNotes(){
   const box = $("#st-cnlist"); if (!box || $("#st-check").hidden && !stParsed) return;
   const all = menuFindings(ckPagesNow()), L = all.filter(f => !stCkIgnore.has(f.key)), hid = all.length - L.length;
-  box.innerHTML = "";
-  $("#st-cnh").textContent = L.length ? "점검 " + L.length + "건 — 누르면 그 칸으로 갑니다" : stTypoRan ? "점검할 곳이 없습니다" : "같은 이름 · 가격 형식은 문제가 없습니다";   // 382번. 맞춤법은 단추를 눌러야 본다 — 안 봤으면 「맞춤법까지 문제 없다」고 쓰지 않는다
-  if (!$("#st-typo").dataset.busy) $("#st-typo").textContent = stTypoRan ? "AI로 다시 보기" : "AI로 맞춤법 보기";   // 382번. 고친 뒤 다시 볼 수 있다(사용자)
-  if (!stTypoRan && !$("#st-typo").dataset.err) $("#st-typosub").textContent = "맞춤법: 아직 안 봤습니다";   // 382번. 새 사진이면 다시 「안 봤습니다」
-  if (L.some(f => f.kind === "typo")){ const nt = el("p", "st-cnf"); nt.textContent = "맞춤법은 AI 의견 · 글자 규칙으로 찾은 것입니다. 사진에 적힌 그대로가 맞을 수도 있으니 확인하고 [적용]하세요."; box.append(nt); }   // 357번. 줄마다 붙이지 않고 한 번
+  box.innerHTML = ""; ["dup", "price", "typo"].forEach(k => { $("#st-cl-" + k).innerHTML = ""; });
+  const cnt = k => L.filter(f => f.kind === k).length, setRow = (k, st, txt) => { const r = $("#st-ck-" + k); r.dataset.s = st; if (k !== "typo") r.querySelector(".tx").textContent = txt; };   // 384번. 맞춤법 줄 글은 아래에서 따로(단추 눌렀을 때의 결과 글을 지우지 않게)
+  setRow("dup", cnt("dup") ? "warn" : "ok", cnt("dup") ? "같은 이름: " + cnt("dup") + "건" : "같은 이름: 겹치는 메뉴 없음");
+  setRow("price", cnt("price") ? "warn" : "ok", cnt("price") ? "가격 형식: " + cnt("price") + "건" : "가격 형식: 문제 없음");
+  const nt = cnt("typo"), tb = $("#st-typo");
+  setRow("typo", nt ? "warn" : stTypoRan ? "ok" : "idle");
+  if (!tb.dataset.busy && !tb.dataset.err) $("#st-typosub").textContent = "맞춤법: " + (nt ? nt + "건" + (stTypoRan ? "" : " · AI로는 아직 안 봤습니다") : stTypoRan ? "틀린 곳 없음" : "아직 안 봤습니다");   // 382번. 맞춤법은 단추를 눌러야 본다 — 안 봤으면 「문제 없다」고 쓰지 않는다
+  if (!tb.dataset.busy) tb.textContent = stTypoRan ? "AI로 다시 보기" : "AI로 맞춤법 보기";   // 382번. 고친 뒤 다시 볼 수 있다(사용자)
   L.slice(0, 40).forEach(f => { const r = el("div", "st-cnr"), g = el("button", "go"); g.type = "button"; g.textContent = f.msg; g.onclick = () => ckGo(f); r.append(g);
     if (f.kind === "typo"){ const a = el("button", "ab ap"); a.type = "button"; a.textContent = "적용"; a.title = "이 칸의 「" + f.from + "」를 「" + f.to + "」로 바꿉니다"; a.onclick = () => ckApply(f); r.append(a); }
-    const k = el("button", "ab"); k.type = "button"; k.textContent = "무시"; k.onclick = () => { stCkIgnore.add(f.key); drawCkNotes(); }; r.append(k); box.append(r); });
+    const k = el("button", "ab"); k.type = "button"; k.textContent = "무시"; k.onclick = () => { stCkIgnore.add(f.key); drawCkNotes(); }; r.append(k); $("#st-cl-" + f.kind).append(r); });
+  if (L.length){ const h = el("p", "st-cnf"); h.textContent = "항목을 누르면 그 칸으로 갑니다." + (L.some(f => f.kind === "typo") ? " 맞춤법은 AI 의견 · 글자 규칙으로 찾은 것입니다. 사진에 적힌 그대로가 맞을 수도 있으니 확인하고 [적용]하세요." : ""); box.append(h); }   // 357번. 줄마다 붙이지 않고 한 번
   if (ckLast){ const u = el("p", "st-cnf"); u.textContent = "「" + ckLast.from + "」를 「" + ckLast.to + "」로 바꿨습니다 "; const b = el("button", "ab"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = ckUndo; u.append(b); box.append(u); }
   if (hid){ const u = el("p", "st-cnf"); u.textContent = "무시한 " + hid + "건 "; const b = el("button", "ab"); b.type = "button"; b.textContent = "다시 보기"; b.onclick = () => { stCkIgnore = new Set(); drawCkNotes(); }; u.append(b); box.append(u); }
 }
