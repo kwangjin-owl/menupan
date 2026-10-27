@@ -348,7 +348,7 @@ body{transition:padding-right .18s ease}
 
 /* ── 영업시간 ─────────────────────────────────────────────────────── */
 .hours{margin:1em auto 0;display:flex;gap:1.6em;justify-content:center;flex-wrap:wrap;
-  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:.55em 1.6em;width:fit-content}
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:.3em 1.6em;width:fit-content}   /* 385번. 위 · 아래 실선과 글자 사이 .55em → .3em(사용자: 너무 넓다) */
 .hours div{font-size:.81em}
 .hours b{font-weight:400;color:var(--ink-soft);margin-right:.55em}
 .hours span{font-family:var(--jp)}
@@ -2553,7 +2553,7 @@ dialog .st-cnotes .st-ck[data-s="warn"] .tx{font-weight:700}
 dialog .st-cnotes .st-cl:empty{display:none}
 dialog .st-cnotes .st-cl{margin:0 0 4px 26px}
 dialog .st-cnotes .st-cnr{display:flex;gap:6px;align-items:center;padding:3px 0;border-top:1px solid rgba(0,0,0,.08);font-size:13px;line-height:1.45}
-dialog .st-cnotes .st-cnr .go{flex:1 1 auto;text-align:left;background:none;border:0;padding:4px 6px;height:auto;min-height:32px;white-space:normal;overflow-wrap:anywhere;border-radius:0;   /* 356번. 안내창 단추 규칙(높이 40px)이 걸려 긴 줄(폰 폭)이 다음 줄과 겹쳤다 */ color:#241c12;font:inherit;cursor:pointer;text-decoration:underline dotted}
+dialog .st-cnotes .st-cnr .go{flex:0 1 auto;text-align:left;background:none;border:0;padding:4px 6px;height:auto;min-height:32px;white-space:normal;overflow-wrap:anywhere;border-radius:0;   /* 356번. 안내창 단추 규칙(높이 40px)이 걸려 긴 줄(폰 폭)이 다음 줄과 겹쳤다 */ color:#241c12;font:inherit;cursor:pointer;text-decoration:underline dotted}
 dialog .st-cnotes .st-cnr button.ab{flex:0 0 auto;height:30px;padding:0 10px;border:1px solid #b9a98a;border-radius:6px;background:#fffdf6;color:#241c12;font:inherit;font-size:13px}
 dialog .st-cnotes .st-cnr button.ab.ap{background:#e0cfa8;font-weight:700}
 dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
