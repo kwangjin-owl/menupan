@@ -1408,7 +1408,7 @@ html body .st-seg > button:not(.dlg-x):not(.st-icon):not(.st-rot button), html b
    ② 막대와 값 — 윗줄 이름 · 값(· 「기본으로」), 아랫줄 막대 + 한 덩어리 [− | +](수량 고르기 꼴)
    ③ 가끔 쓰는 동작은 글자 단추(밑줄) — 「기본으로」 · 「이 장 설정을 다른 장에도 적용」 */
 html body #panel .st-pseg, html body #panel #pgpick{display:grid !important;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;padding:2px;margin:0;border:1px solid rgba(240,230,205,.22);border-radius:8px !important;background:rgba(240,230,205,.05);width:100%;box-sizing:border-box}
-html body #panel .st-pseg > button, html body #panel #pgpick > button{height:28px !important;min-height:28px !important;padding:0 8px !important;border:0 !important;border-radius:6px !important;background:transparent !important;color:rgba(240,230,205,.68);font-size:13px;box-shadow:none !important;white-space:nowrap}
+html body #panel .st-pseg > button, html body #panel #pgpick > button{height:26px !important;min-height:26px !important;padding:0 8px !important;border:0 !important;border-radius:6px !important;background:transparent !important;color:rgba(240,230,205,.68);font-size:13px;box-shadow:none !important;white-space:nowrap}
 html body #panel .st-pseg > button.on, html body #panel #pgpick > button.on, html body #panel #pgpick > button[aria-pressed="true"]{background:rgba(240,230,205,.2) !important;color:#f3e9d2;font-weight:600}
 html body #panel .st-pseg > button::before{content:none !important}
 html body #panel .st-pseg > button + button{border-left:0 !important}
@@ -1423,7 +1423,7 @@ html body #panel .slhead{display:flex;align-items:baseline;justify-content:space
 html body #panel .slbody{display:flex;align-items:center;gap:10px;margin-top:6px}
 html body #panel .slbody input[type=range]{flex:1;min-width:0;margin:0}
 html body #panel .stepg{display:inline-flex;flex:0 0 auto;border:1px solid rgba(240,230,205,.22);border-radius:8px;overflow:hidden}
-html body #panel .stepg > button.stp:not(#_){width:34px !important;height:28px !important;min-height:28px !important;padding:0 !important;border:0 !important;border-radius:0 !important;background:transparent !important;font-size:16px;line-height:1;color:#efe3c9;box-shadow:none !important}
+html body #panel .stepg > button.stp:not(#_){width:34px !important;height:30px !important;min-height:30px !important;padding:0 !important;border:0 !important;border-radius:0 !important;background:transparent !important;font-size:16px;line-height:1;color:#efe3c9;box-shadow:none !important}
 html body #panel .stepg > button.stp + button.stp:not(#_){border-left:1px solid rgba(240,230,205,.22) !important}   /* 336번. :not(#_) — 꾸미기 창 전체 「단추 모서리 8px」(id 둘 · 이름 둘)이 이겨 + 칸 왼쪽이 둥글게 휘어 +만 싸인 것처럼 보였다(사용자). 두 규칙 다 !important 라 선택자 무게로 갈린다 — id 둘 · 이름 둘 이상이어야 이긴다(재 보고 잡음) */
 html body #panel .stepg > button:hover{background:rgba(240,230,205,.08) !important}
 html body #panel [data-only][hidden]{display:none}
@@ -1475,11 +1475,11 @@ html body #panel .pgrid .pband .qs.has.empty, .panel .pgrid .pqr.empty{backgroun
 html body #panel #g-art{width:150px}
 html body #panel #g-art.land{width:210px}
 html body #panel .pgrid .pband{gap:5%;padding:0 5%}
-html body #panel .pgrid .pband .qs{width:30%;height:74%;border:1px dashed rgba(240,230,205,.6);color:rgba(240,230,205,.7);font:700 9px/1 sans-serif}
+html body #panel .pgrid .pband .qs{width:30%;height:74%;border:1px dashed rgba(240,230,205,.6);color:rgba(240,230,205,.7);font:700 12px/1 sans-serif}
 html body #panel .pgrid .pband .qs:not(.has)::after{content:"QR"}
 html body #panel .pgrid .pband .qs.has{color:#111}
 html body #panel .pgrid .pband .qs.on{outline:0;box-shadow:inset 0 0 0 2px #efe3c9}
-html body #panel .pgrid .pqr.hint{background:transparent;color:rgba(240,230,205,.75);border:1px dashed rgba(240,230,205,.6);pointer-events:auto;cursor:pointer;font:700 9px/1 sans-serif}
+html body #panel .pgrid .pqr.hint{background:transparent;color:rgba(240,230,205,.75);border:1px dashed rgba(240,230,205,.6);pointer-events:auto;cursor:pointer;font:700 12px/1 sans-serif}
 html body #panel .pgrid .pqr.hint:hover{background:rgba(255,255,255,.18)}
 /* 347번. **QR 자리 네 곳은 크기가 모두 같은 정사각형**(24px) — 맨 위 좌우 끝도 아래 모퉁이와 같은 모양(사용자). 맨 위 띠가 낮은 종이에서도 상자가 띠 안에 들어가게 격자 띠에 최소 높이 */
 html body #panel .pgrid .pband{min-height:30px}
@@ -2308,9 +2308,9 @@ dialog button.bt-out:disabled:hover{background:transparent}
 .pl-tile .c i{display:block;height:13px}
 .pl-tile .c em{display:block;width:8px;height:8px;border-radius:50%;margin:5px auto 0}
 /* 284번. 저장할 것이 있다는 불 — [파일로 저장]이 [파일 ▾] 안에 들어가 안 보이게 됐으므로 [파일 ▾]에 켠다(컴퓨터 파일일 때. 버셀 주소는 자동 저장이라 끈다 — 277번) */
-body.unsaved #b-file{background:#efe3c9;border-color:#efe3c9;color:#1a140c}
-body.unsaved #b-file:hover{background:#fff6e2;border-color:#fff6e2}
-body.web.unsaved #b-file{background:rgba(22,17,10,.94);border-color:rgba(240,230,205,.18);color:#efe3c9}
+/* 389번. 불을 단추 채움에서 점으로 — 크림 채움은 켜짐 표시(366 · 387번)라, 켜지지 않은 [파일 ▾]가 켜진 [편집]과 같아 보였다. 단추 모양은 다른 막대 단추 그대로, 오른쪽 위에 점 하나 */
+#b-file{position:relative}
+body.unsaved:not(.web) #b-file::after{content:"";position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#e8b04a}
 .tb-menu #b-save{background:transparent;border:0;color:#efe3c9}
 /* ── 286번. 결 맞추기(사용자 점검)
    · 둘째 줄을 얇게(44 → 38, 틈 6 → 4) — 상단이 화면을 너무 먹었다
@@ -2557,10 +2557,10 @@ dialog .st-cnotes .st-ck[data-s="warn"] .tx{font-weight:700}
 dialog .st-cnotes .st-cl:empty{display:none}
 dialog .st-cnotes .st-cl{margin:0 0 4px 26px;display:grid;grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:6px}   /* 388번. 줄마다 글 길이가 달라 [적용] · [무시]가 들쭉날쭉했다 — 가장 긴 글 바로 뒤의 같은 세로줄에 세운다(칸 맞춤) */
 dialog .st-cnotes .st-cl .st-cnr{display:grid;grid-template-columns:subgrid;grid-column:1 / -1;align-items:center}
-dialog .st-cnotes .st-cnr{display:flex;gap:6px;align-items:center;padding:3px 0;border-top:1px solid rgba(0,0,0,.08);font-size:13px;line-height:1.45}
-dialog .st-cnotes .st-cnr .go{flex:0 1 auto;text-align:left;background:none;border:0;padding:4px 6px;height:auto;min-height:32px;white-space:normal;overflow-wrap:anywhere;border-radius:0;   /* 356번. 안내창 단추 규칙(높이 40px)이 걸려 긴 줄(폰 폭)이 다음 줄과 겹쳤다 */ color:#241c12;font:inherit;cursor:pointer;text-decoration:underline dotted}
-dialog .st-cnotes .st-cnr button.ab{flex:0 0 auto;height:30px;padding:0 10px;border:1px solid #b9a98a;border-radius:6px;background:#fffdf6;color:#241c12;font:inherit;font-size:13px}
-dialog .st-cnotes .st-cnr button.ab.ap{background:#e0cfa8;font-weight:700}
+dialog .st-cnotes .st-cnr{display:flex;gap:6px;align-items:center;padding:3px 0;border-top:1px solid rgba(0,0,0,.08);font-size:14px;line-height:1.45;border-radius:6px;cursor:pointer}
+dialog .st-cnotes .st-cnr:hover{background:rgba(36,28,18,.06)}   /* 389번. 점검 항목은 목록 줄 — 줄 전체를 누르면 그 칸으로 간다(밑줄 글 단추는 규칙 I 280번 「글자만 있는 단추 금지」에 어긋났다). 올리면 옅은 겹(규칙 I 상태 「올림」) */
+dialog .st-cnotes .st-cnr .go{flex:0 1 auto;text-align:left;background:none;border:0;padding:4px 6px;height:auto;min-height:32px;white-space:normal;overflow-wrap:anywhere;border-radius:0;   /* 356번. 안내창 단추 규칙(높이 40px)이 걸려 긴 줄(폰 폭)이 다음 줄과 겹쳤다 */ color:#241c12;font:inherit;cursor:pointer;text-decoration:none}
+dialog .st-cnotes button.ab, dialog .st-cnotes button.st-typo{flex:0 0 auto;height:32px;min-height:32px;padding:0 14px;border-radius:8px;font-size:14px}   /* 389번. 목록 줄 안 단추 = 32(규칙 I 높이 세 단계 40 · 32 · 26) · 모양은 안내창 테두리 단추(bt-out) 그대로. [적용]도 같은 테두리 단추 — 옅은 색 채움은 켜진 상태에만 */
 dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
 /* 357번. [AI] 창 — 꾸미기 창(.panel)과 같은 모양 · 같은 자리. 점검은 묶음(맞춤법 · 가격 · 중복)별로, 고른 항목에만 [적용] · [무시]가 열린다 */
 .aipanel{width:320px}
@@ -2584,22 +2584,22 @@ dialog .st-cnotes .st-cnf{margin:4px 0 0;font-size:12.5px;color:#6b5d48}
 .aipanel .aip-it .ln.to .v{font-weight:700;color:#f0d9a0}
 .aipanel .aip-it .s{display:block;font-size:12px;color:rgba(240,230,205,.6);margin-top:5px;padding-left:52px}
 .aipanel .aip-btns{display:flex;gap:6px;margin-top:8px}
-.aipanel .aip-btns button{flex:0 0 auto;min-height:34px;padding:0 16px}
-.aipanel .aip-btns button.ap{background:var(--ui-accent);border-color:var(--ui-accent);color:#fff;font-weight:700}
+.aipanel .aip-btns button{flex:0 0 auto;min-height:32px;padding:0 16px}   /* 389번. AI 창도 꾸미기 창과 같은 32 · [적용]은 확인 화면과 같은 테두리 단추(빨간 채움은 앞으로 가기에만) */
 .aipanel .aip-undo{font-size:12.5px;color:rgba(240,230,205,.8);margin:2px 0 6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.aipanel .aip-undo button{min-height:30px;padding:0 12px}
+.aipanel .aip-undo button{min-height:32px;padding:0 12px}
 .aipanel #ai-typo{width:100%}
+dialog .st-how button{font-size:14px}   /* 389번. 단계 목록 글(13px)을 물려받아 안내창 단추 중 이것만 13px 였다 */
+#aipanel button:not(.aip-it):not(#_){height:32px;min-height:32px}   /* 389번. 꾸미기 창과 같은 32(규칙 I) */
+.panel .phead button#ai-close{width:32px;height:32px;min-height:32px}
 .aipanel #f-tr{width:100%}
 .aiflash{outline:3px solid #e0a020 !important;outline-offset:2px;background:#fff1b8 !important}
 textarea.st-cin{display:block;width:100%;resize:none;overflow:hidden;line-height:1.35;padding:3px 6px;white-space:pre-wrap;overflow-wrap:anywhere}
 dialog .st-cin.flash{outline:3px solid #e0a020;outline-offset:1px;background:#fff1b8}
-dialog .st-cnotes .st-typo{flex:none;height:30px;min-height:0;padding:0 10px;border:1px solid #b9a98a;border-radius:6px;background:#fffdf6;color:#241c12;font:inherit;font-size:13px;font-weight:400}   /* 388번. 어두운 갈색 채움은 [적용] · [무시]와 다른 종류로 보여 혼자 튀었다(사용자) — 같은 크기 · 같은 모양의 테두리 단추 */
-dialog .st-cnotes .st-typo:hover{background:#f3e7c8}
 dialog .st-cnotes .st-typo:disabled{opacity:.6}
 dialog .st-cnotes #st-typo{flex:none}
 dialog #st-readsum{font-size:13px;margin-top:12px}
 dialog #st-readsum .lab{display:block;margin-bottom:6px;font-weight:700;color:#241c12}
-dialog #st-readsum .chip{display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:999px;background:#e8dcc0;color:#241c12;font-size:12.5px;line-height:1.6}
+dialog #st-readsum .chip{display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:8px;   /* 389번. 칩은 8px 둥근 네모(규칙 I 333번) */background:#e8dcc0;color:#241c12;font-size:12.5px;line-height:1.6}
 dialog #st-readsum .chip.warn{background:#f6d9d3;color:#8a2a1c}
 dialog #st-readsum small.why{display:block;margin:0 0 4px;font-size:12px;color:#6b5d48}
 dialog #st-readsum i.sw{display:inline-block;width:12px;height:12px;margin:0 3px -1px;border:1px solid rgba(0,0,0,.35);border-radius:2px}
@@ -3212,7 +3212,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">바탕</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
     <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 아래 글자</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적힙니다(비워도 됩니다)"></span>
     <small class="qrnote" id="qr-note"></small></span>
-    <button type="button" id="b-artsame" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>
+    <button type="button" id="b-artsame" class="tbtn" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>   <!-- 389번. 글자 단추 한 벌(.tbtn) — 같은 모양인데 이름표가 없어 검사가 높이 규칙에 걸었다 -->
   </span>
   </div>
   <p class="pzoom">   <!-- 368번. 맨 위로 올라와 모든 탭에서 설정을 밀어내던 것을 아래로(사용자) --><!-- 351번. 편집은 화면 배율 100% 에서 — 배율이 다르면 줄바꿈이 달리 보인다(229번) -->화면 <b>100%</b>에서 고쳐야 인쇄물과 줄바꿈이 같습니다 (Ctrl+0)</p>
@@ -3375,7 +3375,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <div class="st-ptabs" id="st-ptabs" role="tablist" aria-label="쪽" hidden></div>   <!-- 353번. 쪽이 둘 이상이면 쪽마다 확인 -->
     <p class="st-ccount" id="st-ccount"></p>   <!-- 296번. 몇 개를 읽었는지 · 어떤 모양으로 놓았는지 -->   <!-- 290번. 안내 셋 → 하나 + (노란 칸이 있을 때만) 하나 -->
     <p class="st-legend"><i></i>노랗게 칠한 칸은 AI가 잘못 읽었을 수 있는 곳입니다(영업시간처럼 작은 글씨는 늘). 먼저 사진과 맞춰 보세요.</p>   <!-- 313번 -->
-    <div class="st-cnotes" id="st-cnotes"><div class="st-ck" id="st-ck-dup"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-dup"></div><div class="st-ck" id="st-ck-price"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-price"></div><div class="st-ck" id="st-ck-typo"><i class="mk"></i><span class="tx" id="st-typosub">맞춤법: 아직 안 봤습니다</span><button type="button" id="st-typo" class="st-typo">AI로 맞춤법 보기</button></div><div class="st-cl" id="st-cl-typo"></div><div id="st-cnlist"></div></div>   <!-- 353번. 점검 — 눌러서 그 칸으로 가고 · [적용] · [무시] -->
+    <div class="st-cnotes" id="st-cnotes"><div class="st-ck" id="st-ck-dup"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-dup"></div><div class="st-ck" id="st-ck-price"><i class="mk"></i><span class="tx"></span></div><div class="st-cl" id="st-cl-price"></div><div class="st-ck" id="st-ck-typo"><i class="mk"></i><span class="tx" id="st-typosub">맞춤법: 아직 안 봤습니다</span><button type="button" id="st-typo" class="st-typo bt-out">AI로 맞춤법 보기</button></div><div class="st-cl" id="st-cl-typo"></div><div id="st-cnlist"></div></div>   <!-- 353번. 점검 — 눌러서 그 칸으로 가고 · [적용] · [무시] -->   <!-- 389번. [AI로 맞춤법 보기]는 안내창 테두리 단추(bt-out) -->
     <div class="st-cbody"><div class="st-cphoto"><img id="st-cimg" alt="올린 메뉴판 사진" title="누르면 크게 봅니다"><p class="st-note st-czoomhint">사진을 누르면 크게 봅니다</p></div>
       <div class="st-cpaper"><div class="st-cband"><input type="text" id="st-cshop" class="st-cshopin" placeholder="가게 이름" aria-label="가게 이름" autocomplete="off"></div>   <!-- 290번. 읽은 가게 이름 — 고칠 수 있다 --><div id="st-chours" class="st-chours" hidden></div><div id="st-ctab" class="st-ctab"></div><div id="st-cfoot" class="st-cfoot" hidden></div>   <!-- 312번. 영업시간 · 바닥 글 칸 --></div></div>
     <div class="row2 end foot2"><button type="button" class="bt-fill" id="st-check-go">다음</button></div>
@@ -10779,11 +10779,11 @@ function drawCkNotes(){
   if (!tb.dataset.busy && !tb.dataset.err) $("#st-typosub").textContent = "맞춤법: " + (nt ? nt + "건" + (stTypoRan ? "" : " · AI로는 아직 안 봤습니다") : stTypoRan ? "틀린 곳 없음" : "아직 안 봤습니다");   // 382번. 맞춤법은 단추를 눌러야 본다 — 안 봤으면 「문제 없다」고 쓰지 않는다
   if (!tb.dataset.busy) tb.textContent = stTypoRan ? "AI로 다시 보기" : "AI로 맞춤법 보기";   // 382번. 고친 뒤 다시 볼 수 있다(사용자)
   L.slice(0, 40).forEach(f => { const r = el("div", "st-cnr"), g = el("button", "go"); g.type = "button"; g.textContent = f.msg; g.onclick = () => ckGo(f); r.append(g);
-    if (f.kind === "typo"){ const a = el("button", "ab ap"); a.type = "button"; a.textContent = "적용"; a.title = "이 칸의 「" + f.from + "」를 「" + f.to + "」로 바꿉니다"; a.onclick = () => ckApply(f); r.append(a); }
-    const k = el("button", "ab"); k.type = "button"; k.textContent = "무시"; k.onclick = () => { stCkIgnore.add(f.key); drawCkNotes(); }; r.append(k); $("#st-cl-" + f.kind).append(r); });
+    if (f.kind === "typo"){ const a = el("button", "ab bt-out"); a.type = "button"; a.textContent = "적용"; a.title = "이 칸의 「" + f.from + "」를 「" + f.to + "」로 바꿉니다"; a.onclick = e => { e.stopPropagation(); ckApply(f); }; r.append(a); }
+    const k = el("button", "ab bt-out"); k.type = "button"; k.textContent = "무시"; k.onclick = e => { e.stopPropagation(); stCkIgnore.add(f.key); drawCkNotes(); }; r.append(k); r.onclick = e => { if (!e.target.closest("button.ab")) ckGo(f); }; $("#st-cl-" + f.kind).append(r); });   // 389번. 줄 전체가 그 칸으로 가는 목록 줄
   if (L.length){ const h = el("p", "st-cnf"); h.textContent = "항목을 누르면 그 칸으로 갑니다." + (L.some(f => f.kind === "typo") ? " 맞춤법은 AI 의견 · 글자 규칙으로 찾은 것입니다. 사진에 적힌 그대로가 맞을 수도 있으니 확인하고 [적용]하세요." : ""); box.append(h); }   // 357번. 줄마다 붙이지 않고 한 번
-  if (ckLast){ const u = el("p", "st-cnf"); u.textContent = "「" + ckLast.from + "」를 「" + ckLast.to + "」로 바꿨습니다 "; const b = el("button", "ab"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = ckUndo; u.append(b); box.append(u); }
-  if (hid){ const u = el("p", "st-cnf"); u.textContent = "무시한 " + hid + "건 "; const b = el("button", "ab"); b.type = "button"; b.textContent = "다시 보기"; b.onclick = () => { stCkIgnore = new Set(); drawCkNotes(); }; u.append(b); box.append(u); }
+  if (ckLast){ const u = el("p", "st-cnf"); u.textContent = "「" + ckLast.from + "」를 「" + ckLast.to + "」로 바꿨습니다 "; const b = el("button", "ab bt-out"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = ckUndo; u.append(b); box.append(u); }
+  if (hid){ const u = el("p", "st-cnf"); u.textContent = "무시한 " + hid + "건 "; const b = el("button", "ab bt-out"); b.type = "button"; b.textContent = "다시 보기"; b.onclick = () => { stCkIgnore = new Set(); drawCkNotes(); }; u.append(b); box.append(u); }
 }
 function ckApply(f){
   if (f.p !== stPgI){ syncCheck(); stPgSave(); stPgLoad(f.p); drawCheck(); }
