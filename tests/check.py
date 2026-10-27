@@ -1402,7 +1402,7 @@ def t54(b, f):
           if (parseFloat(cs.fontSize) < 12 && !b.closest('.wfrow')) bad.push(nm+' '+cs.fontSize);
           if (b.matches('.ptab-btn')){ H(b, 40, nm, r); return; }   // 탭 40
           if (b.matches('.pl-tile, .aip-it, .tbtn') || b.closest('.pgrid, .pcells, .pl-presets, .bottles, .bpick') || b.tagName === 'SELECT' && b.closest('.wfrow')) return;   // 타일 · 칸 그림 · 병 고르기(카드) · 글자 단추(규칙 I 335번 ⑤)는 높이 규칙 밖
-          const grp = b.closest('.st-pseg, #pgpick, .stepg, .pwtabs');   // 390번. 창 머리 탭도 나뉜 고르기
+          const grp = b.closest('.st-pseg, #pgpick, .stepg');
           if (grp){ H(grp, 32, nm+'(묶음)', grp.getBoundingClientRect()); return; }   // 나뉜 고르기 · [− | +] 는 묶음 바깥이 32
           H(b, 32, nm, r);
         }
@@ -1915,6 +1915,7 @@ def t70(b, f):
         pg.goto(url('p70_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
         out['title'] = pg.evaluate("""()=>{ const a=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #c7c5c3'}, null), b=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #8f8a2e'}, null); return [a.title||null, /회색/.test(a.titleWhy||''), b.title||null] }""")
         pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', body); pg.click('#st-appgo'); pg.wait_for_timeout(500)
+        out['parts'] = pg.evaluate("()=>[typoLabel('가츠동 (돈가츠 덮밥) #Pork','가쓰동 (돈가스 덮밥) #Pork'), typoLabel('타코야끼','타코야키'), typoLabel('김치 우동','김치우동')]")   # 392번. 바뀐 낱말만
         pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'돈카츠동'},{from:'타코야끼',to:'타코야키'}); stTypoRan=true; drawCkNotes(); }"); pg.wait_for_timeout(150)
         R = "()=>[...document.querySelectorAll('#st-cl-typo .st-cnr')].map(r=>r.querySelector('.go').textContent)"
         out['rows'] = pg.evaluate(R)
@@ -1929,7 +1930,8 @@ def t70(b, f):
         if not pg.evaluate("()=>editing"): pg.click('#b-edit'); pg.wait_for_timeout(300)
         if pg.evaluate("()=>document.querySelector('#panel').hidden"): pg.click('#b-style'); pg.wait_for_timeout(300)
         ST = "()=>({panel:!document.querySelector('#panel').hidden, ai:!document.querySelector('#aipanel').hidden, bs:document.querySelector('#b-style').classList.contains('on'), ba:document.querySelector('#b-ai').classList.contains('on'), ed:editing})"
-        pg.evaluate("()=>document.querySelector('#panel .pwtab[data-w=ai]').click()"); pg.wait_for_timeout(300); out['toAI'] = pg.evaluate(ST)
+        pg.evaluate("()=>document.querySelector('#b-ai').click()"); pg.wait_for_timeout(300); out['toAI'] = pg.evaluate(ST)   # 392번. 창 머리 탭을 걷고 위쪽 막대 [꾸미기] · [AI]로
+        out['bar392'] = pg.evaluate("()=>{ const s=document.querySelector('#b-style'); return [!!s.closest('#editbar'), s.closest('.tb-right') === document.querySelector('#b-ai').closest('.tb-right'), document.querySelectorAll('.pwtab').length, Math.round(document.querySelector('#aipanel').getBoundingClientRect().width)] }")
         pg.mouse.move(2, 990); pg.wait_for_timeout(100)
         out['onbg'] = pg.evaluate("()=>[getComputedStyle(document.querySelector('#b-ai')).backgroundColor, getComputedStyle(document.querySelector('#b-edit')).backgroundColor]")
         out['ailoc'] = pg.evaluate("()=>[...document.querySelectorAll('#ai-list .aip-it .s')].map(x=>x.textContent)")
@@ -1938,9 +1940,11 @@ def t70(b, f):
         out['aidone'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate("()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name)).includes('타코야키')")]
         pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.done button').click() }"); pg.wait_for_timeout(300)
         out['aiundo'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate("()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name)).includes('타코야끼')")]
-        pg.evaluate("()=>document.querySelector('#aipanel .pwtab[data-w=style]').click()"); pg.wait_for_timeout(300); out['toStyle'] = pg.evaluate(ST)
+        out['aist'] = pg.evaluate("()=>{ aiIgnore = new Set(aiList().L.map(f=>f.key)); aiDraw(); const r=[...document.querySelectorAll('#ai-list .aip-st')].map(x=>[x.dataset.s, x.textContent]); aiIgnore = new Set(); aiDraw(); return r }")   # 391번. 점검할 것이 없으면 줄글 대신 세 줄
+        pg.evaluate("()=>document.querySelector('#b-style').click()"); pg.wait_for_timeout(300); out['toStyle'] = pg.evaluate(ST)
+        out['pw392'] = pg.evaluate("()=>Math.round(document.querySelector('#panel').getBoundingClientRect().width)")
         pg.click('#b-edit'); pg.wait_for_timeout(300); pg.click('#b-ai'); pg.wait_for_timeout(300)
-        pg.evaluate("()=>document.querySelector('#aipanel .pwtab[data-w=style]').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)
+        pg.evaluate("()=>document.querySelector('#b-style').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)   # 392번. 편집이 꺼진 채 [꾸미기] — 편집을 같이 켠다
     except Exception as e:
         out['fail'] = str(e)[:200]
     finally:
@@ -2145,7 +2149,7 @@ def t61(b, f):
             pg2 = ctx.new_page(); pg2.set_viewport_size({'width': W, 'height': 844}); pg2.on('pageerror', lambda e: out['err'].append(str(e)))
             pg2.goto(url(f)); pg2.wait_for_timeout(500)
             pg2.evaluate("()=>{MENU.sheets[0][0][0].items[0].price=''; MENU.sheets[0][0][0].items[1].price='abc'; MENU.sheets[0][0][0].items[2].price=1; MENU.sheets[0][0][0].items[3].price=900000; render(); document.querySelector('#b-ai').click()}"); pg2.wait_for_timeout(300)
-            out['narrow'][W] = pg2.evaluate("""()=>{const r=document.querySelector('#aipanel').getBoundingClientRect(); return [['#b-file','#b-ai','#b-edit','#b-print','#b-help'].map(s=>Math.round(document.querySelector(s).getBoundingClientRect().right)).every(x=>x<=innerWidth),
+            out['narrow'][W] = pg2.evaluate("""()=>{const r=document.querySelector('#aipanel').getBoundingClientRect(); return [['#b-file','#b-style','#b-ai','#b-edit','#b-print','#b-help'].map(s=>Math.round(document.querySelector(s).getBoundingClientRect().right)).every(x=>x<=innerWidth),
               [...document.querySelectorAll('#ai-list .aip-it')].every(g=>g.scrollWidth<=g.clientWidth+1), document.querySelectorAll('#ai-list .aip-it').length, r.left>=0 && r.right<=innerWidth && r.top>=0]}""")
             pg2.close()
         except Exception as e: out['narrow'][W] = str(e)[:100]
@@ -2577,12 +2581,12 @@ def judge(t, r):
         if t == 't70':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             rw = r['rows']; ap, ud = r['applied'], r['undone']
-            ok = (r['title'] == [None, True, '#8f8a2e'] and len(rw) == 4 and len(set(rw)) == 4 and any('네기가츠동' in x for x in rw) and any('김치가츠동' in x for x in rw)
+            ok = (r.get('parts') == ['「가츠동」 → 「가쓰동」 · 「돈가츠」 → 「돈가스」', '「타코야끼」 → 「타코야키」', '「김치 우동」 → 「김치우동」'] and r['title'] == [None, True, '#8f8a2e'] and len(rw) == 4 and len(set(rw)) == 4 and any('네기가츠동' in x for x in rw) and any('김치가츠동' in x for x in rw)
                   and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
                   and any(x.startswith('✓ 적용함') and '타코야키' in x for x in ap[0]) and '타코야키' in ap[1] and not any(x.startswith('✓') for x in ud[0]) and '타코야끼' in ud[1]
                   and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': True} and r['onbg'][0] == r['onbg'][1] == 'rgb(239, 227, 201)'
-                  and any('네기가츠동' in x for x in r['ailoc']) and r['aidone'] == [1, True] and r['aiundo'] == [0, True]
-                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
+                  and any('네기가츠동' in x for x in r['ailoc']) and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'ok'] and len(r['aist']) == 3 and r['aidone'] == [1, True] and r['aiundo'] == [0, True]
+                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [False, True, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
             return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 맞춤법 줄 {rw} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 적용 {ap} · 되돌림 {ud} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · AI 줄 자리 {r['ailoc']} · AI 적용/되돌림 {r['aidone']}/{r['aiundo']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
         if t == 't69':
             if r.get('fail'): return False, f"실패: {r['fail']}"
