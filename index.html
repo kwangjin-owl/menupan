@@ -2594,6 +2594,7 @@ dialog .st-how button{font-size:14px}   /* 389번. 단계 목록 글(13px)을 �
 #aipanel button:not(.aip-it):not(#_){height:32px;min-height:32px}
 .aipanel .aip-it.done{cursor:default;border-style:dashed}
 .aipanel .aip-it .ln.nmline .v{font-size:12.5px;color:rgba(240,230,205,.82)}   /* 395번. 「메뉴」 줄 — 틀린 부분에 밑줄 */
+.aipanel .aip-it .ln.nmline .nmi{display:block}   /* 396번. 메뉴 이름은 한 줄에 하나 */
 .aipanel .aip-it .ln.nmline u{text-decoration-color:#e0a020;text-decoration-thickness:2px;text-underline-offset:3px}
 .aipanel .aip-st{display:flex;align-items:center;gap:8px;min-height:26px;font-size:13px;color:#efe3c9}   /* 391번. 점검 상태 세 줄 — 확인 화면 .st-ck 와 같은 표시 */
 .aipanel .aip-st .mk{flex:none;width:18px;height:18px;border-radius:50%;text-align:center;font:700 12px/18px sans-serif;font-style:normal;color:#fff}
@@ -2628,8 +2629,8 @@ dialog p.st-ccount b{font-weight:700;color:var(--ui-accent)}
 .st-cpaper .st-ccol{gap:12px}
 dialog .st-cpaper .st-cadd{height:24px;margin-top:3px}
 
-.st-chead{display:flex;gap:6px;align-items:center}
-.st-chead .st-csec{flex:1 1 auto;min-width:0}
+.st-chead{display:flex;gap:6px;align-items:center;position:relative}
+.st-chead .st-csec{flex:1 1 auto;min-width:0;padding-right:76px}   /* 396번. [＋ 메뉴]를 띠 위 오른쪽 끝에 올린다 — 띠 옆에 두니 띠가 끊겨 보였다(사용자) */
 dialog .st-cpaper .st-chead .st-cadd{margin-top:0;flex:0 0 auto;height:22px;padding:0 9px;font-size:11.5px}
 .panel .fld.sub{padding-left:10px;margin-left:2px}
 .panel .subrow{grid-template-columns:2.6em minmax(0,1fr) 32px;gap:5px}
@@ -2870,7 +2871,8 @@ dialog#start.wide{margin:72px auto 16px;max-height:calc(100vh - 88px)}
    · 꾸미기 창 카드 이름 10 ~ 11.5 → 12, 단추 · 고르기 칸 10.5 ~ 11 → 13(같은 창 다른 단추와 같게) */
 dialog p.st-ccount .st-seg{margin:0}
 dialog .st-rot button.bt-out{width:40px;height:40px;min-width:0;padding:0;border-radius:50%;background:transparent}
-dialog .st-cpaper .st-chead button.st-cadd{height:26px;padding:0 10px;font-size:12px;border-radius:13px}
+dialog .st-cpaper .st-chead button.st-cadd{padding:0 10px;font-size:12px;border-radius:13px}   /* 396번. 높이는 아래 줄(띠 안)이 정한다 — 전에는 26 고정 */
+dialog .st-cpaper .st-chead button.st-cadd{position:absolute;right:4px;top:3px;bottom:7px;height:auto;min-height:0;margin:0;display:flex;align-items:center;background:#fffdf6}   /* 띠 안에 들어가게 — 높이는 띠(분류 이름 칸)에서 위 3 · 아래 7(칸 아래 여백 4 포함)을 뺀 만큼 */
 dialog .st-crow button.st-cpk{height:26px}
 .panel .btpick .bpick{font-size:12px}
 .panel button.pl-tile{font-size:12px}
@@ -10547,13 +10549,13 @@ function drawCheck(){   // 280번. 한 줄 목록 → 사진 옆에 실제 메�
   $(".st-cpaper").querySelectorAll("input").forEach(x => x.addEventListener("input", () => x.classList.remove("un")));
   stPgTabs(); drawCkNotes();   // 353번
   $(".st-legend").hidden = !$(".st-cpaper").querySelector(".un");
-  requestAnimationFrame(fitCheck);   // 290번. 노란 칸이 없으면 설명도 없다   // 고치면 노란 표시를 뗀다
+  fitCheckSoon();   // 290번. 노란 칸이 없으면 설명도 없다   // 고치면 노란 표시를 뗀다
 }
 /* 363번. 확인 화면의 이름 · 안내 · 바닥 글 칸은 한 줄 칸(input)이 아니라 줄이 바뀌는 칸 — 긴 줄이 칸 끝에서 잘려 안 보였다(사용자). 줄바꿈 글자는 넣지 않고(엔터는 막는다) 위치는 편집 화면에서 정한다 */
 function ckTa(cls){ const x = el("textarea", cls); x.rows = 1; x.spellcheck = false; x.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
-  x.addEventListener("input", () => { if (/[\r\n]/.test(x.value)){ const a = x.selectionStart; x.value = x.value.replace(/\s*[\r\n]+\s*/g, " "); x.selectionStart = x.selectionEnd = a; } ckFit(x); }); return x; }
+  x.addEventListener("input", () => { if (/[\r\n]/.test(x.value)){ const a = x.selectionStart; x.value = x.value.replace(/\s*[\r\n]+\s*/g, " "); x.selectionStart = x.selectionEnd = a; } const h0 = x.offsetHeight; ckFit(x); if (x.offsetHeight !== h0) fitCheckSoon(); }); return x; }   // 396번. 줄이 늘거나 줄면 배율을 다시
 function ckFit(x){ x.style.height = "auto"; if (x.scrollHeight) x.style.height = x.scrollHeight + 2 + "px"; }
-new ResizeObserver(() => document.querySelectorAll("#st-ctab textarea, #st-cfoot textarea").forEach(ckFit)).observe(document.querySelector("#st-check"));
+new ResizeObserver(() => { if (!$("#st-check").hidden) fitCheckSoon(); }).observe(document.querySelector("#st-check"));   // 396번. 화면이 보이거나 크기가 바뀌면 칸 높이와 배율을 함께 다시(따로 칸 높이만 고치면 배율과 어긋났다)
 function syncCheck(){ const keep = readCheck(false); keep.forEach((s, i) => { stParsed[i].name = s.name; stParsed[i].items = s.items; stParsed[i].notes = s.notes; }); readExtra(); }   // 296번. 칸에 고친 것을 그대로 담아 둔다(다시 그리기 전에)
 function readCheck(drop = true){   // 확인 화면의 칸 → 분류 목록(빈 이름 줄은 뺀다)
   const secs = stParsed.map(s => ({ name:s.name, col:s.col, wine:s.wine, notes:(s.notes || []).slice(), items:s.items.map(it => ({ ...it })) }));   // 341번. wine
@@ -10577,6 +10579,7 @@ function readExtra(){   // 312번. 확인 화면의 영업시간 · 바닥 글 �
   if ($("#st-chours").childElementCount || !stHours.length) stHours = H;
   if ($("#st-cfoot").childElementCount) stFoot = [...$("#st-cfoot").querySelectorAll("textarea")].map(x => x.value.trim()).filter(Boolean);
 }
+const CHECK_ZOOM_MAX = 1.4;   // 396번. 메뉴가 적으면 키워 종이를 채운다
 const CHECK_ZOOM_MIN = 0.5;   // 312번 · 392번. 0.8 → 0.5 — 한 장이 늘 다 보이게(사용자: 「새로 만들어진 메뉴판은 스크롤 없이 A4 비율 다 보이게」). 메뉴가 아주 많으면 칸 글자가 작아진다(0.5 = 약 7px). 그 밑에서만 종이 안 스크롤
 function fitCheck(){   // 312번. 확인 화면 종이(A4 비율 그대로 — 297번)에 메뉴가 다 보이게 칸을 줄인다(사용자: 스크롤 없이 한눈에). 영업시간 · 메뉴 · 바닥 글을 같은 배율로
   const p = $(".st-cpaper"); if (!p || $("#st-check").hidden) return;
@@ -10590,16 +10593,17 @@ function fitCheck(){   // 312번. 확인 화면 종이(A4 비율 그대로 — 2
       if (ph) ph.style.width = "auto"; im.style.maxHeight = "none"; im.style.height = ih + "px"; im.style.width = Math.round(ih / asp) + "px"; im.style.maxWidth = "none";
       if (!land){ p.style.height = avail + "px"; p.style.minHeight = "0"; }   /* 사진 크기는 방향과 상관없이 같다(314번) — 가로 종이는 남는 폭에 맞춘다 */
       else { const w = Math.round(Math.min(body.clientWidth - im.offsetWidth - 40, avail * 1.414)); p.style.width = w + "px"; p.style.height = Math.round(w / 1.414) + "px"; p.style.minHeight = "0"; } } }
-  const parts = ["#st-chours", "#st-ctab", "#st-cfoot"].map(q => $(q)).filter(n => n && !n.hidden);
-  parts.forEach(n => n.style.zoom = "");
-  for (let k = 0; k < 8; k++){
-    const over = p.scrollHeight - p.clientHeight; if (over <= 1) break;
-    const ch = parts.reduce((a, n) => a + n.getBoundingClientRect().height, 0), z = +(parts[0].style.zoom || 1), nz = Math.max(CHECK_ZOOM_MIN, z * (ch - over - 2) / ch);
-    if (!(nz < z - 0.001)) break; parts.forEach(n => n.style.zoom = nz.toFixed(3));
-  }
+  /* 396번. 칸 줄이기를 한 곳에서 — 글 칸(textarea) 높이를 이 안에서 다시 재고(전에는 따로 도는 ResizeObserver 가 나중에 키워 1920 × 1080 에서 종이 안 스크롤이 남았다),
+     줄이기만 하던 것을 「꽉 차게」로: 0.5 ~ 1.4 사이에서 넘치지 않는 가장 큰 배율을 찾는다(사용자: 스크롤 없이 A4 비율에 꽉 차게) */
+  const parts = ["#st-chours", "#st-ctab", "#st-cfoot"].map(q => $(q)).filter(n => n && !n.hidden), tas = p.querySelectorAll("textarea");
+  const fits = z => { parts.forEach(n => n.style.zoom = z.toFixed(3)); tas.forEach(ckFit); return p.scrollHeight <= p.clientHeight; };   // 1px 넘침도 스크롤 막대가 생긴다
+  let lo = CHECK_ZOOM_MIN, hi = CHECK_ZOOM_MAX;
+  if (fits(hi)) lo = hi; else if (!fits(lo)) hi = lo; else for (let k = 0; k < 9; k++){ const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
+  fits(lo); fitCheck.z = lo;
 }
-addEventListener("resize", () => { if (!$("#st-check").hidden) fitCheck(); });
-$("#st-cimg").addEventListener("load", () => { if (!$("#st-check").hidden) requestAnimationFrame(fitCheck); });   // 392번. 사진이 늦게 뜨면 높이를 다시 맞춘다
+let fitCkT = 0; const fitCheckSoon = () => { cancelAnimationFrame(fitCkT); fitCkT = requestAnimationFrame(() => { fitCkT = 0; fitCheck(); }); };   // 396번. 부르는 곳(그리기 · 사진 · 창 크기 · 글 고침)은 모두 이 하나로
+addEventListener("resize", () => { if (!$("#st-check").hidden) fitCheckSoon(); });
+$("#st-cimg").addEventListener("load", () => { if (!$("#st-check").hidden) fitCheckSoon(); });   // 392번. 사진이 늦게 뜨면 높이를 다시 맞춘다
 function splitCols(secs, n = 2){   // 분류를 n 단에 나눈다 — 줄 수가 고르게(분류 순서는 그대로). 296번. 단 수 · 사진이 알려 준 칸 번호
   const C = Array.from({ length:n }, () => []);
   if (n > 1 && secs.length && secs.every(s => s.col >= 1 && s.col <= n)) secs.forEach(s => C[s.col - 1].push(s));   // 사진에서 놓인 칸 그대로
@@ -10845,7 +10849,12 @@ function paperPages(){   // 종이의 장마다 분류를 한 줄로 펴고, 분
 }
 function aiPath(f, map){ const b = map[f.p][f.s]; return f.i < 0 ? b + ".name" : b + ".items." + f.i + "." + (f.kind === "price" ? "price" : "name"); }
 function getDeep(path){ let n = MENU; path.split(".").forEach(k => { n = n == null ? n : n[k]; }); return n; }
-function aiList(){ const { pages, map } = paperPages(), all = menuFindings(pages); return { L:all.filter(f => !aiIgnore.has(f.key)), map, hid:all.length - all.filter(f => !aiIgnore.has(f.key)).length }; }
+/* 396번. 같은 칸에서 짧은 고침이 긴 고침을 덮으면 긴 것을 뺀다 — 「가츠동 → 가쓰동」이 있으면 「네기가츠동 → 네기가쓰동」은 같은 고침이 두 번 세어진 것(화면: 맞춤법 9건 중 둘이 겹침) */
+function typoCover(L){
+  const at = f => f.p + "|" + f.s + "|" + f.i;
+  return L.filter(f => f.kind !== "typo" || !L.some(g => g !== f && g.kind === "typo" && at(g) === at(f) && g.from.length < f.from.length && f.from.includes(g.from) && f.from.split(g.from).join(g.to) === f.to));
+}
+function aiList(){ const { pages, map } = paperPages(), all = typoCover(menuFindings(pages)); return { L:all.filter(f => !aiIgnore.has(f.key)), map, hid:all.length - all.filter(f => !aiIgnore.has(f.key)).length }; }
 let aiSel = "", aiHidPanel = false, aiRefT = 0;
 function aiOpen(){
   const pa = $("#aipanel"), pp = $("#panel"); aiHidPanel = !pp.hidden; pp.hidden = true; $("#b-style").classList.remove("on");
@@ -10857,10 +10866,10 @@ function aiClose(restore){
   aiHidPanel = false; placePanel();
 }
 /* 종이의 그 줄을 칠해 둔다(고른 것 하나). render() 가 줄을 새로 만들면 칠이 사라지므로 부를 때마다 다시 칠한다 */
-function aiMark(path){
+function aiMark(path){   // 396번. 길 하나 또는 여럿 — 묶은 카드는 해당 칸을 다 칠한다(사용자: 뭉쳐놨으면 해당되는 곳에 색깔이 다 칠해져야지). 화면은 첫 칸으로
   document.querySelectorAll(".aiflash").forEach(n => n.classList.remove("aiflash"));
-  const n = path && document.querySelector('[data-path="' + path + '"]'); if (!n) return;
-  n.classList.add("aiflash");
+  const ns = [].concat(path || []).map(q => q && document.querySelector('[data-path="' + q + '"]')).filter(Boolean); if (!ns.length) return;
+  ns.forEach(x => x.classList.add("aiflash")); const n = ns[0];
   const r = n.getBoundingClientRect(), tb = document.querySelector(".barwrap"), top = (tb ? tb.getBoundingClientRect().bottom : 0) + 8;
   if (r.top < top || r.bottom > innerHeight - 24) n.scrollIntoView({ block:"center" });
 }
@@ -10903,14 +10912,14 @@ function aiDraw(){
       const pg = f2 => (L.some(x => x.pg !== f2.pg) || MENU.sheets.length > 1 ? f2.pg + "쪽 · " : "");
       if (kind === "typo"){
         ln("틀린 곳", f.from, "fr"); ln("이렇게", f.to, "to"); ln("이유", [...new Set([f.tk, f.why].filter(Boolean))].join(" · ") || "맞춤법", "why");   // 395번. 갈래(외래어 표기 · 띄어쓰기 …)를 앞에
-        const names = el("span", "nm");   /* 395번. 「메뉴」 이름표 + 그 메뉴 이름(해시태그 뺌) — 틀린 부분에 밑줄. 같은 고침이 여러 메뉴면 「 · 」로 */
-        c.fs.forEach((x, k) => { if (k) names.append(" · "); const nm = aiNoTag(x.i < 0 ? x.sn : x.name) || x.from, parts = nm.split(x.from);
-          if (pg(x)) names.append(pg(x)); parts.forEach((t, q) => { if (q){ const u = el("u"); u.textContent = x.from; names.append(u); } names.append(t); }); });
-        ln(c.fs.length > 1 ? "메뉴 " + c.fs.length + "곳" : (f.i < 0 ? "분류" : "메뉴"), names, "nmline");
+        const names = el("span", "nm");   /* 395번 · 396번. 「메뉴」 이름표 + 그 메뉴 이름(해시태그 뺌)을 한 줄에 하나씩 — 틀린 부분에 밑줄. 곳 수는 [모두 적용 (N곳)]에(「메뉴 3곳」으로 두 줄에 걸치면 다른 말처럼 읽혔다 — 사용자) */
+        c.fs.forEach(x => { const r = el("span", "nmi"), nm = aiNoTag(x.i < 0 ? x.sn : x.name) || x.from, parts = nm.split(x.from);
+          if (pg(x)) r.append(pg(x)); parts.forEach((t, q) => { if (q){ const u = el("u"); u.textContent = x.from; r.append(u); } r.append(t); }); names.append(r); });
+        ln(f.i < 0 ? "분류" : "메뉴", names, "nmline");
       }
       else if (kind === "dup"){ ln("메뉴", aiNoTag(f.name)); ln("이유", "같은 이름이 " + f.n + "번 있습니다(" + f.j + "번째)", "why"); const loc = el("span", "s"); loc.textContent = pg(f) + (f.sn || "이름 없는 분류"); it.append(loc); }
       else { const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3); ln("메뉴", aiNoTag(f.name)); if (v) ln("가격", v, "to"); ln("이유", w, "why"); const loc = el("span", "s"); loc.textContent = pg(f) + (f.sn || "이름 없는 분류"); it.append(loc); }
-      const pick = () => { aiSelect(c.key); aiMark(path); };
+      const pick = () => { aiSelect(c.key); };   // aiDraw 끝에서 고른 카드의 칸을 다 칠한다
       it.onclick = pick; it.onkeydown = e => { if ((e.key === "Enter" || e.key === " ") && e.target === it){ e.preventDefault(); pick(); } };
       if (on){
         const bt = el("div", "aip-btns");
@@ -10924,11 +10933,11 @@ function aiDraw(){
   });
   if (aiDone.length){ const gh = el("div", "aip-gh"); gh.textContent = "적용함"; const sm = el("small"); sm.textContent = aiDone.length + "건"; gh.append(" ", sm); box.append(gh);   // 390번 · 395번. 고친 것도 묶음으로 남긴다 — 묶음마다 되돌리기
     aiDone.forEach((u, n) => { const it = el("div", "aip-it done");
-      const ln = (lab, txt, cls) => { const r = el("span", "ln" + (cls ? " " + cls : "")), l = el("b"), v = el("span", "v"); l.textContent = lab; v.textContent = txt; r.append(l, v); it.append(r); };
-      ln("고친 곳", u.from, "fr"); ln("이렇게", u.to, "to"); ln(u.ch.length > 1 ? "메뉴 " + u.ch.length + "곳" : "메뉴", u.names.map(aiNoTag).filter(Boolean).join(" · "), "nmline");
-      const bt = el("div", "aip-btns"), b = el("button"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = e => { e.stopPropagation(); aiUndo(n); }; bt.append(b); it.append(bt); it.onclick = () => aiMark(u.ch[0].path); box.append(it); }); }
+      const ln = (lab, txt, cls) => { const r = el("span", "ln" + (cls ? " " + cls : "")), l = el("b"), v = el("span", "v"); l.textContent = lab; if (txt instanceof Node) v.append(txt); else v.textContent = txt; r.append(l, v); it.append(r); };
+      ln("고친 곳", u.from, "fr"); ln("이렇게", u.to, "to"); { const nm = el("span", "nm"); u.names.map(aiNoTag).filter(Boolean).forEach(t => { const r = el("span", "nmi"); r.textContent = t; nm.append(r); }); ln("메뉴", nm, "nmline"); }   // 396번. 한 줄에 하나
+      const bt = el("div", "aip-btns"), b = el("button"); b.type = "button"; b.textContent = "되돌리기"; b.onclick = e => { e.stopPropagation(); aiUndo(n); }; bt.append(b); it.append(bt); it.onclick = () => aiMark(u.ch.map(c => c.path)); box.append(it); }); }
   if (hid){ const u = el("div", "aip-undo"); u.append("무시한 " + hid + "건"); const b = el("button"); b.type = "button"; b.textContent = "다시 보기"; b.onclick = () => { aiIgnore = new Set(); aiDraw(); }; u.append(b); box.append(u); }
-  const cur = cards.find(c => c.key === aiSel); aiMark(cur ? aiPath(cur.fs[0], map) : "");
+  const cur = cards.find(c => c.key === aiSel); aiMark(cur ? cur.fs.map(f => aiPath(f, map)) : "");   // 396번
 }
 function aiRefresh(){ clearTimeout(aiRefT); aiRefT = setTimeout(() => { if (!$("#aipanel").hidden) aiDraw(); }, 300); }
 async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확인 화면이 같이 쓴다. 이름 글만 보낸다. 틀린 곳은 [{from,to}], 실패하면 Error(쉬운 말)

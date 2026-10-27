@@ -1930,6 +1930,7 @@ def t70(b, f):
         pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'가쓰동'}); drawCkNotes(); }"); pg.wait_for_timeout(150)
         out['ck395'] = pg.evaluate("()=>[!!document.querySelector('#st-ck-typo'), !!document.querySelector('#st-cl-typo'), !!document.querySelector('#st-typo'), document.querySelectorAll('#st-cnotes .st-ck').length, /맞춤법/.test(document.querySelector('#st-cnotes').textContent)]")   # 395번. 확인 화면에는 같은 이름 · 가격 형식 두 줄만
         out['box'] = pg.evaluate("()=>{ const b=document.querySelector('#st-cnotes'); return [getComputedStyle(b).overflowY, b.scrollHeight - b.clientHeight] }")
+        out['fill396'] = pg.evaluate("()=>{ const p=document.querySelector('.st-cpaper'), h=document.querySelector('.st-chead'), b=h.querySelector('.st-cadd'), t=h.querySelector('.st-csec'), R=e=>e.getBoundingClientRect(); return [p.scrollHeight <= p.clientHeight, +(document.querySelector('#st-ctab').style.zoom||1) > 1, R(b).top >= R(t).top - 0.5 && R(b).bottom <= R(t).bottom + 0.5 && R(b).right <= R(t).right + 0.5] }")   # 396번. 메뉴가 적으면 키워 종이를 채우고(스크롤 없음) · [＋ 메뉴]는 분류 띠 안
         out['btbg'] = pg.evaluate("()=>getComputedStyle(document.querySelector('#st-copy')).backgroundColor")
         pg.click('#st-check-go'); pg.wait_for_timeout(300); pg.click('#st-go'); pg.wait_for_timeout(1200)
         pg.evaluate("()=>{ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); try{guideEnd()}catch(e){} }"); pg.wait_for_timeout(300)
@@ -1941,12 +1942,13 @@ def t70(b, f):
         pg.mouse.move(2, 990); pg.wait_for_timeout(100)
         out['onbg'] = pg.evaluate("()=>[getComputedStyle(document.querySelector('#b-ai')).backgroundColor, getComputedStyle(document.querySelector('#b-edit')).backgroundColor]")
         NM = "()=>MENU.sheets[0].flat().flatMap(s=>s.items.map(i=>i.name))"
-        pg.evaluate("()=>{ aiTypos = [{from:'가츠동',to:'가쓰동',kind:'외래어 표기'},{from:'타코야끼',to:'타코야키',kind:'외래어 표기'}]; aiDraw(); }"); pg.wait_for_timeout(200)
-        C = "()=>[...document.querySelectorAll('#ai-list .aip-it:not(.done)')].map(x=>[x.querySelector('.ln.fr .v').textContent, x.querySelector('.ln.to .v').textContent, x.querySelector('.ln.nmline b').textContent, x.querySelector('.ln.nmline .v').textContent, [...x.querySelectorAll('.ln.nmline u')].map(u=>u.textContent).join(',')])"
+        pg.evaluate("()=>{ aiTypos = [{from:'가츠동',to:'가쓰동',kind:'외래어 표기'},{from:'네기가츠동',to:'네기가쓰동',kind:'외래어 표기'},{from:'타코야끼',to:'타코야키',kind:'외래어 표기'}]; aiDraw(); }")   # 396번. 네기가츠동 → 네기가쓰동은 가츠동 → 가쓰동에 덮여 빠진다; pg.wait_for_timeout(200)
+        C = "()=>[...document.querySelectorAll('#ai-list .aip-it:not(.done)')].map(x=>[x.querySelector('.ln.fr .v').textContent, x.querySelector('.ln.to .v').textContent, x.querySelector('.ln.nmline b').textContent, [...x.querySelectorAll('.ln.nmline .nmi')].map(n=>n.textContent).join('|'), [...x.querySelectorAll('.ln.nmline u')].map(u=>u.textContent).join(',')])"
         out['cards'] = [pg.evaluate(C), pg.evaluate("()=>document.querySelector('#ai-count').textContent")]   # 395번. 같은 고침은 한 카드 — 「메뉴 3곳」 + 틀린 부분 밑줄
         out['frto'] = pg.evaluate("()=>{ const it=document.querySelector('#ai-list .aip-it'); return [getComputedStyle(it.querySelector('.ln.fr .v')).textDecorationLine, getComputedStyle(it.querySelector('.ln.to .v')).fontWeight, getComputedStyle(it.querySelector('.ln.to .v')).color] }")
         pg.evaluate("()=>{ [...document.querySelectorAll('#ai-list .aip-it')].find(x=>/가츠동/.test(x.textContent)).click() }"); pg.wait_for_timeout(200)
         out['allbtn'] = pg.evaluate("()=>document.querySelector('#ai-list .aip-it.on .aip-btns button.ap').textContent")
+        out['flash'] = pg.evaluate("()=>document.querySelectorAll('.aiflash').length")   # 396번. 묶은 카드를 고르면 해당 칸이 다 칠해진다
         pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.on .aip-btns button.ap').click() }"); pg.wait_for_timeout(300)
         out['aidone'] = [pg.evaluate("()=>document.querySelectorAll('#ai-list .aip-it.done').length"), pg.evaluate(NM)[:3], pg.evaluate("()=>document.querySelector('#ai-list .aip-it.done .ln.nmline b').textContent")]
         pg.evaluate("()=>{ document.querySelector('#ai-list .aip-it.done button').click() }"); pg.wait_for_timeout(300)
@@ -2598,14 +2600,14 @@ def judge(t, r):
             cd = r.get('cards', [[], ''])
             ok = (r.get('parts') == ['「가츠동」 → 「가쓰동」 · 「돈가츠」 → 「돈가스」', '「타코야끼」 → 「타코야키」', '「김치 우동」 → 「김치우동」'] and r['title'] == [None, True, '#8f8a2e']
                   and r.get('ck395') == [False, False, False, 2, False] and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
-                  and r.get('far') == ['케익', '함박스텍', '육계장']
-                  and cd[0] == [['가츠동', '가쓰동', '메뉴 3곳', '가츠동 · 네기가츠동 · 김치가츠동', '가츠동,가츠동,가츠동'], ['타코야끼', '타코야키', '메뉴', '타코야끼', '타코야끼']] and cd[1] == '2건'
-                  and r.get('frto', [''])[0] == 'line-through' and r['frto'][1] == '700' and r.get('allbtn') == '모두 적용 (3곳)'
-                  and r['aidone'] == [1, ['가쓰동', '네기가쓰동', '김치가쓰동'], '메뉴 3곳'] and r['aiundo'] == [0, ['가츠동', '네기가츠동', '김치가츠동']] and r.get('aiign') == [3, '1건']
+                  and r.get('far') == ['케익', '함박스텍', '육계장'] and r.get('fill396') == [True, True, True]
+                  and cd[0] == [['가츠동', '가쓰동', '메뉴', '가츠동|네기가츠동|김치가츠동', '가츠동,가츠동,가츠동'], ['타코야끼', '타코야키', '메뉴', '타코야끼', '타코야끼']] and cd[1] == '2건'
+                  and r.get('frto', [''])[0] == 'line-through' and r['frto'][1] == '700' and r.get('allbtn') == '모두 적용 (3곳)' and r.get('flash') == 3
+                  and r['aidone'] == [1, ['가쓰동', '네기가쓰동', '김치가쓰동'], '메뉴'] and r['aiundo'] == [0, ['가츠동', '네기가츠동', '김치가츠동']] and r.get('aiign') == [3, '1건']
                   and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [['가츠동', '가쓰동', ''], ['돈가츠', '돈가스', ''], ['두마리', '두 마리', '띄어쓰기'], ['김치찌게', '김치찌개', ''], ['타코야끼', '타코야키', '외래어 표기'], ['여섯개', '여섯 개', '띄어쓰기']] and r.get('aikind') == ['돈까스', '돈가스', '외래어 표기']
                   and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'idle'] and len(r['aist']) == 3
                   and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
-            return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 395번 확인 화면 [맞춤법 줄 · 목록 · 단추 · 줄 수 · 글] {r.get('ck395')} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 다른 말 거름(남은 것) {r.get('far')} · AI 카드 {cd} · 고치기 전/후 {r.get('frto')} · {r.get('allbtn')} · 적용/되돌림/무시 {r['aidone']}/{r['aiundo']}/{r.get('aiign')} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
+            return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 395번 확인 화면 [맞춤법 줄 · 목록 · 단추 · 줄 수 · 글] {r.get('ck395')} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 다른 말 거름(남은 것) {r.get('far')} · 396번 [넘침 없음, 키움, 띠 안 단추] {r.get('fill396')} · 칠한 칸 {r.get('flash')} · AI 카드 {cd} · 고치기 전/후 {r.get('frto')} · {r.get('allbtn')} · 적용/되돌림/무시 {r['aidone']}/{r['aiundo']}/{r.get('aiign')} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
         if t == 't69':
             if r.get('fail'): return False, f"실패: {r['fail']}"
             Z = r['hours_geo']
