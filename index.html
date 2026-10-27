@@ -2381,7 +2381,6 @@ body.editing .topbar .editbar{display:flex}
   .topbar .bar button{padding:0 12px} .topbar .tb-right{gap:6px} .topbar .bar #b-help{width:36px;padding:0}
   .topbar .bar #b-edit{min-width:0}
 }
-}
 /* 366번. 위쪽 켜고 끄는 단추 넷([편집] · [AI] · [꾸미기] · [미리보기])은 켜졌을 때만 같은 색 — 전에는 [편집]만 늘 붉어 켜진 것으로 읽혔고, [AI]는 붉고 [꾸미기]는 회색이라 둘이 켜지면 붉은 단추가 둘이었다(사용자 · 규칙 I) */
 .topbar #b-style.on,.topbar #b-preview.on{color:#efe3c9}   /* 289번. [미리보기 끝]도 — [편집 끝]과 빨간 단추 둘이 됐다(규칙 I) */   /* 283번. [꾸미기]를 채운 빨강에서 내렸다 — 한 화면에 빨간 단추 둘이었다 */
 .tb-menu{position:fixed;z-index:31;min-width:240px;padding:6px;display:flex;flex-direction:column;gap:2px;
@@ -10728,18 +10727,36 @@ function typoParts(a, b){
   const r = []; A.forEach((w, i) => { if (w !== B[i]) r.push([w.replace(/^[(\[「]+|[)\]」,.]+$/g, ""), B[i].replace(/^[(\[「]+|[)\]」,.]+$/g, "")]); });
   return r.length ? r : [[a, b]];
 }
-/* 393번. 맞춤법 의견 걸러내기 — 애매하거나 헷갈리게 할 것은 뺀다(사용자: 「애매하거나 헷갈리게 할 수 있는 거 빼고 제대로」).
-   ① 해시태그(#Pork)는 떼고 본다(AI 가 빼고 돌려준 것을 「바꿀 것」으로 읽어 [적용]하면 해시태그가 지워졌다)
-   ② 낱말 수가 다르면(띄어쓰기만 고친 것 · 짝이 안 맞는 것) 뺀다 ③ 영문이 든 낱말은 뺀다(한국어 맞춤법이 아니다)
-   ④ 외래어 표기만 다른 것(끼/키 · 까/가 · 츠/쓰/스 …)은 뺀다 — 가게마다 쓰는 표기라 틀렸다고 할 수 없다
-   남는 것은 「바뀐 낱말 하나 → 하나」 짝으로 돌려준다 — 적용도 그 낱말만 바꾼다 */
-const LOAN_SWAP = [["까","가"],["까","카"],["끼","기"],["끼","키"],["꼬","고"],["꼬","코"],["께","게"],["께","케"],["깨","캐"],["꾸","쿠"],["츠","쓰"],["츠","스"],["쓰","스"],["쯔","츠"],["쯔","쓰"],["따","타"],["또","토"],["뚜","투"],["떼","테"],["빠","파"],["뽀","포"],["삐","피"],["뻬","페"],["빵","팡"],["쨩","짱"],["쟈","자"],["쥬","주"],["쵸","초"],["슈","수"]];
-const loanOnly = (a, b) => a.length === b.length && [...a].every((c, k) => c === b[k] || LOAN_SWAP.some(([x, y]) => (c === x && b[k] === y) || (c === y && b[k] === x)));
+/* 393 · 394번. 맞춤법 의견 걸러내기 — 국립국어원 어문 규범(한글 맞춤법 · 띄어쓰기 · 외래어 표기법)에 걸리는 것은 다 본다(사용자: 「외래어라고 해도 표준말이 있으면 검사해야지」 「띄어쓰기도 넣어야지. 무시할지 적용할지는 본인 판단」).
+   393번이 외래어 표기 · 띄어쓰기를 통째로 뺀 것을 되돌렸다. 빼는 것은 한국어 맞춤법의 대상이 아닌 것뿐 — ① 해시태그(#Pork, 떼고 본다 — AI 가 빼고 돌려준 것을 [적용]하면 지워졌다) ② 영문이 든 낱말.
+   낱말을 순서대로 맞춰 보고(LCS) 다른 부분만 「틀린 것 → 고친 것」 짝으로 돌려준다 — 띄어쓰기는 「두마리 → 두 마리」처럼 묶어서. [적용]도 그 부분만 바꾼다.
+   kind — AI 가 붙인 갈래(맞춤법 · 외래어 표기 · 띄어쓰기), 없으면 띄어쓰기만 다른지로 가린다 */
+function typoSplit(sa, sb){   // 394번. 다른 낱말 덩어리를 짝으로 — 붙여 쓴 낱말은 띄어 쓴 낱말 여럿과(두마리 ↔ 두 마리), 나머지는 하나씩
+  const r = []; let i = 0, j = 0;
+  const glue = (one, many, k0) => { let k = 1, acc = many[k0]; while (acc.length < one.length && k0 + k < many.length && one.startsWith(acc)){ acc += many[k0 + k]; k++; } return acc === one && k > 1 ? k : 0; };
+  while (i < sa.length && j < sb.length){
+    let k = glue(sa[i], sb, j); if (k){ r.push([sa[i], sb.slice(j, j + k).join(" ")]); i++; j += k; continue; }
+    k = glue(sb[j], sa, i); if (k){ r.push([sa.slice(i, i + k).join(" "), sb[j]]); i += k; j++; continue; }
+    r.push([sa[i], sb[j]]); i++; j++;
+  }
+  if (i < sa.length || j < sb.length){ if (r.length){ const l = r[r.length - 1]; l[0] = [l[0], ...sa.slice(i)].join(" "); l[1] = [l[1], ...sb.slice(j)].join(" "); } else r.push([sa.join(" "), sb.join(" ")]); }
+  return r;
+}
 function typoClean(list){
   const out = [], strip = t => String(t || "").replace(/#\S+/g, " ").replace(/\s+/g, " ").trim(), core = w => w.replace(/^[(\[「『"'“‘]+|[)\]」』"'”’,.!?:;]+$/g, "");
-  (list || []).forEach(t => { const A = strip(t.from).split(" "), B = strip(t.to).split(" "); if (!A[0] || !B[0] || A.length !== B.length) return;
-    A.forEach((w, k) => { const a = core(w), b = core(B[k]); if (!a || !b || a === b || /[A-Za-z]/.test(a + b) || loanOnly(a, b)) return;
-      if (!out.some(u => u.from === a && u.to === b)) out.push({ from:a, to:b, rule:t.rule }); }); });
+  (list || []).forEach(t => { const A = strip(t.from).split(" ").filter(Boolean), B = strip(t.to).split(" ").filter(Boolean); if (!A.length || !B.length) return;
+    const L = Array.from({ length:A.length + 1 }, () => new Array(B.length + 1).fill(0));
+    for (let x = A.length - 1; x >= 0; x--) for (let y = B.length - 1; y >= 0; y--) L[x][y] = A[x] === B[y] ? L[x + 1][y + 1] + 1 : Math.max(L[x + 1][y], L[x][y + 1]);
+    const spans = []; let x = 0, y = 0, sa = [], sb = [];
+    const flush = () => { if (sa.length || sb.length) spans.push(...typoSplit(sa, sb)); sa = []; sb = []; };
+    while (x < A.length || y < B.length){
+      if (x < A.length && y < B.length && A[x] === B[y]){ flush(); x++; y++; }
+      else if (y >= B.length || (x < A.length && L[x + 1][y] >= L[x][y + 1])) sa.push(A[x++]); else sb.push(B[y++]);
+    }
+    flush();
+    spans.forEach(([p0, q0]) => { const a = core(p0), b = core(q0); if (!a || !b || a === b || /[A-Za-z]/.test(a + b)) return;   // 한쪽이 비면(낱말을 통째로 뺀 것) 맞춤법이 아니다
+      const kind = a.replace(/\s/g, "") === b.replace(/\s/g, "") ? "띄어쓰기" : (t.kind && t.kind !== "띄어쓰기" ? t.kind : "");
+      if (!out.some(u => u.from === a && u.to === b)) out.push({ from:a, to:b, rule:t.rule, kind }); }); });
   return out;
 }
 const typoLabel = (a, b) => typoParts(a, b).map(([x, y]) => "「" + x + "」 → 「" + y + "」").join(" · ");
@@ -10758,10 +10775,10 @@ function menuFindings(pages){   // 354번. 무시 열쇠(key)에는 「N쪽 · �
         else if (!/시가|변동|문의|별도/.test(v)) add("price", { s, i, name:it.name, detail:"숫자가 아닌 가격 「" + v + "」", msg:tag + nm + " — 숫자가 아닌 가격 「" + v + "」" }); }); });
     const stray = [];   // 359번. 한글 이름 끝에 뜻 없이 붙은 영문자(야끼소바dd) — AI 를 부르지 않아도 규칙으로 바로 잡는다. 단위(ml · g …)는 뺀다
     secs.forEach(sec => sec.items.forEach(it => { const m = /^(.*[가-힣])([A-Za-z]{1,3})$/.exec(String(it.name || "")); if (m && !/^(ml|cl|l|g|kg|oz|ea|pcs|x)$/i.test(m[2]) && !(pg.typos || []).some(t => t.from === it.name)) stray.push({ from:it.name, to:m[1], rule:"한글 이름 뒤에 뜻 없는 영문자가 붙은 것 같습니다" }); }));
-    (pg.typos || []).concat(stray.filter((t, k) => stray.findIndex(u => u.from === t.from) === k)).forEach(t => secs.forEach((sec, s) => { const m = "맞춤법: " + typoLabel(t.from, t.to), whole = typoParts(t.from, t.to)[0][0] === t.from;   // 392번. 바뀐 낱말만   // 357번. 「AI 의견 …」 문구는 줄마다 두지 않고 목록 위에 한 번
+    (pg.typos || []).concat(stray.filter((t, k) => stray.findIndex(u => u.from === t.from) === k)).forEach(t => secs.forEach((sec, s) => { const m = "맞춤법" + (t.kind && t.kind !== "맞춤법" ? "(" + t.kind + ")" : "") + ": " + typoLabel(t.from, t.to), whole = typoParts(t.from, t.to)[0][0] === t.from;   // 392번. 바뀐 낱말만 · 394번. 갈래(외래어 표기 · 띄어쓰기)   // 357번. 「AI 의견 …」 문구는 줄마다 두지 않고 목록 위에 한 번
       const wh = nm => nm === t.from && whole ? "" : " — " + nm;   // 390번. 어느 메뉴의 글인지 — 「가츠동 → 돈카츠동」이 가츠동 · 네기가츠동 · 김치가츠동에서 똑같은 세 줄로 나왔다(사용자)
-      if (sec.name && sec.name.includes(t.from)) add("typo", { s, i:-1, from:t.from, to:t.to, why:t.rule || "", name:sec.name, msg:tag + m + wh(sec.name) });
-      sec.items.forEach((it, i) => { if (it.name && it.name.includes(t.from)) add("typo", { s, i, from:t.from, to:t.to, why:t.rule || "", name:it.name, msg:tag + m + wh(it.name) }); }); }));
+      if (sec.name && sec.name.includes(t.from)) add("typo", { s, i:-1, from:t.from, to:t.to, why:t.rule || "", tk:t.kind || "", name:sec.name, msg:tag + m + wh(sec.name) });
+      sec.items.forEach((it, i) => { if (it.name && it.name.includes(t.from)) add("typo", { s, i, from:t.from, to:t.to, why:t.rule || "", tk:t.kind || "", name:it.name, msg:tag + m + wh(it.name) }); }); }));
   });
   return L;
 }
@@ -10897,7 +10914,7 @@ function aiDraw(){
     part.slice(0, 40).forEach(f => {
       const path = aiPath(f, map), it = el("div", "aip-it" + (f.key === aiSel ? " on" : "")); it.tabIndex = 0; it.setAttribute("role", "button"); it.setAttribute("aria-pressed", f.key === aiSel ? "true" : "false");
       const ln = (lab, txt, cls) => { const r = el("span", "ln" + (cls ? " " + cls : "")), l = el("b"), v = el("span", "v"); l.textContent = lab; v.textContent = txt; r.append(l, v); it.append(r); };   // 359번. 「이름표 + 내용」 줄 — 무엇이 · 어떻게 · 왜가 한눈에 갈린다
-      if (kind === "typo"){ const tp = typoParts(f.from, f.to); ln("틀린 곳", tp.map(x => x[0]).join(" · "), "fr"); ln("이렇게", tp.map(x => x[1]).join(" · "), "to"); if (f.why) ln("이유", f.why, "why"); }   // 392번. 바뀐 낱말만
+      if (kind === "typo"){ const tp = typoParts(f.from, f.to); ln("틀린 곳", tp.map(x => x[0]).join(" · "), "fr"); ln("이렇게", tp.map(x => x[1]).join(" · "), "to"); if (f.why || f.tk) ln("이유", f.why || f.tk, "why"); }   // 392번. 바뀐 낱말만
       else if (kind === "dup"){ ln("메뉴", f.name); ln("이유", "같은 이름이 " + f.n + "번 있습니다(" + f.j + "번째)", "why"); }
       else { const k = f.detail.indexOf(" — "), v = k < 0 ? "" : f.detail.slice(0, k), w = k < 0 ? f.detail : f.detail.slice(k + 3); ln("메뉴", f.name); if (v) ln("가격", v, "to"); ln("이유", w, "why"); }
       const loc = el("span", "s"); loc.textContent = (L.some(x => x.pg !== f.pg) || MENU.sheets.length > 1 ? f.pg + "쪽 · " : "") + (f.sn || "이름 없는 분류") + (kind === "typo" && f.name && f.i >= 0 && !(f.name === f.from && typoParts(f.from, f.to)[0][0] === f.from) ? " · " + f.name : ""); it.append(loc);   // 390번. 맞춤법은 어느 메뉴인지까지(같은 줄이 여럿 나왔다)
@@ -10931,8 +10948,8 @@ async function typoAsk(list){   // 376번. 맞춤법 보기 — [AI] 창과 확�
   if (r.status === 403) throw new Error("이 메뉴판에서는 AI 를 쓸 수 없습니다.");
   if (!r.ok || typeof j.text !== "string"){ console.warn("맞춤법 보기 실패", r.status, j); throw new Error("구글이 잠시 답하지 못했습니다. 잠시 뒤 다시 눌러 주세요."); }
   const q = x => x.replace(/^[\s「『"'“‘]+|[\s」』"'”’]+$/g, ""), out = [];
-  j.text.split(/\r?\n/).forEach(l => { const m = l.replace(/^[-*•\s]*(?:점검\s*[:：])?\s*/, "").match(/^(.+?)\s*(?:→|->|=>)\s*(.+)$/); if (!m) return;
-    const a = q(m[1]), c = q(m[2]); if (!a || !c || a === c || out.some(t => t.from === a && t.to === c)) return; out.push({ from:a, to:c }); });
+  j.text.split(/\r?\n/).forEach(l => { const m = l.replace(/^[-*•\s]*(?:점검\s*[:：])?\s*/, "").match(/^(.+?)\s*(?:→|->|=>)\s*(.+?)(?:\s*[\[(（]\s*(맞춤법|외래어 표기|외래어|띄어쓰기)\s*[\])）])?\s*$/); if (!m) return;   // 394번. 끝의 (맞춤법 · 외래어 표기 · 띄어쓰기) 갈래
+    const a = q(m[1]), c = q(m[2]), kind = m[3] ? (m[3] === "외래어" ? "외래어 표기" : m[3]) : ""; if (!a || !c || a === c || out.some(t => t.from === a && t.to === c)) return; out.push({ from:a, to:c, kind }); });
   return typoClean(out).filter(t => list.some(x => x.includes(t.from)));   // 393번
 }
 async function aiTypoRun(){

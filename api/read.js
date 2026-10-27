@@ -56,7 +56,7 @@ const PROMPT = [
 ].join("\n");   // 313번(방향 = 종이 기준 · 바닥 = 맨 아래 단 전체 폭). 312번(분류 제목 · 이름 없는 묶음 · 추천 · 안내 · 바닥 · 영업시간 ? · 짐작 금지 · 궁서 · 조명 뺀 색). index.html 의 READ_PROMPT 와 같게
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const ORIENT = "아래 네 사진은 같은 가게 메뉴판 사진을 서로 다르게 돌린 것입니다(1번 ~ 4번). 글자가 바로 서서 위에서 아래로 자연스럽게 읽히는 사진의 번호 하나만 1, 2, 3, 4 중 숫자로 답하세요. 다른 말은 쓰지 마세요.";   // 316번
-const TYPO = "아래는 가게 메뉴판의 메뉴 이름 목록입니다(한 줄에 하나). 한국어 맞춤법이 확실히 틀린 낱말만 찾아 「틀린 낱말 → 고친 낱말」 모양으로 한 줄씩, 최대 8줄만 적으세요. 메뉴 이름 전체가 아니라 틀린 낱말 하나만 적습니다(예: 김치찌게 → 김치찌개, 육계장 → 육개장). 다음은 쓰지 않습니다: 외래어 표기(가츠/가쓰, 돈까스/돈가스, 야끼/야키 같은 것), 띄어쓰기, 영어 · 숫자 · 기호, 괄호 안 설명, 가게 고유 이름 · 방언, 틀렸는지 조금이라도 확실하지 않은 것. 다른 말은 쓰지 마세요. 틀린 것이 없으면 아무것도 쓰지 마세요.";   // 393번. 애매한 의견을 빼고 틀린 낱말만(사용자: 애매하거나 헷갈리게 할 수 있는 거 빼고 제대로) — 메뉴판 쪽 typoClean 이 한 번 더 거른다
+const TYPO = "아래는 가게 메뉴판의 메뉴 이름 목록입니다(한 줄에 하나). 국립국어원 어문 규범(한글 맞춤법 · 표준어 규정 · 외래어 표기법 · 띄어쓰기)과 표준국어대사전에 비추어 틀린 부분만 찾아 「틀린 부분 → 고친 부분 (갈래)」 모양으로 한 줄씩, 최대 12줄만 적으세요. 갈래는 맞춤법 · 외래어 표기 · 띄어쓰기 중 하나입니다. 메뉴 이름 전체가 아니라 틀린 부분만 적습니다(예: 김치찌게 → 김치찌개 (맞춤법), 돈까스 → 돈가스 (외래어 표기), 두마리 → 두 마리 (띄어쓰기)). 외래어는 표준 표기가 정해진 말만 적습니다. 영어 · 숫자 · 기호 · 해시태그는 보지 않습니다. 가게 고유 이름, 표준 표기가 없는 말, 맞는지 확실하지 않은 것은 쓰지 않습니다. 다른 말은 쓰지 마세요. 틀린 것이 없으면 아무것도 쓰지 마세요.";   // 393 · 394번. 어문 규범의 네 갈래를 다 본다(사용자: 외래어도 표준말이 있으면 · 띄어쓰기도) — 메뉴판 쪽 typoClean 이 해시태그 · 영문을 한 번 더 거른다
 const MAX_NAMES = 120;   // 354번. 이름 목록 상한
 const ROTS = [0, 90, 180, 270];   // 1 ~ 4번 사진이 돌린 각도(시계 방향) — 메뉴판(index.html)의 geminiOrient 와 같은 순서
 const MAX_B64 = 4000000;   // 사진(base64) 약 3MB. 메뉴판은 긴 쪽 1600px JPEG 로 줄여 보낸다(보통 0.5MB 안)
@@ -106,7 +106,7 @@ module.exports = async function handler(req, res){
     if (m[2].length > MAX_B64){ res.status(413).json({ error:"사진이 너무 큽니다", code:"size" }); return; }
     parts = [{ text:PROMPT }, { inline_data:{ mime_type:m[1], data:m[2] } }];
   }
-  const payload = JSON.stringify({ contents:[{ parts }], generationConfig:{ temperature:0, maxOutputTokens: typo ? 400 : orient ? 8 : 2048 } });
+  const payload = JSON.stringify({ contents:[{ parts }], generationConfig:{ temperature:0, maxOutputTokens: typo ? 600 : orient ? 8 : 2048 } });
 
   const first = process.env.GEMINI_MODEL || DEFAULT_MODEL;
   const models = [...new Set([first, DEFAULT_MODEL, "gemini-2.5-flash-lite", "gemini-2.5-flash"])];

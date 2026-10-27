@@ -923,7 +923,14 @@ def tstatic(b, f):
     tags = {}
     for m in re.finditer(r'<dialog id="(\w+)">(.*?)</dialog>', body, re.S):
         tags[m.group(1)] = {t: (len(re.findall(r'<' + t + r'[\s>]', m.group(2))), m.group(2).count('</' + t + '>')) for t in ('div', 'p', 'ul', 'ol', 'li', 'details', 'label')}
-    return {'css_comments': [st.count('/*'), st.count('*/')], 'html_comments': [body.count('<!--'), body.count('-->')], 'node': node,
+    # 394번. CSS 괄호 짝 — 393번에 남은 「}」 하나를 편집기(VS Code)가 잡았는데 이 검사는 주석 짝만 봐서 못 잡았다. 주석 · 문자열을 걷고 깊이가 0 밑으로 내려가는지 · 끝이 0인지
+    c2 = re.sub(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'', '""', re.sub(r'/\*[\s\S]*?\*/', '', st)); dep, neg = 0, []
+    for k, ch in enumerate(c2):
+        if ch == '{': dep += 1
+        elif ch == '}':
+            dep -= 1
+            if dep < 0: neg.append(c2[max(0, k - 60):k + 1].replace('\n', ' ')); dep = 0
+    return {'css_braces': [dep, neg[:3]], 'css_comments': [st.count('/*'), st.count('*/')], 'html_comments': [body.count('<!--'), body.count('-->')], 'node': node,
             'dialog_tags_ok': all(a == c for d in tags.values() for a, c in d.values()), 'dialog_tags': tags}
 
 def origdiff(new, base):
@@ -1915,7 +1922,8 @@ def t70(b, f):
         pg.goto(url('p70_' + f)); pg.wait_for_timeout(400); pg.route('**/api/read', h)
         out['title'] = pg.evaluate("""()=>{ const a=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #c7c5c3'}, null), b=readLook({'색':'종이 #ffffff · 글자 #222222 · 띠 #c8b560 · 제목 #8f8a2e'}, null); return [a.title||null, /회색/.test(a.titleWhy||''), b.title||null] }""")
         pg.click('#st-photo'); pg.wait_for_timeout(300); pg.click('#st-way button[data-w="app"]'); pg.fill('#st-ans', body); pg.click('#st-appgo'); pg.wait_for_timeout(500)
-        out['clean'] = pg.evaluate("()=>typoClean([{from:'가츠동 (돈가츠 덮밥) #Pork',to:'가쓰동 (돈가스 덮밥)'},{from:'에비후라이 (새우튀김 두마리) #Shrimp',to:'에비후라이 (새우튀김 두 마리)'},{from:'김치찌게 #Kimchi',to:'김치찌개'},{from:'타코야끼',to:'타코야키'},{from:'Salmon',to:'Salman'}]).map(t=>({from:t.from,to:t.to}))")   # 393번. 외래어 · 띄어쓰기 · 해시태그 · 영문은 거르고 틀린 낱말만
+        out['clean'] = pg.evaluate("()=>typoClean([{from:'가츠동 (돈가츠 덮밥) #Pork',to:'가쓰동 (돈가스 덮밥)'},{from:'에비후라이 (새우튀김 두마리) #Shrimp',to:'에비후라이 (새우튀김 두 마리)'},{from:'김치찌게 #Kimchi',to:'김치찌개'},{from:'타코야끼 (여섯개)',to:'타코야키 (여섯 개)',kind:'외래어 표기'},{from:'Salmon',to:'Salman'}]).map(t=>[t.from,t.to,t.kind])")   # 394번. 해시태그 · 영문만 거르고 맞춤법 · 외래어 표기 · 띄어쓰기는 다 — 바뀐 부분만, 띄어쓰기는 묶어서
+        out['aikind'] = pg.evaluate("async()=>{ const f=window.fetch; window.fetch=async()=>({status:200, ok:true, json:async()=>({text:'돈까스 → 돈가스 (외래어 표기)'})}); try { const r=await typoAsk(['돈까스 #Pork']); return r.length===1 ? [r[0].from, r[0].to, r[0].kind] : r } finally { window.fetch=f } }")   # 394번. AI 답의 갈래
         out['parts'] = pg.evaluate("()=>[typoLabel('가츠동 (돈가츠 덮밥) #Pork','가쓰동 (돈가스 덮밥) #Pork'), typoLabel('타코야끼','타코야키'), typoLabel('김치 우동','김치우동')]")   # 392번. 바뀐 낱말만
         pg.evaluate("()=>{ stTypos.push({from:'가츠동',to:'돈카츠동'},{from:'타코야끼',to:'타코야키'}); stTypoRan=true; drawCkNotes(); }"); pg.wait_for_timeout(150)
         R = "()=>[...document.querySelectorAll('#st-cl-typo .st-cnr')].map(r=>r.querySelector('.go').textContent)"
@@ -2585,7 +2593,7 @@ def judge(t, r):
             ok = (r.get('parts') == ['「가츠동」 → 「가쓰동」 · 「돈가츠」 → 「돈가스」', '「타코야끼」 → 「타코야키」', '「김치 우동」 → 「김치우동」'] and r['title'] == [None, True, '#8f8a2e'] and len(rw) == 4 and len(set(rw)) == 4 and any('네기가츠동' in x for x in rw) and any('김치가츠동' in x for x in rw)
                   and r['box'][0] == 'visible' and r['box'][1] <= 1 and r['btbg'] == 'rgb(255, 253, 246)'
                   and any(x.startswith('✓ 적용함') and '타코야키' in x for x in ap[0]) and '타코야키' in ap[1] and not any(x.startswith('✓') for x in ud[0]) and '타코야끼' in ud[1]
-                  and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [{'from': '김치찌게', 'to': '김치찌개'}]
+                  and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [['가츠동', '가쓰동', ''], ['돈가츠', '돈가스', ''], ['두마리', '두 마리', '띄어쓰기'], ['김치찌게', '김치찌개', ''], ['타코야끼', '타코야키', '외래어 표기'], ['여섯개', '여섯 개', '띄어쓰기']] and r.get('aikind') == ['돈까스', '돈가스', '외래어 표기']
                   and any('네기가츠동' in x for x in r['ailoc']) and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'ok'] and len(r['aist']) == 3 and r['aidone'] == [1, True] and r['aiundo'] == [0, True]
                   and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
             return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 맞춤법 줄 {rw} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 적용 {ap} · 되돌림 {ud} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · AI 줄 자리 {r['ailoc']} · AI 적용/되돌림 {r['aidone']}/{r['aiundo']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
@@ -2682,7 +2690,7 @@ def judge(t, r):
                   and r['saved'] == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[4, 'url', 300, 20, '-'], [5, 'wifi', 1, 0, '']], False, False] and not r['err'])
             return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창(격자 한 그림 — 탭 한 줄 · 구분선 · 맨 위 좌우 끝 = QR · 아래 두 칸은 모퉁이 하나만) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
-        if t == 'tstatic': ok = r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
+        if t == 'tstatic': ok = r.get('css_braces', [0, []]) == [0, []] and r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"CSS 괄호 {r.get('css_braces')} · 주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
