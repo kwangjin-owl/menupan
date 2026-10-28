@@ -9324,6 +9324,7 @@ function syncQr(pg){
   const x = qrAt(pg, qrSlot), k = x ? x.kind : "none";
   $("#f-qrkind").querySelectorAll("button").forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
   $("#qr-url").hidden = k !== "url"; $("#qr-wifi").hidden = k !== "wifi"; $("#qr-labrow").hidden = k === "none"; $("#qr-bgrow").hidden = k === "none";
+  $("#f-qrlabel").placeholder = k === "wifi" ? "예: 와이파이" : "예: 네이버 지도";   // 400번. 예시는 종류에 맞게 — 와이파이에도 「네이버 지도」가 떴다(사용자)
   { const bgv = x && /^#[0-9a-f]{6}$/.test(x.bg || "") ? x.bg : "#ffffff", none = !!x && x.bg === "none", cp = $("#c-qrbg"); if (document.activeElement !== cp) cp.value = bgv; cp.parentNode.classList.toggle("off", none);   /* 348번. 바탕 없음이면 색 상자는 옅게(누르면 색 바탕으로 돌아온다) */
     $("#f-qrnone").querySelectorAll("button").forEach(b => { b.classList.toggle("on", none); b.setAttribute("aria-pressed", String(none)); }); }
   const set = (id, v) => { const e = $(id); if (document.activeElement !== e) e.value = v || ""; };

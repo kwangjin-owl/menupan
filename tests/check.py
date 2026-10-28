@@ -1963,6 +1963,8 @@ def t70(b, f):
         out['pw392'] = pg.evaluate("()=>Math.round(document.querySelector('#panel').getBoundingClientRect().width)")
         pg.click('#b-edit'); pg.wait_for_timeout(300); pg.click('#b-ai'); pg.wait_for_timeout(300)
         pg.evaluate("()=>document.querySelector('#b-edit').click()"); pg.wait_for_timeout(400); out['fromView'] = pg.evaluate(ST)   # 393번
+        pg.evaluate("()=>document.querySelectorAll('#ptabs button')[4].click()"); pg.wait_for_timeout(250)
+        out['qrph'] = [pg.evaluate("(k)=>{ document.querySelector('#f-qrkind button[data-k=\"'+k+'\"]').click(); return document.querySelector('#f-qrlabel').placeholder }", k) for k in ('url', 'wifi')]   # 400번. QR 이름 예시는 종류에 맞게
     except Exception as e:
         out['fail'] = str(e)[:200]
     finally:
@@ -2607,7 +2609,7 @@ def judge(t, r):
                   and r['aidone'] == [1, ['가쓰동', '네기가쓰동', '김치가쓰동'], '위치'] and r.get('notag') == ['오코노미야끼', '가츠동 (돈가츠 덮밥)', '김치우동'] and r['aiundo'] == [0, ['가츠동', '네기가츠동', '김치가츠동']] and r.get('aiign') == [3, '1건']
                   and r['toAI'] == {'panel': False, 'ai': True, 'bs': False, 'ba': True, 'ed': False} and r['onbg'] == ['rgb(239, 227, 201)', 'rgba(0, 0, 0, 0)'] and r.get('clean') == [['가츠동', '가쓰동', ''], ['돈가츠', '돈가스', ''], ['두마리', '두 마리', '띄어쓰기'], ['김치찌게', '김치찌개', ''], ['타코야끼', '타코야키', '외래어 표기'], ['여섯개', '여섯 개', '띄어쓰기']] and r.get('aikind') == ['돈까스', '돈가스', '외래어 표기']
                   and [x[0] for x in r.get('aist', [])] == ['ok', 'ok', 'idle'] and len(r['aist']) == 3
-                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and not r['err'])
+                  and r['toStyle'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('bar392', [None])[:3] == [True, False, 0] and r['bar392'][3] == r.get('pw392') and r['fromView'] == {'panel': True, 'ai': False, 'bs': True, 'ba': False, 'ed': True} and r.get('qrph') == ['예: 네이버 지도', '예: 와이파이'] and not r['err'])
             return ok, f"390번 제목 색 [회색 버림, 까닭, 올리브 받음] {r['title']} · 395번 확인 화면 [맞춤법 줄 · 목록 · 단추 · 줄 수 · 글] {r.get('ck395')} · 박스 스크롤 {r['box']} · 단추 바탕 {r['btbg']} · 다른 말 거름(남은 것) {r.get('far')} · 396번 [넘침 없음, 키움, 띠 안 단추] {r.get('fill396')} · 칠한 칸 {r.get('flash')} · AI 카드 {cd} · 고치기 전/후 {r.get('frto')} · {r.get('allbtn')} · 적용/되돌림/무시 {r['aidone']}/{r['aiundo']}/{r.get('aiign')} · AI 탭 {r['toAI']} · 켜짐 바탕 {r['onbg']} · 꾸미기 탭 {r['toStyle']} · 편집 꺼진 채 {r['fromView']}"
         if t == 't69':
             if r.get('fail'): return False, f"실패: {r['fail']}"
