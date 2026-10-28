@@ -1420,8 +1420,11 @@ html body #panel #b-copypage[hidden]{display:none}
 html body #panel .tbtn{height:auto !important;min-height:0 !important;padding:2px 2px !important;border:0 !important;border-radius:4px !important;background:none !important;color:rgba(240,230,205,.72);font-size:12px;font-weight:400;text-decoration:underline;text-underline-offset:3px;box-shadow:none !important}
 html body #panel .tbtn:hover{color:#f3e9d2}
 html body #panel .slhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-html body #panel .slbody{display:flex;align-items:center;gap:10px;margin-top:6px}
+html body #panel .slbody{display:flex;align-items:center;gap:10px;margin-top:0}   /* 398번. 6 → 0 — 이름표 아래 4(이름표 아래 여백)만 남겨 다른 이름표 → 칸과 같게 */
 html body #panel .slbody input[type=range]{flex:1;min-width:0;margin:0}
+html body #panel .pgrp + select:not([hidden]){display:block}   /* 398번. 소제목 바로 아래 고르기 칸 — 글줄 상자(inline-block)라 위 여백이 겹치지 않아 10, 다른 칸은 8 이었다 */
+html body #panel .slhead > label{margin-top:0}   /* 398번. 이름표가 줄(slhead) 안에 있어 위 여백이 둘(8 + 8 = 16)로 겹쳤다 — 위 여백은 줄이 갖는다 */
+html body #panel .slhead{margin-top:8px}
 html body #panel .stepg{display:inline-flex;flex:0 0 auto;border:1px solid rgba(240,230,205,.22);border-radius:8px;overflow:hidden}
 html body #panel .stepg > button.stp:not(#_){width:34px !important;height:30px !important;min-height:30px !important;padding:0 !important;border:0 !important;border-radius:0 !important;background:transparent !important;font-size:16px;line-height:1;color:#efe3c9;box-shadow:none !important}
 html body #panel .stepg > button.stp + button.stp:not(#_){border-left:1px solid rgba(240,230,205,.22) !important}   /* 336번. :not(#_) — 꾸미기 창 전체 「단추 모서리 8px」(id 둘 · 이름 둘)이 이겨 + 칸 왼쪽이 둥글게 휘어 +만 싸인 것처럼 보였다(사용자). 두 규칙 다 !important 라 선택자 무게로 갈린다 — id 둘 · 이름 둘 이상이어야 이긴다(재 보고 잡음) */
@@ -1488,8 +1491,9 @@ html body #panel .pgrid .pqr{width:24px;height:24px;aspect-ratio:1}
 html body #panel .pgrid .pqr.sy2{bottom:4px}
 html body #panel .qrblk.lead{border-top:0;padding-top:0;margin-top:6px}
 html body #panel #corner-row[hidden], html body #panel #b-artsame[hidden]{display:none !important}
-html body #panel .qrblk{border-top:1px solid rgba(240,230,205,.12);padding-top:14px;margin-top:14px}
+html body #panel .qrblk{border-top:0;padding-top:0;margin-top:0}   /* 398번. 선은 QR 소제목(.pgrp)이 긋는다 — 묶음 위 선과 소제목 위 선이 28px 사이로 두 줄 그어졌다 */
 html body #panel .qrblk [hidden], html body #panel .cellblk[hidden]{display:none !important}
+html body #panel .qrblk #qr-url:not([hidden]), html body #panel .qrblk #qr-wifi:not([hidden]), html body #panel #art-opts:not([hidden]), html body #panel #seal-opts:not([hidden]){display:flex;flex-direction:column;gap:8px}   /* 398번. 줄 사이를 다른 줄과 같게 8 — 감싼 칸이 글줄(span)이라 와이파이 이름 · 보안 · 비밀번호가 간격 0으로 붙었다 */
 .st-wtag{margin-left:8px;padding:1px 8px;border-radius:8px;background:rgba(120,40,60,.14);font-size:12px;white-space:nowrap}   /* 341번 */
 .st-narrow{margin:6px 0 10px;padding:8px 12px;border-radius:8px;background:rgba(160,110,40,.16);font-size:13px;line-height:1.5}   /* 341번 */
 
@@ -1509,7 +1513,7 @@ html body #panel .wfrow > button + button{margin-left:-10px}   /* ⑤ 줄 간격
 .panel::-webkit-scrollbar-button{display:none;height:0;width:0}
 .panel::-webkit-scrollbar-thumb{background:rgba(240,230,205,.28);border-radius:99px}
 .panel::-webkit-scrollbar-thumb:hover{background:rgba(240,230,205,.45)}
-.panel label{display:block;margin:10px 0 4px}   /* 159 → 161번. **이름표와 그 아래 손잡이 사이**가 0 이었다. 위 10px · 아래 4px */
+.panel label{display:block;margin:8px 0 4px}   /* 398번. 줄 사이 10 → 8 — 소제목 뒤 · 칸 묶음 안 줄 사이(8)와 같게 */   /* 159 → 161번. **이름표와 그 아래 손잡이 사이**가 0 이었다. 위 10px · 아래 4px */
 .panel label b{color:rgba(240,230,205,.8);font-weight:600;margin-left:.45em;
   font-variant-numeric:tabular-nums}
 .panel .phead{display:flex;align-items:center;justify-content:space-between;
@@ -3213,13 +3217,14 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <div class="pgrp" id="h-qr"><span id="h-qrt">QR</span> <small class="pgonly">이 장만</small></div>
     <span class="subrow nosw"><label id="l-qrkind">종류</label>
       <span class="grp st-pseg" id="f-qrkind" role="group" aria-labelledby="l-qrkind"><button type="button" data-k="none">없음</button><button type="button" data-k="url">주소</button><button type="button" data-k="wifi">와이파이</button></span></span>
+    <!-- 398번. 두 종류에 같이 쓰는 QR 이름 · QR 바탕색을 종류 바로 아래로 — 종류를 바꿔도 자리가 그대로(전에는 주소 · 와이파이 칸 아래라 종류마다 위치가 달랐다). 「QR 아래 글자」 → 「QR 이름」, 「바탕」 → 「QR 바탕색」(사용자) -->
+    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 이름</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적혀 무엇이 열리는지 알려 줍니다(비워도 됩니다)"></span>
+    <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">QR 바탕색</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
     <span id="qr-url" hidden><span class="subrow nosw"><label for="f-qrurl">주소</label><input type="text" id="f-qrurl" maxlength="300" autocomplete="off" spellcheck="false" placeholder="예: naver.me/abcd" title="네이버 지도 · 인스타 · 카카오톡 채널 · 가민 코스의 공유 주소. https:// 는 안 적어도 됩니다. 전화는 tel:01012345678"></span></span>
     <span id="qr-wifi" hidden>
       <span class="subrow nosw"><label for="f-qrssid">와이파이 이름</label><input type="text" id="f-qrssid" maxlength="32" autocomplete="off" spellcheck="false"></span>
       <span class="subrow nosw"><label for="f-qrenc">보안</label><select id="f-qrenc"><option value="WPA">비밀번호 있음</option><option value="nopass">비밀번호 없음</option></select></span>
       <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
-    <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">바탕</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
-    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 아래 글자</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적힙니다(비워도 됩니다)"></span>
     <small class="qrnote" id="qr-note"></small></span>
     <button type="button" id="b-artsame" class="tbtn" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>   <!-- 389번. 글자 단추 한 벌(.tbtn) — 같은 모양인데 이름표가 없어 검사가 높이 규칙에 걸었다 -->
   </span>
