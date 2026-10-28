@@ -3011,10 +3011,10 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     </select>
     <!-- 색 상자만 있으면 뭐가 뭔지 알 수 없다. 이름을 붙여 둔다 -->
     <span class="grp" id="pickers">
-      <span class="pk"><input type="color" id="c-paper" title="종이색"><b>종이</b></span>
-      <span class="pk"><input type="color" id="c-ink" title="글자색"><b>글자</b></span>
+      <span class="pk"><input type="color" id="c-paper" title="종이 색"><b>종이</b></span>
+      <span class="pk"><input type="color" id="c-ink" title="글자 색"><b>글자</b></span>
       <span class="pk"><input type="color" id="c-band" title="띠 색"><b>띠</b></span>
-      <span class="pk"><input type="color" id="c-accent" title="포인트색"><b>포인트</b></span>
+      <span class="pk"><input type="color" id="c-accent" title="포인트 색"><b>포인트</b></span>
     </span>
   </span>
 
@@ -3035,7 +3035,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <label class="chk"><input type="checkbox" class="m3sw" id="f-sub"> 한 줄 소개</label>
     <label class="chk" id="f-hours-l"><input type="checkbox" class="m3sw" id="f-hours"> 영업시간</label>   <!-- 367번. 영업시간도 같은 켜고 끄기 — 1쪽에만 있다 -->
   </span>
-  <div class="pgrp">띠 · 글자색 · 크기 <small class="pgonly">이 장만</small></div>
+  <div class="pgrp">띠 · 글자 색 · 크기 <small class="pgonly">이 장만</small></div>
   <label for="f-noren">상단 모양</label>   <!-- 374번. 모양과 채우기를 따로 — 「띠」는 색을 채운 바탕뿐 아니라 선만 있는 것도 있다 -->
   <div class="pl-presets noren-tiles" id="g-noren" role="group" aria-label="상단 모양"></div>   <!-- 375번. 이름만으로는 어떤 모양인지 알 수 없다(사용자) — 그림으로 고른다. 아래 select 는 같은 값을 쥔다(검사 · 접근성) -->
   <select id="f-noren" hidden>
@@ -3056,16 +3056,16 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   </select>
   <label class="chk" id="f-nfill-l"><input type="checkbox" class="m3sw" id="f-nfill"> 색으로 채우기</label>
   <div class="pcrow" id="r-nband"><label for="c-nband">맨 위 띠 색</label><input type="color" id="c-nband" title="맨 위 띠 색"><button type="button" class="tbtn" id="b-nband-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
-  <label for="f-logo">맨 위 글자색</label>   <!-- 366번. 띠 색과 따로 — 「맨 위 색」이면 띠인지 글자인지 알 수 없었다(사용자). 글자 · 로고 어느 쪽이든 맨 위에 쓰는 색 -->
+  <label for="f-logo">맨 위 글자 색</label>   <!-- 366번. 띠 색과 따로 — 「맨 위 색」이면 띠인지 글자인지 알 수 없었다(사용자). 글자 · 로고 어느 쪽이든 맨 위에 쓰는 색 -->
   <span class="grp">
     <select id="f-logo">
       <option value="paper">자동 (띠에 맞춤)</option>
       <option value="white">흰색</option>
       <option value="ink">먹색</option>
-      <option value="accent">포인트색</option>
+      <option value="accent">포인트 색</option>
       <option value="custom">직접 고르기</option>
     </select>
-    <span class="pk"><input type="color" id="c-logo" title="맨 위 글자색"><b>글자</b></span>
+    <span class="pk"><input type="color" id="c-logo" title="맨 위 글자 색"><b>글자</b></span>
   </span>
   <span class="slhead"><label>맨 위 크기 <b id="nsz-val"></b></label><button id="b-nreset" class="tbtn" type="button">기본으로</button></span>
   <span class="slbody"><input type="range" id="nsz-range" min="30" max="160" step="1" title="맨 위 크기"><span class="stepg"><button id="b-nminus" class="stp" type="button" title="맨 위를 작게" aria-label="맨 위를 작게">−</button><button id="b-nplus" class="stp" type="button" title="맨 위를 크게" aria-label="맨 위를 크게">+</button></span></span>
@@ -3111,14 +3111,14 @@ dialog#start.wide .row2.foot2{margin-top:auto}
   </select></span>
   </span>
   <div class="pcrow" id="r-sband"><label for="c-sband">분류 제목 띠 색</label><input type="color" id="c-sband" title="분류 제목 띠 · 알약 색"><button type="button" class="tbtn" id="b-sband-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
-  <div class="pcrow" id="r-stx"><label for="c-stx">분류 제목 글자색</label><input type="color" id="c-stx" title="분류 제목 글자색"><button type="button" class="tbtn" id="b-stx-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
+  <div class="pcrow" id="r-stx"><label for="c-stx">분류 제목 글자 색</label><input type="color" id="c-stx" title="분류 제목 글자 색"><button type="button" class="tbtn" id="b-stx-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
   <div class="pgrp">분류 줄 <small class="pgonly">이 장만</small></div>
   <span class="chkrow">
     <label class="chk"><input type="checkbox" class="m3sw" id="f-align"> 단끼리 분류 제목 높이 맞추기</label>
   </span>
   <div class="pnote">같은 순서의 분류 제목이 단마다 같은 높이에 섭니다. 짧은 단은 아래가 빌 수 있고, 그만큼 글자가 작아질 수 있습니다</div>
   <div class="pgrp">메뉴 이름</div>
-  <div class="pcrow" id="r-ntx"><label for="c-ntx">메뉴 이름 글자색</label><input type="color" id="c-ntx" title="메뉴 이름 글자색"><button type="button" class="tbtn" id="b-ntx-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
+  <div class="pcrow" id="r-ntx"><label for="c-ntx">메뉴 이름 글자 색</label><input type="color" id="c-ntx" title="메뉴 이름 글자 색"><button type="button" class="tbtn" id="b-ntx-r" title="처음 모양의 색으로 돌립니다">기본으로</button></div>
   <div class="pgrp">추천 표시</div>
   <span class="fldone"><select id="f-mark" aria-label="추천 표시">
         <option value="★">★ 별</option>
@@ -3217,14 +3217,14 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <div class="pgrp" id="h-qr"><span id="h-qrt">QR</span> <small class="pgonly">이 장만</small></div>
     <span class="subrow nosw"><label id="l-qrkind">종류</label>
       <span class="grp st-pseg" id="f-qrkind" role="group" aria-labelledby="l-qrkind"><button type="button" data-k="none">없음</button><button type="button" data-k="url">주소</button><button type="button" data-k="wifi">와이파이</button></span></span>
-    <!-- 398번. 두 종류에 같이 쓰는 QR 이름 · QR 바탕색을 종류 바로 아래로 — 종류를 바꿔도 자리가 그대로(전에는 주소 · 와이파이 칸 아래라 종류마다 위치가 달랐다). 「QR 아래 글자」 → 「QR 이름」, 「바탕」 → 「QR 바탕색」(사용자) -->
-    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 이름</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적혀 무엇이 열리는지 알려 줍니다(비워도 됩니다)"></span>
-    <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">QR 바탕색</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
     <span id="qr-url" hidden><span class="subrow nosw"><label for="f-qrurl">주소</label><input type="text" id="f-qrurl" maxlength="300" autocomplete="off" spellcheck="false" placeholder="예: naver.me/abcd" title="네이버 지도 · 인스타 · 카카오톡 채널 · 가민 코스의 공유 주소. https:// 는 안 적어도 됩니다. 전화는 tel:01012345678"></span></span>
     <span id="qr-wifi" hidden>
       <span class="subrow nosw"><label for="f-qrssid">와이파이 이름</label><input type="text" id="f-qrssid" maxlength="32" autocomplete="off" spellcheck="false"></span>
       <span class="subrow nosw"><label for="f-qrenc">보안</label><select id="f-qrenc"><option value="WPA">비밀번호 있음</option><option value="nopass">비밀번호 없음</option></select></span>
       <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
+    <!-- 399번. 종류 → 그 종류의 칸(주소 · 와이파이) → 두 종류가 같이 쓰는 QR 이름 · QR 바탕 색. 398번은 같이 쓰는 칸을 종류 바로 밑에 두어, 종류를 누르면 두 줄 아래에서 내용이 바뀌었다(사용자) — 고르는 단추와 바뀌는 칸을 붙인다 -->
+    <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 이름</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 아래에 작게 적혀 무엇이 열리는지 알려 줍니다(비워도 됩니다)"></span>
+    <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">QR 바탕 색</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕 색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕 색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
     <small class="qrnote" id="qr-note"></small></span>
     <button type="button" id="b-artsame" class="tbtn" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>   <!-- 389번. 글자 단추 한 벌(.tbtn) — 같은 모양인데 이름표가 없어 검사가 높이 규칙에 걸었다 -->
   </span>
@@ -3294,16 +3294,16 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       <!-- 241번. 흰 테두리를 이제 **파일이 그린다**(화면 = 인쇄). 전에는 "3~5mm · 용지 끝까지"라 적었는데
            폭이 프린터마다 달랐고 화면에는 없었다. 셋째 줄의 "글자는 1cm 넘게"는 로고(위 끝 4mm)에 틀린 말이었다 -->
       <li><i class="ph-sw ph-sw-edge"></i><b>흰 테두리 4mm</b> — 프린터가 못 찍는 자리라 <b>일부러 비워 둔</b> 것입니다. 화면에 보이는 그대로입니다</li>
-      <li><i class="ph-sw ph-sw-paper"></i><b>종이색 · 맨 위 띠</b> — 흰 테두리 안쪽을 채웁니다</li>
+      <li><i class="ph-sw ph-sw-paper"></i><b>종이 색 · 맨 위 띠</b> — 흰 테두리 안쪽을 채웁니다</li>
       <li><i class="ph-sw ph-sw-line"></i><b>글자 · 로고</b> — 흰 테두리보다 더 안쪽이라 잘리지 않습니다</li>
     </ul>
   </div>
   <!-- 229번. 잘 된 것 · 잘못된 것을 ✓ ✕ 로 갈랐다.
        234번. 잘못된 모습이 하나뿐이었고 고칠 곳을 안 적었다 — 가장 흔한 실수(배경 그래픽 꺼짐)를 더하고,
        넓은 테두리의 원인에 **배율 자동 축소**도 넣었다(196번). 번호는 위 목록의 번호다 -->
-  <p class="sub ok"><b>잘 나온 모습</b> — 화면과 같습니다. 흰 테두리 4mm, 안쪽은 종이색이 가득</p>   <!-- 241번 -->
+  <p class="sub ok"><b>잘 나온 모습</b> — 화면과 같습니다. 흰 테두리 4mm, 안쪽은 종이 색이 가득</p>   <!-- 241번 -->
   <p class="sub no"><b>흰 테두리가 1cm 넘게 넓으면</b> — 1번 배율 · 2번 여백 확인</p>
-  <p class="sub no"><b>종이색 · 띠가 아예 안 나오면</b> — 3번 배경 그래픽 켜기</p>
+  <p class="sub no"><b>종이 색 · 띠가 아예 안 나오면</b> — 3번 배경 그래픽 켜기</p>
   <p class="sub note2 ph-zoom">화면 확대는 인쇄에 영향이 없습니다. 인쇄물은 <b>100% 화면</b>과 같으니
   화면으로 줄바꿈을 볼 때는 <b>Ctrl+0</b>으로 두세요.</p>
   <!-- 233번. "PDF로 저장" 이 **어디에 있는지**를 안 적어 두었다. 인쇄 창의 「대상(프린터)」
@@ -7308,8 +7308,8 @@ const BOTTLE_SHAPES = [["bordeaux","보르도"],["burgundy","부르고뉴"],["ch
 const BOTTLE_COLORS = [["ink","먹색"],["dgreen","짙은 초록"],["green","초록"],["olive","올리브"],["amber","갈색"],["straw","화이트 (짚색)"],["rose","로제 (분홍)"],["orange","오렌지 (호박빛)"]];
 const BOTTLE_FOILS  = [["accent","포인트"],["gold","금빛"],["ink","먹색"],["pale","옅은"],["white","흰"],["green","초록"]];
 /* 157번. 라벨(상표)도 색과 글자 색을 고른다 — 실제 와인은 검은 라벨 · 금박 글자처럼 병마다 다르다 */
-const LABEL_COLORS  = [["paper","종이색"],["cream","크림"],["white","흰"],["ink","먹색"],["gold","금빛"],["accent","포인트"]];
-const LABEL_INKS    = [["ink","먹색"],["accent","포인트"],["gold","금빛"],["paper","종이색"],["white","흰"]];
+const LABEL_COLORS  = [["paper","종이 색"],["cream","크림"],["white","흰"],["ink","먹색"],["gold","금빛"],["accent","포인트"]];
+const LABEL_INKS    = [["ink","먹색"],["accent","포인트"],["gold","금빛"],["paper","종이 색"],["white","흰"]];
 /* 값 하나가 CSS 한 줄이 된다. **목록과 CSS 가 여기 한 곳에 같이 있어야** 153번처럼 목록만 늘고
    규칙이 없어 검게 나오는 일이 없다. 전부 테마 변수의 섞음이라 색을 바꾸면 따라간다 */
 const COLOR_CSS = {
@@ -9314,7 +9314,7 @@ function syncQrNote(){
     else if (t && !r) m = "글이 너무 길어 QR 을 만들 수 없습니다.";
     else { topBands(); const c = qrOverlap(panelPage), lo = qrContrast(x);
       if (c) m = "이 장의 QR 이 메뉴 글자 " + c + "곳을 가립니다 — 빈 칸으로 옮겨 주세요.";
-      else if (lo !== null && lo < QR_LOW) m = (x.bg === "none" ? "이 자리 뒤의 색이 어두워 " : "바탕색이 어두워 ") + "폰이 QR 을 못 읽을 수 있습니다 — 인쇄해서 읽어 보고, 안 읽히면 바탕을 밝은 색이나 흰색으로 해 주세요.";   // 348번. 안내만 한다(막지 않는다)
+      else if (lo !== null && lo < QR_LOW) m = (x.bg === "none" ? "이 자리 뒤의 색이 어두워 " : "바탕 색이 어두워 ") + "폰이 QR 을 못 읽을 수 있습니다 — 인쇄해서 읽어 보고, 안 읽히면 바탕을 밝은 색이나 흰색으로 해 주세요.";   // 348번. 안내만 한다(막지 않는다)
       else if (r && r.n > 69) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다).";
       else if (t) m = (qrSlot >= 4 ? "바닥 QR 은 바닥 글 옆 맨 아래에 들어가 종이 아래를 차지합니다" : "맨 위 QR 은 맨 위 영역의 좌우 끝에 들어갑니다 — 영역이 낮으면 QR 높이만큼 커지고 가운데 글자는 옆으로 비킵니다") + " — 메뉴가 넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜거나 글자 크기를 줄여 주세요.";
       else m = x.kind === "wifi" ? "비밀번호가 QR 에 그대로 담깁니다 — 메뉴판을 보는 누구나 접속할 수 있습니다." : "인쇄한 뒤 폰 카메라로 읽어 보세요."; } }
