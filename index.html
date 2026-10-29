@@ -79,7 +79,7 @@ body{transition:padding-right .18s ease}
   /* 242번. **6 → 4mm 로 통일, `--nogo-in` 은 걷었다.** "6mm 는 과하다. 프린터가 찍을 수 있는데 우리가 흰색을 줘버리는 셈 ·
      4mm 넘어서 흰색이 나오는 건 프린터의 일". 이제 **색 끝(4mm)이 디자인의 가장자리**다 — 상단 · 액자 · 쪽 번호는
      원래 종이 끝에서 재던 거리를 **색 끝에서** 잰다(위 끝 여백이 원래 디자인과 같은 비율로 돌아온다) */
-  --nogo:4mm;
+  --nogo:4mm;   /* 401번. 이제 흰색이 아니라 **글자 · 로고 · 쪽 번호의 안전 거리**다 — 편집 화면에서만 빗금으로 보인다 */
   /* 256번. **위 여백선.** "상단은 삼각형이 있는 곳을 시작으로 재야지 · 뽑았을 때 맨 위에 딱 붙으면 이상하다 · 상단도 점선으로".
      로고(삼각형)의 윗변을 종이 끝에서 이 값에 둔다. 아래 여백(11mm)과 같게 — 위아래가 같고 좌우(14mm)가 조금 넓다.
      띠(남색 등)는 여전히 흰 테두리 끝까지 채운다 — 여백은 글자 · 로고의 자리이지 색 덩어리의 자리가 아니다 */
@@ -1566,17 +1566,28 @@ html body #panel .wfrow > button + button{margin-left:-10px}   /* ⑤ 줄 간격
      z 3 으로 두었더니 왼쪽 여백의 편집 이름표("영업시간" · "바닥 글")가 잘렸다. 종이 배경 · 그림(z 0)은 덮는다. 누르기를 막지 않는다
    · **편집 중에만** 안쪽 끝에 회색 점선과 이름표. 여백선(갈색)과 색으로 가른다 */
 .nogo{position:absolute;inset:0;z-index:1;pointer-events:none;
-  border:var(--nogo) solid #fff}
+  border:var(--nogo) solid transparent}   /* 401번. 흰색 → 투명. 폭(`--nogo`)은 그대로 — 글자 · 로고 · 쪽 번호가 색 끝(4mm)에서 재는 기준이라 위치는 안 움직인다 */
+/* 401번. **인쇄 · 완성본 · 미리보기는 흰 테두리를 안 그린다 — 색이 종이 끝까지 간다.** "여백 없이 뽑을 수 있는 경우를 날려버리는 느낌"(사용자).
+   실제로 뽑아 보니 여백 없음을 켜도 흰 테두리가 남았다 — 241번이 파일에서 그린 4mm 였다. 241번이 풀던 것(로고가 못 찍는 자리에 있던 것)은
+   테두리가 아니라 **글자 · 로고가 4mm 안쪽에 서는 것**이 풀고 있다(242번). 그래서 흰색만 걷는다.
+   · 여백 없는 인쇄가 되는 프린터는 색이 끝까지 나온다
+   · 안 되는 프린터는 못 찍는 폭이 흰 테두리로 남는다(폭은 기계마다 다르다 — 241번이 막으려던 것이 이것이다. 글자는 안 잘린다)
+   · **편집 중에만** 그 4mm 를 빗금으로 보인다("프린터에 따라 인쇄되지 않을 수 있는 곳"). 색이 비쳐 보여야 하므로 흰 바탕 없이 줄만 긋고,
+     어두운 띠 위에서도 보이게 줄을 밝은 것 · 어두운 것 둘로 긋는다. 띠 모양(테두리 4mm)만 남기려 clip-path(evenodd) 로 안쪽을 오려 낸다 */
+.editing:not(.preview) .nogo{
+  background:repeating-linear-gradient(135deg, rgba(255,255,255,.75) 0 1px, rgba(70,50,20,.6) 1px 2px, transparent 2px 6px);
+  clip-path:polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    var(--nogo) var(--nogo), var(--nogo) calc(100% - var(--nogo)), calc(100% - var(--nogo)) calc(100% - var(--nogo)), calc(100% - var(--nogo)) var(--nogo), var(--nogo) var(--nogo))}
 /* 242번. **편집 중에는 색을 끝까지 보이고 테두리만 반투명 흰색.** "아예 흰색으로 하니까 오류 같아 보인다 · 점선이랑 같이 있으니 더".
    편집은 작업대라 띠 · 그림이 가장자리에서 어떻게 끝나는지 보여야 하고, 완성본 · 미리보기 · 인쇄는 결과물이라 흰색 그대로.
    반투명 경계가 곧 선이므로 회색 점선은 걷었다(색 끝과 겹쳐 선이 두 겹으로 보였다). 글자 위치는 두 모드가 같다 — 얹는 표시만 다르다 */
-.editing:not(.preview) .nogo{border-color:rgba(255,255,255,.35)}   /* 243번. .55 → .35 "조금만 더 투명하게" */
+/* 243번의 반투명 흰색(.35)은 401번에서 빗금으로 바뀌었다 */
 .nogo::after{content:none}
 /* 243번. 이름표를 **위아래 두 군데**에 — "여백 안내를 위아래 2군데에 다". 위는 남색 띠 위라 글자만 두면 안 읽혀
    둘 다 옅은 흰 알약 바탕을 깐다(배경색이 무엇이든 같은 모습) */
 .nogo::before{content:none}
 .editing:not(.preview) .nogo::before,
-.editing:not(.preview) .nogo::after{content:"종이 가장자리 4mm — 인쇄되지 않는 흰 테두리입니다";   /* 242 · 243 · 252번 */
+.editing:not(.preview) .nogo::after{content:"종이 가장자리 4mm — 프린터에 따라 인쇄되지 않을 수 있는 곳입니다";   /* 242 · 243 · 252 · 401번 */
   position:absolute;left:50%;transform:translateX(-50%);height:calc(var(--nogo) - 2px);display:flex;align-items:center;
   padding:0 7px;border-radius:3px;background:rgba(255,255,255,.82);
   font:9px/1 system-ui,sans-serif;color:#555;white-space:nowrap}
@@ -1811,7 +1822,7 @@ dialog .ph-legend{list-style:none;margin:0;padding:0;font-size:12px;line-height:
 dialog .ph-legend li{position:relative;padding-left:20px;margin:0 0 6px}
 dialog .ph-legend li:last-child{margin-bottom:0}
 dialog .ph-sw{position:absolute;left:0;top:.2em;width:13px;height:13px;border-radius:2px;box-sizing:border-box}
-dialog .ph-sw-edge{background:#fff;border:1px solid #c9bda6}
+dialog .ph-sw-edge{background:repeating-linear-gradient(135deg,#9a7f58 0 1px,#fff 1px 4px);border:1px solid #c9bda6}   /* 401번. 빗금 — 편집 화면의 가장자리 4mm 와 같은 모양 */
 dialog .ph-sw-paper{background:linear-gradient(#26374f 0 35%, #efe3c9 35%);border:1px solid #c9bda6}
 dialog .ph-sw-line{border:1px dashed #9a7f58;border-top:0;border-radius:0 0 2px 2px}
 dialog p.sub.ok + p.sub.no, dialog p.sub.no + p.sub.no{margin-top:6px}
@@ -1921,7 +1932,7 @@ body.editing .editbar{display:flex}
   .editing h2 .hv:empty::before,.editing .hours b:empty::before,
   .editing .hours span:empty::before{content:"" !important}
   .guide{display:none !important}          /* 194번. 여백선은 화면에만 */
-  .nogo{border-color:#fff !important}      /* 241번 · 242번. 흰 테두리는 인쇄에도 흰색 그대로(편집 중 인쇄여도), 이름표만 걷는다 */
+  .nogo{background:none !important;clip-path:none !important}      /* 401번. 흰 테두리는 없다(241 · 242번을 바꿈) — 편집 중 인쇄여도 빗금은 안 찍힌다 */
   .nogo::before,.nogo::after,.guide::after,.zone::after{content:none !important}   /* 243번 · 위 이름표 · 바닥 구역 선도 */
   .sheet.over{outline:none !important}
   .sheet.over::before{display:none !important}   /* 190번. 넘침 표시는 화면에만 */
@@ -3276,9 +3287,10 @@ dialog#start.wide .row2.foot2{margin-top:auto}
        "1cm 넘게"로 적는다(아래 11 · 가로 13 · 세로 14mm 모두 참) -->
   <div class="pgdiag result ph-diag">
     <svg class="ph-paper" viewBox="0 0 84 118" width="84" height="118" aria-hidden="true">
-      <rect x=".5" y=".5" width="83" height="117" rx="1.5" fill="#fff" stroke="#c9bda6"></rect>
-      <rect x="1.6" y="1.6" width="80.8" height="114.8" fill="#efe3c9"></rect>   <!-- 241번 · 242번. 테두리를 실제 비율(4mm)로 -->
-      <rect x="1.6" y="1.6" width="80.8" height="23.6" fill="#26374f"></rect>
+      <defs><pattern id="ph-hatch" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="3" fill="#fff" fill-opacity=".7"></rect><rect width="1" height="3" fill="#9a7f58"></rect></pattern></defs>
+      <rect x=".5" y=".5" width="83" height="117" rx="1.5" fill="#efe3c9" stroke="#c9bda6"></rect>   <!-- 401번. 색이 끝까지 간다(241번의 흰 테두리를 걷음). 빗금 = 프린터에 따라 흰 테두리로 남을 수 있는 4mm(실제 비율) -->
+      <rect x=".5" y=".5" width="83" height="24.7" fill="#26374f"></rect>
+      <path d="M.5 .5H83.5V117.5H.5Z M2.1 2.1V115.9H81.9V2.1Z" fill="url(#ph-hatch)" fill-rule="evenodd"></path>
       <rect x="31" y="12" width="22" height="6" rx="1.5" fill="#efe3c9" opacity=".85"></rect>
       <g fill="#c8b894"><rect x="17" y="34" width="20" height="2.2"></rect><rect x="47" y="34" width="20" height="2.2"></rect>
         <rect x="17" y="41" width="16" height="1.6"></rect><rect x="47" y="41" width="17" height="1.6"></rect>
@@ -3293,15 +3305,15 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <ul class="ph-legend">
       <!-- 241번. 흰 테두리를 이제 **파일이 그린다**(화면 = 인쇄). 전에는 "3~5mm · 용지 끝까지"라 적었는데
            폭이 프린터마다 달랐고 화면에는 없었다. 셋째 줄의 "글자는 1cm 넘게"는 로고(위 끝 4mm)에 틀린 말이었다 -->
-      <li><i class="ph-sw ph-sw-edge"></i><b>흰 테두리 4mm</b> — 프린터가 못 찍는 자리라 <b>일부러 비워 둔</b> 것입니다. 화면에 보이는 그대로입니다</li>
-      <li><i class="ph-sw ph-sw-paper"></i><b>종이 색 · 맨 위 띠</b> — 흰 테두리 안쪽을 채웁니다</li>
-      <li><i class="ph-sw ph-sw-line"></i><b>글자 · 로고</b> — 흰 테두리보다 더 안쪽이라 잘리지 않습니다</li>
+      <li><i class="ph-sw ph-sw-edge"></i><b>빗금 · 가장자리 4mm</b> — <b>여백 없는 인쇄가 되는 프린터</b>는 색이 끝까지 나오고, <b>안 되는 프린터</b>는 이 자리가 흰 테두리로 남습니다(폭은 프린터마다 다릅니다)</li>
+      <li><i class="ph-sw ph-sw-paper"></i><b>종이 색 · 맨 위 띠</b> — 가장자리 끝까지 채웁니다</li>
+      <li><i class="ph-sw ph-sw-line"></i><b>글자 · 로고</b> — 빗금보다 더 안쪽이라 잘리지 않습니다</li>
     </ul>
   </div>
   <!-- 229번. 잘 된 것 · 잘못된 것을 ✓ ✕ 로 갈랐다.
        234번. 잘못된 모습이 하나뿐이었고 고칠 곳을 안 적었다 — 가장 흔한 실수(배경 그래픽 꺼짐)를 더하고,
        넓은 테두리의 원인에 **배율 자동 축소**도 넣었다(196번). 번호는 위 목록의 번호다 -->
-  <p class="sub ok"><b>잘 나온 모습</b> — 화면과 같습니다. 흰 테두리 4mm, 안쪽은 종이 색이 가득</p>   <!-- 241번 -->
+  <p class="sub ok"><b>잘 나온 모습</b> — 종이 색이 가장자리 끝까지 가득. 프린터에 따라 가장자리에 흰 테두리가 남을 수 있습니다</p>   <!-- 241번 · 401번 -->
   <p class="sub no"><b>흰 테두리가 1cm 넘게 넓으면</b> — 1번 배율 · 2번 여백 확인</p>
   <p class="sub no"><b>종이 색 · 띠가 아예 안 나오면</b> — 3번 배경 그래픽 켜기</p>
   <p class="sub note2 ph-zoom">화면 확대는 인쇄에 영향이 없습니다. 인쇄물은 <b>100% 화면</b>과 같으니
@@ -3490,7 +3502,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <li>백업 · 다른 컴퓨터로 옮기기는 <b>[파일 ▾] → [파일로 저장]</b>, 옮긴 곳에서는 <b>[파일에서 불러오기]</b>. 컴퓨터 파일로 열었을 때는 자동 저장이 안 됩니다(고친 곳이 있으면 [파일 ▾]에 불이 들어옵니다).</li></ul>
   <h4>인쇄</h4>
   <ul><li>인쇄 창의 「설정 더보기」에서 용지 A4 · <b>배율 기본값(100%)</b> · 여백 없음 · <b>배경 그래픽 켜기</b>.</li>
-    <li>가장자리 흰 테두리(4mm)는 프린터가 못 찍는 자리라 일부러 비워 둔 것입니다.</li></ul>
+    <li>편집 화면의 <b>가장자리 빗금(4mm)</b>은 프린터에 따라 인쇄되지 않을 수 있는 자리입니다. 여백 없는 인쇄가 되는 프린터는 색이 끝까지 나옵니다.</li></ul>
   <!-- 234번. [다시 보지 않기]로 끈 인쇄 안내를 되살릴 곳이 없었다. 늘 보이는 체크로 둔다(24번) -->
   <div class="row2 end foot2">
     <label class="chk"><input type="checkbox" class="m3sw" id="help-ph"> 인쇄할 때 안내 창 먼저 띄우기</label>
@@ -7539,7 +7551,7 @@ function drawSheet(spec){
   { let mw = 0, mh = 0; [0, 1].forEach(c => { const q = (PS.qrs || []).find(x => x.cell === c); if (!q) return; const n = qrNode(q, "qr qh qx" + c); if (!n) return; noren.appendChild(n); const w = parseFloat(n.style.width); mw = Math.max(mw, w); mh = Math.max(mh, w + (q.label ? 6 : 0)); });
     if (mw){ noren.classList.add("hasqr"); noren.style.setProperty("--qrw", mw + "mm"); noren.style.setProperty("--qrh", mh + "mm"); } }
   sheet.appendChild(noren);
-  // 241번. 흰 테두리 4mm(242번) — 화면 · 인쇄 모두(편집 중에는 반투명 · 이름표). **상단 바로 뒤에** 둔다 — z 가 같은 1 이므로
+  // 241번. 흰 테두리 4mm(242번) — 401번부터 흰색이 아니라 투명, 편집 중에만 빗금 · 이름표. **상단 바로 뒤에** 둔다 — z 가 같은 1 이므로
   // 문서 차례로 칠해져 상단 띠는 덮고, 뒤에 오는 영업시간 · 본문 · 바닥(편집 이름표가 왼쪽 여백에 선다)은 덮지 않는다
   sheet.appendChild(el("div","nogo"));
 

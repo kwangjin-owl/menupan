@@ -1046,7 +1046,7 @@ def t44(b, f):
 # ───────────────────────── 45. 프린터가 못 찍는 테두리(241번)
 #   글자 · 로고 · 도장 · 쪽 번호 · 액자 윗선이 종이 네 변에서 --nogo(4mm, 242번) + 1mm 넘게 안쪽인지.
 #   글자는 **글자 상자**(Range)로, 로고 · 도장은 요소 상자로 잰다. 그림(.art)은 일부러 종이 끝까지 가므로 뺀다.
-#   그리고 흰 테두리(.nogo)가 4mm 이고 완성본 · 미리보기 · 인쇄(편집 중 인쇄도)는 흰색, 편집은 반투명 흰색인지
+#   그리고 가장자리 띠(.nogo)가 4mm 이고 완성본 · 미리보기 · 인쇄(편집 중 인쇄도)는 투명(색이 끝까지 간다, 401번), 편집은 빗금 + clip-path 인지
 EDGE = """()=>{const mm=v=>+(v/96*25.4).toFixed(1); const out=[];
   document.querySelectorAll('.sheet').forEach((s,si)=>{const R=s.getBoundingClientRect();
     const add=(k,tag)=>{ if(!k.width||!k.height) return; out.push([si,tag,mm(k.top-R.top),mm(R.bottom-k.bottom),mm(k.left-R.left),mm(R.right-k.right)]) };
@@ -1068,7 +1068,7 @@ def t45(b, f):
                 for side, x in zip(('top', 'bottom', 'left', 'right'), c.js(EDGE)):
                     k = o + ':' + side; v = x[2 + ('top', 'bottom', 'left', 'right').index(side)]
                     if k not in out['worst'] or v < out['worst'][k][0]: out['worst'][k] = [v, nr, ns, x[1]]
-        vis = "()=>[...document.querySelectorAll('.nogo')].map(e=>{const c=getComputedStyle(e); return [c.display, +(parseFloat(c.borderTopWidth)/96*25.4).toFixed(1), c.borderTopColor, c.outlineStyle]})"
+        vis = "()=>[...document.querySelectorAll('.nogo')].map(e=>{const c=getComputedStyle(e); return [c.display, +(parseFloat(c.borderTopWidth)/96*25.4).toFixed(1), c.borderTopColor, c.outlineStyle, c.backgroundImage.startsWith('repeating-linear-gradient'), c.clipPath !== 'none']})"
         out['show'][o] = {'idle': c.js(vis)}
         c.pg.click('#b-edit'); c.pg.wait_for_timeout(150); out['show'][o]['edit'] = c.js(vis)
         c.pg.emulate_media(media='print'); out['show'][o]['editPrint'] = c.js(vis); c.pg.emulate_media(media='screen')
@@ -2516,11 +2516,11 @@ def judge(t, r):
             return ok, f"복사 {r['copy']} · 모든 그림에 같게 {r.get('artsame')} · 병 색 상자 {sw} · 끄는 중 {r['drag']} · 끄는 중 다시 그리기 · 레드 병 카드 · 바뀜 · 다른 병도 바뀜 {r['live']} · 빈 와인 카드 가격 '{r['wineprice']}' · 상단 걸음 {r['nstep']} · 저장 뒤 병 추가 {r['saveadd']} · 309번 분류 줄 스위치 [켬 · 다른 장 그대로 · 여백, 끔 · 여백 없음, 한 단 흐림 · 모양] {r.get('align309')}"
         if t == 't45':
             w = r['worst']; bad = {k: v for k, v in w.items() if v[0] < 5.0}
-            sh = r['show']; W = 'rgb(255, 255, 255)'; H = 'rgba(255, 255, 255, 0.35)'   # 243번
-            okv = all(all(x[0] == 'block' and near(x[1], 4.0, 0.3) for x in m) for o in sh.values() for m in o.values()) \
-                and all(all(x[2] == H for x in o['edit']) and all(x[2] == W for x in o['idle'] + o['preview'] + o['editPrint']) for o in sh.values())
+            sh = r['show']; T = 'rgba(0, 0, 0, 0)'   # 401번. 흰색(243번까지)이 아니라 투명 — 테두리 폭만 남는다. 편집 화면에만 빗금 + clip-path
+            okv = all(all(x[0] == 'block' and near(x[1], 4.0, 0.3) and x[2] == T for x in m) for o in sh.values() for m in o.values()) \
+                and all(all(x[4] and x[5] for x in o['edit']) and all(not x[4] and not x[5] for x in o['idle'] + o['preview'] + o['editPrint']) for o in sh.values())
             mins = {k: v[0] for k, v in w.items()}
-            return not bad and okv and not (r['err_portrait'] or r['err_landscape']), f"가장자리 최소 {mins} {bad or ''} · 흰 테두리 4mm · 편집만 반투명 {okv}"
+            return not bad and okv and not (r['err_portrait'] or r['err_landscape']), f"가장자리 최소 {mins} {bad or ''} · 가장자리 띠 4mm · 투명 · 편집만 빗금 {okv}"
         if t == 't57':
             sv = r.get('server') or {}
             ok = (not r.get('fail') and r['start'] == ['', True] and r['zh'] == ['zh', False, False, True, True] and r['sent'][0] == 1 and r['sent'][2]
