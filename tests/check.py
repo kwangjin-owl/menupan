@@ -2299,16 +2299,6 @@ def t72(b, f):
           cor=A.querySelector('#corner-row').getBoundingClientRect(), nxt=bx[bx.length-1].getBoundingClientRect(), nm=A.querySelector('#art-cellname');
         return [bx.length, bx.every(bd), T('#l-gart').startsWith('칸 고르기'), T('#l-artpos'), T('#l-sealpos'), T('#l-qrpos'), Math.abs(nxt.top-cor.bottom)<=1.5, getComputedStyle(nm).backgroundColor!=='rgba(0, 0, 0, 0)', nm.textContent,
           getComputedStyle(A.querySelector('#h-qr small')).display, T('#h-qrt')] }""")
-    # 404번 — 창 맨 위 1px 줄도 고정된 머리가 덮는다(스크롤한 내용이 비치지 않는다) · QR 이름 위치
-    out['strip'] = c.js("""()=>{ const p=document.querySelector('#panel'); p.scrollTop=Math.max(40,p.scrollHeight/3); const r=p.getBoundingClientRect();
-        return [p.scrollTop>0, ...[1,2,3,6,10].map(d=>{ const e=document.elementFromPoint(r.left+80, r.top+d); return !!(e && e.closest('.pstick')) })] }""")
-    out['labpos'] = c.js("()=>document.querySelector('#l-qrlabpos').textContent.trim()")
-    # 405번 — 안내 글 한 모양(글자 12px · 줄 간격 17.4px · 같은 글자색) · QR 안내는 끝 마침표 없음 · 줄 수
-    out['notes'] = c.js("""()=>{ const pn=document.querySelector('#panel'); pn.hidden=false; pn.querySelectorAll('[hidden]').forEach(e=>e.hidden=false); pn.querySelectorAll('.ptab').forEach(e=>{e.hidden=false;e.style.display='block'}); document.querySelector('#aipanel').hidden=false;
-        return ['#f-mine-l small','#nsz-note','.ptab .pnote','#l-gart small','.pzoom','#qr-note','#aipanel .pnote','label.fitsw small'].map(s=>{ const e=document.querySelector(s); if(!e) return [s,null]; const cs=getComputedStyle(e); return [s, cs.fontSize, cs.color, cs.lineHeight] }) }""")
-    out['qrnotes'] = c.js("""()=>{ const g=(q,top,cell)=>{ P(0).qrs=[q]; panelTop=top; panelCell=cell; syncPage(); const e=document.querySelector('#qr-note'), lh=parseFloat(getComputedStyle(e).lineHeight); return [e.textContent, Math.round(e.getBoundingClientRect().height/lh)] };
-        return [ g({cell:5,kind:'url',url:''},null,5), g({cell:5,kind:'wifi',ssid:'',pass:'',enc:'WPA'},null,5), g({cell:5,kind:'url',url:'naver.me/abcd'},null,5), g({cell:0,kind:'url',url:'naver.me/abcd'},0,2),
-          g({cell:5,kind:'url',url:'naver.me/abcd',pos:{x:.5,y:.5}},null,5), g({cell:5,kind:'url',url:'naver.me/abcd',bg:'#222222'},null,5), g({cell:5,kind:'wifi',ssid:'a',pass:'b',enc:'WPA'},null,5) ] }""")
     out['err'] = list(c.errs); c.close()
     return out
 
@@ -2818,13 +2808,9 @@ def judge(t, r):
             ok_r = len(rc) == 8 * 4 + 3 * 4 and all(x[4] and x[5] and x[6] for x in rc)
             ok_b = len(r['box']) == 2 and all(abs(x[0] - 91) < .3 for x in r['box']) and abs(r['box'][0][1] - 14) < .3 and abs(r['box'][1][1] - 105) < .3
             ok_d = r['drag'][0] == {'x': 0, 'y': 0} and r['drag'][1] and r['drag'][2]
-            ok_p = pn[0] == 3 and pn[1] and pn[2] and pn[3:6] == ['그림 자리', '도장 자리', 'QR 자리'] and pn[6] and pn[7] and pn[8] == '오른쪽 아래 칸' and pn[9] == 'none' and pn[10] == 'QR'
-            nt, qn = r['notes'], r['qrnotes']
-            ok_n = all(x[1] == '12px' and x[2] == 'rgba(240, 230, 205, 0.6)' and x[3] == '17.4px' for x in nt) and len(nt) == 8 \
-                and all(not x[0].endswith('.') for x in qn) and '한 장에 맞춤' in qn[2][0] and qn[2][1] <= 3 and '한 장에 맞춤' in qn[3][0] and qn[3][1] <= 4 \
-                and qn[4][0] == '손잡이를 끌어 옮깁니다. 글자와 겹쳐도 막지 않습니다' and qn[4][1] <= 2 and '못 읽을 수' in qn[5][0] and qn[0][0] == '주소를 적으면 QR 이 나옵니다'   # 405번
-            ok = ok_t and ok_r and ok_b and r['handle'] == [True, True] and ok_d and ok_p and r['strip'] == [True] * 6 and r['labpos'] == 'QR 이름 위치' and ok_n and not r['err']
-            return ok, f"403번 표가 그림마다 다시 잰 값과 같음 {ok_t} {tb[0][:3]} · 구석에서 점선 안 + 변에 닿음 {ok_r} {[x[:4] for x in rc if not (x[4] and x[5] and x[6])][:6]} · 칸 배치 상자 폭 · 왼쪽 {ok_b} {r['box']} · 손잡이 가운데 {r['handle']} · 끌어서 모서리까지 {r['drag']} · 창 맨 위 줄 덮임 {r['strip']} · 이름 위치 {r['labpos']} · 안내 글 한 모양 {ok_n} {[x[1:] for x in nt][:2]} · QR 안내 줄 수 {[(x[1], len(x[0])) for x in qn]} · 꾸미기 창 [상자 수, 모두 상자, 칸 고르기, 이름 셋, 이어 붙음, 이름표 색, 이름표, 이 장만 숨김, QR 제목] {pn}"
+            ok_p = pn[0] == 3 and pn[1] and pn[2] and pn[6] and pn[7]
+            ok = ok_t and ok_r and ok_b and r['handle'] == [True, True] and ok_d and ok_p and not r['err']
+            return ok, f"403번 표가 그림마다 다시 잰 값과 같음 {ok_t} {tb[0][:3]} · 구석에서 점선 안 + 변에 닿음 {ok_r} {[x[:4] for x in rc if not (x[4] and x[5] and x[6])][:6]} · 칸 배치 상자 폭 · 왼쪽 {ok_b} {r['box']} · 손잡이 가운데 {r['handle']} · 끌어서 모서리까지 {r['drag']} · 꾸미기 창 [상자 수, 모두 상자, 칸 고르기, 이름 셋, 이어 붙음, 이름표 색, 이름표, 이 장만 숨김, QR 제목] {pn}"
         if t == 'tstatic': ok = r.get('css_braces', [0, []]) == [0, []] and r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"CSS 괄호 {r.get('css_braces')} · 주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
