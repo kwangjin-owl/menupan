@@ -1395,7 +1395,7 @@ html body .st-seg > button:not(.dlg-x):not(.st-icon):not(.st-rot button), html b
 /* 334번. 탭 이름은 한 줄(333번에 죽은 규칙을 걷다 nowrap 까지 걷어 「메/뉴」로 접혔다 — 사용자) */
 .panel #ptabs .ptab-btn{white-space:nowrap}
 /* 334번. 머리 · 탭 · 고칠 장을 위에 고정. 창 안쪽 여백(12 · 14px)만큼 끌어올려 덮는다 */
-.panel .pstick{position:sticky;top:-12px;z-index:3;margin:-12px -14px 0;padding:12px 14px 0;background:rgb(22,17,10)}
+.panel .pstick{position:sticky;top:-13px;z-index:3;margin:-13px -14px 0;padding:13px 14px 0;background:rgb(22,17,10)}   /* 404번. 12 → 13 — 창 위 안쪽 여백(13px)보다 1px 덜 덮어, 그 줄로 스크롤하는 내용(흰 상자 · 이름표)이 비쳤다. 머리 글자 자리는 그대로(위로 1 · 안으로 1) */
 /* 334번. 고칠 장 — 이름표와 [모든 장에 같게] 한 줄, 칩은 그 아래(이 장 → 모든 장으로 읽히게) */
 .panel #pgbar{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 8px;padding-bottom:10px;border-bottom:1px solid rgba(240,230,205,.12);margin-bottom:4px}
 .panel #pgbar .pglbl{grid-column:1;grid-row:1}
@@ -2974,6 +2974,8 @@ html body #panel #art-cell .blkhd small{margin-left:6px;font-weight:400;color:rg
 html body #panel #art-cell .qrblk .pgrp{margin:0 !important;padding:0 !important;border:0 !important;font-size:13px;font-weight:700;color:rgba(240,230,205,.88)}
 html body #panel #art-cell .qrblk .pgrp small{display:none}   /* 이 장만 — 맨 위 탭 제목에 이미 있다 */
 html body #panel #art-cell #corner-row:not([hidden]){border-bottom:0 !important;border-bottom-left-radius:0;border-bottom-right-radius:0}
+/* 405번. **안내 글(작은 설명) 한 모양** — 글자 12px · 줄 간격 1.45 · 글자색 .6(대비 5.98). 전에는 색 .46 · .55 · .6 · .62, 줄 간격 다섯 가지, AI 창은 11px 였다(대비 .46 은 3.99) */
+html body #panel .pnote, html body #aipanel .pnote, html body #panel .qrnote, html body #panel #f-mine-l small, html body #panel #l-gart small, html body #panel label.fitsw small, html body #panel .pzoom{font-size:12px !important;line-height:1.45 !important;color:rgba(240,230,205,.6) !important}
 html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){margin-top:-10px !important;border-top:1px dashed rgba(240,230,205,.18) !important;border-top-left-radius:0;border-top-right-radius:0}
 /* 327번. 도장 글자 칸 */
 .panel #f-sealtx{width:100%;box-sizing:border-box;height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(240,230,205,.28);background:rgba(240,230,205,.06);color:#f0e6cd;font:inherit;font-size:14px}
@@ -3263,7 +3265,7 @@ html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){ma
       <span class="subrow nosw" id="qr-passrow"><label for="f-qrpass">비밀번호</label><input type="text" id="f-qrpass" maxlength="63" autocomplete="off" spellcheck="false"></span></span>
     <!-- 399번. 종류 → 그 종류의 칸(주소 · 와이파이) → 두 종류가 같이 쓰는 QR 이름 · QR 바탕 색. 398번은 같이 쓰는 칸을 종류 바로 밑에 두어, 종류를 누르면 두 줄 아래에서 내용이 바뀌었다(사용자) — 고르는 단추와 바뀌는 칸을 붙인다 -->
     <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 이름</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 위나 아래에 작게 적혀 무엇이 열리는지 알려 줍니다(비워도 됩니다)"></span>
-    <span class="subrow nosw" id="qr-labposrow" hidden><label id="l-qrlabpos">QR 이름 자리</label><span class="grp st-pseg" id="f-qrlabpos" role="group" aria-labelledby="l-qrlabpos"><button type="button" data-k="bottom">아래</button><button type="button" data-k="top">위</button></span></span>   <!-- 402번. 아래(기본) | 위 -->
+    <span class="subrow nosw" id="qr-labposrow" hidden><label id="l-qrlabpos">QR 이름 위치</label><span class="grp st-pseg" id="f-qrlabpos" role="group" aria-labelledby="l-qrlabpos"><button type="button" data-k="bottom">아래</button><button type="button" data-k="top">위</button></span></span>   <!-- 402번. 아래(기본) | 위 -->
     <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">QR 바탕 색</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕 색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕 색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
     <span class="subrow nosw posrow" id="qr-posrow"><label id="l-qrpos">QR 자리</label><span class="grp st-pseg" id="f-qrpos" role="group" aria-labelledby="l-qrpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span>   <!-- 402번 -->
     <small class="qrnote" id="qr-note"></small></span>
@@ -9313,7 +9315,7 @@ $("#b-style").onclick   = () => {
 $("#f-logo").onchange   = e => { P(panelPage).logoColor = e.target.value; applyLook(); touch(); };
 /* 상단 배율. 본문(`--scale`)과 완전히 따로 논다 — 로고 · 업종 · 한 줄 소개 · 술 높이 ·
    여백이 전부 이 하나를 따르므로 상단 안에서 따로 노는 것이 없다(93번) */
-function nszNote(){ const n = $("#nsz-note"); if (!n) return; const pg = P(panelPage), ns = pg.norenScale ?? NSCALE_DEFAULT, on = pg.showTitle !== false || pg.showSub !== false; n.hidden = !(ns < .45 && on); n.textContent = "작게 하면 업종 · 한 줄 소개가 8px 밑으로 작아져 읽기 어렵습니다 — 끄거나 키우세요."; }   // 342번
+function nszNote(){ const n = $("#nsz-note"); if (!n) return; const pg = P(panelPage), ns = pg.norenScale ?? NSCALE_DEFAULT, on = pg.showTitle !== false || pg.showSub !== false; n.hidden = !(ns < .45 && on); n.textContent = "작게 하면 업종 · 한 줄 소개가 8px 밑으로 작아져 읽기 어렵습니다 — 끄거나 키우세요"; }   // 342 · 405번. 끝 마침표 뺌
 const setNScale = v => {
   P(panelPage).norenScale = Math.round(Math.min(1.6, Math.max(NSCALE_MIN, v)) * 100) / 100;   // 342번. 하한 60 → 30%
   applyLook(); render(); touch();
@@ -9410,17 +9412,17 @@ function syncQrNote(){
   const pg = P(panelPage), x = qrAt(pg, qrSlot), note = $("#qr-note"); let m = "";
   if (!x) m = "";
   else { const t = qrPayload(x), r = t && qrSvg(t);
-    if (x.kind === "url" && !String(x.url || "").trim()) m = "주소를 적으면 QR 이 나옵니다.";
-    else if (x.kind === "url" && !t) m = "읽을 수 없는 주소입니다 — https:// 로 시작하는 주소를 적어 주세요.";
-    else if (x.kind === "wifi" && !x.ssid) m = "와이파이 이름을 적어 주세요.";
-    else if (t && !r) m = "글이 너무 길어 QR 을 만들 수 없습니다.";
+    if (x.kind === "url" && !String(x.url || "").trim()) m = "주소를 적으면 QR 이 나옵니다";
+    else if (x.kind === "url" && !t) m = "읽을 수 없는 주소입니다 — https:// 로 시작하는 주소를 적어 주세요";
+    else if (x.kind === "wifi" && !x.ssid) m = "와이파이 이름을 적어 주세요";
+    else if (t && !r) m = "글이 너무 길어 QR 을 만들 수 없습니다";
     else { topBands(); const c = qrOverlap(panelPage), lo = qrContrast(x);
-      if (c && !x.pos) m = "이 장의 QR 이 메뉴 글자 " + c + "곳을 가립니다 — 빈 칸으로 옮겨 주세요.";   // 402번. 자유 배치는 겹침을 막지 않는다(사용자)
-      else if (lo !== null && lo < QR_LOW) m = (x.bg === "none" ? "이 자리 뒤의 색이 어두워 " : "바탕 색이 어두워 ") + "폰이 QR 을 못 읽을 수 있습니다 — 인쇄해서 읽어 보고, 안 읽히면 바탕을 밝은 색이나 흰색으로 해 주세요.";   // 348번. 안내만 한다(막지 않는다)
-      else if (r && r.n > 69) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다).";
-      else if (t && x.pos) m = "자유 배치 — 종이 위 손잡이를 끌어 옮깁니다. 글자와 겹치는지는 보고 놓아 주세요. [칸]을 누르면 원래 자리로 돌아갑니다.";   // 402번
-      else if (t) m = (qrSlot >= 4 ? "바닥 QR 은 바닥 글 옆 맨 아래에 들어가 종이 아래를 차지합니다" : "맨 위 QR 은 맨 위 영역의 좌우 끝에 들어갑니다 — 영역이 낮으면 QR 높이만큼 커지고 가운데 글자는 옆으로 비킵니다") + " — 메뉴가 넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜거나 글자 크기를 줄여 주세요.";
-      else m = x.kind === "wifi" ? "비밀번호가 QR 에 그대로 담깁니다 — 메뉴판을 보는 누구나 접속할 수 있습니다." : "인쇄한 뒤 폰 카메라로 읽어 보세요."; } }
+      if (c && !x.pos) m = "이 장의 QR 이 메뉴 글자 " + c + "곳을 가립니다 — 빈 칸으로 옮겨 주세요";   // 402번. 자유 배치는 겹침을 막지 않는다(사용자)
+      else if (lo !== null && lo < QR_LOW) m = (x.bg === "none" ? "이 자리 뒤의 색이 어두워 " : "바탕 색이 어두워 ") + "폰이 QR 을 못 읽을 수 있습니다 — 인쇄해서 읽어 보고, 안 읽히면 바탕을 밝은 색이나 흰색으로 해 주세요";   // 348번. 안내만 한다(막지 않는다)
+      else if (r && r.n > 69) m = "글이 길어 QR 이 촘촘합니다 — 인쇄해서 폰으로 읽어 보세요(짧은 주소를 권합니다)";
+      else if (t && x.pos) m = "손잡이를 끌어 옮깁니다. 글자와 겹쳐도 막지 않습니다";   // 402 · 405번. 위의 「자리 [칸 | 자유 배치]」가 돌아가는 길을 이미 보여 준다
+      else if (t) m = (qrSlot >= 4 ? "바닥 글 옆 맨 아래에 들어가 종이 아래를 차지합니다" : "맨 위 영역의 좌우 끝에 들어갑니다 — 낮으면 QR 높이만큼 커집니다") + (qrSlot >= 4 ? " — " : ". ") + "넘치면 [메뉴] 탭의 「한 장에 맞춤」을 켜세요";   // 405번. 설명을 덜고 「한 장에 맞춤」으로 가는 길만 남겼다(편집 중 넘침 알림은 글자 크기만 말한다)
+      else m = x.kind === "wifi" ? "비밀번호가 QR 에 그대로 담깁니다 — 메뉴판을 보는 누구나 접속할 수 있습니다" : "인쇄한 뒤 폰 카메라로 읽어 보세요"; } }
   note.textContent = m;
 }
 function syncQr(pg){
