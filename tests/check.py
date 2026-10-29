@@ -2212,6 +2212,56 @@ def t55(b, f):
         srv.shutdown()
     return out
 
+# ───────────────────────── 71. 402번 — 자유 배치(그림 · 도장 · QR) · QR 이름 위 · 아래 · 원산지 줄
+#   ① 꾸미기 창 「종이 위 자리」 탭을 열면 물건마다 손잡이 ② 손잡이를 마우스로 끌면 pos 가 생기고 갈색 점선 안에 머문다(밖으로 끌어도)
+#   ③ 화면과 인쇄의 자리가 같고 손잡이는 인쇄에 안 나온다 ④ [칸] 은 pos 를 지우고 [자유 배치] 는 제자리 그대로 pos 를 만든다
+#   ⑤ 가로로 바꿔도 점선 안 ⑥ 망가진 pos 는 버리거나 0 ~ 1 로 ⑦ QR 이름 위 = 이름이 코드보다 먼저 ⑧ 원산지: 투명도 1 · 편집 윗선 폭 = 미리보기 · 비어도 높이 그대로
+T71_IN = """()=>{const s=document.querySelector('.sheet[data-pi="0"]'),g=s.querySelector('.guide').getBoundingClientRect();
+  return [...s.querySelectorAll('.free')].map(n=>{const r=n.getBoundingClientRect(); return [n.classList.contains('art')?'art':n.classList.contains('seal')?'seal':'qr', r.left>=g.left-1 && r.right<=g.right+1 && r.top>=g.top-1 && r.bottom<=g.bottom+1]})}"""
+T71_MM = """()=>{const s=document.querySelector('.sheet[data-pi="0"]'),S=s.getBoundingClientRect(),k=S.width/(s.classList.contains('land')?297:210);
+  return [...s.querySelectorAll('.free')].map(n=>{const r=n.getBoundingClientRect(); return [+((r.left-S.left)/k).toFixed(1), +((r.top-S.top)/k).toFixed(1)]})}"""
+def t71(b, f):
+    out = {}
+    c = Ctx(b, f, W=1600, H=1100); pg = c.pg
+    c.js("()=>{ P(0).qrs=[{cell:4,kind:'url',url:'naver.me/abcd',label:'와이파이'}]; MENU.feet[0].origin='돼지고기 국내산'; P(0).showOrigin=true; render(); }")
+    pg.click('#b-edit'); pg.wait_for_timeout(250)
+    c.js("()=>{ panelTab='deco'; syncPageTabs(); syncPage(); }"); pg.wait_for_timeout(250)
+    out['handles'] = c.js("""()=>[...document.querySelectorAll('.sheet[data-pi="0"] .mvh')].filter(h=>getComputedStyle(h).display!=='none').map(h=>h.dataset.kind).sort()""")
+    c.js("()=>{ panelTab='look'; syncPageTabs(); syncPage(); }"); out['hidden_other_tab'] = c.js("""()=>[...document.querySelectorAll('.sheet[data-pi="0"] .mvh')].every(h=>getComputedStyle(h).display==='none')""")
+    c.js("()=>{ panelTab='deco'; syncPageTabs(); syncPage(); }"); pg.wait_for_timeout(200)
+    def drag(kind, cell, dx, dy):
+        h = pg.query_selector(f'.sheet[data-pi="0"] .mvh[data-kind="{kind}"][data-cell="{cell}"]'); h.scroll_into_view_if_needed(); bx = h.bounding_box()
+        x, y = bx['x'] + bx['width'] / 2, bx['y'] + bx['height'] / 2
+        pg.mouse.move(x, y); pg.mouse.down(); pg.mouse.move(x + dx / 2, y + dy / 2, steps=4); pg.mouse.move(x + dx, y + dy, steps=4); pg.mouse.up(); pg.wait_for_timeout(250)
+    ac, sc = c.js("()=>P(0).arts[0].cell"), c.js("()=>P(0).seals[0].cell")
+    drag('art', ac, -250, -300); drag('seal', sc, -3000, 3000); drag('qr', 4, 200, -400)   # 도장은 점선 밖(왼쪽 아래 멀리)으로 끈다
+    out['pos'] = c.js("()=>[!!P(0).arts[0].pos, !!P(0).seals[0].pos, !!P(0).qrs[0].pos, P(0).seals[0].pos]")
+    out['inbox'] = c.js(T71_IN)
+    out['sel'] = c.js("()=>[panelCell, panelTop, [...document.querySelectorAll('#f-qrpos button.on')].map(b=>b.dataset.k)]")
+    scr = c.js(T71_MM); pg.emulate_media(media='print'); prt = c.js(T71_MM)
+    out['print'] = [scr == prt, c.js("""()=>[...document.querySelectorAll('.mvh')].every(h=>getComputedStyle(h).display==='none')""")]; pg.emulate_media(media='screen')
+    pg.click('#f-qrlabpos button[data-k="top"]'); pg.wait_for_timeout(200)
+    out['labtop'] = c.js("""()=>{const q=document.querySelector('.sheet[data-pi="0"] .qr'); return [P(0).qrs[0].lab, q.firstElementChild.className]}""")
+    c.js("()=>{ panelCell=P(0).arts[0].cell; panelTop=null; syncPage(); }")
+    pg.click('#f-artpos button[data-k="cell"]'); pg.wait_for_timeout(200); out['back_cell'] = c.js("()=>'pos' in P(0).arts[0]")
+    r0 = c.js("""()=>{const r=document.querySelector('.sheet[data-pi="0"] .art').getBoundingClientRect(); return [r.left, r.top]}""")
+    pg.click('#f-artpos button[data-k="free"]'); pg.wait_for_timeout(200)
+    r1 = c.js("""()=>{const r=document.querySelector('.sheet[data-pi="0"] .art').getBoundingClientRect(); return [r.left, r.top]}""")
+    out['free_here'] = [c.js("()=>!!P(0).arts[0].pos"), abs(r0[0] - r1[0]) < 1 and abs(r0[1] - r1[1]) < 1]
+    c.js("()=>{ SETTINGS.orient='landscape'; render(); }"); pg.wait_for_timeout(250); out['land_inbox'] = c.js(T71_IN)
+    out['norm'] = c.js("""()=>{ const a={arts:[{cell:0,art:'beer',pos:{x:'a',y:2}},{cell:1,art:'beer',pos:{x:3,y:-1}}],seals:[{cell:2,seal:'word',pos:null}],qrs:[{cell:5,kind:'url',url:'a.b',lab:'top',pos:{x:.25,y:.5}},{cell:4,kind:'url',url:'a.b',lab:'left'}]};
+      normArts(a,[]); normSeals(a,[]); normQrs(a); return JSON.stringify([a.arts,a.seals,a.qrs]) }""")
+    out['err'] = list(c.errs); c.close()
+    # 원산지 — 투명도 · 윗선 폭 · 빈 칸 높이
+    c = Ctx(b, f, W=1600, H=1000); pg = c.pg
+    M = """()=>{const f=document.querySelector('.sheet .foot'),o=f.querySelector('.origin'); return [+f.getBoundingClientRect().height.toFixed(1), +o.getBoundingClientRect().width.toFixed(1), getComputedStyle(o).opacity, getComputedStyle(o.querySelector('b')).opacity]}"""
+    c.js("()=>{ P(0).showOrigin=true; MENU.feet[0].origin=''; render(); }"); pg.click('#b-edit'); pg.wait_for_timeout(250); e0 = c.js(M)
+    c.js("()=>{ MENU.feet[0].origin='돼지고기 국내산'; render(); }"); pg.wait_for_timeout(200); e1 = c.js(M)
+    pg.click('#b-preview'); pg.wait_for_timeout(200); p1 = c.js(M)
+    out['origin'] = [e0, e1, p1]
+    out['err'] += c.errs; c.close()
+    return out
+
 def near(x, y, t): return abs(x - y) <= t
 # ───────────────────────── 58. QR (337 · 340번)
 def t58(b, f):
@@ -2704,16 +2754,24 @@ def judge(t, r):
                   and r['saved'] == ['[{"cell":5,"kind":"wifi","ssid":"알프스","pass":"pw;1","enc":"WPA","label":"와이파이"}]', 1]
                   and r['norm'] == [[[4, 'url', 300, 20, '-'], [5, 'wifi', 1, 0, '']], False, False] and not r['err'])
             return ok, f"읽은 값 {r['read']} · 못 읽는 주소 · 빈 칸 · 300자 그려짐 {r['none_drawn']} · 자리(위 = 단 맨 위 · 아래 = 바닥 글 옆 · 글자 · 도장과 안 겹침 · 20 ~ 30mm) 문제 {r['layout_bad'] or '없음'} · 한 장에 맞춤 + QR 겹침 {r['fit_bad'] or '없음'} · 가운데 칸 QR 은 버림 {r['mid']} · 꾸미기 창(격자 한 그림 — 탭 한 줄 · 구분선 · 맨 위 좌우 끝 = QR · 아래 두 칸은 모퉁이 하나만) {r['panel']} · 열 때 겹친 파일 {r['excl']} · 저장 데이터를 불러오는 순간 [종이 그려짐, QR 수, 남은 도장, 오류] {r['loadqr']} · 저장했다 연 뒤 {r['saved']} · 망가진 값 {r['norm']}"
+        if t == 't71':
+            o = r['origin']
+            ok = (r['handles'] == ['art', 'qr', 'seal'] and r['hidden_other_tab'] and r['pos'][:3] == [True, True, True] and r['pos'][3] == {'x': 0, 'y': 1}
+                  and all(x[1] for x in r['inbox']) and len(r['inbox']) == 3 and r['sel'][:2] == [4, None] and r['sel'][2] == ['free'] and r['print'] == [True, True]
+                  and r['labtop'] == ['top', 'qrl top'] and r['back_cell'] is False and r['free_here'] == [True, True] and all(x[1] for x in r['land_inbox']) and len(r['land_inbox']) == 3
+                  and r['norm'] == '[[{"cell":0,"art":"beer"},{"cell":1,"art":"beer","pos":{"x":1,"y":0}}],[{"cell":2,"seal":"word"}],[{"cell":4,"kind":"url","url":"a.b"},{"cell":5,"kind":"url","url":"a.b","lab":"top","pos":{"x":0.25,"y":0.5}}]]'
+                  and o[0][0] == o[1][0] and o[1][1] == o[2][1] and all(x[2] == '1' and x[3] == '1' for x in o) and not r['err'])
+            return ok, f"402번 손잡이 {r['handles']} · 끈 뒤 pos {r['pos']} · 점선 안 {r['inbox']} · 인쇄 같음 · 손잡이 안 찍힘 {r['print']} · 이름 위 {r['labtop']} · 칸으로 {not r['back_cell']} · 제자리 자유 {r['free_here']} · 가로 점선 안 {[x[1] for x in r['land_inbox']]} · 원산지 [바닥 높이 · 윗선 폭 · 투명도] 편집 빈 칸 {o[0]} · 편집 {o[1]} · 미리보기 {o[2]}"
         if t == 'tstatic': ok = r.get('css_braces', [0, []]) == [0, []] and r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"CSS 괄호 {r.get('css_braces')} · 주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):
