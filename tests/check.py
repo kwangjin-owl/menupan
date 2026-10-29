@@ -1507,7 +1507,7 @@ def t54(b, f):
           set('none'); return [dflt, own, sym, norm, lat && ko4, noAlps] }""")   # 327번. 글자 도장 — 비우면 상호명 · 적은 글자 · 기호 도장엔 글자 없음 · 정리(4자 · 빈칸 · 기호 도장 글자 버림) · 영문 가로 · 「알프스」가 박힌 도장 없음
         out['p326'] = c.js("""()=>{ const hid=[...document.querySelectorAll('#art-cell .cellblk[hidden]')]; hid.forEach(x=>x.hidden=false);   /* 340번 — 도장 · QR 은 한 줄로 고르고 안 고른 묶음은 숨는다 · 재는 동안만 펼친다 */
           const b=[...document.querySelectorAll('#art-cell .cellblk')].filter(x=>!x.classList.contains('qrblk') && !x.classList.contains('cornerblk')), h=b.map(x=>(x.querySelector('.blkhd')||{}).textContent);   /* 337번 — QR 묶음은 t58 */
-          const r=[ b.length===2 && h[0]==='그림' && h[1]==='도장', b.length===2 && b[1].getBoundingClientRect().top >= b[0].getBoundingClientRect().bottom && getComputedStyle(b[1]).borderTopStyle==='solid', !!b[0] && b[0].contains(document.querySelector('#f-art')) && !!b[1] && b[1].contains(document.querySelector('#f-seal')) && b[1].contains(document.querySelector('#c-seal')) ]; hid.forEach(x=>x.hidden=true); return r }""")   # 326번. 칸 안 그림 · 도장 두 묶음(제목 · 구분선)
+          const r=[ b.length===2 && h[0]==='그림' && h[1]==='도장', b.length===2 && b[1].getBoundingClientRect().top >= b[0].getBoundingClientRect().bottom && getComputedStyle(b[1]).borderTopWidth==='1px' /* 403번 — 도장 묶음도 상자(구분선이 아니라 테두리). 모퉁이 아래에 이어 붙으면 점선 */, !!b[0] && b[0].contains(document.querySelector('#f-art')) && !!b[1] && b[1].contains(document.querySelector('#f-seal')) && b[1].contains(document.querySelector('#c-seal')) ]; hid.forEach(x=>x.hidden=true); return r }""")   # 326번. 칸 안 그림 · 도장 두 묶음(제목 · 구분선)
         out['p323'] = c.js("""()=>{ const P0=P(panelPage), cells=[...document.querySelectorAll('#g-art .pcells > button')], fs=document.querySelector('#f-seal'), set=v=>{ fs.value=v; fs.dispatchEvent(new Event('change')); };
           P0.seals=[]; render(); syncPage(); cells[0].click(); set('tri'); cells[5].click(); set('star'); const two=JSON.stringify(P0.seals.map(x=>[x.cell,x.seal]))==='[[0,"tri"],[5,"star"]]';
           const gridShows=!!cells[0].querySelector('.psl') && !!cells[5].querySelector('.psl') && !cells[2].querySelector('.psl');
@@ -2217,7 +2217,7 @@ def t55(b, f):
 #   ③ 화면과 인쇄의 자리가 같고 손잡이는 인쇄에 안 나온다 ④ [칸] 은 pos 를 지우고 [자유 배치] 는 제자리 그대로 pos 를 만든다
 #   ⑤ 가로로 바꿔도 점선 안 ⑥ 망가진 pos 는 버리거나 0 ~ 1 로 ⑦ QR 이름 위 = 이름이 코드보다 먼저 ⑧ 원산지: 투명도 1 · 편집 윗선 폭 = 미리보기 · 비어도 높이 그대로
 T71_IN = """()=>{const s=document.querySelector('.sheet[data-pi="0"]'),g=s.querySelector('.guide').getBoundingClientRect();
-  return [...s.querySelectorAll('.free')].map(n=>{const r=n.getBoundingClientRect(); return [n.classList.contains('art')?'art':n.classList.contains('seal')?'seal':'qr', r.left>=g.left-1 && r.right<=g.right+1 && r.top>=g.top-1 && r.bottom<=g.bottom+1]})}"""
+  return [...s.querySelectorAll('.free')].map(n=>{const r=visRect(n) /* 403번 — 그림은 그려진 부분이 점선 안(도화지 빈 곳은 밖으로 나가도 된다) */; return [n.classList.contains('art')?'art':n.classList.contains('seal')?'seal':'qr', r.left>=g.left-1 && r.right<=g.right+1 && r.top>=g.top-1 && r.bottom<=g.bottom+1]})}"""
 T71_MM = """()=>{const s=document.querySelector('.sheet[data-pi="0"]'),S=s.getBoundingClientRect(),k=S.width/(s.classList.contains('land')?297:210);
   return [...s.querySelectorAll('.free')].map(n=>{const r=n.getBoundingClientRect(); return [+((r.left-S.left)/k).toFixed(1), +((r.top-S.top)/k).toFixed(1)]})}"""
 def t71(b, f):
@@ -2260,6 +2260,46 @@ def t71(b, f):
     pg.click('#b-preview'); pg.wait_for_timeout(200); p1 = c.js(M)
     out['origin'] = [e0, e1, p1]
     out['err'] += c.errs; c.close()
+    return out
+
+# ───────────────────────── 72. 403번 — 자유 배치에서 그림은 **실제로 그려진 부분**이 갈색 점선에 닿는다 · 꾸미기 창 상자
+#   ① `ART_VIS` 표 = 그림마다 다시 잰 값(알파 8 넘는 화소, 오차 2) ② 구석(0,0 · 1,0 · 0,1 · 1,1)에서 그려진 부분이 점선 안이고 그 변에 닿는다(세로 · 가로)
+#   ③ 손잡이 가운데 = 그려진 부분 가운데 ④ 칸에 있던 그림을 손잡이로 점선 모서리까지 끌면 닿는다 ⑤ 칸 배치의 그림 상자는 그대로(상자 폭 = 여백선 안쪽의 반)
+#   ⑥ 꾸미기 창: 칸 이름표 · 그림 / 모퉁이+도장 · QR 이 상자 · 이름 「그림 자리」 「도장 자리」 「QR 자리」 · 모퉁이 아래 설정이 한 상자로 이어짐
+T72_RECT = """(keys)=>{ const res=[]; for (const o of ['portrait','landscape']){ SETTINGS.orient=o;
+    for (const k of keys.slice(0, o==='portrait' ? 99 : 3)) for (const [x,y] of [[0,0],[1,0],[0,1],[1,1]]){
+      P(0).arts=[{cell:2,art:k,pos:{x,y}}]; render();
+      const sh=document.querySelector('.sheet[data-pi="0"]'), g=sh.querySelector('.guide').getBoundingClientRect(), n=sh.querySelector('.art'), r=visRect(n), e=1.5;
+      res.push([o,k,x,y, r.left>=g.left-e && r.right<=g.right+e && r.top>=g.top-e && r.bottom<=g.bottom+e,
+        Math.abs((x?r.right-g.right:r.left-g.left))<=e, Math.abs((y?r.bottom-g.bottom:r.top-g.top))<=e]); } }
+  SETTINGS.orient='portrait'; return res }"""
+def t72(b, f):
+    out = {}
+    c = Ctx(b, f, W=1600, H=1100); pg = c.pg
+    out['table'] = c.js("""async()=>{ const bad=[]; for (const k of Object.keys(ART)){ let s=ART[k]; if (typeof s!=='string' || k==='none') continue;
+        s=s.replace('<svg ','<svg width="880" height="520" color="#000" ').replace(/currentColor/g,'#000'); const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+        try { await img.decode() } catch(e){ bad.push([k,'decode']); continue }
+        const cv=document.createElement('canvas'); cv.width=880; cv.height=520; const x=cv.getContext('2d'); x.drawImage(img,0,0); const d=x.getImageData(0,0,880,520).data; let x0=880,y0=520,x1=-1,y1=-1;
+        for (let y=0;y<520;y++) for (let xx=0;xx<880;xx++) if (d[(y*880+xx)*4+3]>8){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(y<y0)y0=y; if(y>y1)y1=y }
+        const v=ART_VIS[k], m=[x0,y0,x1+1,y1+1]; if (!v || v.some((a,i)=>Math.abs(a-m[i])>2)) bad.push([k,v,m]) }
+      const miss=Object.keys(ART_VIS).filter(k=>!(k in ART)); return [bad, miss, Object.keys(ART).filter(k=>k!=='none').length, Object.keys(ART_VIS).length] }""")
+    pg.click('#b-edit'); pg.wait_for_timeout(250)   # 점선(.guide)은 편집 중에만 그려진다
+    out['rect'] = c.js(T72_RECT, ['bridge', 'cake', 'horse', 'ibex', 'cabin', 'soju', 'mountain', 'bingsu'])
+    out['box'] = c.js("""()=>{ SETTINGS.orient='portrait'; P(0).arts=[{cell:2,art:'bridge'},{cell:3,art:'beer'}]; render(); const sh=document.querySelector('.sheet[data-pi="0"]'), S=sh.getBoundingClientRect(), k=S.width/210;
+        return [...sh.querySelectorAll('.art')].map(n=>{const r=n.getBoundingClientRect(); return [+((r.right-r.left)/k).toFixed(1), +((r.left-S.left)/k).toFixed(1)]}) }""")   # 칸 배치: 폭 91mm · 왼쪽 칸 14mm · 오른쪽 칸 105mm
+    c.js("()=>{ P(0).arts=[{cell:2,art:'bridge'},{cell:3,art:'cake'}]; P(0).seals=[]; delete P(0).qrs; render(); }")
+    c.js("()=>{ panelTab='deco'; panelPage=0; panelTop=null; panelCell=2; syncPageTabs(); syncPage(); }"); pg.wait_for_timeout(250)
+    out['handle'] = c.js("""()=>[...document.querySelectorAll('.sheet[data-pi="0"] .mvh[data-kind="art"]')].map(h=>{ const n=document.querySelector('.sheet[data-pi="0"] .art[data-cell="'+h.dataset.cell+'"]'), r=visRect(n), b=h.getBoundingClientRect();
+        return Math.abs(b.left+b.width/2-(r.left+r.width/2))<1.2 && Math.abs(b.top+b.height/2-(r.top+r.height/2))<1.2 })""")
+    h = pg.query_selector('.sheet[data-pi="0"] .mvh[data-kind="art"][data-cell="2"]'); h.scroll_into_view_if_needed(); bx = h.bounding_box(); x, y = bx['x'] + bx['width'] / 2, bx['y'] + bx['height'] / 2
+    pg.mouse.move(x, y); pg.mouse.down(); pg.mouse.move(x - 400, y - 400, steps=5); pg.mouse.move(x - 3000, y - 3000, steps=5); pg.mouse.up(); pg.wait_for_timeout(250)
+    out['drag'] = c.js("""()=>{ const sh=document.querySelector('.sheet[data-pi="0"]'), g=sh.querySelector('.guide').getBoundingClientRect(), r=visRect(sh.querySelector('.art[data-cell="2"]')); return [P(0).arts[0].pos, Math.abs(r.left-g.left)<=1.5, Math.abs(r.top-g.top)<=1.5] }""")
+    out['panel'] = c.js("""()=>{ panelCell=5; panelTop=null; P(0).qrs=[{cell:5,kind:'url',url:'naver.me/abcd'}]; P(0).seals=P(0).seals.filter(k=>k.cell!==5); render(); syncPage();
+        const A=document.querySelector('#art-cell'), bx=[...A.querySelectorAll('.cellblk')].filter(x=>!x.hidden), bd=x=>getComputedStyle(x).borderTopWidth==='1px' && parseFloat(getComputedStyle(x).paddingLeft)>=10, T=id=>document.querySelector(id).textContent.trim(),
+          cor=A.querySelector('#corner-row').getBoundingClientRect(), nxt=bx[bx.length-1].getBoundingClientRect(), nm=A.querySelector('#art-cellname');
+        return [bx.length, bx.every(bd), T('#l-gart').startsWith('칸 고르기'), T('#l-artpos'), T('#l-sealpos'), T('#l-qrpos'), Math.abs(nxt.top-cor.bottom)<=1.5, getComputedStyle(nm).backgroundColor!=='rgba(0, 0, 0, 0)', nm.textContent,
+          getComputedStyle(A.querySelector('#h-qr small')).display, T('#h-qrt')] }""")
+    out['err'] = list(c.errs); c.close()
     return out
 
 def near(x, y, t): return abs(x - y) <= t
@@ -2762,16 +2802,25 @@ def judge(t, r):
                   and r['norm'] == '[[{"cell":0,"art":"beer"},{"cell":1,"art":"beer","pos":{"x":1,"y":0}}],[{"cell":2,"seal":"word"}],[{"cell":4,"kind":"url","url":"a.b"},{"cell":5,"kind":"url","url":"a.b","lab":"top","pos":{"x":0.25,"y":0.5}}]]'
                   and o[0][0] == o[1][0] and o[1][1] == o[2][1] and all(x[2] == '1' and x[3] == '1' for x in o) and not r['err'])
             return ok, f"402번 손잡이 {r['handles']} · 끈 뒤 pos {r['pos']} · 점선 안 {r['inbox']} · 인쇄 같음 · 손잡이 안 찍힘 {r['print']} · 이름 위 {r['labtop']} · 칸으로 {not r['back_cell']} · 제자리 자유 {r['free_here']} · 가로 점선 안 {[x[1] for x in r['land_inbox']]} · 원산지 [바닥 높이 · 윗선 폭 · 투명도] 편집 빈 칸 {o[0]} · 편집 {o[1]} · 미리보기 {o[2]}"
+        if t == 't72':
+            tb, rc = r['table'], r['rect']; pn = r['panel']
+            ok_t = tb[0] == [] and tb[1] == [] and tb[2] == tb[3]
+            ok_r = len(rc) == 8 * 4 + 3 * 4 and all(x[4] and x[5] and x[6] for x in rc)
+            ok_b = len(r['box']) == 2 and all(abs(x[0] - 91) < .3 for x in r['box']) and abs(r['box'][0][1] - 14) < .3 and abs(r['box'][1][1] - 105) < .3
+            ok_d = r['drag'][0] == {'x': 0, 'y': 0} and r['drag'][1] and r['drag'][2]
+            ok_p = pn[0] == 3 and pn[1] and pn[2] and pn[3:6] == ['그림 자리', '도장 자리', 'QR 자리'] and pn[6] and pn[7] and pn[8] == '오른쪽 아래 칸' and pn[9] == 'none' and pn[10] == 'QR'
+            ok = ok_t and ok_r and ok_b and r['handle'] == [True, True] and ok_d and ok_p and not r['err']
+            return ok, f"403번 표가 그림마다 다시 잰 값과 같음 {ok_t} {tb[0][:3]} · 구석에서 점선 안 + 변에 닿음 {ok_r} {[x[:4] for x in rc if not (x[4] and x[5] and x[6])][:6]} · 칸 배치 상자 폭 · 왼쪽 {ok_b} {r['box']} · 손잡이 가운데 {r['handle']} · 끌어서 모서리까지 {r['drag']} · 꾸미기 창 [상자 수, 모두 상자, 칸 고르기, 이름 셋, 이어 붙음, 이름표 색, 이름표, 이 장만 숨김, QR 제목] {pn}"
         if t == 'tstatic': ok = r.get('css_braces', [0, []]) == [0, []] and r['css_comments'][0] == r['css_comments'][1] and r['html_comments'][0] == r['html_comments'][1] and r['node'] in (True, 'node 없음') and r['dialog_tags_ok']; return ok, f"CSS 괄호 {r.get('css_braces')} · 주석 짝 CSS {r['css_comments']} · HTML {r['html_comments']} · JS {r['node']} · 안내창 태그 짝 {r['dialog_tags_ok']}"
     except Exception as e:
         return False, f'판정 실패: {e}'
     return None, ''
 
 ALL = ['tstatic', 't02', 't03', 't04', 't04p', 't05', 't06', 't07', 't08', 't10', 't11', 't14', 't15', 't16', 't17', 't21', 't23', 't24',
-       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't02b']
+       't25', 't27', 't28', 't30', 't31v', 't32', 't35', 't36', 't37', 't38', 't39', 't40', 't41', 't42', 't43', 't44', 't45', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't72', 't02b']
 # 305번. 빠른 묶음 — 304번에 잰 시간(한 파일 기준)이 45초 이하인 것. 빠진 무거운 것: t02 · t04p · t05 · t07 · t08 · t15 · t23 · t25 · t31v · t32 · t37 · t45
 QUICK = ['tstatic', 't06', 't10', 't11', 't14', 't16', 't17', 't21', 't24', 't28', 't30', 't35', 't36', 't38', 't39', 't40', 't41', 't42',
-         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't02b']
+         't43', 't44', 't46', 't47', 't48', 't49', 't50', 't51', 't52', 't53', 't54', 't55', 't56', 't57', 't58', 't59', 't60', 't61', 't62', 't63', 't64', 't65', 't66', 't67', 't68', 't69', 't70', 't71', 't72', 't02b']
 IGNORE_SAME = {'_sec', 'err', 'rt_err', 'legacy_err'}
 
 def worker(f, tests):

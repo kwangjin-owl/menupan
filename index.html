@@ -2964,6 +2964,17 @@ dialog#start.wide .row2.foot2{margin-top:auto}
 .panel #art-cell .blkhd{font-size:13px;font-weight:700;color:rgba(240,230,205,.88);letter-spacing:.02em}
 .panel #art-cell .sealblk, .panel #art-cell .cornerblk{border-top:1px solid rgba(240,230,205,.14);padding-top:12px;margin-top:4px}   /* 351번. 모퉁이도 도장처럼 제목 · 구분선 */
 .panel #art-cell #b-artsame{margin-top:6px}
+/* 403번. 꾸미기 창 「그림·도장·QR」 — 소속이 보이게 상자로 나눈다(사용자: 「각 항목이 어디 소속인지가 잘 안 보여」).
+   ① 맨 위 이름표 = 지금 고른 칸 ② 그림 · (모퉁이 + 도장 또는 QR) 이 각각 테두리 상자 ③ 모퉁이 고르기와 그 아래 도장 · QR 설정은 한 상자로 이어 붙인다(고른 것의 설정이 그 아래에 달려 있다)
+   ④ 그림 · 도장 · QR 마다 「그림 자리」 「도장 자리」 「QR 자리」 — 「자리」 하나가 칸 고르기 · 그림 놓기 · QR 놓기 세 뜻이었다 */
+html body #panel #art-cell{display:flex;flex-direction:column;gap:10px}
+html body #panel #art-cell .cellname{display:block;padding:6px 10px;border-radius:8px;background:rgba(240,230,205,.12);font-size:13px;font-weight:700;color:#f0e6cd}
+html body #panel #art-cell .cellblk{margin:0 !important;padding:12px !important;border:1px solid rgba(240,230,205,.18) !important;border-radius:10px;background:rgba(240,230,205,.04);box-sizing:border-box}
+html body #panel #art-cell .blkhd small{margin-left:6px;font-weight:400;color:rgba(240,230,205,.6)}
+html body #panel #art-cell .qrblk .pgrp{margin:0 !important;padding:0 !important;border:0 !important;font-size:13px;font-weight:700;color:rgba(240,230,205,.88)}
+html body #panel #art-cell .qrblk .pgrp small{display:none}   /* 이 장만 — 맨 위 탭 제목에 이미 있다 */
+html body #panel #art-cell #corner-row:not([hidden]){border-bottom:0 !important;border-bottom-left-radius:0;border-bottom-right-radius:0}
+html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){margin-top:-10px !important;border-top:1px dashed rgba(240,230,205,.18) !important;border-top-left-radius:0;border-top-right-radius:0}
 /* 327번. 도장 글자 칸 */
 .panel #f-sealtx{width:100%;box-sizing:border-box;height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(240,230,205,.28);background:rgba(240,230,205,.06);color:#f0e6cd;font:inherit;font-size:14px}
 .panel #f-sealtx::placeholder{color:rgba(240,230,205,.42)}
@@ -3206,9 +3217,9 @@ dialog#start.wide .row2.foot2{margin-top:auto}
       </select>
   </div>
   <div class="ptab" data-tab="deco">
-  <div class="pgrp">종이 위 자리 — 그림 · 도장 · QR <small class="pgonly">이 장만</small></div>
+  <div class="pgrp">종이 위 그림 · 도장 · QR <small class="pgonly">이 장만</small></div>   <!-- 403번. 「자리」가 세 가지 뜻(칸 고르기 · 그림 놓는 방식 · QR 놓는 방식)으로 쓰여 헷갈렸다 — 이름을 나눴다 -->
   <span class="grp two artseal">
-    <span class="fld artpick"><label id="l-gart">자리 <small>그림 · 도장은 칸을, QR 은 점선 「QR」 상자(맨 위 좌우 · 아래 모퉁이)를 누릅니다</small></label>
+    <span class="fld artpick"><label id="l-gart">칸 고르기 <small>그림 · 도장은 칸을, QR 은 점선 「QR」 상자(맨 위 좌우 · 아래 모퉁이)를 누릅니다</small></label>
     <span class="pgrid" id="g-art" role="group" aria-labelledby="l-gart"></span></span>
     <span class="fld sub" id="art-cell">
     <span class="cellname" id="art-cellname"></span>
@@ -3227,8 +3238,8 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span id="art-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-art" title="그림 색" aria-label="그림 색"></span></span>
       <span class="subrow nosw"><label for="f-artop">진하기</label><select id="f-artop"><option value="light">연하게 (기본)</option><option value="mid">보통</option><option value="strong">진하게</option></select></span></span>
-      <span class="subrow nosw posrow" id="art-posrow"><label id="l-artpos">자리</label><span class="grp st-pseg" id="f-artpos" role="group" aria-labelledby="l-artpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span></span>   <!-- 402번. 칸 | 자유 배치 -->
-    <span class="cellblk cornerblk" id="corner-row" role="group" aria-labelledby="l-corner" hidden><span class="blkhd" id="l-corner">모퉁이</span><!-- 351번. 모퉁이는 그림의 설정이 아니라 도장 · QR 을 가르는 자리라 그림과 같은 높이의 제목 · 구분선 --><span class="grp st-pseg" id="f-corner" role="group" aria-labelledby="l-corner"><button type="button" data-k="none">없음</button><button type="button" data-k="seal">도장</button><button type="button" data-k="qr">QR</button></span></span>   <!-- 344번. 아래 두 칸의 모퉁이는 도장과 QR 이 같은 자리 — 하나만 -->
+      <span class="subrow nosw posrow" id="art-posrow"><label id="l-artpos">그림 자리</label><span class="grp st-pseg" id="f-artpos" role="group" aria-labelledby="l-artpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span></span>   <!-- 402번. 칸 | 자유 배치 -->
+    <span class="cellblk cornerblk" id="corner-row" role="group" aria-labelledby="l-corner" hidden><span class="blkhd" id="l-corner">모퉁이 <small>도장 또는 QR 중 하나</small></span><!-- 351번. 모퉁이는 그림의 설정이 아니라 도장 · QR 을 가르는 자리라 그림과 같은 높이의 제목 · 구분선 --><span class="grp st-pseg" id="f-corner" role="group" aria-labelledby="l-corner"><button type="button" data-k="none">없음</button><button type="button" data-k="seal">도장</button><button type="button" data-k="qr">QR</button></span></span>   <!-- 344번. 아래 두 칸의 모퉁이는 도장과 QR 이 같은 자리 — 하나만 -->
     <span class="cellblk sealblk" role="group" aria-labelledby="h-cseal"><span class="blkhd" id="h-cseal">도장</span>
     <span class="subrow nosw sealrow"><label for="f-seal">모양</label>
     <select id="f-seal">
@@ -3239,7 +3250,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="subrow nosw" id="seal-txrow"><label for="f-sealtx">글자</label><input type="text" id="f-sealtx" maxlength="4" autocomplete="off" spellcheck="false" title="도장에 새길 글자 1 ~ 4자 — 비우면 파일 이름"></span>   <!-- 327번 -->
     <span id="seal-opts">
       <span class="subrow nosw"><label>색</label><span class="pk"><input type="color" id="c-seal" title="도장 색" aria-label="도장 색"></span></span></span>
-    <span class="subrow nosw posrow" id="seal-posrow"><label id="l-sealpos">자리</label><span class="grp st-pseg" id="f-sealpos" role="group" aria-labelledby="l-sealpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span></span>   <!-- 402번 -->
+    <span class="subrow nosw posrow" id="seal-posrow"><label id="l-sealpos">도장 자리</label><span class="grp st-pseg" id="f-sealpos" role="group" aria-labelledby="l-sealpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span></span>   <!-- 402번 -->
 
     <span class="cellblk qrblk" role="group" aria-labelledby="h-qr">   <!-- 337 · 342번. 찍으면 주소 · 와이파이로 이어지는 QR — 자리 넷(맨 위 · 바닥 × 왼쪽 · 오른쪽). 도장과 따로 -->
     <div class="pgrp" id="h-qr"><span id="h-qrt">QR</span> <small class="pgonly">이 장만</small></div>
@@ -3254,7 +3265,7 @@ dialog#start.wide .row2.foot2{margin-top:auto}
     <span class="subrow nosw" id="qr-labrow" hidden><label for="f-qrlabel">QR 이름</label><input type="text" id="f-qrlabel" maxlength="20" autocomplete="off" placeholder="예: 네이버 지도" title="QR 위나 아래에 작게 적혀 무엇이 열리는지 알려 줍니다(비워도 됩니다)"></span>
     <span class="subrow nosw" id="qr-labposrow" hidden><label id="l-qrlabpos">QR 이름 자리</label><span class="grp st-pseg" id="f-qrlabpos" role="group" aria-labelledby="l-qrlabpos"><button type="button" data-k="bottom">아래</button><button type="button" data-k="top">위</button></span></span>   <!-- 402번. 아래(기본) | 위 -->
     <span class="subrow nosw" id="qr-bgrow" hidden><label id="l-qrbg">QR 바탕 색</label><span class="qrbgctl"><span class="pk"><input type="color" id="c-qrbg" title="바탕 색 — 누르면 색을 고릅니다(기본 흰색)" aria-label="QR 바탕 색"></span><span class="grp st-pseg" id="f-qrnone" role="group" aria-label="바탕 없음"><button type="button" data-k="none" title="바탕 없이 이 자리 뒤의 색 위에 그대로 찍습니다">바탕 없음</button></span></span></span>   <!-- 348번. 흰색(기본) + 색 고르기 + 바탕 없음 -->
-    <span class="subrow nosw posrow" id="qr-posrow"><label id="l-qrpos">자리</label><span class="grp st-pseg" id="f-qrpos" role="group" aria-labelledby="l-qrpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span>   <!-- 402번 -->
+    <span class="subrow nosw posrow" id="qr-posrow"><label id="l-qrpos">QR 자리</label><span class="grp st-pseg" id="f-qrpos" role="group" aria-labelledby="l-qrpos" title="자유 배치 — 종이 위 손잡이를 끌어 갈색 점선 안 어디에나 놓습니다(글자와 겹쳐도 막지 않습니다). [칸]을 누르면 칸 자리로 돌아갑니다"><button type="button" data-k="cell">칸</button><button type="button" data-k="free">자유 배치</button></span></span>   <!-- 402번 -->
     <small class="qrnote" id="qr-note"></small></span>
     <button type="button" id="b-artsame" class="tbtn" title="고른 칸의 그림 색 · 진하기와 도장 모양 · 색을 이 장의 다른 칸에도 똑같이 합니다">모든 칸에 같게</button></span>   <!-- 389번. 글자 단추 한 벌(.tbtn) — 같은 모양인데 이름표가 없어 검사가 높이 규칙에 걸었다 -->
   </span>
@@ -5921,6 +5932,9 @@ function qrNode(q, cls){   // 종이에 놓을 상자(없으면 null)
   return w;
 }
 const qrAt = (pg, c) => (pg.qrs || []).find(x => x.cell === c);
+/* 403번. 그림의 **실제로 그려진 부분** — 도화지(880 × 520)에서 [왼쪽, 위, 오른쪽, 아래]. 자유 배치는 이 부분이 갈색 점선에 닿는 데까지 움직인다(도화지 빈 곳은 점선 밖으로 나가도 된다).
+   칸 배치는 도화지 그대로라 눈에 보이는 변화가 없다. 그림을 새로 그리거나 고치면 다시 잰다 — `t72` 가 그림마다 다시 재서 이 표와 맞는지 본다(알파 8 넘는 화소) */
+const ART_VIS = {cabin:[81,140,790,499], bridge:[75,244,796,492], beer:[281,85,595,492], soju:[345,119,538,492], sake:[289,100,594,492], wine:[343,112,543,492], pasta:[141,133,741,476], beerpasta:[105,158,771,492], horse:[68,61,813,493], zebra:[68,61,813,493], mountain:[51,169,829,492], night:[73,103,806,492], highball:[288,53,594,492], edelweiss:[131,97,756,492], fir:[73,144,806,492], ibex:[129,0,709,494], vine:[152,5,720,493], ttuk:[210,52,670,494], bapsujeo:[130,168,770,494], bibim:[235,82,645,492], jeon:[112,72,769,492], coffee:[232,60,654,492], croissant:[121,130,759,492], cake:[220,175,660,491], bingsu:[200,42,680,492], teapot:[118,144,764,492], tteok:[148,47,732,492], gimbap:[130,169,750,491], eomuk:[176,55,704,492], ramyeon:[136,79,744,492], chicken:[200,101,680,492], fries:[276,87,604,492], skewer:[279,67,627,491], lantern:[100,40,780,495]};
 /* 402번. 자유 배치 — 자리 값(normPos)을 종이 위 mm 로 옮기고, 옮김 손잡이를 단다 */
 function freeMark(n, pos){ if (!pos) return; n.classList.add("free"); n.dataset.fx = pos.x; n.dataset.fy = pos.y; }
 function freeBox(sh){   // 갈색 점선(여백선 .guide) 상자, mm — 좌우 --mg · 위 --mt · 아래 11mm(194 · 256번)
@@ -5929,14 +5943,19 @@ function freeBox(sh){   // 갈색 점선(여백선 .guide) 상자, mm — 좌우
 }
 /* 자리 값은 **물건이 차지하는 겉 상자**(도장은 -4° 기울어 상자보다 조금 넓다)의 가운데가 움직일 수 있는 폭에 대한 비율이다 — 0 · 1 이어도 기운 모서리까지 점선 안.
    left · top 은 기울기 전 상자(offset)에 주므로 가운데에서 그 반을 뺀다 */
+function visRect(n){   // 403번. 그림은 도화지가 아니라 실제로 그려진 부분(ART_VIS) — 다른 물건은 상자 그대로
+  const r = n.getBoundingClientRect(), v = n.classList.contains("art") && ART_VIS[n.dataset.art]; if (!v) return r;
+  const L = r.left + v[0] / 880 * r.width, T = r.top + v[1] / 520 * r.height, W = (v[2] - v[0]) / 880 * r.width, H = (v[3] - v[1]) / 520 * r.height;
+  return { left:L, top:T, width:W, height:H, right:L + W, bottom:T + H }; }
 function freeExt(sh, n){ const B = freeBox(sh), S = sh.getBoundingClientRect(), px = S.width / B.W, k = sh.offsetWidth / B.W; if (!px || !k) return null;
-  const r = n.getBoundingClientRect();
-  return { B, S, px, w:n.offsetWidth / k, h:n.offsetHeight / k, ow:r.width / px, oh:r.height / px, cx:(r.left + r.width / 2 - S.left) / px, cy:(r.top + r.height / 2 - S.top) / px }; }
+  const r = visRect(n), q = n.getBoundingClientRect();   // 403번. dx · dy = 보이는 부분 가운데가 상자 가운데에서 벗어난 mm (그림만 0 이 아니다)
+  return { B, S, px, w:n.offsetWidth / k, h:n.offsetHeight / k, ow:r.width / px, oh:r.height / px, cx:(r.left + r.width / 2 - S.left) / px, cy:(r.top + r.height / 2 - S.top) / px,
+    dx:((r.left + r.width / 2) - (q.left + q.width / 2)) / px, dy:((r.top + r.height / 2) - (q.top + q.height / 2)) / px }; }
 const freeSpan = (B, ow, oh) => ({ x0:B.l + ow / 2, xw:Math.max(0, B.W - 2 * B.l - ow), y0:B.t + oh / 2, yw:Math.max(0, B.H - B.t - B.b - oh) });
 function placeFree(sh){
   sh.querySelectorAll(".free").forEach(n => { const e = freeExt(sh, n); if (!e) return; const R = freeSpan(e.B, e.ow, e.oh);
-    n.style.left = (R.x0 + (+n.dataset.fx) * R.xw - e.w / 2).toFixed(2) + "mm";
-    n.style.top = (R.y0 + (+n.dataset.fy) * R.yw - e.h / 2).toFixed(2) + "mm"; });
+    n.style.left = (R.x0 + (+n.dataset.fx) * R.xw - e.w / 2 - e.dx).toFixed(2) + "mm";
+    n.style.top = (R.y0 + (+n.dataset.fy) * R.yw - e.h / 2 - e.dy).toFixed(2) + "mm"; });   // 403번. - dx · dy
 }
 function mvNode(sh, kind, c){ return sh.querySelector("." + kind + '[data-cell="' + c + '"]' + (kind === "seal" ? ":not(.blank)" : "")); }
 function posOf(sh, n){   // 지금 놓인 자리 → 자리 값(물건 가운데로 잰다 — 도장이 기울어 있어도, 가운데 칸이 translate 로 올라가 있어도 같다)
@@ -5954,7 +5973,7 @@ function placeMv(){
   document.querySelectorAll("#pages .sheet").forEach(sh => {
     const S = sh.getBoundingClientRect(), B = freeBox(sh), px = S.width / B.W; if (!px) return;
     sh.querySelectorAll(".art[data-cell], .seal[data-cell]:not(.blank), .qr[data-cell]").forEach(n => {
-      const r = n.getBoundingClientRect(); if (!r.width || !r.height) return;
+      const r = visRect(n); if (!r.width || !r.height) return;   // 403번. 그림은 그려진 부분 가운데에 손잡이
       const kind = n.classList.contains("art") ? "art" : n.classList.contains("seal") ? "seal" : "qr";
       const h = document.createElement("span"); h.className = "mvh"; h.dataset.kind = kind; h.dataset.cell = n.dataset.cell; h.setAttribute("role", "button");
       h.title = NAME[kind] + " — 끌어서 갈색 점선 안 어디에나 놓습니다"; h.setAttribute("aria-label", NAME[kind] + " 옮기기"); h.innerHTML = MV_ICON;
@@ -7814,7 +7833,8 @@ function drawSheet(spec){
     const n = qrNode(q, "qr qx" + (q.cell % 2) + " qy2"); if (n) sheet.appendChild(n); });   // 337 · 338 · 340번
   /* 147번 → 152번. 그림은 장마다 → 302번. 칸마다(`P(장).arts`) — 색 · 진하기도 칸마다(artVars) */
   (PS.arts || []).forEach(x => { if (!ART[x.art]) return;
-    const a = el("div","art ax" + (x.cell % 2) + " ay" + Math.floor(x.cell / 2)); a.dataset.cell = x.cell; a.innerHTML = ART[x.art]; artVars(a, x); freeMark(a, x.pos); sheet.appendChild(a); });   // 402번. 자유 배치
+    const a = el("div","art ax" + (x.cell % 2) + " ay" + Math.floor(x.cell / 2)); a.dataset.cell = x.cell; a.dataset.art = x.art; a.innerHTML = ART[x.art]; artVars(a, x); freeMark(a, x.pos);   // 403번. data-art — 자유 배치가 그려진 부분을 알려고
+    sheet.appendChild(a); });   // 402번. 자유 배치
   const pn = SETTINGS.pageno === "num" ? String(spec.no)
            : (SETTINGS.pageno === "of" && spec.total > 1) ? spec.no + " / " + spec.total : "";
   // 82번에서 장 삭제를 여기 붙였다가 83번에서 넣고 빼는 묶음으로 합쳤다. 쪽번호는 다시 쪽번호일 뿐이다
@@ -9431,7 +9451,7 @@ function syncSpot(pg){
   document.querySelector(".qrblk").hidden = !(top || st === "qr"); document.querySelector(".qrblk").classList.toggle("lead", top); $("#b-artsame").hidden = top;
   $("#f-corner").querySelectorAll("button").forEach(b => { const on = b.dataset.k === st; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
   $("#art-cellname").textContent = top ? (panelTop === 0 ? "맨 위 왼쪽" : "맨 위 오른쪽") + " — QR 자리" : CELL_NAMES[panelCell] + " 칸";
-  $("#h-qrt").textContent = top ? "QR" : "QR · " + CELL_NAMES[panelCell] + " 모퉁이";
+  $("#h-qrt").textContent = "QR";   // 403번. 칸 이름은 맨 위 이름표에 한 번만
 }
 $("#f-corner").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const k = b.dataset.k, pg = P(panelPage), c = panelCell;
   if (k === "none"){ pg.seals = (pg.seals || []).filter(x => x.cell !== c); pg.qrs = (pg.qrs || []).filter(x => x.cell !== c); if (!pg.qrs.length) delete pg.qrs; render(); touch(); syncPage(); }
@@ -9476,7 +9496,7 @@ document.addEventListener("pointermove", e => { const d = mvDrag; if (!d) return
   if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 3) return;
   if (!d.moved){ d.moved = true; if (d.n.parentNode !== d.sh) d.sh.appendChild(d.n); d.n.classList.remove("qf", "qh", "qy2", "qx0", "qx1"); d.n.classList.add("free"); }
   d.x = d.cx(d.x0 + (e.clientX - d.sx) / d.E.px); d.y = d.cy(d.y0 + (e.clientY - d.sy) / d.E.px);   // 가운데(mm)
-  d.n.style.left = (d.x - d.E.w / 2).toFixed(2) + "mm"; d.n.style.top = (d.y - d.E.h / 2).toFixed(2) + "mm";
+  d.n.style.left = (d.x - d.E.w / 2 - d.E.dx).toFixed(2) + "mm"; d.n.style.top = (d.y - d.E.h / 2 - d.E.dy).toFixed(2) + "mm";   // 403번. - dx · dy
   d.h.style.left = d.x.toFixed(2) + "mm"; d.h.style.top = d.y.toFixed(2) + "mm";
 });
 function mvEnd(e){ const d = mvDrag; if (!d) return; mvDrag = null; d.h.classList.remove("drag");
