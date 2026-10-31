@@ -610,7 +610,10 @@ body{transition:padding-right .18s ease}
 .editing .pagebar .pstat[hidden]{display:none}
 .editing .pagebar .n{font-size:11.5px;color:var(--ink);font-weight:700;margin-right:2px}
 .editing .pagebar .addbtn{display:block;visibility:visible;margin:0;background:none;box-shadow:none}
-.editing .sheet .pagebar .addbtn.pmv{padding:2px 7px}   /* 409번. 장 옮기기 ◀ ▶ — 글자 단추보다 좁게 */
+.editing .sheet .pagebar .addbtn.pmv{padding:2px 7px}   /* 409번. 장 옮기기 ▲ ▼(410번) — 글자 단추보다 좁게 */
+.editing .sheet .pagebar .addbtn.pmv{display:flex;align-items:center;justify-content:center;align-self:stretch}   /* 410번. 그림만 든 단추가 글자 단추보다 낮았다(14 · 17px) — 줄 높이에 맞춘다 */
+.editing .sheet .pagebar .addbtn.pmv > .gi{display:block;line-height:0}
+.editing .sheet .pagebar .addbtn.pmv > .gi > svg{display:block;width:.85em;height:.85em;overflow:visible}   /* 410번. 118번의 그림 기호 */
 .editing.preview .pagebar{display:none}
 /* 어느 종이의 일인지 확실히 — 막대에 마우스를 올리면 그 종이 전체에 테두리가 선다 */
 .editing .sheet:has(.pagebar:hover){outline:2px solid var(--ui-accent);outline-offset:2px}
@@ -774,7 +777,7 @@ body{transition:padding-right .18s ease}
 .sheet.imgpage .pgimg-miss{margin:auto;font-size:14px;color:var(--accent)}
 /* 409번. 꾸미기 창 — 이미지 장을 고르면 탭과 설정 칸 대신 이 장의 것(이미지 바꾸기 · 맞춤)만 */
 html body #panel.imgsel #ptabs, html body #panel.imgsel .ptab, html body #panel.imgsel #b-copypage{display:none !important}
-html body #panel #pimg[hidden]{display:none}
+html body #panel #pimg[hidden], html body #panel #pimg small[hidden]{display:none}
 html body #panel #pimg{padding:10px 0 4px}
 html body #panel #pimg .pimg-act{margin:8px 0 12px}
 html body #panel #pimg .pimg-act button{height:32px;padding:0 14px}
@@ -3037,8 +3040,8 @@ html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){ma
     <div class="pimg-act"><button type="button" id="b-imgswap" class="tbtn2">이미지 바꾸기</button></div>
     <label>맞춤</label>
     <div class="st-pseg" id="f-imgfit" role="group" aria-label="이미지 맞춤"><button type="button" data-fit="">전부 보이게</button><button type="button" data-fit="fill">종이 끝까지</button></div>
-    <small id="imgfit-note"></small>
-    <small>이미지 장에는 이미지만 찍힙니다. 글자를 고치려면 원래 파일을 고쳐 다시 넣으세요. 장 순서는 종이 위 탭의 ◀ ▶, 빼기는 [✕ 장 삭제]입니다</small>
+    <small id="imgfit-note" hidden></small>
+    <small>이미지 장에는 이미지만 찍힙니다. 글자는 원래 파일을 고쳐 다시 넣으세요</small>   <!-- 410번. 장 순서 · 빼기는 종이 위 탭에 보이는 단추라 걷었다(사용자 — 「너무 tmi」) -->
   </div>
   <div class="ptab on" data-tab="look">
   <label id="f-mine-l">내 조합 <small>추천 조합을 입힌 뒤 모양을 바꾸면 여기에 남습니다</small></label>   <!-- 289번. 한 칸 -->
@@ -3552,7 +3555,7 @@ html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){ma
   <h4>글자와 메뉴 고치기</h4>
   <ul><li><b>글자를 눌러</b> 고칩니다. Enter 는 칸에서 빠져나옵니다(분류 제목 · 와인 이름 · 와인 라벨에서는 줄을 나눕니다).</li>
     <li>메뉴 줄에 마우스를 올리면 가격 오른쪽에 <b>추천 · 품절 · 설명 · ✕</b>(지우기), 이름 앞에 <b>▲ ▼</b> 옮기기가 뜹니다.</li>
-    <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
+    <li>분류에 마우스를 올리면 <b>＋ 메뉴 · 분류 · 단</b>을 넣고 빼는 단추가, 종이 위쪽 탭에 <b>장</b> 추가 · 삭제 · 순서 바꾸기(<b>▲ ▼</b>)가 있습니다. 분류는 제목 옆 <b>◀ ▶</b>로 옆 단으로 옮깁니다.</li>
     <li>잘못했으면 아래에 뜨는 <b>되돌리기</b>나 <b>↶</b> · Ctrl+Z.</li></ul>
   <h4>모양 바꾸기</h4>
   <ul><li>[꾸미기] 탭 다섯 — <b>색 · 글꼴</b>(추천 조합 · 글꼴 · 색 · 종이 결) · <b>맨 위</b>(가게 이름 글자/로고 · 업종 · 한 줄 소개 · 띠) · <b>메뉴</b>(종이 방향 · 단 · 글자 크기 · 분류 제목 · 메뉴 줄, 와인 장이 있으면 맨 아래 와인 카드 · 병) · <b>바닥</b>(바닥 글 · 원산지 · 쪽 번호) · <b>그림·도장·QR</b>(칸마다 그림 · 도장, 맨 위 · 바닥 QR). 「이 장만」이 붙은 묶음은 위 「고칠 장」에서 고른 장에만 걸립니다</li>   <!-- 331 · 332번. 탭을 하려는 일로 넷 — 와인 탭은 와인 장이 있을 때만 -->
@@ -7907,9 +7910,11 @@ function drawSheet(spec){
   if (editing){
     const bar = el("div","pagebar");
     bar.appendChild(el("span","n")).textContent = spec.no + "쪽";
-    /* 409번. 장 순서 바꾸기 — 쪽 번호 바로 옆 ◀ ▶(분류 ◀ ▶ 와 같은 꼴). 끝에서는 흐리게(113번 — 늘 그리고 못 하면 흐리게) */
-    [[-1, "◀", "이 장을 한 쪽 앞으로"], [1, "▶", "이 장을 한 쪽 뒤로"]].forEach(([d, g, t]) => {
-      const b = el("button","addbtn pmv"); b.type = "button"; b.textContent = g; b.title = t; b.setAttribute("aria-label", t);
+    /* 409번. 장 순서 바꾸기 — 쪽 번호 바로 옆. 끝에서는 흐리게(113번 — 늘 그리고 못 하면 흐리게).
+       410번. ◀ ▶ → ▲ ▼ — 종이는 위아래로 쌓인다(#pages 세로). 이 파일에서 ◀ ▶ 는 「옆 단으로」(분류), ▲ ▼ 는 「위아래로」(메뉴 줄)다.
+       글자 대신 그림(118번 — 글자 기호는 기계마다 가운데가 어긋난다) */
+    [[-1, "▲", "이 장을 한 쪽 위로"], [1, "▼", "이 장을 한 쪽 아래로"]].forEach(([d, g, t]) => {
+      const b = el("button","addbtn pmv"); b.type = "button"; b.appendChild(glyph(g)); b.title = t; b.setAttribute("aria-label", t);
       const j = spec.pi + d; if (j < 0 || j >= MENU.sheets.length) b.disabled = true; else b.onclick = () => movePage(spec.pi, d);
       bar.appendChild(b); });
     /* 139번. **장은 두 종류로 넣는다.** "일반 메뉴판이랑 와인 메뉴판을 선택적으로 장을 추가할 수 있어야
@@ -7947,7 +7952,8 @@ function drawSheet(spec){
       del.title = "이 장(종이 한 쪽) 전체 지우기";
       del.onclick = () => {
         const gone = MENU.sheets.splice(spec.pi,1)[0]; const [gp, gf] = splicePage(spec.pi, 1); touch(); render();
-        toast("장 하나를 지웠습니다", () => { MENU.sheets.splice(spec.pi, 0, gone); splicePage(spec.pi, 0, gp, gf); touch(); render(); });
+        const note = spec.pi === 0 && imgPageOf(0) ? " — 1쪽이 이미지 장이라 영업시간이 나오지 않습니다" : "";   // 410번. 옮기기(409번)와 같게
+        toast("장 하나를 지웠습니다" + note, () => { MENU.sheets.splice(spec.pi, 0, gone); splicePage(spec.pi, 0, gp, gf); touch(); render(); }, note ? 6000 : 0);
       };
     } else { del.disabled = true; del.title = "마지막 하나는 지울 수 없습니다"; }
     bar.appendChild(del);
@@ -9650,8 +9656,8 @@ function syncPageTabs(){
   const tabs = PANEL_TABS();
   tabs.forEach(([id, label, hint]) => bar.appendChild(mk(id, label, hint)));
   if (!tabs.some(t => t[0] === panelTab)) panelTab = "look";
-  const pgOn = PAGE_TABS.includes(panelTab); $("#pgbar").hidden = !pgOn; $("#b-copypage").hidden = paperPagesN() < 2;   /* 408번. 이미지 장은 세지 않는다(409번: 이미지 장을 골랐을 때는 CSS 가 숨긴다) */
-  $("#pgpick").classList.toggle("many", MENU.sheets.length > 3);   // 409번   // 335번. 장이 하나면 옮길 곳이 없다   // 334번. [모든 장에 같게]는 고칠 장 옆(#pgbar 안)
+  const pgOn = PAGE_TABS.includes(panelTab); $("#pgbar").hidden = !pgOn; $("#b-copypage").hidden = paperPagesN() < 2;   /* 335번. 장이 하나면 옮길 곳이 없다 · 334번. [모든 장에 같게]는 고칠 장 옆(#pgbar 안) · 408번. 이미지 장은 세지 않는다(409번: 이미지 장을 골랐을 때는 CSS 가 숨긴다) */
+  $("#pgpick").classList.toggle("many", MENU.sheets.length > 3);   // 409번
   if (!MENU.sheets[panelPage]) panelPage = 0;
   /* 408 → 409번. 이미지 장도 목록에 있고 누를 수 있다 — 고르면 탭 · 설정 칸 대신 이미지 장의 것이 나온다(syncPage).
      408번은 목록에서 뺐다가(2쪽이 빠져 보임) 흐리게 했는데(눌리지 않아 오류처럼 보임), 둘 다 사용자 지적으로 걷었다 */
@@ -9692,8 +9698,9 @@ function syncPage(){
     pn.classList.toggle("imgsel", !!IP); $("#pimg").hidden = !IP;
     if (IP){
       $("#f-imgfit").querySelectorAll("button").forEach(b => { const on = (b.dataset.fit || "") === (IP.fit === "fill" ? "fill" : ""); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
-      $("#imgfit-note").textContent = IP.fit === "fill" ? "종이를 빈틈없이 채웁니다. 종이와 비율이 다르면 넘치는 부분이 잘리고, 가장자리 4mm는 프린터에 따라 안 찍힐 수 있습니다"
-        : "이미지 전체가 종이 안(가장자리 4mm 안쪽)에 들어갑니다. 남는 곳은 종이색입니다";
+      /* 410번. 설명은 [종이 끝까지]일 때만 — 잘리는 것은 단추 이름으로 알 수 없다. [전부 보이게]는 이름 그대로라 설명을 걷었다 */
+      $("#imgfit-note").hidden = IP.fit !== "fill";
+      $("#imgfit-note").textContent = "종이와 비율이 다르면 넘치는 부분이 잘리고, 가장자리 4mm는 프린터에 따라 안 찍힐 수 있습니다";
       return;
     } }
   /* 334번. **와인 묶음은 「고칠 장」이 와인 장일 때만**(사용자 — 「메뉴장인데 와인 카드가 왜 보여?」). 331번은 파일 어딘가에 와인이 있으면 늘 보였다.
@@ -10243,7 +10250,7 @@ function wphotoPick(it){
       const wide = img.naturalWidth > img.naturalHeight * .6;
       toast((wide ? "가로로 넓은 사진이라 작게 들어갔습니다 — 병이 세로로 선 사진이 잘 맞습니다" : "사진을 넣었습니다")
         + sn.text, null, wide || sn.big ? 6000 : 3500);
-    } catch(e){ toast("이 사진을 열지 못했습니다(HEIC 등은 JPG · PNG 로 바꿔 주세요)", null); }
+    } catch(e){ toast("이 사진을 열지 못했습니다(HEIC 등은 JPG · PNG로 바꿔 주세요)", null);   /* 410번. 이미지 장 알림과 같게 */ }
     finally { URL.revokeObjectURL(url); }
   };
   inp.click();
