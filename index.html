@@ -761,6 +761,9 @@ body{transition:padding-right .18s ease}
 .row.wine .wbwrap{position:relative;display:block;height:var(--bh);max-height:100%;
   transform:translateY(5%);margin-bottom:0.234em}
 .row.wine .wbwrap svg{display:block}
+/* 407번. 와인 사진 — 병 그림과 같은 칸(`.wbottle` 4.45em × `--bh`)에 비율을 지켜 넣는다. 바닥에 맞추고(병과 같은 바닥), 병 그림의 5% 내림은 사진에는 하지 않는다 */
+.row.wine .wbottle.hasphoto .wbwrap{transform:none;margin-bottom:0}
+.row.wine .wbottle img.wphoto{display:block;height:100%;width:auto;max-width:4.45em;object-fit:contain;object-position:center bottom}
 /* 179번. 상표 셋 —
    ① **가로**를 6.92 → 7.5em 으로. 천장은 `폭(em) × 제 글자 크기(em) ≤ 병 칸`(163번 d)이고
       칸을 4.1 → 4.45em 으로 넓혔으므로 `7.5 × .59 = 4.425em` 까지다(실측 여유 0.4px).
@@ -6004,6 +6007,17 @@ function normQrs(pg){   /* 337번. 망가진 값은 버리고 칸마다 하나 �
    · 자동 저장본을 쓰는 것은 "처음 여는 파일"(첫 화면 표시가 있는 원본 · 버셀의 index.html)일 때만. 자기 내용이 든 파일(알프스판 · 저장본)은 그 내용 그대로
    · [파일에서 불러오기]는 고른 파일의 메뉴 · 설정을 이 탭의 sessionStorage 에 담고 다시 연다 — 파일을 열 때의 옛 값 정리를 똑같이 거친다 */
 const AUTO_KEY = "menupan-auto", ON_WEB = /^https?:$/.test(location.protocol);
+/* 407번. **와인 사진 보관함.** 카드는 `it.photo`(사진 이름표)만 들고, 사진 본체(작게 줄인 data URL)는 여기 둔다.
+   `snapshot()` 에 본체를 넣으면 되돌리기 60칸이 사진을 60벌 들고 자동 저장도 금방 찬다 — 이름표만 넣으면 되돌려도 사진은 이 보관함에 남아 있다.
+   저장 파일에는 `const WPHOTO = {...}` 를 **쓰는 사진만, 사진이 있을 때만** 덧붙인다(사진 없는 파일은 전과 바이트가 같다) */
+const WPH = (typeof WPHOTO === "object" && WPHOTO) ? WPHOTO : {};
+function usedPhotos(){
+  const out = {};
+  const w = o => { if (!o || typeof o !== "object") return; if (Array.isArray(o)){ o.forEach(w); return; }
+    if (typeof o.photo === "string" && WPH[o.photo]) out[o.photo] = WPH[o.photo];
+    Object.keys(o).forEach(k => { if (k !== "photo") w(o[k]); }); };
+  w(MENU); return out;
+}
 let autoLoaded = "";
 (function(){
   let imp = null, prev = null;
@@ -6014,6 +6028,7 @@ let autoLoaded = "";
     const d = JSON.parse(raw); if (!d || !d.menu || !d.settings) return;
     Object.keys(MENU).forEach(k => delete MENU[k]);         Object.assign(MENU, d.menu);
     Object.keys(SETTINGS).forEach(k => delete SETTINGS[k]); Object.assign(SETTINGS, d.settings); delete SETTINGS.startScreen;
+    if (d.photos && typeof d.photos === "object") Object.assign(WPH, d.photos);   // 407번
     autoLoaded = imp ? "import" : "auto";
   } catch(e){}
 })();
@@ -7539,7 +7554,12 @@ function drawWineItem(sec, it, i, path, blank){
     bot = el("div","wbottle bs-" + st.shape); bottleVars(bot, st);
     bot.dataset.bk = bottleKey(sec.wine, it);   // 240번. 끄는 동안 이 병만 색을 바꾸려고 — 어느 병을 쓰는지 적어 둔다   // 163번. 모양마다 상표 자리가 다르다
     /* 164번. 병만 감싸는 상자 — 상표를 **이 상자의 %** 로 잡으면 글자 크기에 안 흔들린다 */
-    const bw = el("span","wbwrap"); bw.innerHTML = BOTTLE[st.shape]; bot.appendChild(bw);
+    const bw = el("span","wbwrap");
+    /* 407번. 사진이 있으면 병 그림 자리에 사진을 둔다(없으면 병 그림 — 전과 같다). 상표 글은 병 위에 얹는 것이라 사진에는 안 얹는다 */
+    const ph = it.photo && WPH[it.photo] ? WPH[it.photo] : null;
+    if (ph){ const im = el("img","wphoto"); im.src = ph; im.alt = ""; im.draggable = false; bw.appendChild(im); bot.classList.add("hasphoto"); }
+    else bw.innerHTML = BOTTLE[st.shape];
+    bot.appendChild(bw);
     if (editing){
       /* 153 · 157번. 카드마다 병 — 병 그림 아래 작은 select. 편집 전용(흐름 밖 · 미리보기 · 인쇄에서 사라진다).
          **"레드 병 (기본)" 과 [종류 병] 묶음은 걷어냈다** — 값이 종류 이름 그대로면 "기본"이라는 말이 따로 필요 없다.
@@ -7547,14 +7567,21 @@ function drawWineItem(sec, it, i, path, blank){
       const ns = el("select","bsel"); ns.title = "이 와인의 병";
       BOTTLE_KEYS.forEach(([k, t]) => { const o = el("option"); o.value = k; o.textContent = t; ns.appendChild(o); });
       bottleMore().forEach(bm => { const o = el("option"); o.value = "@" + bm.id; o.textContent = bm.name || "이름 없는 병"; ns.appendChild(o); });
-      ns.value = bottleKey(sec.wine, it);
-      ns.onchange = () => { if (ns.value === sec.wine) delete it.bottle; else it.bottle = ns.value; touch(); render(); };
+      /* 407번. 병 목록 끝에 사진 올리기 · 바꾸기. 사진이 있을 때 목록의 현재 값은 "내 사진" — 병 종류를 고르면 사진이 빠진다 */
+      if (ph){ const o = el("option"); o.value = "@@cur"; o.textContent = "내 사진"; ns.insertBefore(o, ns.firstChild); }
+      { const o = el("option"); o.value = "@@photo"; o.textContent = ph ? "사진 바꾸기…" : "사진 올리기…"; ns.appendChild(o); }
+      ns.value = ph ? "@@cur" : bottleKey(sec.wine, it);
+      ns.onchange = () => {
+        if (ns.value === "@@cur") return;
+        if (ns.value === "@@photo"){ ns.value = ph ? "@@cur" : bottleKey(sec.wine, it); wphotoPick(it); return; }
+        delete it.photo;   // 407번
+        if (ns.value === sec.wine) delete it.bottle; else it.bottle = ns.value; touch(); render(); };
       ns.onmousedown = e => e.stopPropagation();
       bot.appendChild(ns);
     }
     const lab = el("span","wlabel"); lab.textContent = it.label || ""; lab.dataset.path = p+".label";
     lab.dataset.ml = "1";   // 179번. 상표도 Enter 로 줄을 나눈다
-    if (it.label || editing) bw.appendChild(lab);
+    if (!ph && (it.label || editing)) bw.appendChild(lab);   // 407번. 사진에는 상표를 얹지 않는다
   }
   // 글
   const txt = el("div","wtext");
@@ -8236,6 +8263,7 @@ function setDeep(path, value){
      277번에서 **버셀 주소(http · https)에서만** 자동 저장을 되살렸다 — 저장소가 주소마다 따로라 섞이지 않는다.
      컴퓨터 파일로 열면 지금도 자동 저장을 하지 않고, 저장 안 하고 닫는 것은 beforeunload 경고가 막는다 */
 const snapshot = () => JSON.stringify({ menu:MENU, settings:SETTINGS });
+const snapFull = () => JSON.stringify({ menu:MENU, settings:SETTINGS, photos:usedPhotos() });   // 407번. 자동 저장 · 불러오기 되돌리기용 — 사진 본체까지
 let lastState = "", typeTimer = 0;
 const undoStack = [], redoStack = [];   // 271번. 다시 하기 — 새로 고치면 비운다
 function syncUndoBtns(){ const u = $("#b-undo"), r = $("#b-redo"); if (u) u.disabled = !undoStack.length; if (r) r.disabled = !redoStack.length; }
@@ -8271,7 +8299,7 @@ function autoStatus(k){
 function autoSave(){
   if (!ON_WEB || SETTINGS.startScreen === true) return;
   clearTimeout(autoT); autoStatus("saving");
-  autoT = setTimeout(() => { try { localStorage.setItem(AUTO_KEY, snapshot()); autoAt = new Date(); autoStatus("ok"); } catch(e){ autoStatus("fail"); } }, 400);
+  autoT = setTimeout(() => { try { localStorage.setItem(AUTO_KEY, snapFull());   /* 407번 */ autoAt = new Date(); autoStatus("ok"); } catch(e){ autoStatus("fail"); } }, 400);
 }
 let newMenuAt = -1;   // 368번. 새 메뉴판으로 바꾼 직후의 되돌리기 깊이 — 그 한 걸음이 이전 메뉴판으로 가는 걸음이다
 function stepBack(){
@@ -8928,6 +8956,7 @@ function saveFile(){
         /* 157번. 지워진 **이름 붙인 병**을 가리키던 카드. 화면에서는 이미 제 종류의 병으로 돌아가 있으므로
            (bottleKey) 파일에만 죽은 이름이 남는다 — 빈 줄과 같은 규칙으로 버린다(22번) */
         sec.items.forEach(it => { if (typeof it.bottle === "string" && it.bottle[0] === "@" && !moreOf(it.bottle.slice(1))) delete it.bottle; });
+        sec.items.forEach(it => { if (it.photo != null && !WPH[it.photo]) delete it.photo; });   // 407번. 사진 본체가 없는 이름표
       });
       /* 210번. ~~＋로 만들고 아무것도 안 쓴 분류 · 단 · 장을 걸러낸다.~~ **걷어냈다.**
          주석에 "줄과 똑같이"라고 적혀 있었지만 186번 뒤로 **줄은 안 걸러낸다** — 한 층 위만
@@ -8973,7 +9002,8 @@ function saveFile(){
   //   실제로 이 줄을 쓰다가 파일을 한 번 깨뜨렸다 (8장의 경고와 같은 함정이다)
   const json = v => JSON.stringify(v, null, 2).replace(/</g, "\\u003C");
   $("#menu-data").textContent = banner + "const MENU = " + json(MENU)
-      + ";\n\nconst SETTINGS = " + json(SETTINGS) + ";\n";
+      + ";\n\nconst SETTINGS = " + json(SETTINGS) + ";\n"
+      + (Object.keys(usedPhotos()).length ? "\n/* 407번. 와인 사진 — 쓰는 것만 */\nconst WPHOTO = " + json(usedPhotos()) + ";\n" : "");
   $("#pages").innerHTML = "";
   /* 235번. **화면 상태를 사본에서 걷는다.** 8장의 "연속 두 번 저장한 파일의 크기가 같은지"를 화면을 흔든 뒤에 재 보니
      달랐다(실측 +401 → −9바이트). 꾸미기 창의 탭 · 쪽 고르기 · 병 알약 · 칸 목록(JS 가 열 때마다 새로 만드는 것),
@@ -10021,6 +10051,36 @@ function fitName(){ const t = $("#f-shop"); if (!t) return; const cs = getComput
   c.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily; const w = c.measureText(t.value || t.placeholder || "").width;
   t.style.width = Math.ceil(w + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 4) + "px"; }   // 287번. 막대의 이름 칸   // 283번. 막대 왼쪽 이름도   // 265번 · 280번. 첫 화면이 떠 있는 동안은 뒤에 깔린 예시의 이름을 쓰지 않는다
 const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+/* 407번. 와인 사진 — 고른 사진을 긴 변 640px 로 줄여 보관함(WPH)에 넣고 카드에는 이름표만 건다.
+   투명한 부분이 있으면 PNG(병 사진 누끼), 없으면 JPEG .85. 칸이 4.45em 뿐이라 640px 면 인쇄에도 넉넉하다 */
+function wphotoShrink(img){
+  const k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d", { willReadFrequently:true }); g.drawImage(img, 0, 0, w, h);
+  const p = g.getImageData(0, 0, w, h).data; let alpha = false;
+  for (let i = 3; i < p.length; i += 4) if (p[i] < 250){ alpha = true; break; }
+  return alpha ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", .85);
+}
+function wphotoPick(it){
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    if (!/^image\//.test(f.type)){ toast("이미지 파일을 골라 주세요", null); return; }
+    const url = URL.createObjectURL(f);
+    try {
+      const img = await loadImg(url);
+      const data = wphotoShrink(img);
+      const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      WPH[id] = data; it.photo = id;
+      touch(); render();
+      const up = usedPhotos(), n = Object.keys(up).length, mb = Object.values(up).reduce((a, v) => a + v.length, 0) / 1048576;
+      toast("사진을 넣었습니다 (지금 " + n + "장 · " + mb.toFixed(1) + " MB)" + (mb > 3 ? " — 사진이 많아 자동 저장이 실패할 수 있습니다" : ""), null, mb > 3 ? 6000 : 3500);
+    } catch(e){ toast("이 사진을 열지 못했습니다(HEIC 등은 JPG · PNG 로 바꿔 주세요)", null); }
+    finally { URL.revokeObjectURL(url); }
+  };
+  inp.click();
+}
 let logoOrig = null, logoInv = false;   // 올린 원본(파일에는 안 남는다 — 뒤집기에만 쓴다)
 function logoMask(img, inv){
   const k = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
@@ -10281,7 +10341,8 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#filem
 function readSavedFile(txt){
   const m = txt.match(/const MENU = (\{[\s\S]*?\});\s*\n/), s2 = txt.match(/const SETTINGS = (\{[\s\S]*?\n\});/);
   if (!m || !s2) return null;
-  try { return { menu:JSON.parse(m[1]), settings:JSON.parse(s2[1]) }; } catch(e){ return null; }
+  const p = txt.match(/^const WPHOTO = (\{[\s\S]*?\});\s*$/m);   // 407번
+  try { const r = { menu:JSON.parse(m[1]), settings:JSON.parse(s2[1]) }; if (p) r.photos = JSON.parse(p[1]); return r; } catch(e){ return null; }
 }
 function importFile(f){
   const fr = new FileReader();
@@ -10289,7 +10350,7 @@ function importFile(f){
     const d = readSavedFile(String(fr.result || ""));
     if (!d){ toast("메뉴판 파일이 아닙니다. [파일로 저장]으로 받은 파일을 골라 주세요", null); return; }
     try {
-      if (!(SETTINGS.startScreen === true)) sessionStorage.setItem("menupan-import-prev", snapshot());   // 되돌리기용 — 다시 열면 되돌리기 칸이 비므로 따로
+      if (!(SETTINGS.startScreen === true)) sessionStorage.setItem("menupan-import-prev", snapFull());   /* 407번 */   // 되돌리기용 — 다시 열면 되돌리기 칸이 비므로 따로
       sessionStorage.setItem("menupan-import", JSON.stringify(d));
     } catch(e){ toast("불러오지 못했습니다(브라우저 저장소)", null); return; }
     dirty = false; location.reload();
