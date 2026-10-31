@@ -761,9 +761,10 @@ body{transition:padding-right .18s ease}
 .row.wine .wbwrap{position:relative;display:block;height:var(--bh);max-height:100%;
   transform:translateY(5%);margin-bottom:0.234em}
 .row.wine .wbwrap svg{display:block}
-/* 407번. 와인 사진 — 병 그림과 같은 칸(`.wbottle` 4.45em × `--bh`)에 비율을 지켜 넣는다. 바닥에 맞추고(병과 같은 바닥), 병 그림의 5% 내림은 사진에는 하지 않는다 */
+/* 407번. 와인 사진 — 병 그림과 같은 칸(`.wbottle` 4.45em × `--bh`)에 비율을 지켜 넣는다. 병 그림의 5% 내림은 사진에는 하지 않는다.
+   칸보다 납작한 사진(라벨 · 정사각형)은 **위아래 가운데** — 바닥에 붙이면 위가 비어 이름 줄과 어긋나 보였다(사용자). 키 큰 병 사진은 칸을 채워 병 그림과 같다 */
 .row.wine .wbottle.hasphoto .wbwrap{transform:none;margin-bottom:0}
-.row.wine .wbottle img.wphoto{display:block;height:100%;width:auto;max-width:4.45em;object-fit:contain;object-position:center bottom}
+.row.wine .wbottle img.wphoto{display:block;height:100%;width:auto;max-width:4.45em;object-fit:contain;object-position:center center}
 /* 179번. 상표 셋 —
    ① **가로**를 6.92 → 7.5em 으로. 천장은 `폭(em) × 제 글자 크기(em) ≤ 병 칸`(163번 d)이고
       칸을 4.1 → 4.45em 으로 넓혔으므로 `7.5 × .59 = 4.425em` 까지다(실측 여유 0.4px).
@@ -3198,7 +3199,8 @@ html body #panel #art-cell #corner-row:not([hidden]) ~ .cellblk:not([hidden]){ma
        와인마다 다른 병을 줄 수 없었다. **알약으로 병 하나를 고르고 그 병만 손본다**(152번의 쪽 고르기와 같은 꼴).
        이름을 붙여 얼마든지 만들 수 있고, 고른 병은 바로 옆에 그려서 보여 준다 -->
   <div class="pgrp">병 <small class="pgonly">모든 와인 장</small></div>
-  <label><small>고칠 병을 누르세요. <b>＋ 병 추가</b>로 이름 붙인 병을 만들면 편집 중 카드에서 그 와인만 바꿀 수 있습니다</small></label>
+  <!-- 407번. 사진 올리기는 카드의 병 칸에만 있다(와인마다 다른 사진) — 꾸미기 창만 보는 사람에게 자리를 알린다 -->
+  <label><small>고칠 병을 누르세요. <b>＋ 병 추가</b>로 이름 붙인 병을 만들면 편집 중 카드에서 그 와인만 바꿀 수 있습니다. 같은 칸에서 내 사진도 올릴 수 있습니다</small></label>
   <div class="btpick" id="btpick"></div>
   <div id="f-bottle"></div>
   </div>
@@ -10075,7 +10077,10 @@ function wphotoPick(it){
       WPH[id] = data; it.photo = id;
       touch(); render();
       const up = usedPhotos(), n = Object.keys(up).length, mb = Object.values(up).reduce((a, v) => a + v.length, 0) / 1048576;
-      toast("사진을 넣었습니다 (지금 " + n + "장 · " + mb.toFixed(1) + " MB)" + (mb > 3 ? " — 사진이 많아 자동 저장이 실패할 수 있습니다" : ""), null, mb > 3 ? 6000 : 3500);
+      /* 407번. 칸이 병 모양(폭 ≈ 높이 × 0.4)이라 폭이 높이의 0.6배를 넘는 사진은 칸 높이의 2/3 아래로 작아진다 — 그때만 까닭을 알린다 */
+      const wide = img.naturalWidth > img.naturalHeight * .6;
+      toast((wide ? "가로로 넓은 사진이라 작게 들어갔습니다 — 병이 세로로 선 사진이 잘 맞습니다" : "사진을 넣었습니다")
+        + " (지금 " + n + "장 · " + mb.toFixed(1) + " MB)" + (mb > 3 ? " — 사진이 많아 자동 저장이 실패할 수 있습니다" : ""), null, wide || mb > 3 ? 6000 : 3500);
     } catch(e){ toast("이 사진을 열지 못했습니다(HEIC 등은 JPG · PNG 로 바꿔 주세요)", null); }
     finally { URL.revokeObjectURL(url); }
   };
