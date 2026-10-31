@@ -8101,7 +8101,7 @@ function render(){
   // 78번과 같다 — 값은 바뀌고 라벨은 안 바뀐다
   $("#lay-info").textContent = "종이 " + MENU.sheets.length + "장 · 단 "
     + MENU.sheets.map(sh => sh.length).join("+") + "개";
-  if (document.querySelectorAll("#pgpick .pill").length !== paperPagesN()) syncPageTabs();   // 408번. 이미지 장은 목록에 없다   // 장을 넣고 뺐을 때
+  if (document.querySelectorAll("#pgpick .pill").length !== MENU.sheets.length) syncPageTabs();   // 장을 넣고 뺐을 때
 
   placePanel();
   syncAddHere();
@@ -9620,13 +9620,15 @@ function syncPageTabs(){
   if (!tabs.some(t => t[0] === panelTab)) panelTab = "look";
   const pgOn = PAGE_TABS.includes(panelTab); $("#pgbar").hidden = !pgOn; $("#b-copypage").hidden = paperPagesN() < 2;   /* 408번. 이미지 장은 세지 않는다 */   // 335번. 장이 하나면 옮길 곳이 없다   // 334번. [모든 장에 같게]는 고칠 장 옆(#pgbar 안)
   if (!MENU.sheets[panelPage]) panelPage = 0;
-  /* 408번. 이미지 장에는 꾸밀 것(맨 위 · 글자 크기 · 그림 · 도장 …)이 없다 — 고칠 장 목록에서 빼고, 골라져 있었으면 첫 메뉴 · 와인 장으로 */
+  /* 408번. 이미지 장에는 꾸밀 것(맨 위 · 글자 크기 · 그림 · 도장 …)이 없다 — 고칠 장 목록에서는 흐리게(못 고른다), 골라져 있었으면 첫 메뉴 · 와인 장으로.
+     처음에는 목록에서 뺐는데 「1쪽 · 3쪽」으로 2쪽이 빠져 보였다(사용자) — 113 · 137번 「늘 그리고 못 하면 흐리게」를 따른다 */
   if (imgPageOf(panelPage)){ const k = MENU.sheets.findIndex((_, i) => !imgPageOf(i)); if (k >= 0) panelPage = k; }
   document.querySelectorAll(".panel .ptab").forEach(x => x.classList.toggle("on", x.dataset.tab === panelTab));
   const pk = $("#pgpick"); pk.innerHTML = "";
-  MENU.sheets.forEach((_, i) => { if (imgPageOf(i)) return;   // 408번
+  MENU.sheets.forEach((_, i) => {
     const b = el("button","pill" + (i === panelPage ? " on" : "")); b.type = "button";
     b.textContent = (i+1) + "쪽 · " + sheetKindName(i);
+    if (imgPageOf(i)){ b.disabled = true; b.title = "이미지 장은 꾸밀 것이 없습니다. 이미지 바꾸기 · 맞춤은 편집 중 그 종이 아래 막대에서 합니다"; pk.appendChild(b); return; }   // 408번
     b.onclick = () => { panelPage = i; syncPageTabs(); syncPage(); }; pk.appendChild(b); });
 }
 /* 157번. **어느 장이 메뉴 장이고 어느 장이 와인 장인지 화면에 적는다.** 창의 손잡이는 장마다 한 벌이라
