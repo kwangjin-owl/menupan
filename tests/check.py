@@ -1030,7 +1030,7 @@ def t44(b, f):
       ci.dispatchEvent(new Event('change',{bubbles:true}));
       return [n, red.length, red.every(v=>v==='#492030'), other.some(v=>v==='#492030')] }""")
     # (d) [＋ 와인 장 추가]의 빈 카드에 0 이 찍히지 않는지
-    out['wineprice'] = c.js("""()=>{ document.querySelector('.pagebar .addbtn:nth-of-type(2)').click(); toggleEdit();
+    out['wineprice'] = c.js("""()=>{ [...document.querySelectorAll('.pagebar .addbtn')].find(b=>b.textContent.includes('와인 장 추가')).click(); toggleEdit();   /* 409번. 자리(두 번째 단추)가 아니라 이름으로 — 쪽 탭에 ◀ ▶ 가 생겨 두 번째가 ▶ 가 됐다 */
       const t=document.querySelectorAll('.sheet')[1].querySelector('.row.wine .price').textContent; toggleEdit(); return t }""")
     out['winearts311'] = c.js("()=>{ const p=SETTINGS.pages[1]; return JSON.stringify(p.arts)+'|'+('art' in p) }")   # 311번. 새 와인 장은 포도나무 한 칸(새 형식) · 옛 키 art 없음 — 310번까지는 앞 장 그림 복사 + art:'vine' 이 같이 들어가 다시 열면 바뀌었다
     # (e) 상단 크기 ＋ㅡ 걸음 = 글자 크기 ＋ㅡ 걸음(4%)
